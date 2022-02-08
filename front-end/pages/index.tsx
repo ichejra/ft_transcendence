@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import HomePage from "./home";
 
 const Home: NextPage = () => {
-  return <HomePage/>;
+  return <HomePage />;
 };
 
 export default Home;

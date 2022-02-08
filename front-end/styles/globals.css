@@ -10,35 +10,49 @@ body {
 }
 
 .screen-bg {
-  background-image: url("../public/images/pong.jpeg");
-  height: 100vh;
-  width: 100%;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-
-.dropdown-toggle:hover {
+  height: 40vh;
 }
 
 .dropdown-menu {
-  background: black;
-  /* color: black; */
-  border: 1px solid white;
-  border-top: none;
-  padding: 2px;
-  border-radius: 0 0 4px 4px;
   position: absolute;
+  opacity: 1;
+  padding: 1px;
+  top: -30px;
+  border-radius: 12px;
+  transform: translateY(100px);
+  will-change: opacity;
+  transition: all 0.8s;
+  background: gray;
   font-size: 16px;
-  top: 65px;
-  right: -1px;
-  transition: all 5s;
+  right: 0.4rem;
+  box-shadow: 1px 2px 10px #888888;
+}
+
+.arrow {
+  position: absolute;
+  top: -10px;
+  right: 2rem;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  transform: rotate(45deg);
+  overflow: hidden;
+  border-top: 1.5px solid rgb(245, 245, 245);
+  border-left: 1.5px solid whitesmoke;
 }
 
 .show-dropdown-menu {
-  display: block;
+  opacity: 1;
 }
 
 .hide-dropdown-menu {
-  display: none;
+  opacity: 0;
+  transition: all 0.3s;
+}
+
+.page-100 {
+  min-height: calc(100vh - 9.85rem);
+}
+.page {
+  min-height: calc(100vh - (20vh + 10rem));
 }
