@@ -14,39 +14,40 @@ body {
 }
 
 .dropdown-menu {
-  position: absolute;
+  position: fixed;
   opacity: 1;
   padding: 1px;
   top: -30px;
   border-radius: 12px;
-  transform: translateY(100px);
-  will-change: opacity;
-  transition: all 0.8s;
+  transform: translateY(100px) translateX(110%);
+  transition: all 0.5s;
   background: gray;
   font-size: 16px;
   right: 0.4rem;
   box-shadow: 1px 2px 10px #888888;
 }
 
-.arrow {
+.notifications-list {
   position: absolute;
-  top: -10px;
-  right: 2rem;
-  width: 20px;
-  height: 20px;
-  background-color: white;
-  transform: rotate(45deg);
-  overflow: hidden;
-  border-top: 1.5px solid rgb(245, 245, 245);
-  border-left: 1.5px solid whitesmoke;
+  opacity: 1;
+  padding: 1px;
+  top: -30px;
+  border-radius: 12px;
+  transform: translateY(100px);
+  transition: all 0.8s;
+  background: gray;
+  font-size: 16px;
+  right: 12rem;
+  box-shadow: 1px 2px 10px #888888;
 }
 
 .show-dropdown-menu {
   opacity: 1;
+  transform: translateY(100px) translateX(0%);
 }
 
 .hide-dropdown-menu {
-  opacity: 0;
+  opacity: 1;
   transition: all 0.3s;
 }
 
@@ -55,4 +56,64 @@ body {
 }
 .page {
   min-height: calc(100vh - (20vh + 10rem));
+}
+
+.nav-container {
+  display: block;
+  position: relative;
+}
+
+.amount-notif-container {
+  position: absolute;
+  top: -0.4rem;
+  right: -0.3rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: rgb(247, 81, 81);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.total-amount {
+  color: white;
+  text-align: center;
+  margin-bottom: 0;
+  font-size: 0.9rem;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  row-gap: 1rem;
+  transition: all 0.4s linear;
+  transform: translate(-100%);
+}
+
+.show-sidebar {
+  transform: translate(0);
+}
+
+.nav-toggle {
+  display: block;
+}
+
+.nav-links {
+  display: none;
+}
+
+@media (min-width: 992px) {
+  .nav-toggle {
+    display: none;
+  }
+
+  .nav-links {
+    display: flex;
+  }
 }
