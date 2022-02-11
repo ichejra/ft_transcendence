@@ -10,7 +10,10 @@ body {
 }
 
 .screen-bg {
-  height: 40vh;
+  height: 100vh;
+  background-image: url("../public/images/Fade-In-Background.svg");
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .dropdown-menu {
@@ -28,7 +31,7 @@ body {
 }
 
 .notifications-list {
-  position: absolute;
+  position: fixed;
   opacity: 1;
   padding: 1px;
   top: -30px;
@@ -37,7 +40,8 @@ body {
   transition: all 0.8s;
   background: gray;
   font-size: 16px;
-  right: 12rem;
+  width: 100%;
+  right: 0;
   box-shadow: 1px 2px 10px #888888;
 }
 
@@ -115,5 +119,20 @@ body {
 
   .nav-links {
     display: flex;
+  }
+
+  .notifications-list {
+    position: absolute;
+    opacity: 1;
+    padding: 1px;
+    top: -30px;
+    border-radius: 12px;
+    transform: translateY(100px);
+    transition: all 0.8s;
+    background: gray;
+    font-size: 16px;
+    right: 12rem;
+    width: auto;
+    box-shadow: 1px 2px 10px #888888;
   }
 }

@@ -39,8 +39,8 @@ const ProfileDropdown = () => {
   return (
     <div className="flex">
       {!isUser ? (
-        <div className="flex py-3 items-center transition duration-300 cursor-pointer text-2xl font-medium mx-2 px-2">
-          <button className="hover:scale-110 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-1 px-4 bg-white text-black rounded-md">
+        <div className="flex py-1 items-center transition duration-300 cursor-pointer text-2xl font-medium mx-2 px-2">
+          <button className="hover:scale-110 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-1 px-4 bg-yellow-400 text-gray-800 rounded-md">
             <Link href="/auth">Login</Link>
           </button>
         </div>

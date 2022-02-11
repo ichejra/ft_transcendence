@@ -62,7 +62,7 @@ const Notifications = () => {
         return (
           <li
             key={id}
-            className="hover:bg-gray-800 hover:bg-gray-700 w-72 rounded-lg transition duration-300 px-2"
+            className="hover:bg-gray-800 hover:bg-gray-700 rounded-lg transition duration-300 px-2"
           >
             <Link href={link}>
               <div className="flex flex-col">
