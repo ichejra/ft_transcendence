@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { FaUserEdit, FaUserFriends } from "react-icons/fa";
-import { BiTimeFive } from "react-icons/bi";
+import { IoMdTime } from "react-icons/io";
 
 const ProfileHeader: React.FC = () => {
   return (
-    <div className="flex">
+    <div className="flex my-16">
       <div className="mx-8">
         <img
           src="/images/profile.jpeg"
@@ -14,12 +14,12 @@ const ProfileHeader: React.FC = () => {
       <div className="flex flex-col justify-center px-4 mr-48">
         <h1 className="text-3xl font-bold">John Doe</h1>
         <span className="flex text-gray-500 pt-4 mb-2 items-center">
-          <FaUserFriends size="2rem" className="mr-2" />
+          <FaUserFriends className="w-6 h-8 mr-2" />
           <p className="text-lg font-medium">555 friends</p>
         </span>
         <span className="flex text-gray-500 items-center">
-          <BiTimeFive size="2rem" className="mr-2" />
-          <p className="text-lg font-medium">Joined Junuary 2022</p>
+          <IoMdTime className="w-6 h-8 mr-2" />
+          <p className="text-lg font-medium">Joined Junuary, 2022</p>
         </span>
       </div>
       <div className="flex items-start mt-10">
