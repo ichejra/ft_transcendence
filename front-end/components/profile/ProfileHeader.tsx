@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { FaUserEdit, FaUserFriends } from "react-icons/fa";
 import { IoMdTime } from "react-icons/io";
+import { GetStaticPaths, GetStaticProps } from "next";
+import { ParsedUrlQuery } from "querystring";
+import { User } from "../../state/actions/userActions";
 
 const ProfileHeader: React.FC = () => {
   return (

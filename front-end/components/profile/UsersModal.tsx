@@ -2,15 +2,16 @@ import { useRef } from "react";
 import { FaTimes } from "react-icons/fa";
 
 interface Props {
-  setOpenModal: (a: boolean) => void;
+  setConfirmationModal: (a: boolean) => void;
 }
 
-const UsersModal: React.FC<Props> = ({ setOpenModal }) => {
+const UsersModal: React.FC<Props> = ({ setConfirmationModal }) => {
   const divRef = useRef(null);
+
   return (
     <div
       onClick={(e) => {
-        if (e.target == divRef.current) setOpenModal(false);
+        if (e.target == divRef.current) setConfirmationModal(false);
       }}
       className="fixed top-0 left-0 z-10 bg-black bg-opacity-75 w-full h-full"
     >
@@ -26,7 +27,7 @@ const UsersModal: React.FC<Props> = ({ setOpenModal }) => {
             <FaTimes
               size="2rem"
               className="cursor-pointer hover:text-yellow-400 transition duration-300"
-              onClick={() => setOpenModal(false)}
+              onClick={() => setConfirmationModal(false)}
             />
           </div>
           <hr />
@@ -37,13 +38,13 @@ const UsersModal: React.FC<Props> = ({ setOpenModal }) => {
             </p>
             <div className="flex justify-end mt-8">
               <button
-                onClick={() => setOpenModal(false)}
+                onClick={() => setConfirmationModal(false)}
                 className="hover:bg-gray-100 bg-gray-200 font-bold px-4 py-2 mr-2 rounded-lg"
               >
                 Cancel
               </button>
               <button
-                onClick={() => setOpenModal(false)}
+                onClick={() => setConfirmationModal(false)}
                 className="hover:bg-yellow-300 bg-yellow-400 font-bold px-4 py-2 mr-2 rounded-lg"
               >
                 Confirm

@@ -29,9 +29,12 @@ const HistoryModal: React.FC<Props> = ({ setOpenModal }) => {
               onClick={() => setOpenModal(false)}
             />
           </div>
-          {Array.from({ length: 50 }).map((test) => {
+          {Array.from({ length: 50 }).map((test, index) => {
             return (
-              <div className="flex justify-between items-center py-2 md:p-2">
+              <div
+                key={index}
+                className="flex justify-between items-center py-2 md:p-2"
+              >
                 <div className="flex items-center bg-green-300 rounded-full pr-4">
                   <img
                     src="/images/profile.jpeg"

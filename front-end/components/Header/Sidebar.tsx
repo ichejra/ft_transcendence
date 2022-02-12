@@ -1,9 +1,15 @@
 import { FaTimes } from "react-icons/fa";
 import Link from "next/link";
-import { useGlobalHeaderContext } from "./context";
+import { useDispatch, useSelector } from "react-redux";
+import { bindActionCreators } from "redux";
+import { actionCreators } from "../../state";
+import { State } from "../../state/reducers";
 
-const Sidebar = ({}) => {
-  const { isSidebarOpen, closeSidebar } = useGlobalHeaderContext();
+const Sidebar = () => {
+  const dispatch = useDispatch();
+  const { closeSidebar } = bindActionCreators(actionCreators, dispatch);
+  const { isSidebarOpen } = useSelector((state: State) => state.headerReducer);
+
   return (
     <aside
       className={`px-2 h-screen py-4 w-full bg-black bg-opacity-75 text-yellow-400 ${
