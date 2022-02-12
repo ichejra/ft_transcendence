@@ -6,7 +6,7 @@ import UsersModal from "./UsersModal";
 const FriendsList: React.FC = () => {
   const [openModal, setOpenModal] = useState(false);
   return (
-    <div className="w-1/4 pb-12 ">
+    <div className="md:w-1/4 pb-12 ">
       <div className="flex justify-between">
         <h1 className="text-xl font-bold p-2">Friends</h1>
         <Link href="/profile/1/list">
