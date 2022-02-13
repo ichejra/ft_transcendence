@@ -1,14 +1,13 @@
 import { FaTimes } from "react-icons/fa";
 import Link from "next/link";
-import { useDispatch, useSelector } from "react-redux";
-import { bindActionCreators } from "redux";
-import { actionCreators } from "../../state";
-import { State } from "../../state/reducers";
+import { closeSidebar } from "../../features/sidebarSlice";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 
 const Sidebar = () => {
-  const dispatch = useDispatch();
-  const { closeSidebar } = bindActionCreators(actionCreators, dispatch);
-  const { isSidebarOpen } = useSelector((state: State) => state.headerReducer);
+  const dispatch = useAppDispatch();
+  const isSidebarOpen = useAppSelector(
+    (state) => state.toggleSidebar.isSidebarOpen
+  );
 
   return (
     <aside
@@ -22,16 +21,19 @@ const Sidebar = () => {
       <button
         type="button"
         className="absolute text-white right-3 top-3"
-        onClick={closeSidebar}
+        onClick={() => dispatch(closeSidebar())}
       >
-        <FaTimes size="3rem" />
+        <FaTimes
+          size="3rem"
+          className="hover:text-yellow-400 transition duration-300 "
+        />
       </button>
       <ul className="flex flex-col mt-10">
         <li>
           <Link href="/dashboard">
             <button
               className="rounded-lg text-left w-full hover:text-yellow-400 hover:bg-gray-600 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-4 px-2"
-              onClick={closeSidebar}
+              onClick={() => dispatch(closeSidebar())}
               type="button"
             >
               Dashboard
@@ -42,7 +44,7 @@ const Sidebar = () => {
           <Link href="/">
             <button
               className="rounded-lg text-left w-full hover:text-yellow-400 hover:bg-gray-600 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-4 px-2"
-              onClick={closeSidebar}
+              onClick={() => dispatch(closeSidebar())}
               type="button"
             >
               Home
@@ -53,7 +55,7 @@ const Sidebar = () => {
           <Link href="/channels">
             <button
               className="rounded-lg text-left w-full hover:text-yellow-400 hover:bg-gray-600 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-4 px-2"
-              onClick={closeSidebar}
+              onClick={() => dispatch(closeSidebar())}
               type="button"
             >
               Channels
@@ -64,7 +66,7 @@ const Sidebar = () => {
           <Link href="/game">
             <button
               className="rounded-lg text-left w-full hover:text-yellow-400 hover:bg-gray-600 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-4 px-2"
-              onClick={closeSidebar}
+              onClick={() => dispatch(closeSidebar())}
               type="button"
             >
               Game
@@ -75,7 +77,7 @@ const Sidebar = () => {
           <Link href="/about">
             <button
               className="rounded-lg text-left w-full hover:text-yellow-400 hover:bg-gray-600 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-4 px-2"
-              onClick={closeSidebar}
+              onClick={() => dispatch(closeSidebar())}
               type="button"
             >
               about

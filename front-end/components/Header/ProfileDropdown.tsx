@@ -100,7 +100,7 @@ const ProfileDropdown = () => {
                 className="bg-black rounded-xl bg-opacity-75 py-2"
               >
                 <li className="py-2 pl-2 rounded-t-xl hover:bg-gray-800 hover:text-yellow-400 transition duration-300">
-                  <Link href={`/profile/${1}`}>
+                  <Link href={`/profile/60d0fe4f5311236168a109ca`}>
                     <span className="flex items-center pr-16">
                       <CgProfile size="1.5rem" />
                       <p className="ml-3">Profile</p>

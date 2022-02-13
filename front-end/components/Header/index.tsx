@@ -2,18 +2,21 @@ import Link from "next/link";
 import { GoThreeBars } from "react-icons/go";
 import Sidebar from "./Sidebar";
 import ProfileDropdown from "./ProfileDropdown";
-import { useDispatch } from "react-redux";
-import { bindActionCreators } from "redux";
-import { actionCreators } from "../../state";
+import { openSidebar } from "../../features/sidebarSlice";
+import { useAppDispatch } from "../../app/hooks";
 
 const Header: React.FC = () => {
-  const dispatch = useDispatch();
-  const { openSidebar } = bindActionCreators(actionCreators, dispatch);
+  const dispatch = useAppDispatch();
 
   return (
     <>
-      <nav className="pl-6 py-4 bg-black bg-opacity-75 shadow-md shadow-black/10 text-white flex items-center justify-between">
-        <button className="nav-toggle" onClick={openSidebar}>
+      <nav className="className='font-mono pl-6 py-4 bg-black bg-opacity-75 shadow-md shadow-black/10 text-white flex items-center justify-between">
+        <button
+          className="nav-toggle"
+          onClick={() => {
+            dispatch(openSidebar());
+          }}
+        >
           <GoThreeBars size="3rem" className="text-yellow-400" />
         </button>
         <div className="nav-links cursor-pointer text-2xl text-yellow-500 font-bold">
@@ -44,4 +47,3 @@ const Header: React.FC = () => {
 };
 
 export default Header;
-

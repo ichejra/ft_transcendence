@@ -17,7 +17,9 @@ export const closeSidebar = () => {
 
 export const getUsers = () => {
   return async (dispatch: Dispatch<UserAction>) => {
+    dispatch({ type: ActionType.IS_LOADING });
     try {
+      // const response = await fetch("https://api.github.com/users");
       const response = await fetch(
         "https://dummyapi.io/data/v1/user?limit=50",
         {
@@ -26,7 +28,6 @@ export const getUsers = () => {
         }
       );
       const { data } = await response.json();
-      dispatch({ type: ActionType.IS_LOADING });
       dispatch({ type: ActionType.GET_USERS, payload: data });
     } catch (err) {
       dispatch({ type: ActionType.IS_ERROR });
@@ -34,3 +35,5 @@ export const getUsers = () => {
     }
   };
 };
+
+// 6207d95d0d83d3b8d0e20499
