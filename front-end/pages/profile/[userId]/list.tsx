@@ -2,30 +2,10 @@ import { NextPage } from "next";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { UsersModal } from "../../../components/profile";
-import { useSelector, useDispatch } from "react-redux";
-import { State } from "../../../state/reducers";
-import { bindActionCreators } from "redux";
-import { actionCreators } from "../../../state";
 
 const FullFriendsList: NextPage = () => {
   const [confirmationModal, setConfirmationModal] = useState(false);
-  const dispatch = useDispatch();
-  const { getUsers } = bindActionCreators(actionCreators, dispatch);
-  const { users, isLoading } = useSelector(
-    (state: State) => state.usersReducer
-  );
 
-  useEffect(() => {
-    getUsers();
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center">
-        <h1>Loading...</h1>
-      </div>
-    );
-  }
   return (
     <div className="page-100 flex justify-center md:py-12">
       <div className="md:w-5/6 items-center md:border-2 shadow-xl rounded-3xl bg-white">
@@ -34,9 +14,8 @@ const FullFriendsList: NextPage = () => {
             All Friends
           </h1>
           <div className="flex flex-wrap justify-center">
-            {users.map((user) => {
-              console.log(user);
-              const { id, firstName, lastName, picture } = user;
+            {Array.from({ length: 50 }).map((user, index) => {
+              const id = new Date().getTime().toString() + index;
               return (
                 <div
                   key={id}
@@ -44,15 +23,15 @@ const FullFriendsList: NextPage = () => {
                 >
                   <div className="flex md:flex-col">
                     <img
-                      src={picture}
+                      src="/images/profile.jpeg"
                       className="w-16 h-16 rounded-full mr-2 md:mr-0 md:mb-4 md:w-36 md:h-36"
                     />
                     <div className="flex flex-col md:items-center items-start justify-center">
                       <h1 className="text-md md:font-bold md:text-lg mr-2 md:mr-0">
-                        {firstName} {lastName}
+                        Fname Lanme
                       </h1>
                       <p className="text-sm md:text-md text-gray-500 font-sans">
-                        @{firstName[0] + lastName}
+                        @flname
                       </p>
                     </div>
                   </div>
