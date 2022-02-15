@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
+import loggedInReducer from "../features/isLoggedInTestSlice";
 import sidebarReducer from "../features/sidebarSlice";
 
 export const store = configureStore({
   reducer: {
     toggleSidebar: sidebarReducer,
+    loginStatus: loggedInReducer,
   },
 });
 

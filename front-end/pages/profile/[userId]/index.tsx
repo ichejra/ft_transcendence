@@ -1,4 +1,5 @@
 import { NextPage } from "next";
+import withAuth from "../../../components/auth/withAuth";
 
 import {
   ProfileHeader,
@@ -43,4 +44,4 @@ const UserProfile: NextPage = () => {
 //   };
 // };
 
-export default UserProfile;
+export default withAuth(UserProfile);

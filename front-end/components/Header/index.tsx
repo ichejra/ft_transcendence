@@ -4,10 +4,11 @@ import Sidebar from "./Sidebar";
 import ProfileDropdown from "./ProfileDropdown";
 import { openSidebar } from "../../features/sidebarSlice";
 import { useAppDispatch } from "../../app/hooks";
+import { useAppSelector } from "../../app/hooks";
 
 const Header: React.FC = () => {
   const dispatch = useAppDispatch();
-
+  const { isAdmin } = useAppSelector((state) => state.loginStatus);
   return (
     <>
       <nav className="className='font-mono pl-6 py-4 bg-black bg-opacity-75 shadow-md shadow-black/10 text-white flex items-center justify-between">
@@ -23,9 +24,11 @@ const Header: React.FC = () => {
           <Link href="/">LOGO</Link>
         </div>
         <ul className="nav-links flex justify-between w-1/2">
-          <li className="hover:scale-110 hover:text-yellow-400 transition duration-300 cursor-pointer text-2xl font-medium mx-2 px-2">
-            <Link href="/dashboard">Dashboard</Link>
-          </li>
+          {isAdmin && (
+            <li className="hover:scale-110 hover:text-yellow-400 transition duration-300 cursor-pointer text-2xl font-medium mx-2 px-2">
+              <Link href="/dashboard">Dashboard</Link>
+            </li>
+          )}
           <li className="hover:scale-110 hover:text-yellow-400 transition duration-300 cursor-pointer text-2xl font-medium mx-2 px-2">
             <Link href="/">Home</Link>
           </li>

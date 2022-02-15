@@ -1,19 +1,17 @@
 import { NextPage } from "next";
-import React, { useState } from "react";
-import { Login, SignUp } from "../../components/auth";
+import React from "react";
+import CompleteUserProfileInfo from "../../components/auth/CompleteUserProfileInfo";
+import { useAppSelector } from "../../app/hooks";
+import Login from "../../components/auth/Login";
 
 const Authentication: NextPage = () => {
-  const [loginForm, setLoginForm] = useState(false);
+  const { isLoggedIn } = useAppSelector((state) => state.loginStatus);
 
-  return (
-    <div className="screen-bg- page-100 bg-black flex justify-center items-center">
-      {loginForm ? (
-        <Login setLoginForm={setLoginForm} />
-      ) : (
-        <SignUp setLoginForm={setLoginForm} />
-      )}
-    </div>
-  );
+  console.log(isLoggedIn);
+  if (!isLoggedIn) {
+    return <Login />;
+  }
+  return <CompleteUserProfileInfo />;
 };
 
 export default Authentication;
