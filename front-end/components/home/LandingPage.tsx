@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const LandingPage: React.FC = () => {
   return (
     <div className="page-100 flex justify-center text-yellow-400">
@@ -10,9 +12,11 @@ const LandingPage: React.FC = () => {
             quidem laboriosam magni odio culpa maiores? Magni.
           </p>
           <div>
-            <button className="text-xl font-bold bg-yellow-400 text-gray-800 w-48 p-2 rounded-lg m-4">
-              Play Now !
-            </button>
+            <Link href="/auth">
+              <button className="text-xl font-bold bg-yellow-400 text-gray-800 w-48 p-2 rounded-lg m-4">
+                Play Now !
+              </button>
+            </Link>
           </div>
         </div>
       </div>
