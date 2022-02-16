@@ -1,11 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseFilters } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards } from '@nestjs/common';
 import { Prisma, Users } from '@prisma/client';
+import { IntraAuthGuard } from 'src/auth/intra-auth.guard';
 
 import { UsersService } from './users.service';
-import { HttpExceptionFilter  } from 'src/http-exception.filter';
 
 @Controller('users')
-// @UseFilters(new HttpExceptionFilter())
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

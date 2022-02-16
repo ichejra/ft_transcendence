@@ -3,6 +3,12 @@ import { Prisma, Users } from '@prisma/client';
 
 import { PrismaService } from 'src/prisma.service';
 
+class NotFoundException extends HttpException {
+  constructor() {
+    super('resource is not found.', HttpStatus.NOT_FOUND);
+  }
+}
+
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
@@ -15,7 +21,7 @@ export class UsersService {
     } catch (e) {
       throw new HttpException({
         status: HttpStatus.FORBIDDEN,
-        error: `Cannot create user.`,
+        error: `Forbidden: cannot create user.`,
       }, HttpStatus.FORBIDDEN);
     }
   }
@@ -30,10 +36,7 @@ export class UsersService {
         where
       });
       if (!user) {
-        throw new HttpException({
-          status: HttpStatus.NOT_FOUND,
-          error: `User not found.`
-        }, HttpStatus.NOT_FOUND);
+        throw new NotFoundException();
       }
       return user;
     }
@@ -49,10 +52,7 @@ export class UsersService {
         data
       });
     } catch(e) {
-      throw new HttpException({
-        status: HttpStatus.NOT_FOUND,
-        error: 'User not found.',
-      }, HttpStatus.NOT_FOUND);
+      throw new NotFoundException();
     }
   }
 
@@ -63,10 +63,7 @@ export class UsersService {
       });
     }
     catch(e) {
-      throw new HttpException({
-        status: HttpStatus.NOT_FOUND,
-        error: `User not found.`
-      }, HttpStatus.NOT_FOUND);
+      throw new NotFoundException();
     }
   }
 }

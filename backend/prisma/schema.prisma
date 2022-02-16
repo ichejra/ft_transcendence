@@ -19,4 +19,5 @@ model Users {
   activated Boolean? @default(false)
   state Boolean? @default(false)
   avatar_url String?
+  // relation between users table and friends table
 }
