@@ -5,11 +5,15 @@ CREATE TABLE "Users" (
     "last_name" TEXT,
     "user_name" TEXT,
     "email" TEXT,
-    "active_2fa" BOOLEAN,
+    "activated" BOOLEAN DEFAULT false,
+    "state" BOOLEAN DEFAULT false,
     "avatar_url" TEXT,
 
     CONSTRAINT "Users_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Users_user_name_key" ON "Users"("user_name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Users_email_key" ON "Users"("email");

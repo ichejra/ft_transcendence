@@ -1,6 +1,5 @@
 import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { Prisma, Users } from "@prisma/client";
 import { UserDto } from "src/users/dto/user.dto";
 import { UsersService } from "src/users/users.service";
 import { JwtPayload } from "./jwt.strategy";
@@ -23,7 +22,7 @@ export class AuthService {
     }
 
     async login(userdto: UserDto): Promise<any> {
-        console.log(userdto);
+        // console.log(userdto);
         // check for user
         let user : UserDto = null;
         try {
@@ -38,27 +37,26 @@ export class AuthService {
             accessToken
         }
     }
-
-    async logInWithIntra(data) {
-        if (!data.user) {
-            throw new BadRequestException();
-        }
-        try {
-            let user = await this.usersService.findOne(data.user.username);
-            if (user) throw 'found';
-        } catch (e) {
-            if (e === 'found') {
-                throw new ForbiddenException({
-                    status: 403,
-                    error: 'Forbidden: user already exists.'
-                });
-            }
-        }
-        try {
-            return await this.usersService.create(data.user);
-        }
-        catch (exp) {
-            throw exp;
-        }
-    }
+    // async logInWithIntra(data) {
+    //     if (!data.user) {
+    //         throw new BadRequestException();
+    //     }
+    //     try {
+    //         let user = await this.usersService.findOne(data.user.username);
+    //         if (user) throw 'found';
+    //     } catch (e) {
+    //         if (e === 'found') {
+    //             throw new ForbiddenException({
+    //                 status: 403,
+    //                 error: 'Forbidden: user already exists.'
+    //             });
+    //         }
+    //     }
+    //     try {
+    //         return await this.usersService.create(data.user);
+    //     }
+    //     catch (exp) {
+    //         throw exp;
+    //     }
+    // }
 }

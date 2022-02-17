@@ -12,11 +12,10 @@ datasource db {
 
 model Users {
   id Int  @default(autoincrement()) @id
-  first_name String?
-  last_name String?
   user_name String? @unique
   email String? @unique
-  activated Boolean? @default(false)
+  display_name String?
+  is_active Boolean? @default(false)
   state Boolean? @default(false)
   avatar_url String?
   // relation between users table and friends table
