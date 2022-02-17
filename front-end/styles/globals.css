@@ -67,7 +67,7 @@ body {
 }
 
 .page-100 {
-  min-height: calc(100vh - 9.85rem);
+  min-height: calc(100vh - 8.85rem);
 }
 
 .page {

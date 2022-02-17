@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import { AiOutlineRight } from "react-icons/ai";
 import { UsersModal } from ".";
@@ -10,7 +10,7 @@ const FriendsList: React.FC = () => {
     <div className="lg:w-1/4 pb-12 ">
       <div className="flex justify-between">
         <h1 className="text-xl font-bold p-2">Friends</h1>
-        <Link href="/profile/1/list">
+        <Link to="/profile/1/list">
           <div className="cursor-pointer flex items-center font-bold text-gray-600 hover:text-yellow-400 transition duration-300">
             See All
             <AiOutlineRight />
@@ -26,7 +26,7 @@ const FriendsList: React.FC = () => {
           .map((user, index) => {
             const id = new Date().getTime().toString() + index;
             return (
-              <Link key={id} href={`/profile/${id}`}>
+              <Link key={id} to={`/profile/${id}`}>
                 <div className="flex items-center p-2 hover:bg-gray-200 cursor-pointer rounded-lg transition duration-300">
                   <img
                     src="/images/profile.jpeg"

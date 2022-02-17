@@ -4,17 +4,25 @@ import {
   setLoggedIn,
   completeProfileInfo,
 } from "../../features/isLoggedInTestSlice";
-import { useAppDispatch } from "../../app/hooks";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { useNavigate } from "react-router";
 
 const CompleteUserProfileInfo: React.FC = () => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [avatar, setAvatar] = useState("");
   const dispatch = useAppDispatch();
+  const { profileAvatar } = useAppSelector((state) => state.loginStatus);
+
   const handleLoginForm = (e: React.FormEvent<EventTarget>) => {
     e.preventDefault();
-    dispatch(completeProfileInfo({ profileAvatar: avatar, username }));
-    router.push("/");
+    dispatch(
+      completeProfileInfo({
+        profileAvatar: avatar ? avatar : profileAvatar,
+        username,
+      })
+    );
+    navigate("/");
   };
 
   const readURL = (e: any) => {
@@ -27,7 +35,9 @@ const CompleteUserProfileInfo: React.FC = () => {
       img.src = `${uploaded_img}`;
       setAvatar(uploaded_img);
     });
-    reader.readAsDataURL(e.target.files[0]);
+    if (e.target.files[0]) {
+      reader.readAsDataURL(e.target.files[0]);
+    }
   };
 
   return (
@@ -63,6 +73,8 @@ const CompleteUserProfileInfo: React.FC = () => {
           placeholder="username"
           className="p-4 rounded-md m-2 tracking-wider border border-gray-800"
           autoComplete="username"
+          maxLength={12}
+          pattern="/[A-Za-z]{12}"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />

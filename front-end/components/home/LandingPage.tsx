@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "react-router-dom";
 
 const LandingPage: React.FC = () => {
   return (
@@ -12,7 +12,7 @@ const LandingPage: React.FC = () => {
             quidem laboriosam magni odio culpa maiores? Magni.
           </p>
           <div>
-            <Link href="/auth">
+            <Link to="/game">
               <button className="text-xl font-bold bg-yellow-400 text-gray-800 w-48 p-2 rounded-lg m-4">
                 Play Now !
               </button>

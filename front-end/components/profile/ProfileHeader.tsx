@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { FaUserEdit, FaUserFriends } from "react-icons/fa";
 import { IoMdTime } from "react-icons/io";
 
@@ -24,7 +24,7 @@ const ProfileHeader: React.FC = () => {
         </span>
       </div>
       <div className="flex md:items-start md:mt-10">
-        <Link href="/profile/edit">
+        <Link to="/profile/edit">
           <button className="hover:scale-110 transition duration-300 cursor-pointer flex items-center text-md md:text-lg md:mx-4 py-1 md:py-2 px-6 bg-yellow-400 text-gray-800 rounded-md">
             <FaUserEdit className="w-6 h-8 mr-2" />
             Edit Profile

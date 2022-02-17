@@ -1,5 +1,5 @@
 import { FaTimes } from "react-icons/fa";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { closeSidebar } from "../../features/sidebarSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 
@@ -30,7 +30,7 @@ const Sidebar = () => {
       </button>
       <ul className="flex flex-col mt-10">
         <li>
-          <Link href="/dashboard">
+          <Link to="/dashboard">
             <button
               className="rounded-lg text-left w-full hover:text-yellow-400 hover:bg-gray-600 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-4 px-2"
               onClick={() => dispatch(closeSidebar())}
@@ -41,7 +41,7 @@ const Sidebar = () => {
           </Link>
         </li>
         <li>
-          <Link href="/">
+          <Link to="/">
             <button
               className="rounded-lg text-left w-full hover:text-yellow-400 hover:bg-gray-600 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-4 px-2"
               onClick={() => dispatch(closeSidebar())}
@@ -52,7 +52,7 @@ const Sidebar = () => {
           </Link>
         </li>
         <li>
-          <Link href="/channels">
+          <Link to="/channels">
             <button
               className="rounded-lg text-left w-full hover:text-yellow-400 hover:bg-gray-600 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-4 px-2"
               onClick={() => dispatch(closeSidebar())}
@@ -63,7 +63,7 @@ const Sidebar = () => {
           </Link>
         </li>
         <li>
-          <Link href="/game">
+          <Link to="/game">
             <button
               className="rounded-lg text-left w-full hover:text-yellow-400 hover:bg-gray-600 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-4 px-2"
               onClick={() => dispatch(closeSidebar())}
@@ -74,7 +74,7 @@ const Sidebar = () => {
           </Link>
         </li>
         <li>
-          <Link href="/about">
+          <Link to="/about">
             <button
               className="rounded-lg text-left w-full hover:text-yellow-400 hover:bg-gray-600 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-4 px-2"
               onClick={() => dispatch(closeSidebar())}

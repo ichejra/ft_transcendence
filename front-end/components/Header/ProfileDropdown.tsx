@@ -1,16 +1,12 @@
 import { useEffect, useState, useRef } from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { CgProfile } from "react-icons/cg";
 import { HiOutlineLogout } from "react-icons/hi";
 import { FiSettings } from "react-icons/fi";
 import { IoMdNotificationsOutline, IoMdNotifications } from "react-icons/io";
 import Notifications from "./Notifications";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import {
-  setLoggedIn,
-  completeProfileInfo,
-} from "../../features/isLoggedInTestSlice";
-import { useRouter } from "next/router";
+import { setLoggedIn } from "../../features/isLoggedInTestSlice";
 
 const ProfileDropdown = () => {
   const [dropDown, setDropdown] = useState(false);
@@ -19,7 +15,6 @@ const ProfileDropdown = () => {
   const dropDownRef = useRef<any>(null);
   const notifRef = useRef<any>(null);
   const dispatch = useAppDispatch();
-  const router = useRouter();
   const { isLoggedIn, username, profileAvatar } = useAppSelector(
     (state) => state.loginStatus
   );
@@ -51,13 +46,13 @@ const ProfileDropdown = () => {
       {!isLoggedIn ? (
         <div className="flex py-1 items-center transition duration-300 cursor-pointer text-2xl font-medium mx-2 px-2">
           <button className="hover:scale-110 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-1 px-4 bg-yellow-400 text-gray-800 rounded-md">
-            <Link href="/auth">Login</Link>
+            <Link to="/auth">Login</Link>
           </button>
         </div>
       ) : (
         <div className="dropdown flex items-center transition duration-300 cursor-pointer text-2xl font-medium mx-2 px-2">
           {/******************************************************************************/}
-          {username && (
+          {isLoggedIn && username && (
             <div ref={notifRef}>
               <button
                 type="button"
@@ -89,7 +84,7 @@ const ProfileDropdown = () => {
           )}
           {/******************************************************************************/}
           <div ref={dropDownRef}>
-            {username && (
+            {isLoggedIn && username && (
               <button
                 type="button"
                 onClick={() => setDropdown(!dropDown)}
@@ -114,7 +109,7 @@ const ProfileDropdown = () => {
                 className="bg-black rounded-xl bg-opacity-75 py-2"
               >
                 <li className="py-2 pl-2 rounded-t-xl hover:bg-gray-800 hover:text-yellow-400 transition duration-300">
-                  <Link href={`/profile/60d0fe4f5311236168a109ca`}>
+                  <Link to={`/profile/60d0fe4f5311236168a109ca`}>
                     <span className="flex items-center pr-16">
                       <CgProfile size="1.5rem" />
                       <p className="ml-3">Profile</p>
@@ -122,7 +117,7 @@ const ProfileDropdown = () => {
                   </Link>
                 </li>
                 <li className="py-2 pl-2 hover:bg-gray-800 hover:text-yellow-400 transition duration-300">
-                  <Link href="/profile/edit">
+                  <Link to="/profile/edit">
                     <span className="flex items-center">
                       <FiSettings size="1.5rem" />
                       <p className="ml-3">Settings</p>
@@ -133,19 +128,19 @@ const ProfileDropdown = () => {
                   <hr />
                 </li>
                 <li className="pt-2 pl-2 rounded-b-xl hover:bg-gray-800 hover:text-yellow-400 transition duration-300">
-                  <button
+                  <Link
+                    to="/"
                     onClick={() => {
                       dispatch(
                         setLoggedIn({ isLoggedIn: false, isAdmin: false })
                       );
-                      router.push("/");
                     }}
                   >
                     <span className="flex items-center">
                       <HiOutlineLogout size="1.5rem" />
                       <p className="ml-3">Log Out</p>
                     </span>
-                  </button>
+                  </Link>
                 </li>
               </ul>
             </div>

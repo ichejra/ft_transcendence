@@ -1,9 +1,8 @@
-import { NextPage } from "next";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { UsersModal } from "../../../components/profile";
+import { UsersModal } from ".";
 
-const FullFriendsList: NextPage = () => {
+const FullFriendsList: React.FC = () => {
   const [confirmationModal, setConfirmationModal] = useState(false);
 
   return (
@@ -42,7 +41,7 @@ const FullFriendsList: NextPage = () => {
                     >
                       unfriend
                     </button>
-                    <Link href={`/profile/${id}`}>
+                    <Link to={`/profile/${id}`}>
                       <button className="hover:bg-yellow-300 bg-yellow-400 mr-2 px-2 py-1 rounded-md font-bold transition duration-300">
                         profile
                       </button>

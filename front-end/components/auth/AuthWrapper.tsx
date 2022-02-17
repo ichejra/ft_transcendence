@@ -1,29 +1,27 @@
 import { useAppSelector } from "../../app/hooks";
-import Login from "./Login";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
 import CompleteUserProfileInfo from "./CompleteUserProfileInfo";
+import { Navigate, useLocation } from "react-router-dom";
 
 const AuthWrapper: React.FC = ({ children }) => {
-  const { isLoggedIn, isAdmin } = useAppSelector((state) => state.loginStatus);
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isAdmin && router.pathname === "/dashboard") {
-      router.push("/");
-    }
-  }, []);
+  const location = useLocation();
+  const { isLoggedIn, isAdmin, username } = useAppSelector(
+    (state) => state.loginStatus
+  );
 
   if (
     !isLoggedIn &&
-    router.pathname !== "/auth" &&
-    router.pathname !== "/" &&
-    router.pathname !== "/about"
+    location.pathname !== "/auth" &&
+    location.pathname !== "/" &&
+    location.pathname !== "/about"
   ) {
-    return <Login />;
+    return <Navigate to="/auth" />;
   }
-  if (isLoggedIn && 0) {
+
+  if (isLoggedIn && !username) {
     return <CompleteUserProfileInfo />;
+  }
+  if (!isAdmin && isLoggedIn && location.pathname === "/dashboard") {
+    return <Navigate to="/" />;
   }
 
   return <>{children}</>;

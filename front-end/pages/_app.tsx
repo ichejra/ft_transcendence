@@ -1,16 +1,34 @@
 import "../styles/globals.css";
-import Layout from "../components/Layout";
 import type { AppProps } from "next/app";
 import { Provider } from "react-redux";
 import { store } from "../app/store";
+import { BrowserRouter as Router, HashRouter } from "react-router-dom";
+import { ReactNode } from "react";
+
+const Test: React.FC = ({ children }) => {
+  return (
+    <div suppressHydrationWarning>
+      {typeof window === "undefined" ? null : children}
+    </div>
+  );
+};
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <Provider store={store}>
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
-    </Provider>
+    <Test>
+      <Provider store={store}>
+        <HashRouter>
+          {typeof window === "undefined" ? null : <Component {...pageProps} />}
+        </HashRouter>
+      </Provider>
+    </Test>
+    // <div suppressHydrationWarning>
+    //   <Provider store={store}>
+    //     <Router>
+    //       {typeof window === "undefined" ? null : <Component {...pageProps} />}
+    //     </Router>
+    //   </Provider>
+    // </div>
   );
 }
 
