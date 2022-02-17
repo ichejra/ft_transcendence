@@ -14,7 +14,7 @@ model Users {
   id Int  @default(autoincrement()) @id
   first_name String?
   last_name String?
-  user_name String?
+  user_name String? @unique
   email String? @unique
   activated Boolean? @default(false)
   state Boolean? @default(false)

@@ -1,20 +1,27 @@
-import { Controller, Get, Req, UseGuards } from "@nestjs/common";
+import { BadRequestException, Controller, Get, Req, Res, UseGuards } from "@nestjs/common";
+import { Request, Response } from "express";
 import { AuthService } from "./auth.service";
 import { IntraAuthGuard } from "./intra-auth.guard";
+import { JwtAuthGuard } from "./jwt-auth.guard";
 
-@Controller()
+@Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) {}
     
+    @Get()
     @UseGuards(IntraAuthGuard)
-    @Get('login')
-    async login(@Req() req) {
-        return req.user;
+    async login(@Req() req: any) {
+        console.log(req.user);
+        const { accessToken } = await this.authService.login(req.user);
+        return {
+            token: accessToken
+        };
     }
 
-    @UseGuards(IntraAuthGuard)
-    @Get('auth')
-    async loginRedirection(@Req() req) {
-        return this.authService.signInWithIntra(req);
+    @Get('profile')
+    @UseGuards(JwtAuthGuard)
+    async getProfile(@Req() req): Promise<any> {
+
+        return req.user;
     }
 }

@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Prisma, Users } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
+import { UserDto } from './dto/user.dto';
 import { PrismaService } from 'src/prisma.service';
 
 class NotFoundException extends HttpException {
@@ -13,7 +14,7 @@ class NotFoundException extends HttpException {
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: Prisma.UsersCreateInput) : Promise<Users>{
+  async create(data: Prisma.UsersCreateInput) : Promise<UserDto>{
     try {
       return await this.prisma.users.create({
         data
@@ -26,11 +27,11 @@ export class UsersService {
     }
   }
 
-  findAll() : Promise<Users[]>{
+  findAll() : Promise<UserDto[]>{
     return this.prisma.users.findMany();
   }
 
-  async findOne(where: Prisma.UsersWhereUniqueInput): Promise<Users> {
+  async findOne(where: Prisma.UsersWhereUniqueInput): Promise<UserDto> {
     try{
       const user = await this.prisma.users.findUnique({
         where
@@ -45,7 +46,7 @@ export class UsersService {
     }
   }
 
-  async update(where: Prisma.UsersWhereUniqueInput, data: Prisma.UsersUpdateInput) : Promise<Users> {
+  async update(where: Prisma.UsersWhereUniqueInput, data: Prisma.UsersUpdateInput) : Promise<UserDto> {
     try{
       return await this.prisma.users.update({
         where,
@@ -56,7 +57,7 @@ export class UsersService {
     }
   }
 
-  async remove(where: Prisma.UsersWhereUniqueInput): Promise<Users>{
+  async remove(where: Prisma.UsersWhereUniqueInput): Promise<UserDto>{
     try{
       return await this.prisma.users.delete({
         where
