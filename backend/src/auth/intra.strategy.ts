@@ -8,17 +8,17 @@ const starategyOptions = {
     clientID: process.env.UID,
     clientSecret: process.env.SECRET,
     callbackURL: "http://localhost:3000/auth",
-    // profileFields: {
-    //     'id': function (obj) { return String(obj.id); },
-    //     'username': 'login',
-    //     'displayName': 'displayname',
-    //     'name.familyName': 'last_name',
-    //     'name.givenName': 'first_name',
-    //     'profileUrl': 'url',
-    //     'emails.0.value': 'email',
-    //     'phoneNumbers.0.value': 'phone',
-    //     'photos.0.value': 'image_url'
-    //   }
+    profileFields: {
+        'id': function (obj) { return String(obj.id); },
+        'username': 'login',
+        'displayName': 'displayname',
+        'name.familyName': 'last_name',
+        'name.givenName': 'first_name',
+        'profileUrl': 'url',
+        'emails.0.value': 'email',
+        'phoneNumbers.0.value': 'phone',
+        'photos.0.value': 'image_url'
+      }
 }
 
 @Injectable()
