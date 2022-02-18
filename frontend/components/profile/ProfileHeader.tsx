@@ -2,8 +2,11 @@ import { Link } from "react-router-dom";
 import { FaUserEdit, FaUserFriends } from "react-icons/fa";
 import { IoMdTime } from "react-icons/io";
 import { useAppSelector } from "../../app/hooks";
+import EditProfileModal from "../modals/EditProfileModal";
+import { useState } from "react";
 
 const ProfileHeader: React.FC = () => {
+  const [editProfile, setEditProfile] = useState(false);
   const { profileAvatar, username } = useAppSelector(
     (state) => state.loginStatus
   );
@@ -28,13 +31,15 @@ const ProfileHeader: React.FC = () => {
         </span>
       </div>
       <div className="flex md:items-start md:mt-10">
-        <Link to="/profile/edit">
-          <button className="hover:scale-110 transition duration-300 cursor-pointer flex items-center text-md md:text-lg md:mx-4 py-1 md:py-2 px-6 bg-yellow-400 text-gray-800 rounded-md">
-            <FaUserEdit className="w-6 h-8 mr-2" />
-            Edit Profile
-          </button>
-        </Link>
+        <button
+          onClick={() => setEditProfile(true)}
+          className="hover:scale-110 transition duration-300 cursor-pointer flex items-center text-md md:text-lg md:mx-4 py-1 md:py-2 px-6 bg-yellow-400 text-gray-800 rounded-md"
+        >
+          <FaUserEdit className="w-6 h-8 mr-2" />
+          Edit Profile
+        </button>
       </div>
+      {editProfile && <EditProfileModal setEditProfile={setEditProfile} />}
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { AiOutlineRight } from "react-icons/ai";
-import { UsersModal } from ".";
+import UsersModal from "../modals/ConfirmationModal";
 
 const FriendsList: React.FC = () => {
   const [confirmationModal, setConfirmationModal] = useState(false);

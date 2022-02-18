@@ -1,8 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  setLoggedIn,
-  completeProfileInfo,
-} from "../../features/isLoggedInTestSlice";
+import { completeProfileInfo } from "../../features/isLoggedInTestSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useNavigate } from "react-router";
 
