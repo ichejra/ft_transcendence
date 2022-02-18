@@ -20,7 +20,7 @@ interface ProfileInfo {
 const initialState: State = {
   isLoggedIn: false,
   isAdmin: false,
-  profileAvatar: "",
+  profileAvatar: "/images/profile.jpeg",
   username: "",
 };
 

@@ -30,7 +30,9 @@ const Home: NextPage = () => {
           path="/channels"
           element={
             <AuthRoute>
-              <Channels />
+              <CompleteProfile>
+                <Channels />
+              </CompleteProfile>
             </AuthRoute>
           }
         />
@@ -63,7 +65,9 @@ const Home: NextPage = () => {
           path="/profile/:id"
           element={
             <AuthRoute>
-              <UserProfile />
+              <CompleteProfile>
+                <UserProfile />
+              </CompleteProfile>
             </AuthRoute>
           }
         ></Route>
@@ -71,7 +75,9 @@ const Home: NextPage = () => {
           path="/profile/:id/list"
           element={
             <AuthRoute>
-              <FullFriendsList />
+              <CompleteProfile>
+                <FullFriendsList />
+              </CompleteProfile>
             </AuthRoute>
           }
         />
@@ -79,7 +85,9 @@ const Home: NextPage = () => {
           path="/profile/edit"
           element={
             <AuthRoute>
-              <EditProfile />
+              <CompleteProfile>
+                <EditProfile />
+              </CompleteProfile>
             </AuthRoute>
           }
         />

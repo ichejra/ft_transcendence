@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Navigate, useLocation } from "react-router";
 import { useAppSelector } from "../../app/hooks";
-import CompleteUserProfileInfo from "../auth/CompleteUserProfileInfo";
 
 export const AuthRoute: React.FC = ({ children }) => {
   const location = useLocation();

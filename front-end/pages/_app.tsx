@@ -5,7 +5,7 @@ import { store } from "../app/store";
 import { BrowserRouter as Router, HashRouter } from "react-router-dom";
 import { ReactNode } from "react";
 
-const Test: React.FC = ({ children }) => {
+const Protecter: React.FC = ({ children }) => {
   return (
     <div suppressHydrationWarning>
       {typeof window === "undefined" ? null : children}
@@ -15,20 +15,13 @@ const Test: React.FC = ({ children }) => {
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <Test>
+    <Protecter>
       <Provider store={store}>
         <HashRouter>
           {typeof window === "undefined" ? null : <Component {...pageProps} />}
         </HashRouter>
       </Provider>
-    </Test>
-    // <div suppressHydrationWarning>
-    //   <Provider store={store}>
-    //     <Router>
-    //       {typeof window === "undefined" ? null : <Component {...pageProps} />}
-    //     </Router>
-    //   </Provider>
-    // </div>
+    </Protecter>
   );
 }
 
