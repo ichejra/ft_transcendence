@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { FaUserEdit, FaUserFriends } from "react-icons/fa";
 import { IoMdTime } from "react-icons/io";
 import { useAppSelector } from "../../app/hooks";
+import EditProfileModal from "../Modals/EditProfileModal";
 
 const ProfileHeader: React.FC = () => {
   const { profileAvatar, username } = useAppSelector(
@@ -35,6 +36,7 @@ const ProfileHeader: React.FC = () => {
           </button>
         </Link>
       </div>
+      {/* <EditProfileModal /> */}
     </div>
   );
 };
