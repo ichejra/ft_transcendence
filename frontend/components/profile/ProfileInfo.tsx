@@ -1,6 +1,6 @@
 import { AiOutlineRight } from "react-icons/ai";
 import { useState } from "react";
-import { HistoryModal } from ".";
+import HistoryModal from "../modals/HistoryModal";
 
 const ProfileInfo: React.FC = () => {
   const [openModal, setOpenModal] = useState(false);

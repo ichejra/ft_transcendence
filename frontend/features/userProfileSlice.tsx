@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface Err {
   isError: boolean;
@@ -6,13 +6,12 @@ interface Err {
 }
 
 interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  picture: string;
-  friends: string[];
+  id?: string;
+  display_name?: string;
+  username?: string;
+  email?: string;
+  picture?: string;
+  friends?: string[];
 }
 
 interface UserState {
@@ -26,8 +25,7 @@ const initialState: UserState = {
   isError: { isError: false, message: "" },
   user: {
     id: "",
-    firstName: "",
-    lastName: "",
+    display_name: "",
     username: "",
     email: "",
     picture: "",
@@ -38,5 +36,13 @@ const initialState: UserState = {
 export const userProfileSlice = createSlice({
   name: "userProfile",
   initialState,
-  reducers: {},
+  reducers: {
+    getUsers: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
+    },
+  },
 });
+
+export const { getUsers } = userProfileSlice.actions;
+
+export default userProfileSlice.reducer;

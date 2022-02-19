@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { UsersModal } from ".";
+import UsersModal from "../modals/ConfirmationModal";
 
 const FullFriendsList: React.FC = () => {
   const [confirmationModal, setConfirmationModal] = useState(false);

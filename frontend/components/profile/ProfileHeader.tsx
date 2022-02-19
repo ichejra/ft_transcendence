@@ -1,12 +1,16 @@
 import { Link } from "react-router-dom";
 import { FaUserEdit, FaUserFriends } from "react-icons/fa";
 import { IoMdTime } from "react-icons/io";
-import { useAppSelector } from "../../app/hooks";
+import { useAppSelector, useAppDispatch } from "../../app/hooks";
+import EditProfileModal from "../modals/EditProfileModal";
+import { editUserProfile } from "../../features/isLoggedInTestSlice";
 
 const ProfileHeader: React.FC = () => {
-  const { profileAvatar, username } = useAppSelector(
+  const dispatch = useAppDispatch();
+  const { profileAvatar, username, editProfile } = useAppSelector(
     (state) => state.loginStatus
   );
+
   return (
     <div className="flex flex-col md:flex-row items-center md:my-16 my-10">
       <div className="md:mx-8 mb-2 md:mb-0">
@@ -28,13 +32,15 @@ const ProfileHeader: React.FC = () => {
         </span>
       </div>
       <div className="flex md:items-start md:mt-10">
-        <Link to="/profile/edit">
-          <button className="hover:scale-110 transition duration-300 cursor-pointer flex items-center text-md md:text-lg md:mx-4 py-1 md:py-2 px-6 bg-yellow-400 text-gray-800 rounded-md">
-            <FaUserEdit className="w-6 h-8 mr-2" />
-            Edit Profile
-          </button>
-        </Link>
+        <button
+          onClick={() => dispatch(editUserProfile(true))}
+          className="hover:scale-110 transition duration-300 cursor-pointer flex items-center text-md md:text-lg md:mx-4 py-1 md:py-2 px-6 bg-yellow-400 text-gray-800 rounded-md"
+        >
+          <FaUserEdit className="w-6 h-8 mr-2" />
+          Edit Profile
+        </button>
       </div>
+      {editProfile && <EditProfileModal />}
     </div>
   );
 };
