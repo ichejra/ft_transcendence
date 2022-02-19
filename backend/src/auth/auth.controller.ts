@@ -10,9 +10,10 @@ export class AuthController {
     
     @Get()
     @UseGuards(IntraAuthGuard)
-    async login(@Req() req: any) {
+    async login(@Req() req: any, @Res() res: any) {
         console.log(req.user);
         const { accessToken } = await this.authService.login(req.user);
+        res.cookie('jwt', accessToken).send({success: true});
         return {
             token: accessToken
         };
