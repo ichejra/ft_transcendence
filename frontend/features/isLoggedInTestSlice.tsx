@@ -19,10 +19,10 @@ interface ProfileInfo {
 }
 
 const initialState: State = {
-  isLoggedIn: false,
-  isAdmin: false,
+  isLoggedIn: true,
+  isAdmin: true,
   profileAvatar: "/images/profile.jpeg",
-  username: "",
+  username: "elahyani",
   editProfile: false,
 };
 
