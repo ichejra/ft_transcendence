@@ -18,6 +18,9 @@ const AboutPage: React.FC = () => {
             Lorem ipsum, dolor sit amet consectetur adipisicing elit. Optio
             sapiente dicta inventore corrupti! Recusandae, omnis eligendi cum
             quidem laboriosam magni odio culpa maiores? Magni.
+            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Optio
+            sapiente dicta inventore corrupti! Recusandae, omnis eligendi cum
+            quidem laboriosam magni odio culpa maiores? Magni.
           </p>
           <img
             src='https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/056cdb109881021.5fddf7261f9f5.gif'
