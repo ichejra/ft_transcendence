@@ -7,9 +7,7 @@ import { useEffect, useRef, useState } from "react";
 const Dashboard: React.FC = () => {
   const [showAction, setShowAction] = useState(false);
   const ulRef = useRef<HTMLUListElement>(null);
-  useEffect(() => {
-    console.dir(ulRef.current?.children);
-  }, [showAction]);
+
   return (
     <div className="page-100 flex justify-center lg:p-12">
       <div className="flex flex-col items-center p-8 w-full border-2 shadow-xl rounded-3xl bg-gray-200 space-y-6">
