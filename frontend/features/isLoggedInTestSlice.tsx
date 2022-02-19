@@ -5,6 +5,7 @@ interface State {
   isAdmin: boolean;
   profileAvatar: string;
   username: string;
+  editProfile: boolean;
 }
 
 interface LoginAction {
@@ -22,6 +23,7 @@ const initialState: State = {
   isAdmin: false,
   profileAvatar: "/images/profile.jpeg",
   username: "",
+  editProfile: false,
 };
 
 export const loggedInSlice = createSlice({
@@ -39,9 +41,13 @@ export const loggedInSlice = createSlice({
       state.profileAvatar = action.payload.profileAvatar;
       state.username = action.payload.username;
     },
+    editUserProfile: (state = initialState, action: PayloadAction<boolean>) => {
+      state.editProfile = action.payload;
+    },
   },
 });
 
-export const { setLoggedIn, completeProfileInfo } = loggedInSlice.actions;
+export const { setLoggedIn, completeProfileInfo, editUserProfile } =
+  loggedInSlice.actions;
 
 export default loggedInSlice.reducer;

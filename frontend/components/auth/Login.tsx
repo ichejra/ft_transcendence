@@ -1,6 +1,7 @@
 import { setLoggedIn } from "../../features/isLoggedInTestSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useNavigate, useLocation } from "react-router";
+import { useEffect, useState } from "react";
 
 interface StateType {
   from: { pathname: string };
@@ -13,6 +14,7 @@ const Login = () => {
   const state = location.state as StateType;
   let from = state?.from?.pathname || "/";
   const { username } = useAppSelector((state) => state.loginStatus);
+
   const handleLogin = () => {
     console.log("Logged");
     dispatch(setLoggedIn({ isLoggedIn: true, isAdmin: false }));
