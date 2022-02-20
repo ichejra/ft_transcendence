@@ -10,19 +10,14 @@ export class AuthController {
     
     @Get()
     @UseGuards(IntraAuthGuard)
-    async login(@Req() req: any, @Res() res: any) {
-        console.log(req.user);
-        const { accessToken } = await this.authService.login(req.user);
-        res.cookie('jwt', accessToken).send({success: true});
-        return {
-            token: accessToken
-        };
+    async login(@Req() _req, @Res() _res): Promise<any> {
+        const url = await this.authService.login(_req, _res);
+        return _res.redirect(url);
     }
 
     @Get('profile')
     @UseGuards(JwtAuthGuard)
-    async getProfile(@Req() req): Promise<any> {
-
-        return req.user;
+    getProfile(@Req() _req): Promise<any> {
+        return _req.user;
     }
 }
