@@ -13,50 +13,28 @@ export class AuthService {
         ) {}
     
     async validateUser(payload: JwtPayload): Promise<UserDto> {
-        const { user_name, email } = payload;
-        const user = await this.usersService.findOne({ user_name});
+        const { user_name } = payload;
+        const user = await this.usersService.findOne({ user_name });
         if (!user) {
             return null;
         }
         return user;
     }
 
-    async login(userdto: UserDto): Promise<any> {
-        // console.log(userdto);
-        // check for user
+    async login(_req: any, _res: any): Promise<any> {
         let user : UserDto = null;
+        let url: string;
         try {
-            user = await this.usersService.findOne({ user_name: userdto.user_name });
+            user = await this.usersService.findOne({ user_name: _req.user.user_name });
+            url = 'http://localhost:3001/'; // redirect to Home page
         } catch(err) {
-            user = await this.usersService.create(userdto);
+            user = await this.usersService.create(_req.user);
+            url = 'http://localhost:3001/#/complete-info'; // redirect to complete-info page
         }
         const payload: JwtPayload = { user_name: (await user).user_name, email: (await user).email };
         const accessToken  = this.jwtService.sign(payload);
-        return {
-            expiresIn : process.env.EXPIRESIN,
-            accessToken
-        }
+        _res.cookie('user', JSON.stringify(user));
+        _res.cookie('jwt', accessToken)
+        return  url;
     }
-    // async logInWithIntra(data) {
-    //     if (!data.user) {
-    //         throw new BadRequestException();
-    //     }
-    //     try {
-    //         let user = await this.usersService.findOne(data.user.username);
-    //         if (user) throw 'found';
-    //     } catch (e) {
-    //         if (e === 'found') {
-    //             throw new ForbiddenException({
-    //                 status: 403,
-    //                 error: 'Forbidden: user already exists.'
-    //             });
-    //         }
-    //     }
-    //     try {
-    //         return await this.usersService.create(data.user);
-    //     }
-    //     catch (exp) {
-    //         throw exp;
-    //     }
-    // }
 }
