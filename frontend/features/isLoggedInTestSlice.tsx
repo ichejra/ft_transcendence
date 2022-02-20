@@ -2,17 +2,14 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface State {
   isLoggedIn: boolean;
-  isAdmin: boolean;
+
   profileAvatar: string;
   username: string;
   editProfile: boolean;
 }
-
 interface LoginAction {
   isLoggedIn: boolean;
-  isAdmin: boolean;
 }
-
 interface ProfileInfo {
   profileAvatar: string;
   username: string;
@@ -20,7 +17,7 @@ interface ProfileInfo {
 
 const initialState: State = {
   isLoggedIn: true,
-  isAdmin: true,
+
   profileAvatar: "/images/profile.jpeg",
   username: "elahyani",
   editProfile: false,
@@ -32,7 +29,6 @@ export const loggedInSlice = createSlice({
   reducers: {
     setLoggedIn: (state = initialState, action: PayloadAction<LoginAction>) => {
       state.isLoggedIn = action.payload.isLoggedIn;
-      state.isAdmin = action.payload.isAdmin;
     },
     completeProfileInfo: (
       state = initialState,

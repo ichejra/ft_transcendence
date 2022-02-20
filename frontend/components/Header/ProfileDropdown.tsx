@@ -131,9 +131,7 @@ const ProfileDropdown = () => {
                   <Link
                     to="/"
                     onClick={() => {
-                      dispatch(
-                        setLoggedIn({ isLoggedIn: false, isAdmin: false })
-                      );
+                      dispatch(setLoggedIn({ isLoggedIn: false }));
                     }}
                   >
                     <span className="flex items-center">

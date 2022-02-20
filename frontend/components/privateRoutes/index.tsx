@@ -20,13 +20,3 @@ export const CompleteProfile: React.FC = ({ children }) => {
   }
   return <>{children}</>;
 };
-
-export const AdminRoute: React.FC = ({ children }) => {
-  const location = useLocation();
-  const { isLoggedIn, isAdmin } = useAppSelector((state) => state.loginStatus);
-
-  if (!isAdmin && isLoggedIn && location.pathname === "/dashboard") {
-    return <Navigate to="/" state={{ from: location }} />;
-  }
-  return <>{children}</>;
-};

@@ -8,7 +8,6 @@ const Sidebar = () => {
   const isSidebarOpen = useAppSelector(
     (state) => state.toggleSidebar.isSidebarOpen
   );
-  const { isAdmin } = useAppSelector((state) => state.loginStatus);
 
   return (
     <aside
@@ -30,19 +29,6 @@ const Sidebar = () => {
         />
       </button>
       <ul className="flex flex-col mt-10">
-        {isAdmin && (
-          <li>
-            <Link to="/dashboard">
-              <button
-                className="rounded-lg text-left w-full hover:text-yellow-400 hover:bg-gray-600 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-4 px-2"
-                onClick={() => dispatch(closeSidebar())}
-                type="button"
-              >
-                Dashboard
-              </button>
-            </Link>
-          </li>
-        )}
         <li>
           <Link to="/">
             <button

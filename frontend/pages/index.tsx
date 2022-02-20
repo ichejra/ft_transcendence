@@ -4,19 +4,13 @@ import HomePage from "../components/home";
 import About from "../components/about";
 import Channels from "../components/channels";
 import PongGame from "../components/game";
-import Dashboard from "../components/dashboard";
 import UserProfile from "../components/profile/Profile";
 import Login from "../components/auth/Login";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import EditProfile from "../components/profile/EditProfile";
 import FullFriendsList from "../components/profile/FullFriendsList";
 import NotFound from "../components/NotFound";
-import {
-  AuthRoute,
-  CompleteProfile,
-  AdminRoute,
-} from "../components/privateRoutes";
+import { AuthRoute, CompleteProfile } from "../components/privateRoutes";
 import CompleteUserProfileInfo from "../components/auth/CompleteUserProfileInfo";
 
 const Home: NextPage = () => {
@@ -41,26 +35,12 @@ const Home: NextPage = () => {
           element={
             <AuthRoute>
               <CompleteProfile>
-                <AdminRoute>
-                  <PongGame />
-                </AdminRoute>
+                <PongGame />
               </CompleteProfile>
             </AuthRoute>
           }
         />
         <Route path="/about" element={<About />} />
-        <Route
-          path="/dashboard"
-          element={
-            <AuthRoute>
-              <CompleteProfile>
-                <AdminRoute>
-                  <Dashboard />
-                </AdminRoute>
-              </CompleteProfile>
-            </AuthRoute>
-          }
-        />
         <Route
           path="/profile/:id"
           element={
@@ -77,16 +57,6 @@ const Home: NextPage = () => {
             <AuthRoute>
               <CompleteProfile>
                 <FullFriendsList />
-              </CompleteProfile>
-            </AuthRoute>
-          }
-        />
-        <Route
-          path="/profile/edit"
-          element={
-            <AuthRoute>
-              <CompleteProfile>
-                <EditProfile />
               </CompleteProfile>
             </AuthRoute>
           }

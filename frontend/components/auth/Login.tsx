@@ -17,7 +17,7 @@ const Login = () => {
 
   const handleLogin = () => {
     console.log("Logged");
-    dispatch(setLoggedIn({ isLoggedIn: true, isAdmin: false }));
+    dispatch(setLoggedIn({ isLoggedIn: true }));
     if (!username) {
       navigate("/complete-info");
     } else {
