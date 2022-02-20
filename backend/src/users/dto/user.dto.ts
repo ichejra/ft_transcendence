@@ -5,13 +5,13 @@ export class UserDto {
     id?: number;
 
     @IsNotEmpty()
-    user_name: string;
+    user_name?: string;
 
     @IsEmail()
-    email: string;
+    email?: string;
 
     @IsString()
-    display_name: string;
+    display_name?: string;
 
     @IsBoolean()
     active_2fa?: boolean;

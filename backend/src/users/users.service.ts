@@ -3,7 +3,6 @@ import { Prisma } from '@prisma/client';
 
 import { UserDto } from './dto/user.dto';
 import { PrismaService } from 'src/prisma.service';
-
 class NotFoundException extends HttpException {
   constructor() {
     super('resource is not found.', HttpStatus.NOT_FOUND);
