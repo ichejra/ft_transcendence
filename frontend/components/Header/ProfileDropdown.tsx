@@ -15,9 +15,9 @@ const ProfileDropdown = () => {
   const dropDownRef = useRef<any>(null);
   const notifRef = useRef<any>(null);
   const dispatch = useAppDispatch();
-  const { isLoggedIn, username, profileAvatar } = useAppSelector(
-    (state) => state.loginStatus
-  );
+  const {
+    user: { user_name: username, avatar_url },
+  } = useAppSelector((state) => state.user);
 
   useEffect(() => {
     //* a mousedown event that listen on the dropdown element to hide it when the click is outside it
@@ -43,7 +43,7 @@ const ProfileDropdown = () => {
   }, [dropDown, showNotificationsList]);
   return (
     <div className="flex">
-      {!isLoggedIn ? (
+      {!username ? (
         <div className="flex py-1 items-center transition duration-300 cursor-pointer text-2xl font-medium mx-2 px-2">
           <button className="hover:scale-110 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-1 px-4 bg-yellow-400 text-gray-800 rounded-md">
             <Link to="/auth">Login</Link>
@@ -52,7 +52,7 @@ const ProfileDropdown = () => {
       ) : (
         <div className="dropdown flex items-center transition duration-300 cursor-pointer text-2xl font-medium mx-2 px-2">
           {/******************************************************************************/}
-          {isLoggedIn && username && (
+          {username && (
             <div ref={notifRef}>
               <button
                 type="button"
@@ -84,7 +84,7 @@ const ProfileDropdown = () => {
           )}
           {/******************************************************************************/}
           <div ref={dropDownRef}>
-            {isLoggedIn && username && (
+            {username && (
               <button
                 type="button"
                 onClick={() => setDropdown(!dropDown)}
@@ -94,7 +94,7 @@ const ProfileDropdown = () => {
                   {username}
                 </p>
                 <img
-                  src={profileAvatar}
+                  src={avatar_url}
                   className="bg-gray-300 h-12 w-12 rounded-full"
                 />
               </button>

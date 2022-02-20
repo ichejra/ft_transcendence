@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   completeProfileInfo,
   editUserProfile,
-} from "../../features/isLoggedInTestSlice";
+} from "../../features/userProfileSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useNavigate } from "react-router";
 
@@ -25,7 +25,9 @@ export const UpdateProfileForm: React.FC = () => {
   const inputRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { profileAvatar } = useAppSelector((state) => state.loginStatus);
+  const {
+    user: { avatar_url, id },
+  } = useAppSelector((state) => state.user);
 
   const readURL = (e: any) => {
     let reader = new FileReader();
@@ -46,10 +48,7 @@ export const UpdateProfileForm: React.FC = () => {
     e.preventDefault();
     if (!isValid) return;
     dispatch(
-      completeProfileInfo({
-        profileAvatar: avatar ? avatar : profileAvatar,
-        username,
-      })
+      completeProfileInfo({ id, avatar_url: avatar, user_name: username })
     );
     dispatch(editUserProfile(false));
     navigate("/profile/60d0fe4f5311236168a109ca");
@@ -69,7 +68,7 @@ export const UpdateProfileForm: React.FC = () => {
         >
           <img
             className="absolute flex items-center justify-center w-44 h-44 rounded-full border border-gray-800 bg-center bg-cover"
-            src={profileAvatar}
+            src={avatar_url}
             id="profile-picture"
           />
           <p className="absolute text-gray-200 w-full h-full flex items-center justify-center rounded-full font-bold text-2xl tracking-wider">

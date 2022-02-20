@@ -4,18 +4,20 @@ import { useAppSelector } from "../../app/hooks";
 
 export const AuthRoute: React.FC = ({ children }) => {
   const location = useLocation();
-  const { isLoggedIn } = useAppSelector((state) => state.loginStatus);
+  const { user } = useAppSelector((state) => state.user);
 
-  if (!isLoggedIn && location.pathname !== "/login") {
+  if (!user && location.pathname !== "/login") {
     return <Navigate to="/auth" state={{ from: location }} replace={true} />;
   }
   return <>{children}</>;
 };
 
 export const CompleteProfile: React.FC = ({ children }) => {
-  const { isLoggedIn, username } = useAppSelector((state) => state.loginStatus);
+  const {
+    user: { user_name: username },
+  } = useAppSelector((state) => state.user);
 
-  if (isLoggedIn && !username) {
+  if (!username) {
     return <Navigate to="/complete-info" replace={true} />;
   }
   return <>{children}</>;

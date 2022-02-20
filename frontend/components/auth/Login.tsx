@@ -1,7 +1,8 @@
-import { setLoggedIn } from "../../features/isLoggedInTestSlice";
+import { fetchCurrentUser } from "../../features/userProfileSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useNavigate, useLocation } from "react-router";
 import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
 
 interface StateType {
   from: { pathname: string };
@@ -13,17 +14,23 @@ const Login = () => {
   const location = useLocation();
   const state = location.state as StateType;
   let from = state?.from?.pathname || "/";
-  const { username } = useAppSelector((state) => state.loginStatus);
+  const { user, isLoading } = useAppSelector((state) => state.user);
 
-  const handleLogin = () => {
-    console.log("Logged");
-    dispatch(setLoggedIn({ isLoggedIn: true }));
-    if (!username) {
-      navigate("/complete-info");
-    } else {
-      navigate(from, { replace: true });
+  // const handleLogin = () => {
+  //   console.log("Logged");
+  //   dispatch(setLoggedIn({ isLoggedIn: true }));
+  //   if (!username) {
+  //     navigate("/complete-info");
+  //   } else {
+  //     navigate(from, { replace: true });
+  //   }
+  // };
+
+  useEffect(() => {
+    if (Cookies.get("jwt")) {
+      dispatch(fetchCurrentUser());
     }
-  };
+  }, [location]);
 
   return (
     <div className="page-100 absolute bg-gray-800 w-full h-full top-0 left-0 flex justify-center items-center">
@@ -32,8 +39,8 @@ const Login = () => {
           Login
         </h1>
         <div className="flex flex-col w-5/6 md:w-4/6 text-gray-800">
-          <button
-            onClick={handleLogin}
+          <a
+            href="http://localhost:3000/auth"
             className="flex items-center justify-center bg-white p-4 rounded-md m-2 shadow-md hover:bg-gray-300 transition duration-300"
           >
             <img
@@ -41,7 +48,7 @@ const Login = () => {
               className="w-8 h-8 mr-4 pr-1"
             />
             <p className="font-bold">Login with Intra</p>
-          </button>
+          </a>
         </div>
       </div>
     </div>
