@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards, 
 import { Prisma } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { UserDto } from "src/users/dto/user.dto";
+import { UpdateUserDto } from './dto/update-user.dto';
 
 import { UsersService } from './users.service';
 
@@ -18,7 +19,7 @@ export class UsersController {
   findAll() : Promise<UserDto[]> {
     return this.usersService.findAll();
   }
-  
+
   @Get('/me')
   @UseGuards(JwtAuthGuard)
   async login(@Req() _req: any) {
@@ -32,7 +33,7 @@ export class UsersController {
   }
 
   @Patch('/:id')
-  update(@Param('id', ParseIntPipe) id: string, @Body() data: UserDto): Promise<UserDto> {
+  update(@Param('id', ParseIntPipe) id: string, @Body() data: UpdateUserDto): Promise<UserDto> {
     return this.usersService.update({id: Number(id) }, data);
   }
 

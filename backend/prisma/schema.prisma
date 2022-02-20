@@ -11,12 +11,21 @@ datasource db {
 }
 
 model Users {
-  id Int  @default(autoincrement()) @id
-  user_name String? @unique
-  email String? @unique
+  id           Int      @id @default(autoincrement())
+  user_name    String?  @unique
+  email        String?  @unique
   display_name String?
-  is_active Boolean? @default(false)
-  state Boolean? @default(false)
-  avatar_url String?
-  // relation between users table and friends table
+  is_active    Boolean? @default(false)
+  state        Boolean? @default(false)
+  avatar_url   String?
+  // friendsId    Friends[]
+  // friends      Friends?  @relation("friend")
 }
+
+// model Friends {
+//   id        Int    @id
+//   friend_id Int?
+//   users_id  Int?
+//   friend    Users? @relation(name: "friend", fields: [friend_id], references: [id])
+//   user      Users? @relation(fields: [users_id], references: [id])
+// }
