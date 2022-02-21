@@ -13,8 +13,8 @@ export class AuthService {
         ) {}
     
     async validateUser(payload: JwtPayload): Promise<UserDto> {
-        const { user_name } = payload;
-        const user = await this.usersService.findOne({ user_name });
+        const { id } = payload;
+        const user = await this.usersService.findOne({ id: id });
         if (!user) {
             return null;
         }
@@ -31,10 +31,11 @@ export class AuthService {
             user = await this.usersService.create(_req.user);
             url = 'http://localhost:3001/#/complete-info'; // redirect to complete-info page
         }
-        const payload: JwtPayload = { user_name: (await user).user_name, email: (await user).email };
+        
+        const payload: JwtPayload = { id: (await user).id ,user_name: (await user).user_name, email: (await user).email};
         const accessToken  = this.jwtService.sign(payload);
         _res.cookie('user', JSON.stringify(user));
-        _res.cookie('jwt', accessToken)
+        _res.cookie('jwt', accessToken);
         return  url;
     }
 }
