@@ -4,9 +4,9 @@ import { useAppSelector } from "../../app/hooks";
 
 export const AuthRoute: React.FC = ({ children }) => {
   const location = useLocation();
-  const { user } = useAppSelector((state) => state.user);
+  const { isLoggedIn } = useAppSelector((state) => state.user);
 
-  if (!user && location.pathname !== "/login") {
+  if (!isLoggedIn && location.pathname !== "/auth") {
     return <Navigate to="/auth" state={{ from: location }} replace={true} />;
   }
   return <>{children}</>;

@@ -1,30 +1,12 @@
 import { fetchCurrentUser } from "../../features/userProfileSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { useNavigate, useLocation } from "react-router";
-import { useEffect, useState } from "react";
+import { useAppDispatch } from "../../app/hooks";
+import { useLocation } from "react-router";
+import { useEffect } from "react";
 import Cookies from "js-cookie";
-
-interface StateType {
-  from: { pathname: string };
-}
 
 const Login = () => {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
   const location = useLocation();
-  const state = location.state as StateType;
-  let from = state?.from?.pathname || "/";
-  const { user, isLoading } = useAppSelector((state) => state.user);
-
-  // const handleLogin = () => {
-  //   console.log("Logged");
-  //   dispatch(setLoggedIn({ isLoggedIn: true }));
-  //   if (!username) {
-  //     navigate("/complete-info");
-  //   } else {
-  //     navigate(from, { replace: true });
-  //   }
-  // };
 
   useEffect(() => {
     if (Cookies.get("jwt")) {

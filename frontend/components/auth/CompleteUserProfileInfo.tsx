@@ -25,33 +25,38 @@ export const UpdateProfileForm: React.FC = () => {
   const inputRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const {
-    user: { avatar_url, id },
-  } = useAppSelector((state) => state.user);
+  const { user } = useAppSelector((state) => state.user);
 
   const readURL = (e: any) => {
-    let reader = new FileReader();
-    reader.addEventListener("load", () => {
-      const uploaded_img = reader.result as string;
-      const img = document.getElementById(
-        "profile-picture"
-      ) as HTMLImageElement;
-      img.src = `${uploaded_img}`;
-      setAvatar(uploaded_img);
-    });
-    if (e.target.files[0]) {
-      reader.readAsDataURL(e.target.files[0]);
-    }
+    const img = document.getElementById("profile-picture") as HTMLImageElement;
+    img.src = URL.createObjectURL(e.target.files[0]);
+    setAvatar(e.target.files[0]);
+    console.log("new img->", URL.createObjectURL(e.target.files[0]));
   };
 
   const handleLoginForm = (e: React.FormEvent<EventTarget>) => {
     e.preventDefault();
     if (!isValid) return;
+    const formData = new FormData();
+
+    formData.append("avatar_url", avatar);
+    formData.append("user_name", username);
+
+    console.log(
+      "id: ",
+      user.id,
+      "data: ",
+      formData.get("user_name"),
+      formData.get("avatar_url")
+    );
     dispatch(
-      completeProfileInfo({ id, avatar_url: avatar, user_name: username })
+      completeProfileInfo({
+        id: user.id,
+        data: formData,
+      })
     );
     dispatch(editUserProfile(false));
-    navigate("/profile/60d0fe4f5311236168a109ca");
+    navigate(`/profile/${user.id}`);
   };
 
   useEffect(() => {
@@ -68,7 +73,7 @@ export const UpdateProfileForm: React.FC = () => {
         >
           <img
             className="absolute flex items-center justify-center w-44 h-44 rounded-full border border-gray-800 bg-center bg-cover"
-            src={avatar_url}
+            src={user.avatar_url}
             id="profile-picture"
           />
           <p className="absolute text-gray-200 w-full h-full flex items-center justify-center rounded-full font-bold text-2xl tracking-wider">

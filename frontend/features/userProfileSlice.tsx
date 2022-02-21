@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
 import UserProfile from "../components/profile/Profile";
+import axios from "axios";
 
 interface Err {
   isError: boolean;
@@ -12,7 +13,7 @@ interface User {
   display_name?: string;
   user_name?: string;
   email?: string;
-  avatar_url?: string;
+  avatar_url: string;
   is_active: boolean;
   state: boolean;
   friends?: string[];
@@ -21,18 +22,20 @@ interface UserState {
   isLoading: boolean;
   isError: Err;
   user: User;
+  isLoggedIn: boolean;
   editProfile: boolean;
 }
 
 const initialState: UserState = {
   isLoading: true,
   isError: { isError: false, message: "" },
+  isLoggedIn: false,
   user: {
-    id: 0,
-    display_name: "El Hassane Lahyani",
-    user_name: "elahyani",
+    id: NaN,
+    display_name: "",
+    user_name: "",
     email: "",
-    avatar_url: "https://cdn.intra.42.fr/users/elahyani.jpg",
+    avatar_url: "",
     is_active: false,
     state: false,
     friends: [],
@@ -44,14 +47,13 @@ export const fetchCurrentUser = createAsyncThunk(
   "users/fetchUserStatus",
   async (_, _api) => {
     try {
-      const response = await fetch("http://localhost:3000/users/me", {
+      const response = await axios("http://localhost:3000/users/me", {
         headers: {
           authorization: `Bearer ${Cookies.get("jwt")}`,
         },
       });
-      const currentUser = await response.json();
-      console.log(currentUser);
-      return _api.fulfillWithValue(currentUser);
+      console.log("login --> ", response.data);
+      return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error.message);
     }
@@ -60,27 +62,23 @@ export const fetchCurrentUser = createAsyncThunk(
 
 export const completeProfileInfo = createAsyncThunk(
   "user/completeProfileInfo",
-  async (
-    {
-      id,
-      user_name,
-      avatar_url,
-    }: { id: number; user_name: string; avatar_url: string },
-    _api
-  ) => {
-    console.log("-->", id, user_name, avatar_url);
+  async ({ id, data }: { id: number; data: FormData }, _api) => {
+    console.log("-->", data);
 
     try {
-      const response = await fetch(`http://localhost:3000/users/${id}`, {
-        method: "PATCH",
-        headers: {
-          authorization: `Bearer ${Cookies.get("jwt")}`,
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({ user_name, avatar_url }),
-      });
-      const user = await response.json();
-      return _api.fulfillWithValue(user);
+      const response = await axios.patch(
+        `http://localhost:3000/users/${id}`,
+        data,
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("jwt")}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log("slice data ->", response.data);
+
+      return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       _api.rejectWithValue(error.message);
     }
@@ -91,25 +89,22 @@ export const userProfileSlice = createSlice({
   name: "userProfile",
   initialState,
   reducers: {
+    logOutUser: (state = initialState) => {
+      Cookies.remove("jwt");
+      Cookies.remove("user");
+      state.isLoggedIn = false;
+    },
     editUserProfile: (state = initialState, action: PayloadAction<boolean>) => {
       state.editProfile = action.payload;
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(fetchCurrentUser.pending, (state) => {
-      state.isLoading = true;
-    });
     builder.addCase(fetchCurrentUser.fulfilled, (state, action: any) => {
       state.user = action.payload;
-      state.isLoading = false;
+      state.isLoggedIn = true;
     });
     builder.addCase(fetchCurrentUser.rejected, (state, action: any) => {
       state.isError = { isError: true, message: action.payload };
-      state.isLoading = false;
-    });
-
-    builder.addCase(completeProfileInfo.pending, (state) => {
-      state.isLoading = true;
     });
     builder.addCase(completeProfileInfo.fulfilled, (state, action: any) => {
       state.user = action.payload;
@@ -120,6 +115,6 @@ export const userProfileSlice = createSlice({
   },
 });
 
-export const { editUserProfile } = userProfileSlice.actions;
+export const { editUserProfile, logOutUser } = userProfileSlice.actions;
 
 export default userProfileSlice.reducer;

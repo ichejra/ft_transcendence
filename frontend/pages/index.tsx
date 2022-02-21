@@ -1,5 +1,5 @@
 import type { NextPage } from "next";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import HomePage from "../components/home";
 import About from "../components/about";
 import Channels from "../components/channels";
@@ -12,8 +12,21 @@ import FullFriendsList from "../components/profile/FullFriendsList";
 import NotFound from "../components/NotFound";
 import { AuthRoute, CompleteProfile } from "../components/privateRoutes";
 import CompleteUserProfileInfo from "../components/auth/CompleteUserProfileInfo";
-
+import { useAppSelector, useAppDispatch } from "../app/hooks";
+import { useEffect } from "react";
+import { fetchCurrentUser } from "../features/userProfileSlice";
+import Cookies from "js-cookie";
 const Home: NextPage = () => {
+  const { isLoggedIn } = useAppSelector((state) => state.user);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(fetchCurrentUser());
+  }, []);
+
+  if (Cookies.get("user") && !isLoggedIn) {
+    return <div className="loading"></div>;
+  }
   return (
     <>
       <Header />
