@@ -4,6 +4,7 @@ import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@n
 import { AuthService } from './auth.service';
 
 export type JwtPayload = {
+  id: number,
   user_name: string,
   email: string,
 }
@@ -19,6 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload) {
+    
     const user = this.authService.validateUser(payload);
     if (!user) {
       throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
