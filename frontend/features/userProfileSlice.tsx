@@ -61,40 +61,11 @@ export const fetchCurrentUser = createAsyncThunk(
 );
 
 export const updateUsername = createAsyncThunk(
-  "user/completeProfileInfo",
-  async ({ data }: { id: number; data: FormData }, _api) => {
-    console.log("-->", data);
-
+  "user/updateUsername",
+  async ({ username }: { username: string }, _api) => {
+    console.log("-->", username);
     try {
       const response = await axios.patch(
-        `http://localhost:3000/update-avatar`,
-        data,
-        {
-          headers: {
-            authorization: `Bearer ${Cookies.get("jwt")}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      console.log("slice data ->", response.data);
-
-      return _api.fulfillWithValue(response.data);
-    } catch (error: any) {
-      _api.rejectWithValue(error.message);
-    }
-  }
-);
-
-export const completeProfileInfo = createAsyncThunk(
-  "user/completeProfileInfo",
-  async (
-    { username, avatar }: { username: string; avatar: FormData },
-    _api
-  ) => {
-    console.log("-->", username);
-
-    try {
-      const usernameResponse = await axios.patch(
         `http://localhost:3000/users/update-username`,
         { user_name: username },
         {
@@ -104,21 +75,32 @@ export const completeProfileInfo = createAsyncThunk(
           },
         }
       );
-      console.log("slice username data ->", usernameResponse.data);
-      // const avatar = await axios.patch(
-      //   `http://localhost:3000/users/update-avatar`,
-      //   data,
-      //   {
-      //     headers: {
-      //       authorization: `Bearer ${Cookies.get("jwt")}`,
-      //       "Content-Type": "multipart/form-data",
-      //     },
-      //   }
-      // );
-      // console.log("slice avatar data ->", avatar.data);
+      console.log("slice username data ->", response.data);
+      return _api.fulfillWithValue(response.data);
+    } catch (error: any) {
+      _api.rejectWithValue(error.message);
+    }
+  }
+);
 
-      return _api.fulfillWithValue(usernameResponse.data);
-      // return _api.fulfillWithValue(avatar.data);
+export const updateAvatar = createAsyncThunk(
+  "user/updateAvatar",
+  async ({ avatar }: { avatar: FormData }, _api) => {
+    console.log("-->", avatar);
+
+    try {
+      const response = await axios.patch(
+        `http://localhost:3000/users/update-avatar`,
+        avatar,
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("jwt")}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log("slice avatar data ->", response.data);
+      return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       _api.rejectWithValue(error.message);
     }
@@ -130,6 +112,7 @@ export const userProfileSlice = createSlice({
   initialState,
   reducers: {
     logOutUser: (state = initialState) => {
+      Cookies.remove("jwt");
       Cookies.remove("user");
       state.isLoggedIn = false;
     },
@@ -145,10 +128,16 @@ export const userProfileSlice = createSlice({
     builder.addCase(fetchCurrentUser.rejected, (state, action: any) => {
       state.isError = { isError: true, message: action.payload };
     });
-    builder.addCase(completeProfileInfo.fulfilled, (state, action: any) => {
+    builder.addCase(updateUsername.fulfilled, (state, action: any) => {
       state.user = action.payload;
     });
-    builder.addCase(completeProfileInfo.rejected, (state, action: any) => {
+    builder.addCase(updateUsername.rejected, (state, action: any) => {
+      state.isError = { isError: true, message: action.payload };
+    });
+    builder.addCase(updateAvatar.fulfilled, (state, action: any) => {
+      state.user = action.payload;
+    });
+    builder.addCase(updateAvatar.rejected, (state, action: any) => {
       state.isError = { isError: true, message: action.payload };
     });
   },

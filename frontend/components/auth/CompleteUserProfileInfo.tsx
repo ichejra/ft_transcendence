@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  completeProfileInfo,
+  updateUsername,
+  updateAvatar,
   editUserProfile,
 } from "../../features/userProfileSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
@@ -39,22 +40,24 @@ export const UpdateProfileForm: React.FC = () => {
     if (!isValid) return;
     const formData = new FormData();
 
-    formData.append("avatar_url", avatar);
-    // formData.append("user_name", username);
-
-    console.log(
-      "id: ",
-      user.id,
-      "data: ",
-      // formData.get("user_name"),
-      formData.get("avatar_url")
-    );
+    formData.append("file", avatar);
     dispatch(
-      completeProfileInfo({
+      updateUsername({
         username,
-        avatar: formData,
       })
-    );
+    )
+      .then(() => {
+        if (avatar) {
+          dispatch(
+            updateAvatar({
+              avatar: formData,
+            })
+          );
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
     dispatch(editUserProfile(false));
     navigate(`/profile/${user.id}`);
   };
