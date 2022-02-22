@@ -25,7 +25,7 @@ export class AuthService {
         let user : UserDto = null;
         let url: string;
         try {
-            user = await this.usersService.findOne( _req.user.user_name );
+            user = await this.usersService.findOne( _req.user.id );
             url = 'http://localhost:3001/'; // redirect to Home page
         } catch(err) {
             user = await this.usersService.create(_req.user);

@@ -47,7 +47,7 @@ export class UsersController {
   @Patch('update-username')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  updateUsername(@Req() _req: any) {
+  updateUsername(@Req() _req: any):  Promise<UserDto> {
     return this.usersService.update(_req.user.id, { user_name: _req.body.user_name })
   }
   
@@ -61,7 +61,7 @@ export class UsersController {
     }),
   }),
   )
-  updateAvatar(@Req() _req: any, @UploadedFile() file: Express.Multer.File): Promise<UpdateResult> {
+  updateAvatar(@Req() _req: any, @UploadedFile() file: Express.Multer.File): Promise<UserDto> {
     return this.usersService.update(_req.user.id , { avatar_url:  `http://localhost:3000/${file.filename}`});
   }
 
