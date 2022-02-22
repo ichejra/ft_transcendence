@@ -18,14 +18,13 @@ model Users {
   is_active    Boolean? @default(false)
   state        Boolean? @default(false)
   avatar_url   String?
-  // friendsId    Friends[]
-  // friends      Friends?  @relation("friend")
+  // friends Friends[] @relation("friends")
 }
 
 // model Friends {
-//   id        Int    @id
+//   id Int @id @default(autoincrement())
+//   friend    Users? @relation("friends", fields: [friend_id], references: [id])
 //   friend_id Int?
-//   users_id  Int?
-//   friend    Users? @relation(name: "friend", fields: [friend_id], references: [id])
-//   user      Users? @relation(fields: [users_id], references: [id])
 // }
+
+

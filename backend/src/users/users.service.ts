@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 
 import { UserDto } from './dto/user.dto';
 import { PrismaService } from 'src/prisma.service';
+import { UpdateUserDto } from './dto/update-user.dto';
 class NotFoundException extends HttpException {
   constructor() {
     super('resource is not found.', HttpStatus.NOT_FOUND);
@@ -45,7 +46,7 @@ export class UsersService {
     }
   }
 
-  async update(where: Prisma.UsersWhereUniqueInput, data: Prisma.UsersUpdateInput) : Promise<UserDto> {
+  async update(where: Prisma.UsersWhereUniqueInput, data: UpdateUserDto) : Promise<UserDto> {
     try{
       return await this.prisma.users.update({
         where,
