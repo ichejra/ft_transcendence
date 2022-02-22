@@ -16,10 +16,10 @@ interface ProfileInfo {
 }
 
 const initialState: State = {
-  isLoggedIn: true,
+  isLoggedIn: false,
 
   profileAvatar: "/images/profile.jpeg",
-  username: "elahyani",
+  username: "",
   editProfile: false,
 };
 
@@ -30,20 +30,20 @@ export const loggedInSlice = createSlice({
     setLoggedIn: (state = initialState, action: PayloadAction<LoginAction>) => {
       state.isLoggedIn = action.payload.isLoggedIn;
     },
-    completeProfileInfo: (
-      state = initialState,
-      action: PayloadAction<ProfileInfo>
-    ) => {
-      state.profileAvatar = action.payload.profileAvatar;
-      state.username = action.payload.username;
-    },
-    editUserProfile: (state = initialState, action: PayloadAction<boolean>) => {
-      state.editProfile = action.payload;
-    },
+    // completeProfileInfo: (
+    //   state = initialState,
+    //   action: PayloadAction<ProfileInfo>
+    // ) => {
+    //   state.profileAvatar = action.payload.profileAvatar;
+    //   state.username = action.payload.username;
+    // },
+    // editUserProfile: (state = initialState, action: PayloadAction<boolean>) => {
+    //   state.editProfile = action.payload;
+    // },
   },
 });
 
-export const { setLoggedIn, completeProfileInfo, editUserProfile } =
+export const { setLoggedIn, /* completeProfileInfo, editUserProfile */ } =
   loggedInSlice.actions;
 
 export default loggedInSlice.reducer;

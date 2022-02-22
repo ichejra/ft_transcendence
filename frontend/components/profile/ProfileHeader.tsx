@@ -3,28 +3,33 @@ import { FaUserEdit, FaUserFriends } from "react-icons/fa";
 import { IoMdTime } from "react-icons/io";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import EditProfileModal from "../modals/EditProfileModal";
-import { editUserProfile } from "../../features/isLoggedInTestSlice";
+import { editUserProfile } from "../../features/userProfileSlice";
 
 const ProfileHeader: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { profileAvatar, username, editProfile } = useAppSelector(
-    (state) => state.loginStatus
-  );
+  const {
+    user: { avatar_url, user_name, display_name, friends },
+    editProfile,
+  } = useAppSelector((state) => state.user);
 
   return (
     <div className="flex flex-col md:flex-row items-center md:my-16 my-10">
       <div className="md:mx-8 mb-2 md:mb-0">
         <img
-          src={profileAvatar}
+          src={avatar_url}
           className="bg-gray-300 w-36 h-36 md:h-56 md:w-56 rounded-full"
         />
       </div>
       <div className="flex flex-col items-center md:items-start md:justify-center px-4 md:mr-48 mb-2 md:mb-0">
-        <h1 className="text-xl md:text-3xl font-bold">John Doe</h1>
-        <p className="text-gray-400 lowercase text-lg font-mono">@{username}</p>
+        <h1 className="text-xl font-mono md:text-2xl font-bold">
+          {display_name}
+        </h1>
+        <p className="text-gray-400 lowercase text-lg font-mono">
+          @{user_name}
+        </p>
         <span className="hidden md:flex text-gray-500 pt-4 mb-2 items-center">
           <FaUserFriends className="w-6 h-8 mr-2" />
-          <p className="text-lg font-medium">555 friends</p>
+          <p className="text-lg font-medium">{friends?.length} friends</p>
         </span>
         <span className="hidden md:flex text-gray-500 items-center">
           <IoMdTime className="w-6 h-8 mr-2" />

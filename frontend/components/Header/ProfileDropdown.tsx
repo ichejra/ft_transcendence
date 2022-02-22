@@ -1,23 +1,29 @@
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { CgProfile } from "react-icons/cg";
 import { HiOutlineLogout } from "react-icons/hi";
 import { FiSettings } from "react-icons/fi";
 import { IoMdNotificationsOutline, IoMdNotifications } from "react-icons/io";
 import Notifications from "./Notifications";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { setLoggedIn } from "../../features/isLoggedInTestSlice";
+import { logOutUser } from "../../features/userProfileSlice";
+import Cookies from "js-cookie";
+import {
+  editUserProfile,
+  fetchCurrentUser,
+} from "../../features/userProfileSlice";
 
 const ProfileDropdown = () => {
   const [dropDown, setDropdown] = useState(false);
+  const [logout, setLogout] = useState(false);
   const [isNotification, setIsNotification] = useState(false);
   const [showNotificationsList, setShowNotificationsList] = useState(false);
   const dropDownRef = useRef<any>(null);
   const notifRef = useRef<any>(null);
   const dispatch = useAppDispatch();
-  const { isLoggedIn, username, profileAvatar } = useAppSelector(
-    (state) => state.loginStatus
-  );
+  const navigate = useNavigate();
+  const { user, isLoggedIn } = useAppSelector((state) => state.user);
 
   useEffect(() => {
     //* a mousedown event that listen on the dropdown element to hide it when the click is outside it
@@ -41,6 +47,20 @@ const ProfileDropdown = () => {
       document.removeEventListener("mousedown", updateDropDownStatus);
     };
   }, [dropDown, showNotificationsList]);
+
+  useEffect(() => {
+    if (Cookies.get("jwt")) {
+      dispatch(fetchCurrentUser());
+    }
+  }, []);
+
+  useEffect(() => {
+    if (logout) {
+      dispatch(logOutUser());
+    }
+  }, [logout]);
+
+  console.log("dropdownmenu--> ", user);
   return (
     <div className="flex">
       {!isLoggedIn ? (
@@ -52,7 +72,7 @@ const ProfileDropdown = () => {
       ) : (
         <div className="dropdown flex items-center transition duration-300 cursor-pointer text-2xl font-medium mx-2 px-2">
           {/******************************************************************************/}
-          {isLoggedIn && username && (
+          {isLoggedIn && (
             <div ref={notifRef}>
               <button
                 type="button"
@@ -84,17 +104,17 @@ const ProfileDropdown = () => {
           )}
           {/******************************************************************************/}
           <div ref={dropDownRef}>
-            {isLoggedIn && username && (
+            {isLoggedIn && (
               <button
                 type="button"
                 onClick={() => setDropdown(!dropDown)}
                 className="flex items-center px-2 "
               >
                 <p className="mr-4 text-xl hover:text-yellow-400 transition duration-300">
-                  {username}
+                  {user.user_name}
                 </p>
                 <img
-                  src={profileAvatar}
+                  src={user.avatar_url}
                   className="bg-gray-300 h-12 w-12 rounded-full"
                 />
               </button>
@@ -109,7 +129,7 @@ const ProfileDropdown = () => {
                 className="bg-black rounded-xl bg-opacity-75 py-2"
               >
                 <li className="py-2 pl-2 rounded-t-xl hover:bg-gray-800 hover:text-yellow-400 transition duration-300">
-                  <Link to={`/profile/60d0fe4f5311236168a109ca`}>
+                  <Link to={`/profile/${user.id}`}>
                     <span className="flex items-center pr-16">
                       <CgProfile size="1.5rem" />
                       <p className="ml-3">Profile</p>
@@ -117,23 +137,23 @@ const ProfileDropdown = () => {
                   </Link>
                 </li>
                 <li className="py-2 pl-2 hover:bg-gray-800 hover:text-yellow-400 transition duration-300">
-                  <Link to="/profile/edit">
+                  <button
+                    onClick={() => {
+                      navigate(`/profile/${user.id}`);
+                      dispatch(editUserProfile(true));
+                    }}
+                  >
                     <span className="flex items-center">
                       <FiSettings size="1.5rem" />
                       <p className="ml-3">Settings</p>
                     </span>
-                  </Link>
+                  </button>
                 </li>
                 <li>
                   <hr />
                 </li>
                 <li className="pt-2 pl-2 rounded-b-xl hover:bg-gray-800 hover:text-yellow-400 transition duration-300">
-                  <Link
-                    to="/"
-                    onClick={() => {
-                      dispatch(setLoggedIn({ isLoggedIn: false }));
-                    }}
-                  >
+                  <Link to="/" onClick={() => setLogout(true)}>
                     <span className="flex items-center">
                       <HiOutlineLogout size="1.5rem" />
                       <p className="ml-3">Log Out</p>

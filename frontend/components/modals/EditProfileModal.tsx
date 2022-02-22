@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { FaTimes } from "react-icons/fa";
 import { UpdateProfileForm } from "../auth/CompleteUserProfileInfo";
 import { useAppDispatch } from "../../app/hooks";
-import { editUserProfile } from "../../features/isLoggedInTestSlice";
+import { editUserProfile } from "../../features/userProfileSlice";
 
 const UsersModal: React.FC = () => {
   const divRef = useRef(null);

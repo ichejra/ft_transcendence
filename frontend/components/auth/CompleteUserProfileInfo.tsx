@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   completeProfileInfo,
   editUserProfile,
-} from "../../features/isLoggedInTestSlice";
+} from "../../features/userProfileSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useNavigate } from "react-router";
 
@@ -25,34 +25,29 @@ export const UpdateProfileForm: React.FC = () => {
   const inputRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { profileAvatar } = useAppSelector((state) => state.loginStatus);
+  const { user } = useAppSelector((state) => state.user);
 
   const readURL = (e: any) => {
-    let reader = new FileReader();
-    reader.addEventListener("load", () => {
-      const uploaded_img = reader.result as string;
-      const img = document.getElementById(
-        "profile-picture"
-      ) as HTMLImageElement;
-      img.src = `${uploaded_img}`;
-      setAvatar(uploaded_img);
-    });
-    if (e.target.files[0]) {
-      reader.readAsDataURL(e.target.files[0]);
-    }
+    const img = document.getElementById("profile-picture") as HTMLImageElement;
+    img.src = URL.createObjectURL(e.target.files[0]);
+    setAvatar(e.target.files[0]);
+    console.log("new img->", URL.createObjectURL(e.target.files[0]));
   };
 
   const handleLoginForm = (e: React.FormEvent<EventTarget>) => {
     e.preventDefault();
     if (!isValid) return;
+    const formData = new FormData();
+
+    formData.append("file", avatar);
+    formData.append("user_name", username);
     dispatch(
       completeProfileInfo({
-        profileAvatar: avatar ? avatar : profileAvatar,
-        username,
+        data: formData,
       })
     );
     dispatch(editUserProfile(false));
-    navigate("/profile/60d0fe4f5311236168a109ca");
+    navigate(`/profile/${user.id}`);
   };
 
   useEffect(() => {
@@ -69,7 +64,7 @@ export const UpdateProfileForm: React.FC = () => {
         >
           <img
             className="absolute flex items-center justify-center w-44 h-44 rounded-full border border-gray-800 bg-center bg-cover"
-            src={profileAvatar}
+            src={user.avatar_url}
             id="profile-picture"
           />
           <p className="absolute text-gray-200 w-full h-full flex items-center justify-center rounded-full font-bold text-2xl tracking-wider">
