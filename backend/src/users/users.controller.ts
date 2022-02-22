@@ -1,13 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards, Req, ParseIntPipe, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards, Req, ParseIntPipe, UseInterceptors, UploadedFile, HttpCode } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Prisma } from '@prisma/client';
-import multer, { diskStorage } from 'multer';
+import  { diskStorage } from 'multer';
 import { extname } from 'path';
+import { UpdateResult, DeleteResult } from 'typeorm';
+
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { UserDto } from "src/users/dto/user.dto";
-import { UpdateUserDto } from './dto/update-user.dto';
-
 import { UsersService } from './users.service';
+import * as dotenv from 'dotenv';
+
+dotenv.config()
 
 const editFilename = (_req, file, cb) =>  {
     cb(null, _req.user.id + extname(file.originalname));
@@ -17,35 +19,40 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
+  @HttpCode(200)
   create(@Body() data: UserDto) : Promise<UserDto> {
     return this.usersService.create(data);
   }
 
   @Get()
+  @HttpCode(200)
   findAll() : Promise<UserDto[]> {
     return this.usersService.findAll();
   }
 
   @Get('/me')
+  @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   async login(@Req() _req: any) {
-    console.log(_req);
-    return await this.usersService.findOne({ user_name: _req.user.user_name });
+    return await this.usersService.findOne( _req.user.id );
   }
 
   @Get('/:id')
+  @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   findOne(@Param('id', ParseIntPipe) id: string): Promise<UserDto> {
-    return this.usersService.findOne({ id: Number(id) });
+    return this.usersService.findOne(Number(id));
   }
 
   @Patch('update-username')
+  @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   updateUsername(@Req() _req: any) {
-    return this.usersService.update({ id: _req.user.id }, { user_name: _req.user.user_name })
+    return this.usersService.update(_req.user.id, { user_name: _req.body.user_name })
   }
   
   @Patch('update-avatar')
+  @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file', {
     storage: diskStorage({
@@ -54,16 +61,15 @@ export class UsersController {
     }),
   }),
   )
-  updateAvatar(@Req() _req: any, @UploadedFile() file: Express.Multer.File): Promise<UserDto> {
-    console.log(file);
-    const url = `http://localhost:3000/${file.filename}` ;
-    return this.usersService.update({ id: _req.user.id }, { avatar_url: url });
+  updateAvatar(@Req() _req: any, @UploadedFile() file: Express.Multer.File): Promise<UpdateResult> {
+    return this.usersService.update(_req.user.id , { avatar_url:  `http://localhost:3000/${file.filename}`});
   }
 
   @Delete('/:id')
+  @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  remove(@Param('id', ParseIntPipe) id: string) : Promise<UserDto> {
-    return this.usersService.remove({ id : Number(id) });
+  remove(@Param('id', ParseIntPipe) id: string) : Promise<DeleteResult> {
+    return this.usersService.remove( Number(id) );
   }
 
 }

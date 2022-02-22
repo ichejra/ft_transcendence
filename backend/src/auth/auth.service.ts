@@ -14,7 +14,7 @@ export class AuthService {
     
     async validateUser(payload: JwtPayload): Promise<UserDto> {
         const { id } = payload;
-        const user = await this.usersService.findOne({ id: id });
+        const user = await this.usersService.findOne( Number(id) );
         if (!user) {
             return null;
         }
@@ -25,7 +25,7 @@ export class AuthService {
         let user : UserDto = null;
         let url: string;
         try {
-            user = await this.usersService.findOne({ user_name: _req.user.user_name });
+            user = await this.usersService.findOne( _req.user.user_name );
             url = 'http://localhost:3001/'; // redirect to Home page
         } catch(err) {
             user = await this.usersService.create(_req.user);
@@ -33,9 +33,9 @@ export class AuthService {
         }
         
         const payload: JwtPayload = { id: (await user).id ,user_name: (await user).user_name, email: (await user).email};
-        const accessToken  = this.jwtService.sign(payload);
+        const jwtToken  = this.jwtService.sign(payload);
         _res.cookie('user', JSON.stringify(user));
-        _res.cookie('jwt', accessToken);
-        return  url;
+        _res.cookie('jwt', jwtToken);
+        return  _res.redirect(url);
     }
 }
