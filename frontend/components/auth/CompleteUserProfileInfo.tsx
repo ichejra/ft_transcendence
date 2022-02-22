@@ -40,19 +40,19 @@ export const UpdateProfileForm: React.FC = () => {
     const formData = new FormData();
 
     formData.append("avatar_url", avatar);
-    formData.append("user_name", username);
+    // formData.append("user_name", username);
 
     console.log(
       "id: ",
       user.id,
       "data: ",
-      formData.get("user_name"),
+      // formData.get("user_name"),
       formData.get("avatar_url")
     );
     dispatch(
       completeProfileInfo({
-        id: user.id,
-        data: formData,
+        username,
+        avatar: formData,
       })
     );
     dispatch(editUserProfile(false));

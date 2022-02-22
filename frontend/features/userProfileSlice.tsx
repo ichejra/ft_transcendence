@@ -47,7 +47,7 @@ export const fetchCurrentUser = createAsyncThunk(
   "users/fetchUserStatus",
   async (_, _api) => {
     try {
-      const response = await axios("http://localhost:3000/users/me", {
+      const response = await axios.get("http://localhost:3000/users/me", {
         headers: {
           authorization: `Bearer ${Cookies.get("jwt")}`,
         },
@@ -60,14 +60,14 @@ export const fetchCurrentUser = createAsyncThunk(
   }
 );
 
-export const completeProfileInfo = createAsyncThunk(
+export const updateUsername = createAsyncThunk(
   "user/completeProfileInfo",
-  async ({ id, data }: { id: number; data: FormData }, _api) => {
+  async ({ data }: { id: number; data: FormData }, _api) => {
     console.log("-->", data);
 
     try {
       const response = await axios.patch(
-        `http://localhost:3000/users/${id}`,
+        `http://localhost:3000/update-avatar`,
         data,
         {
           headers: {
@@ -85,12 +85,51 @@ export const completeProfileInfo = createAsyncThunk(
   }
 );
 
+export const completeProfileInfo = createAsyncThunk(
+  "user/completeProfileInfo",
+  async (
+    { username, avatar }: { username: string; avatar: FormData },
+    _api
+  ) => {
+    console.log("-->", username);
+
+    try {
+      const usernameResponse = await axios.patch(
+        `http://localhost:3000/users/update-username`,
+        { user_name: username },
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("jwt")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("slice username data ->", usernameResponse.data);
+      // const avatar = await axios.patch(
+      //   `http://localhost:3000/users/update-avatar`,
+      //   data,
+      //   {
+      //     headers: {
+      //       authorization: `Bearer ${Cookies.get("jwt")}`,
+      //       "Content-Type": "multipart/form-data",
+      //     },
+      //   }
+      // );
+      // console.log("slice avatar data ->", avatar.data);
+
+      return _api.fulfillWithValue(usernameResponse.data);
+      // return _api.fulfillWithValue(avatar.data);
+    } catch (error: any) {
+      _api.rejectWithValue(error.message);
+    }
+  }
+);
+
 export const userProfileSlice = createSlice({
   name: "userProfile",
   initialState,
   reducers: {
     logOutUser: (state = initialState) => {
-      Cookies.remove("jwt");
       Cookies.remove("user");
       state.isLoggedIn = false;
     },

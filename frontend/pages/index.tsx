@@ -21,7 +21,9 @@ const Home: NextPage = () => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    dispatch(fetchCurrentUser());
+    if (Cookies.get("jwt")) {
+      dispatch(fetchCurrentUser());
+    }
   }, []);
 
   if (Cookies.get("user") && !isLoggedIn) {
