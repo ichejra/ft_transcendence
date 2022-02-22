@@ -8,13 +8,10 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { UserDto } from "src/users/dto/user.dto";
 import { UsersService } from './users.service';
 import * as dotenv from 'dotenv';
+import { editFileName, fileFilter } from './utils/file-upload.utils';
 
 dotenv.config()
-
-const editFilename = (_req, file, cb) =>  {
-    cb(null, _req.user.id + extname(file.originalname));
-}
-@Controller('/users')
+@Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -30,42 +27,36 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @Get('/me')
+  @Get('me')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   async login(@Req() _req: any) {
     return await this.usersService.findOne( _req.user.id );
   }
 
-  @Get('/:id')
+  @Get(':id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   findOne(@Param('id', ParseIntPipe) id: string): Promise<UserDto> {
     return this.usersService.findOne(Number(id));
   }
 
-  @Patch('update-username')
-  @HttpCode(200)
-  @UseGuards(JwtAuthGuard)
-  updateUsername(@Req() _req: any):  Promise<UserDto> {
-    return this.usersService.update(_req.user.id, { user_name: _req.body.user_name })
-  }
-  
-  @Patch('update-avatar')
+  @Patch('update-profile')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file', {
     storage: diskStorage({
       destination: process.env.DESTINATION,
-      filename: editFilename,
+      filename: editFileName,
     }),
+    fileFilter: fileFilter,
   }),
   )
-  updateAvatar(@Req() _req: any, @UploadedFile() file: Express.Multer.File): Promise<UserDto> {
-    return this.usersService.update(_req.user.id , { avatar_url:  `http://localhost:3000/${file.filename}`});
+  update(@Req() _req: any, @UploadedFile() file: Express.Multer.File): Promise<UserDto> {
+    return this.usersService.updateProfile( Number(_req.user.id), _req.body.user_name ,file);
   }
 
-  @Delete('/:id')
+  @Delete(':id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   remove(@Param('id', ParseIntPipe) id: string) : Promise<DeleteResult> {
