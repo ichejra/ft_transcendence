@@ -1,9 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { InjectRepository } from '@nestjs/typeorm'
+import { Repository, UpdateResult, DeleteResult } from 'typeorm'
 
 import { UserDto } from './dto/user.dto';
-import { PrismaService } from 'src/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './entities/user.entity';
 class NotFoundException extends HttpException {
   constructor() {
     super('resource is not found.', HttpStatus.NOT_FOUND);
@@ -12,13 +13,14 @@ class NotFoundException extends HttpException {
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @InjectRepository(User)
+    private usersRepository: Repository<User> 
+    ) {}
 
-  async create(data: Prisma.UsersCreateInput) : Promise<UserDto>{
+  async create(user: UserDto) : Promise<UserDto>{
     try {
-      return await this.prisma.users.create({
-        data
-      });
+      return await this.usersRepository.save(user);
     } catch (e) {
       throw new HttpException({
         status: HttpStatus.FORBIDDEN,
@@ -28,14 +30,12 @@ export class UsersService {
   }
 
   findAll() : Promise<UserDto[]>{
-    return this.prisma.users.findMany();
+    return this.usersRepository.find();
   }
 
-  async findOne(where: Prisma.UsersWhereUniqueInput): Promise<UserDto> {
+  async findOne(id: number | string): Promise<UserDto> {
     try{
-      const user = await this.prisma.users.findUnique({
-        where
-      });
+      const user = await this.usersRepository.findOne(id);
       if (!user) {
         throw new NotFoundException();
       }
@@ -46,22 +46,17 @@ export class UsersService {
     }
   }
 
-  async update(where: Prisma.UsersWhereUniqueInput, data: UpdateUserDto) : Promise<UserDto> {
+  async update(id: number | string, data: UpdateUserDto) : Promise<UpdateResult> {
     try{
-      return await this.prisma.users.update({
-        where,
-        data
-      });
+      return await this.usersRepository.update(id, data);
     } catch(e) {
       throw new NotFoundException();
     }
   }
 
-  async remove(where: Prisma.UsersWhereUniqueInput): Promise<UserDto>{
+  async remove(id: number | string): Promise<DeleteResult> {
     try{
-      return await this.prisma.users.delete({
-        where
-      });
+      return await this.usersRepository.delete(id);
     }
     catch(e) {
       throw new NotFoundException();

@@ -4,10 +4,13 @@ export class UserDto {
     @IsNumberString()
     id?: number;
 
+    @IsString()
     @IsNotEmpty()
     user_name?: string;
 
+    @IsString()
     @IsEmail()
+    @IsNotEmpty()
     email?: string;
 
     @IsString()
@@ -20,5 +23,6 @@ export class UserDto {
     state?: boolean;
 
     @IsUrl()
+    @IsNotEmpty()
     avatar_url?: string;
 }
