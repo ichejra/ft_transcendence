@@ -52,7 +52,6 @@ export const fetchCurrentUser = createAsyncThunk(
           authorization: `Bearer ${Cookies.get("jwt")}`,
         },
       });
-      console.log("login --> ", response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error.message);
@@ -60,38 +59,13 @@ export const fetchCurrentUser = createAsyncThunk(
   }
 );
 
-export const updateUsername = createAsyncThunk(
-  "user/updateUsername",
-  async ({ username }: { username: string }, _api) => {
-    console.log("-->", username);
+export const completeProfileInfo = createAsyncThunk(
+  "user/completeProfileInfo",
+  async ({ data }: { data: FormData }, _api) => {
     try {
       const response = await axios.patch(
-        `http://localhost:3000/users/update-username`,
-        { user_name: username },
-        {
-          headers: {
-            authorization: `Bearer ${Cookies.get("jwt")}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      console.log("slice username data ->", response.data);
-      return _api.fulfillWithValue(response.data);
-    } catch (error: any) {
-      _api.rejectWithValue(error.message);
-    }
-  }
-);
-
-export const updateAvatar = createAsyncThunk(
-  "user/updateAvatar",
-  async ({ avatar }: { avatar: FormData }, _api) => {
-    console.log("-->", avatar);
-
-    try {
-      const response = await axios.patch(
-        `http://localhost:3000/users/update-avatar`,
-        avatar,
+        `http://localhost:3000/users/update-profile`,
+        data,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("jwt")}`,
@@ -99,7 +73,6 @@ export const updateAvatar = createAsyncThunk(
           },
         }
       );
-      console.log("slice avatar data ->", response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       _api.rejectWithValue(error.message);
@@ -128,16 +101,10 @@ export const userProfileSlice = createSlice({
     builder.addCase(fetchCurrentUser.rejected, (state, action: any) => {
       state.isError = { isError: true, message: action.payload };
     });
-    builder.addCase(updateUsername.fulfilled, (state, action: any) => {
+    builder.addCase(completeProfileInfo.fulfilled, (state, action: any) => {
       state.user = action.payload;
     });
-    builder.addCase(updateUsername.rejected, (state, action: any) => {
-      state.isError = { isError: true, message: action.payload };
-    });
-    builder.addCase(updateAvatar.fulfilled, (state, action: any) => {
-      state.user = action.payload;
-    });
-    builder.addCase(updateAvatar.rejected, (state, action: any) => {
+    builder.addCase(completeProfileInfo.rejected, (state, action: any) => {
       state.isError = { isError: true, message: action.payload };
     });
   },
