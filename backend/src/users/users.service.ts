@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, UpdateResult, DeleteResult } from 'typeorm'
 
 import { UserDto } from './dto/user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+
 class NotFoundException extends HttpException {
   constructor() {
     super('resource is not found.', HttpStatus.NOT_FOUND);
@@ -46,9 +46,15 @@ export class UsersService {
     }
   }
 
-  async update(id: number | string, data: UpdateUserDto) : Promise<UserDto> {
+  async updateProfile(id: number, user_name: string, file: Express.Multer.File) : Promise<UserDto> {
     try{
-      await this.usersRepository.update(id, data);
+       if (!file && user_name) {
+        await this.usersRepository.update(id, {user_name: user_name});
+      } else if (!user_name && file) {
+        await this.usersRepository.update(id, {avatar_url:  `http://localhost:3000/${file.filename}`});
+      } else if (file && user_name) {
+        await this.usersRepository.update(id, {user_name: user_name ,avatar_url:  `http://localhost:3000/${file.filename}`});
+      }
       return await this.usersRepository.findOne(id);
     } catch(e) {
       throw new NotFoundException();
