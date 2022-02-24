@@ -14,7 +14,7 @@ dotenv.config()
 @Module({
     imports: [ UsersModule, PassportModule, JwtModule.register({
         secret: process.env.JWT_SECRET ,
-        signOptions: { expiresIn: process.env.JWT_EXPIRESIN}
+        signOptions: { expiresIn: process.env.JWT_EXPIRESIN }
     })],
     controllers: [AuthController ],
     providers: [ AuthService, IntraStrategy, JwtStrategy ]

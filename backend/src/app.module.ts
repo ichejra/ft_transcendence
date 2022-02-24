@@ -4,7 +4,9 @@ import { AuthModule } from './auth/auth.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { ConfigModule } from '@nestjs/config';
-import { User } from './users/entities/user.entity';
+import { UserEntity } from './users/entities/user.entity';
+import { ChannelEntity } from './channels/entities/channel.entity';
+import { UserChannelEntity } from './channels/entities/user-channel.entity';
 
 @Module({
   imports: [
@@ -16,7 +18,11 @@ import { User } from './users/entities/user.entity';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      entities: [ User ],
+      entities: [
+        UserEntity,
+        ChannelEntity,
+        UserChannelEntity,
+      ],
       synchronize: true,
     }),
     UsersModule,

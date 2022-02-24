@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, UpdateResult, DeleteResult } from 'typeorm'
 
 import { UserDto } from './dto/user.dto';
-import { User } from './entities/user.entity';
+import { UserEntity } from './entities/user.entity';
 
 class NotFoundException extends HttpException {
   constructor() {
@@ -14,8 +14,8 @@ class NotFoundException extends HttpException {
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User)
-    private usersRepository: Repository<User> 
+    @InjectRepository(UserEntity)
+    private usersRepository: Repository<UserEntity> 
     ) {}
 
   async create(user: UserDto) : Promise<UserDto>{

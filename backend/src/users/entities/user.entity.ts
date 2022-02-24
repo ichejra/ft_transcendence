@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany, JoinTable } from 'typeorm'
+// import { UserFriendsEntity } from './user-friends.entity';
 
-@Entity()
-export class User {
+@Entity('user')
+export class UserEntity {
     @PrimaryGeneratedColumn({ type: "int" })
     id: number;
 
@@ -22,4 +23,8 @@ export class User {
 
     @Column({default: false})
     state: boolean;
+
+    @ManyToMany(() => UserEntity, user => user.friends)
+    @JoinTable()
+    friends: UserEntity[];
 }
