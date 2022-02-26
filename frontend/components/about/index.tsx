@@ -11,7 +11,7 @@ const AboutPage: React.FC = () => {
   return (
     <div className='page-100 bg-yellow-500'>
       <div className='pt-5'>
-        {/* <div className='flex flex-col flex-col-reverse md:flex-row items-center'> */}
+        {/* <div className='flex flex-col md:flex-row items-center'> */}
         <div className='flex  md:flex-row flex-col-reverse items-center bg-black'>
           {/* <p className='text-center text-xl font-mono m-4 md:w-1/2'> */}
           <p className='md:text-xl text-yellow-400 font-mono m-4 w-full md:px-4 p-6 text-md text-center'>
