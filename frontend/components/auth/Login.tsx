@@ -1,18 +1,19 @@
 import { fetchCurrentUser } from "../../features/userProfileSlice";
 import { useAppDispatch } from "../../app/hooks";
 import { useLocation } from "react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 
 const Login = () => {
+  const [token, setToken] = useState(Cookies.get("jwt"));
   const dispatch = useAppDispatch();
   const location = useLocation();
 
   useEffect(() => {
-    if (Cookies.get("jwt")) {
+    if (token) {
       dispatch(fetchCurrentUser());
     }
-  }, [location]);
+  }, [token]);
 
   return (
     <div className="page-100 absolute bg-gray-800 w-full h-full top-0 left-0 flex justify-center items-center">
