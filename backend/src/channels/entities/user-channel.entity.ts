@@ -1,17 +1,17 @@
-import { UserEntity } from "src/users/entities/user.entity";
+import { User } from "src/users/entities/user.entity";
 import { Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-import { ChannelEntity } from "./channel.entity";
+import { Channel } from "./channel.entity";
 
 @Entity('user_channel') 
-export class UserChannelEntity {
+export class UserChannel {
     @PrimaryGeneratedColumn()
     id?: number;
 
-    @OneToOne(() => UserEntity)
+    @OneToOne(() => User)
     @JoinColumn()
     user?: number;
 
-    @OneToOne(() => ChannelEntity,)
+    @OneToOne(() => Channel,)
     @JoinColumn()
     channel?: number;
 }
