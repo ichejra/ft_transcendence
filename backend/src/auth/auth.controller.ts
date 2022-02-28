@@ -12,6 +12,7 @@ export class AuthController {
     @HttpCode(200)
     @UseGuards(IntraAuthGuard)
     async login(@Req() _req, @Res() _res): Promise<any> {
+        // console.log(_req.user);
         return await this.authService.login(_req, _res);
     }
 
