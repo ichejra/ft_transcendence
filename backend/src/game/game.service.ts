@@ -1,15 +1,17 @@
 import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { GameDto } from "./dto/game.dto";
+import { Game } from "./entities/game.entity";
 import { GameInterface } from "./interfaces/game.interface";
 @Injectable()
 export class GameService {
-  constructor(private gameIn: GameInterface) {}
-  getInterface() {
+  constructor(
+    @InjectRepository(Game)
+    private gameRepository: Repository<Game>
+    ) {}
 
-    this.gameIn.x = 0;
-    this.gameIn.y = 10;
-    this.gameIn.width = 1000;
-    this.gameIn.height = 600;
-    this.gameIn.color = "white";
-    return this.gameIn;
-  }
+    async insertGameData(data: GameDto) : Promise<Game> {
+      return this.gameRepository.save(data);
+    } 
 }

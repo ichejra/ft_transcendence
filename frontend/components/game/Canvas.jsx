@@ -36,7 +36,9 @@ const Canvas = (props) => {
     // const timer = setInterval(render, 1000 / 50);
     // return () => {clearInterval(timer);};
   }, [draw]);
-  return <canvas ref={canvasRef} {...rest} />;
+  return (
+  <canvas ref={canvasRef} />
+  );
 };
 
 export default Canvas;

@@ -1,6 +1,18 @@
 import { useVelocity } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import Canvas from './Canvas.jsx';
+import { io } from 'socket.io-client';
+
+
+//! ///////////////////////
+// let ws = new WebSocket('ws://localhost:3001');
+
+
+const socket = io('http://localhost:3000');
+
+
+
+//! ///////////////////////
 
 interface User {
   x: number;
@@ -12,6 +24,32 @@ interface User {
 }
 
 const PongGame = () => {
+  //! /////////////////////
+  const [msg, setMsg] = useState('msg');
+
+    const hello = 'hello';
+    const message = document.getElementById('message');
+    const messages = document.getElementById('messages');
+    const handleSubmitNewMessage = () => {
+      console.log();
+      socket.emit('message', { data: msg });
+    };
+  
+    socket.on('message', ({ data }) => {
+      handleNewMessage(data);
+    });
+  
+    const handleNewMessage = (message: string) => {
+      messages?.appendChild(buildNewMessage(message));
+    };
+  
+    const buildNewMessage = (msg: any) => {
+      const li = document.createElement('li');
+      li.appendChild(document.createTextNode(msg));
+      return li;
+    };
+
+  //! /////////////////////
   const [tableColor, setTableColor] = useState('#000000');
   const [count, setCount] = useState(0);
   const user: User = {
@@ -203,7 +241,14 @@ const PongGame = () => {
     <div>
       <div className='page-100 flex items-center justify-center'>
         {/* <h1 className="text-2xl">PING PONG</h1> */}
-        <Canvas draw={draw} update={update} user={user} />
+        {/* <Canvas draw={draw} update={update} user={user} /> */}
+      <ul id="messages">
+
+      </ul>
+      </div>
+      <div>
+        <input id="message" type="text" onChange={(e) => setMsg(e.target.value)}/>
+        <button onClick={handleSubmitNewMessage}>submit</button>
       </div>
       <div>
         <button
@@ -216,5 +261,16 @@ const PongGame = () => {
     </div>
   );
 };
+
+
+
+
+
+
+
+
+
+
+
 
 export default PongGame;

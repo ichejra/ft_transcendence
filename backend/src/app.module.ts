@@ -7,6 +7,8 @@ import { ConfigModule } from '@nestjs/config';
 import { UserEntity } from './users/entities/user.entity';
 import { ChannelEntity } from './channels/entities/channel.entity';
 import { UserChannelEntity } from './channels/entities/user-channel.entity';
+import { GameModule } from './game/game.module';
+import { Game } from './game/entities/game.entity';
 
 @Module({
   imports: [
@@ -22,6 +24,7 @@ import { UserChannelEntity } from './channels/entities/user-channel.entity';
         UserEntity,
         ChannelEntity,
         UserChannelEntity,
+        Game
       ],
       synchronize: true,
     }),
@@ -30,6 +33,7 @@ import { UserChannelEntity } from './channels/entities/user-channel.entity';
     ServeStaticModule.forRoot({
       rootPath: process.env.DESTINATION
     }),
+    GameModule
   ],
   controllers: [],
   providers: [],
