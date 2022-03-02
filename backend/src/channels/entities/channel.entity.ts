@@ -1,5 +1,10 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
+export enum ChannelType {
+    PRIVATE = "private",
+    PUBLIC = "public",
+}
+
 @Entity('channels')
 export class Channel {
     @PrimaryGeneratedColumn()
@@ -11,6 +16,10 @@ export class Channel {
     @Column()
     password?: string;
 
-    @Column({ default: false})
-    type: boolean;
+    @Column({
+        type: "enum",
+        enum: ChannelType,
+        default: ChannelType.PUBLIC,
+    })
+    type: ChannelType;
 }

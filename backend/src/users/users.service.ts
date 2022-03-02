@@ -73,6 +73,14 @@ export class UsersService {
     }
   }
 
+  async logout(_req: any, _res: any): Promise<any> {
+    const user = await this.usersRepository.findOne(Number(_req.user.id));
+    if (user) {
+        _res.clearCookie('jwt');
+    }
+    _res.redirect(process.env.HOME_PAGE);
+  }
+
   // method used for insert the logged user id and requested user id in a database table("user_friends") with status pending until accept
   async insertToFriends(userId, recipientId): Promise<User> {
     const relation = await this.userFriendsRepository.query(
@@ -118,7 +126,7 @@ export class UsersService {
         userId,
         blockId
       ]);
-    if (!relation) {
+    if (!relation.length) {
       await this.insertToFriends(userId, blockId); 
     }
     await this.userFriendsRepository.query(

@@ -20,6 +20,10 @@ export class UserFriends {
     @JoinColumn({ name: 'recipientId'})
     recipient: User;
 
-    @Column({ type: 'enum', default: UserFriendsRelation.PENDING, enum: UserFriendsRelation  })
+    @Column({
+        type: 'enum',
+        enum: UserFriendsRelation,
+        default: UserFriendsRelation.PENDING
+    })
     status: UserFriendsRelation;
 }

@@ -21,26 +21,44 @@ export class UsersController {
     return this.usersService.create(data);
   }
 
-  @Get()
+  /* route get all users 
+    https://${host}:${port}/users/all_users
+  */ 
+  @Get('all_users')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   findAll() : Promise<User[]> {
     return this.usersService.findAll();
   }
 
+  /* route get the logged user 
+    http://${host}:${port}/users/me
+  */
   @Get('me')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  login(@Req() _req: any) {
-    return this.usersService.findOne( _req.user.id );
+  getProfile(@Req() _req: any) {
+    return this.usersService.findOne( Number(_req.user.id) );
   }
 
-  // @Get(':id')
-  // @HttpCode(200)
-  // @UseGuards(JwtAuthGuard)
-  // findOne(@Param('id', ParseIntPipe) id: string): Promise<UserDto> {
-  //   return this.usersService.findOne(Number(id));
-  // }
+  /* Route: logout the user 
+    http://${host}:${port}/users/Logout
+    -> clear user session
+  */
+    @Get('/logout')
+    @HttpCode(200)
+    @UseGuards(JwtAuthGuard)
+    logout(@Req() _req, @Res() _res): Promise<any> {
+        return this.usersService.logout(_req, _res);
+    }
+  /*
+    @Get(':id')
+    @HttpCode(200)
+    @UseGuards(JwtAuthGuard)
+    findOne(@Param('id', ParseIntPipe) id: string): Promise<UserDto> {
+      return this.usersService.findOne(Number(id));
+    }
+  */
 
   @Patch('update-profile')
   @HttpCode(200)
@@ -81,7 +99,7 @@ export class UsersController {
 
   /* Route: accept friend
     http://${host}:${port}/users/friend-accepte/:applicantId
-    user who logged is the recipeint
+    -> user who logged is the recipeint and the applicant will be accpeted
     */
   @Patch('/friend-accept/:applicantId')
   @HttpCode(200)
