@@ -7,7 +7,7 @@ import { FiSettings } from "react-icons/fi";
 import { IoMdNotificationsOutline, IoMdNotifications } from "react-icons/io";
 import Notifications from "./Notifications";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { logOutUser } from "../../features/userProfileSlice";
+import { fetchAllUsers, logOutUser } from "../../features/userProfileSlice";
 import Cookies from "js-cookie";
 import {
   editUserProfile,
@@ -51,6 +51,7 @@ const ProfileDropdown = () => {
   useEffect(() => {
     if (Cookies.get("jwt")) {
       dispatch(fetchCurrentUser());
+      dispatch(fetchAllUsers());
     }
   }, []);
 
@@ -60,7 +61,6 @@ const ProfileDropdown = () => {
     }
   }, [logout]);
 
-  console.log("dropdownmenu--> ", user);
   return (
     <div className="flex">
       {!isLoggedIn ? (

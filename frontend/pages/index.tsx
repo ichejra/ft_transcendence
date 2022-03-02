@@ -4,6 +4,7 @@ import HomePage from "../components/home";
 import About from "../components/about";
 import Channels from "../components/channels";
 import PongGame from "../components/game";
+import AllUsers from "../components/users";
 import UserProfile from "../components/profile/Profile";
 import Login from "../components/auth/Login";
 import Header from "../components/Header";
@@ -51,6 +52,16 @@ const Home: NextPage = () => {
             <AuthRoute>
               <CompleteProfile>
                 <PongGame />
+              </CompleteProfile>
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/users"
+          element={
+            <AuthRoute>
+              <CompleteProfile>
+                <AllUsers />
               </CompleteProfile>
             </AuthRoute>
           }

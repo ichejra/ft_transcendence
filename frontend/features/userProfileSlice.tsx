@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
-import UserProfile from "../components/profile/Profile";
 import axios from "axios";
 
 interface Err {
@@ -22,6 +21,7 @@ interface UserState {
   isLoading: boolean;
   isError: Err;
   user: User;
+  users: User[];
   isLoggedIn: boolean;
   editProfile: boolean;
 }
@@ -40,8 +40,28 @@ const initialState: UserState = {
     state: false,
     friends: [],
   },
+  users: [],
   editProfile: false,
 };
+
+export const fetchAllUsers = createAsyncThunk(
+  "users/fetchAllUsers",
+  async (_, _api) => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/users/no_relation",
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("jwt")}`,
+          },
+        }
+      );
+      return _api.fulfillWithValue(response.data);
+    } catch (error) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
 
 export const fetchCurrentUser = createAsyncThunk(
   "users/fetchUserStatus",
@@ -94,6 +114,9 @@ export const userProfileSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    builder.addCase(fetchAllUsers.fulfilled, (state, action: any) => {
+      state.users = action.payload;
+    });
     builder.addCase(fetchCurrentUser.fulfilled, (state, action: any) => {
       state.user = action.payload;
       state.isLoggedIn = true;

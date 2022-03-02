@@ -32,6 +32,9 @@ const Header: React.FC = () => {
             <Link to="/game">Game</Link>
           </li>
           <li className="hover:scale-110 hover:text-yellow-400 transition duration-300 cursor-pointer text-2xl font-medium mx-2 px-2">
+            <Link to="/users">Users</Link>
+          </li>
+          <li className="hover:scale-110 hover:text-yellow-400 transition duration-300 cursor-pointer text-2xl font-medium mx-2 px-2">
             <Link to="/about">about</Link>
           </li>
         </ul>
