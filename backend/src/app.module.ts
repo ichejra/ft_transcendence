@@ -5,7 +5,12 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { ConfigModule } from '@nestjs/config';
 import { User } from './users/entities/user.entity';
+import { Channel } from './channels/entities/channel.entity';
+import { UserChannel } from './channels/entities/user-channel.entity';
+import { UserFriends } from './users/entities/user-friends.entity';
+import * as dotenv from 'dotenv';
 
+dotenv.config();
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '../.env' }),
@@ -16,7 +21,12 @@ import { User } from './users/entities/user.entity';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      entities: [ User ],
+      entities: [
+        User,
+        UserFriends,
+        Channel,
+        UserChannel,
+      ],
       synchronize: true,
     }),
     UsersModule,

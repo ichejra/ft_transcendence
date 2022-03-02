@@ -25,8 +25,9 @@ export class IntraStrategy extends PassportStrategy(Strategy, '42') {
     }
     
     async validate(accessToken: string, refreshToken: string, profile: any, done: Function) : Promise<any> {
-        const { username, emails, photos, displayName } = profile;
+        const { id ,username, emails, photos, displayName } = profile;
         return  {
+            id: id,
             user_name: username,
             email: emails[0].value,
             display_name: displayName,
