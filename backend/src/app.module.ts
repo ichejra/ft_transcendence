@@ -4,12 +4,14 @@ import { AuthModule } from './auth/auth.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { ConfigModule } from '@nestjs/config';
-import { UserEntity } from './users/entities/user.entity';
-import { ChannelEntity } from './channels/entities/channel.entity';
-import { UserChannelEntity } from './channels/entities/user-channel.entity';
+import { User } from './users/entities/user.entity';
+import { Channel } from './channels/entities/channel.entity';
+import { UserChannel } from './channels/entities/user-channel.entity';
+import { UserFriends } from './users/entities/user-friends.entity';
+import * as dotenv from 'dotenv';
 import { GameModule } from './game/game.module';
-import { Game } from './game/entities/game.entity';
 
+dotenv.config();
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '../.env' }),
@@ -21,10 +23,10 @@ import { Game } from './game/entities/game.entity';
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       entities: [
-        UserEntity,
-        ChannelEntity,
-        UserChannelEntity,
-        Game
+        User,
+        UserFriends,
+        Channel,
+        UserChannel,
       ],
       synchronize: true,
     }),

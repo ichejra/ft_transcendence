@@ -1,9 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany, JoinTable } from 'typeorm'
-// import { UserFriendsEntity } from './user-friends.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany, JoinTable, PrimaryColumn } from 'typeorm'
+import { UserFriends } from './user-friends.entity';
 
-@Entity('user')
-export class UserEntity {
-    @PrimaryGeneratedColumn({ type: "int" })
+@Entity('users')
+export class User {
+    @PrimaryColumn({ type: "int" })
     id: number;
 
     @Column({ default: '', unique: true })
@@ -24,7 +24,9 @@ export class UserEntity {
     @Column({default: false})
     state: boolean;
 
-    @ManyToMany(() => UserEntity, user => user.friends)
-    @JoinTable()
-    friends: UserEntity[];
+    @OneToMany(() => UserFriends, (e: UserFriends) => e.applicant)
+    sentRequestFriends: UserFriends[];
+
+    @OneToMany(() => UserFriends, (e: UserFriends) => e.recipient)
+    recievedFriendRequest: UserFriends[];
 }
