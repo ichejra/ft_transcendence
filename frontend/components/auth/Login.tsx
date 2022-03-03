@@ -2,14 +2,12 @@ import {
   fetchCurrentUser,
   fetchAllUsers,
 } from "../../features/userProfileSlice";
-import { useAppDispatch } from "../../app/hooks";
-import { useLocation } from "react-router";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useEffect } from "react";
 import Cookies from "js-cookie";
 
 const Login = () => {
   const dispatch = useAppDispatch();
-  const location = useLocation();
 
   useEffect(() => {
     if (Cookies.get("jwt")) {

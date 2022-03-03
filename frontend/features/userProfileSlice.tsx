@@ -9,19 +9,19 @@ interface Err {
 
 interface User {
   id: number;
-  display_name?: string;
-  user_name?: string;
+  display_name: string;
+  user_name: string;
   email?: string;
   avatar_url: string;
   is_active: boolean;
   state: boolean;
-  friends?: string[];
 }
 interface UserState {
   isLoading: boolean;
   isError: Err;
   user: User;
   users: User[];
+  friends: User[];
   isLoggedIn: boolean;
   editProfile: boolean;
 }
@@ -38,8 +38,8 @@ const initialState: UserState = {
     avatar_url: "",
     is_active: false,
     state: false,
-    friends: [],
   },
+  friends: [],
   users: [],
   editProfile: false,
 };
@@ -56,6 +56,8 @@ export const fetchAllUsers = createAsyncThunk(
           },
         }
       );
+      console.log("==>", response.data);
+
       return _api.fulfillWithValue(response.data);
     } catch (error) {
       return _api.rejectWithValue(error);
@@ -75,6 +77,22 @@ export const fetchCurrentUser = createAsyncThunk(
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const fetchUserFriends = createAsyncThunk(
+  "users/fetchUserFriends",
+  async (_, _api) => {
+    try {
+      const response = await axios.get("http://localhost:3000/users/friends", {
+        headers: {
+          authorization: `Bearer ${Cookies.get("jwt")}`,
+        },
+      });
+      return _api.fulfillWithValue(response.data);
+    } catch (error) {
+      return _api.rejectWithValue(error);
     }
   }
 );
@@ -106,7 +124,6 @@ export const userProfileSlice = createSlice({
   reducers: {
     logOutUser: (state = initialState) => {
       Cookies.remove("jwt");
-      Cookies.remove("user");
       state.isLoggedIn = false;
     },
     editUserProfile: (state = initialState, action: PayloadAction<boolean>) => {
@@ -129,6 +146,9 @@ export const userProfileSlice = createSlice({
     });
     builder.addCase(completeProfileInfo.rejected, (state, action: any) => {
       state.isError = { isError: true, message: action.payload };
+    });
+    builder.addCase(fetchUserFriends.fulfilled, (state, action: any) => {
+      state.friends = action.payload;
     });
   },
 });

@@ -7,7 +7,7 @@ import { FiSettings } from "react-icons/fi";
 import { IoMdNotificationsOutline, IoMdNotifications } from "react-icons/io";
 import Notifications from "./Notifications";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { fetchAllUsers, logOutUser } from "../../features/userProfileSlice";
+import { logOutUser } from "../../features/userProfileSlice";
 import Cookies from "js-cookie";
 import {
   editUserProfile,
@@ -49,9 +49,10 @@ const ProfileDropdown = () => {
   }, [dropDown, showNotificationsList]);
 
   useEffect(() => {
+    console.log("OK");
+
     if (Cookies.get("jwt")) {
       dispatch(fetchCurrentUser());
-      dispatch(fetchAllUsers());
     }
   }, []);
 
