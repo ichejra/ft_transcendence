@@ -220,4 +220,26 @@ export class UsersService {
       ]);
   }
 
+  /* Removing any relation between the logged user and the guest user */
+  async removeRelation(userId: number, rejectedId: number): Promise<User> {
+    return await this.userFriendsRepository.query(
+      `DELETE FROM user_friends
+      WHERE ("user_friends"."recipientId" = $1 AND "user_friends"."applicantId" = $2)
+      OR ("user_friends"."recipientId" = $2 AND "user_friends"."applicantId" = $1)
+      `,
+      [userId, rejectedId]
+    ).then(()=>{
+      return this.usersRepository.findOne(rejectedId);
+    })
+  }
+
+  /* Turn on the two factor authentication */
+  async turnOnTwoFactorAuthentication(userId: number): Promise<User> {
+    return await this.usersRepository.update(userId, {
+      is_verified: true,
+    }).then(() => {
+      return this.usersRepository.findOne(userId);
+    });
+  }
+
 }

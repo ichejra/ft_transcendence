@@ -8,6 +8,7 @@ import { User } from './users/entities/user.entity';
 import { Channel } from './channels/entities/channel.entity';
 import { UserChannel } from './channels/entities/user-channel.entity';
 import { UserFriends } from './users/entities/user-friends.entity';
+import { MailModule } from './mail/mail.module';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -34,6 +35,7 @@ dotenv.config();
     ServeStaticModule.forRoot({
       rootPath: process.env.DESTINATION
     }),
+    MailModule,
   ],
   controllers: [],
   providers: [],

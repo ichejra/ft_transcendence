@@ -4,7 +4,7 @@ import { use } from "passport";
 import { UserDto } from "src/users/dto/user.dto";
 import { User } from "src/users/entities/user.entity";
 import { UsersService } from "src/users/users.service";
-import { JwtPayload } from "./jwt.strategy";
+import { JwtPayload } from "./type/jwt-payload.type";
 
 @Injectable()
 export class AuthService {
@@ -20,12 +20,13 @@ export class AuthService {
         if (!user) {
             return null;
         }
+        console.log(user);
         return user;
     }
 
     /* function used for creating the user if not exist and sign it */
     async login(_req: any, _res: any): Promise<any> {
-        let user : UserDto = null;
+        let user : User = null;
         let url: string;
         try {
             user = await this.usersService.findOne(Number(_req.user.id));
@@ -38,15 +39,14 @@ export class AuthService {
         } catch(err) { }
         const payload: JwtPayload = { id: (await user).id ,user_name: (await user).user_name, email: (await user).email};
         const jwtToken  = await this.jwtService.sign(payload);
-        _res.cookie('user', JSON.stringify(user));
-        _res.cookie('jwt', jwtToken);
+        _res.cookie('accessToken', jwtToken);
         return  _res.redirect(url);
     }
 
     async logout(_req: any, _res: any): Promise<any> {
         const user = await this.usersService.findOne(Number(_req.user.id));
-        if (user && _res.cookie('jwt')) {
-            _res.clearCookie('jwt');
+        if (user && _res.cookie('accessToken')) {
+            _res.clearCookie('accessToken');
         }
         return _res.redirect(process.env.HOME_PAGE);
     }
