@@ -234,9 +234,9 @@ export class UsersService {
   }
 
   /* Turn on the two factor authentication */
-  async turnOnTwoFactorAuthentication(userId: number): Promise<User> {
+  async turnOnTwoFactorAuthentication(userId: number, bool: boolean): Promise<User> {
     return await this.usersRepository.update(userId, {
-      is_verified: true,
+      is_2fa_enabled: bool,
     }).then(() => {
       return this.usersRepository.findOne(userId);
     });

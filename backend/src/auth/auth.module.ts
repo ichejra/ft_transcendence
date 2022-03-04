@@ -9,6 +9,9 @@ import { IntraStrategy } from './strategies/intra.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import * as dotenv from 'dotenv';
 import { TwoFactorAuthModule } from './two-factor-auth/two-factor-auth.module';
+import { TwoFactorAuthService } from './two-factor-auth/two-factor-auth.service';
+import { MailModule } from 'src/mail/mail.module';
+import { MailService } from 'src/mail/mail.service';
 
 dotenv.config()
 
@@ -22,7 +25,13 @@ dotenv.config()
         }),
         TwoFactorAuthModule,
     ],
-    controllers: [AuthController ],
-    providers: [ AuthService, IntraStrategy, JwtStrategy ],
+    controllers: [ AuthController ],
+    providers: [
+        AuthService,
+        IntraStrategy,
+        JwtStrategy,
+        TwoFactorAuthService,
+        MailService
+    ],
 })
 export class AuthModule {}

@@ -2,6 +2,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { Module } from '@nestjs/common';
 import { MailService } from './mail.service';
 import * as dotenv from 'dotenv';
+import Mail from 'nodemailer/lib/mailer';
 
 dotenv.config();
 @Module({
@@ -17,6 +18,6 @@ dotenv.config();
       },
     })
   ],
-  providers: [ MailService ]
+  providers: [ MailService ],
 })
 export class MailModule {}
