@@ -25,7 +25,7 @@ export class User {
     avatar_url: string;
 
     @Column({ default:false })
-    is_verified: boolean;
+    is_2fa_enabled: boolean;
 
     @Column({
         type: 'enum',

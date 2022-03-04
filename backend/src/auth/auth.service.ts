@@ -1,16 +1,16 @@
 import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { use } from "passport";
-import { UserDto } from "src/users/dto/user.dto";
 import { User } from "src/users/entities/user.entity";
 import { UsersService } from "src/users/users.service";
+import { TwoFactorAuthService } from "./two-factor-auth/two-factor-auth.service";
 import { JwtPayload } from "./type/jwt-payload.type";
 
 @Injectable()
 export class AuthService {
     constructor(
         private usersService: UsersService,
-        private jwtService: JwtService
+        private jwtService: JwtService,
+        private twoFactorAuthService: TwoFactorAuthService
         ) {}
     
     /* an async function  used for validate the user if exist in database */
@@ -30,13 +30,20 @@ export class AuthService {
         let url: string;
         try {
             user = await this.usersService.findOne(Number(_req.user.id));
+            // 2FA ENABLE
+            if (user && user.is_2fa_enabled === true) {
+                await this.twoFactorAuthService.sendConnectLink(user);
+                return _res.redirect(process.env.HOME_PAGE);
+            }
             if (!user) {
                 user = await this.usersService.create(_req.user);
                 url = process.env.COMPLETE_INFO; // redirect to complete-info page
-            }else{
+            } else {
                 url = process.env.HOME_PAGE; // redirect to Home page
             }
-        } catch(err) { }
+        } catch(err) {
+            console.log(err);
+        }
         const payload: JwtPayload = { id: (await user).id ,user_name: (await user).user_name, email: (await user).email};
         const jwtToken  = await this.jwtService.sign(payload);
         _res.cookie('accessToken', jwtToken);

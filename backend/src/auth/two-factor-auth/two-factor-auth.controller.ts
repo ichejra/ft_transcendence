@@ -1,6 +1,5 @@
-import { Controller, Get, HttpCode, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
+import { ConsoleLogger, Controller, Get, HttpCode, Patch, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
 import { Response } from "express";
-import { UsersService } from "src/users/users.service";
 import { JwtAuthGuard } from "../guards/jwt-auth.guard";
 import { TwoFactorAuthService } from "./two-factor-auth.service";
 
@@ -9,18 +8,32 @@ export class TwoFactorAuthController {
     constructor(
         private readonly twoFactorAuthService: TwoFactorAuthService,
         ) {}
-    
-    @Get('/send-email')
+
+    @Get('enable')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    sendVerification(@Req()_req: any) {
-        this.twoFactorAuthService.sendVerifaicationLink(_req.user);
+    enableTwoFactorAuth(@Req() _req: any) {
+        return this.twoFactorAuthService.enableDisableTwoFactorAuth(Number(_req.user.id), true);
+    }
+
+    @Get('disable')
+    @HttpCode(200)
+    @UseGuards(JwtAuthGuard)
+    disableTwoFactorAuth(@Req() _req: any) {
+        return this.twoFactorAuthService.enableDisableTwoFactorAuth(Number(_req.user.id), false);
+
+    }
+    
+    @Get('send-email')
+    @HttpCode(200)
+    @UseGuards(JwtAuthGuard)
+    sendEmail(@Req()_req: any) {
+        return this.twoFactorAuthService.sendConnectLink(_req.user);
     }
     
     @Get('verify')
     @HttpCode(200)
-    @UseGuards(JwtAuthGuard)
-    verifyAccount(@Req() _req: any, @Res() res: Response, @Query('token') token: string): Promise<any> {
-      return this.twoFactorAuthService.verify(token, res)
+    verifyLogin(@Res() res: Response, @Query('token') token: string): Promise<any> {
+      return this.twoFactorAuthService.verify(token, res);
     }
 } 

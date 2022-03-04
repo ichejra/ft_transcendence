@@ -4,6 +4,7 @@ import { JwtService } from "@nestjs/jwt";
 import { MailService } from "src/mail/mail.service";
 import { UsersService } from "src/users/users.service";
 import { User } from "src/users/entities/user.entity";
+import { JwtPayload } from "../type/jwt-payload.type";
 
 dotenv.config();
 @Injectable()
@@ -13,34 +14,42 @@ export class TwoFactorAuthService {
         private mailService: MailService,
         private readonly usersService: UsersService
         ) {}
+    
+    /* method used for changing 2fa bool */
+    enableDisableTwoFactorAuth = async (userId: number, bool: boolean) => {
+        return this.usersService.turnOnTwoFactorAuthentication(userId, bool);
+    }
 
-    async sendVerifaicationLink(user: User) : Promise<any>{
-        const {id, email} = user;
-        const payload = { id, email };
+    /* method used for email sending */
+    async sendConnectLink(user: User) : Promise<any>{
+        const payload: JwtPayload = { id: user.id, user_name: user.user_name, email: user.email};
         const token: string = await this.jwtService.sign(payload, {
             secret: process.env.JWT_SECRET,
             expiresIn: process.env.JWT_EXPIRESIN
         });
 
         const url: string = `http://${process.env.HOST}:${process.env.PORT}/2fa/verify?token=${token}`;
-        const text = `Welcome to ${process.env.APP_NAME}. To verify your accout, click here: ${url}`;
+        const text = `Welcome to ${process.env.APP_NAME} 2FA. To continue, click here: ${url}`;
 
-        await this.mailService.sendMail({
-            to: email,
-            subject: 'Account verification',
+        return await this.mailService.sendMail({
+            to: user.email,
+            subject: 'Account login',
             text,
-        });
+        }).then(() => {
+            return { success: true, message: 'check inbox.'}
+        })
+
     }
 
-    async verify(token :string, res: any): Promise<any> {
-        const {id, email } =  await this.jwtService.verify(token);
-        const user = this.usersService.findOne(email);
-        if (user) {
-            await this.usersService.turnOnTwoFactorAuthentication(id);
-            return res.redirect('http://localhost:3001/');
-        }
-        else {
-            return res.redirect('http://localhost:3001/error');
+    /* method used for logging verified */
+    async verify(token: string, res: any): Promise<any> {
+        const { id, email } =  await this.jwtService.verify(token);
+        const user = await this.usersService.findOne(Number(id));
+        if (user && user.email === email) {
+            res.cookie('accessToken', token);
+            return res.redirect(process.env.HOME_PAGE);// redirect to Home page
+        } else {
+            return res.json({ succes: false, msg: 'UNAUTHORIZED' }).send();// redirect to the error page
         }
     }
 }
