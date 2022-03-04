@@ -1,18 +1,19 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
 import axios from "axios";
-import { exit } from "process";
-
+import { User } from "./userProfileSlice";
 const initialState: {
   isFriend: boolean;
   sentReq: boolean;
   acceptReq: boolean;
   pendingReq: boolean;
+  pendingUsers: User[];
 } = {
   isFriend: false,
   sentReq: false,
   acceptReq: false,
   pendingReq: false,
+  pendingUsers: [],
 };
 
 // fetch the friends managment endpoints
@@ -33,7 +34,6 @@ export const fetchRequestStatus = createAsyncThunk(
           },
         }
       );
-      console.log("Friend Request >> ", response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error);
@@ -43,20 +43,17 @@ export const fetchRequestStatus = createAsyncThunk(
 
 export const fetchPendingStatus = createAsyncThunk(
   "user/fetchPendingStatus",
-  async (id: string, _api) => {
+  async (_, _api) => {
     try {
-      const response = await axios.patch(
-        `http://localhost:3000/users/friend-request`,
-        {
-          recipientId: id,
-        },
+      const response = await axios.get(
+        `http://localhost:3000/users/pending-friends`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("jwt")}`,
           },
         }
       );
-      console.log("Friend Request >> ", response.data);
+      console.log("pending friends >> ", response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error);
@@ -67,33 +64,36 @@ export const fetchPendingStatus = createAsyncThunk(
 export const friendsManagementSlice = createSlice({
   name: "friendsManagment",
   initialState,
-  reducers: {
-    sendFriendReq: (state, action: PayloadAction<number>) => {
-      const id = action.payload;
+  reducers: {},
+  extraReducers: (builder) => {
+    builder.addCase(fetchRequestStatus.fulfilled, (state, action: any) => {
+      state.sentReq = false;
+      state.pendingReq = true;
+      state.acceptReq = false;
+    });
+    builder.addCase(fetchPendingStatus.fulfilled, (state, action: any) => {
+      state.pendingUsers = action.payload;
       state.sentReq = true;
       state.pendingReq = true;
       state.acceptReq = false;
-    },
-    acceptFriendReq: (state) => {
-      state.sentReq = false;
-      state.pendingReq = false;
-      state.acceptReq = true;
-    },
-    cancelFriendReq: (state) => {
-      state.sentReq = false;
-      state.pendingReq = false;
-      state.acceptReq = false;
-    },
-  },
-  extraReducers: (builder) => {
-    builder.addCase(fetchRequestStatus.fulfilled, (state, action: any) => {
-      console.log("payload: ", action.payload);
-      state.pendingReq = true;
     });
   },
 });
 
-export const { sendFriendReq, cancelFriendReq, acceptFriendReq } =
-  friendsManagementSlice.actions;
-
 export default friendsManagementSlice.reducer;
+
+/* 
+
+useEffect(() => 
+{
+  socket.on("updateNotifaction", (data) =>
+  {
+    setData(data)    
+  })
+}, [socket])
+
+useEffect(()=>
+{
+
+}, [data])
+*/

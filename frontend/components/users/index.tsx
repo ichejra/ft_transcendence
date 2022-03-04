@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { FaUsersSlash } from "react-icons/fa";
-import { fetchAllUsers } from "../../features/userProfileSlice";
+import { fetchNoRelationUsers } from "../../features/userProfileSlice";
 import Cookies from "js-cookie";
 import {
   sendFriendReq,
@@ -10,21 +10,21 @@ import {
   fetchRequestStatus,
 } from "../../features/friendsManagentSlice";
 
-const AllUsers = () => {
+const AllUsers: React.FC = () => {
   const dispatch = useAppDispatch();
 
   const {
-    users,
+    nrusers: users,
     user: { id: userID },
   } = useAppSelector((state) => state.user);
 
   useEffect(() => {
     if (Cookies.get("jwt")) {
-      dispatch(fetchAllUsers());
+      dispatch(fetchNoRelationUsers());
     }
   }, []);
 
-  if (users.length <= 1) {
+  if (users.length < 1) {
     return (
       <div className="page-100 flex justify-center md:py-12">
         <div className="md:w-5/6 items-center md:border-2 shadow-xl rounded-3xl bg-white">
@@ -140,6 +140,9 @@ const User: React.FC<Props> = ({ id, avatar_url, display_name, user_name }) => {
             </div>
           ) : (
             <div className="w-full text-center">
+              <div className="hover:bg-gray-100 bg-gray-200 px-2 py-1 w-full mb-2 rounded-md font-bold transition duration-300">
+                <Link to={`/profile/${id}`}>profile</Link>
+              </div>
               <button
                 onClick={() => sendFriendRequest(id)}
                 className="hover:bg-yellow-300 bg-yellow-400 px-2 py-1 w-full rounded-md font-bold transition duration-300"

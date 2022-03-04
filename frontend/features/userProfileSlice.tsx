@@ -7,7 +7,7 @@ interface Err {
   message: string;
 }
 
-interface User {
+export interface User {
   id: number;
   display_name: string;
   user_name: string;
@@ -21,9 +21,11 @@ interface UserState {
   isError: Err;
   user: User;
   users: User[];
+  nrusers: User[];
   friends: User[];
   isLoggedIn: boolean;
   editProfile: boolean;
+  showNotifList: boolean;
 }
 
 const initialState: UserState = {
@@ -41,15 +43,36 @@ const initialState: UserState = {
   },
   friends: [],
   users: [],
+  nrusers: [],
   editProfile: false,
+  showNotifList: false,
 };
+
+export const fetchNoRelationUsers = createAsyncThunk(
+  "users/fetchNoRelationUsers",
+  async (_, _api) => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/users/no_relation",
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("jwt")}`,
+          },
+        }
+      );
+      return _api.fulfillWithValue(response.data);
+    } catch (error) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
 
 export const fetchAllUsers = createAsyncThunk(
   "users/fetchAllUsers",
   async (_, _api) => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/users/no_relation",
+        "http://localhost:3000/users/all_users",
         {
           headers: {
             authorization: `Bearer ${Cookies.get("jwt")}`,
@@ -129,8 +152,17 @@ export const userProfileSlice = createSlice({
     editUserProfile: (state = initialState, action: PayloadAction<boolean>) => {
       state.editProfile = action.payload;
     },
+    showNotificationsList: (
+      state = initialState,
+      action: PayloadAction<boolean>
+    ) => {
+      state.showNotifList = action.payload;
+    },
   },
   extraReducers: (builder) => {
+    builder.addCase(fetchNoRelationUsers.fulfilled, (state, action: any) => {
+      state.nrusers = action.payload;
+    });
     builder.addCase(fetchAllUsers.fulfilled, (state, action: any) => {
       state.users = action.payload;
     });
@@ -153,6 +185,7 @@ export const userProfileSlice = createSlice({
   },
 });
 
-export const { editUserProfile, logOutUser } = userProfileSlice.actions;
+export const { showNotificationsList, editUserProfile, logOutUser } =
+  userProfileSlice.actions;
 
 export default userProfileSlice.reducer;
