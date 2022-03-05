@@ -8,6 +8,6 @@ import { GameService } from "./game.service";
 @Module({
   imports: [ TypeOrmModule.forFeature([ Game ]) ],
   controllers: [ GameController ],
-  providers: [ GameService, GameGateway ],
+  providers: [ GameService, GameGateway ], //? Gateways are not instantiated until they are referenced in the providers array of an existing module.
 })
 export class GameModule {}
