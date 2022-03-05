@@ -1,12 +1,17 @@
 import { AiOutlineRight } from "react-icons/ai";
 import { useState } from "react";
 import HistoryModal from "../modals/HistoryModal";
+import { useAppSelector } from "../../app/hooks";
+import { useParams } from "react-router-dom";
 
 const ProfileInfo: React.FC = () => {
   const [openModal, setOpenModal] = useState(false);
-
+  const { user } = useAppSelector((state) => state.user);
+  const { id } = useParams();
   return (
-    <div className="lg:mr-12 lg:w-2/4 pb-12">
+    <div
+      className={`${user.id !== Number(id) ? "w-3/4" : "lg:mr-12 lg:w-2/4"} pb-12`}
+    >
       <div className="flex justify-between mr-2 lg:mr-0">
         <h1 className="text-xl font-bold p-2">Game history</h1>
         <button
@@ -20,7 +25,7 @@ const ProfileInfo: React.FC = () => {
       </div>
       <div className="border rounded-lg p-4 shadow-md">
         {Array.from({ length: 100 })
-          .slice(0, 15)
+          .slice(0, 4)
           .map((test, index) => {
             return (
               <div

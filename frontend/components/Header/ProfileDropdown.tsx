@@ -14,6 +14,7 @@ import {
   fetchCurrentUser,
   showNotificationsList,
 } from "../../features/userProfileSlice";
+import { fetchPendingStatus } from "../../features/friendsManagentSlice";
 
 const ProfileDropdown = () => {
   const [dropDown, setDropdown] = useState(false);
@@ -25,7 +26,7 @@ const ProfileDropdown = () => {
   const { user, isLoggedIn, showNotifList } = useAppSelector(
     (state) => state.user
   );
-  const { pendingUsers } = useAppSelector((state) => state.friends);
+  const { pendingUsers, pendingReq } = useAppSelector((state) => state.friends);
 
   useEffect(() => {
     //* a mousedown event that listen on the dropdown element to hide it when the click is outside it
@@ -51,7 +52,7 @@ const ProfileDropdown = () => {
   }, [dropDown, showNotifList]);
 
   useEffect(() => {
-    if (Cookies.get("jwt")) {
+    if (Cookies.get("accessToken")) {
       dispatch(fetchCurrentUser());
     }
   }, []);
@@ -61,6 +62,10 @@ const ProfileDropdown = () => {
       dispatch(logOutUser());
     }
   }, [logout]);
+
+  useEffect(() => {
+    dispatch(fetchPendingStatus());
+  }, []);
 
   return (
     <div className="flex">
@@ -72,7 +77,6 @@ const ProfileDropdown = () => {
         </div>
       ) : (
         <div className="dropdown flex items-center transition duration-300 cursor-pointer text-2xl font-medium mx-2 px-2">
-          {/******************************************************************************/}
           {isLoggedIn && (
             <div ref={notifRef}>
               <button
@@ -80,7 +84,8 @@ const ProfileDropdown = () => {
                 onClick={() => dispatch(showNotificationsList(!showNotifList))}
                 className="nav-container mr-4"
               >
-                {pendingUsers.length > 0 ? (
+                {pendingUsers.length > 0 &&
+                pendingUsers.filter((puser) => puser.id !== user.id) ? (
                   <IoMdNotifications size="2rem" />
                 ) : (
                   <IoMdNotificationsOutline size="2rem" />
@@ -91,7 +96,7 @@ const ProfileDropdown = () => {
                   </div>
                 )}
               </button>
-              {/****************************/}
+
               {showNotifList && (
                 <div
                   className={`${
@@ -103,8 +108,6 @@ const ProfileDropdown = () => {
               )}
             </div>
           )}
-          {/*################################################################################*/}
-
           <div ref={dropDownRef}>
             {isLoggedIn && (
               <button

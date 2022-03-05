@@ -6,14 +6,16 @@ import { showNotificationsList } from "../../features/userProfileSlice";
 
 const Notifications = () => {
   const dispatch = useAppDispatch();
-  const { pendingUsers } = useAppSelector((state) => state.friends);
+  const { pendingUsers, pendingReq } = useAppSelector((state) => state.friends);
   const {
     user: { id: currentUserID },
   } = useAppSelector((state) => state.user);
 
   useEffect(() => {
     dispatch(fetchPendingStatus());
-  }, []);
+  }, [pendingReq]);
+  // TODO fix notification render
+  console.log("pending users =>>", pendingUsers);
 
   return (
     <ul className="bg-black rounded-xl bg-opacity-75 p-2">

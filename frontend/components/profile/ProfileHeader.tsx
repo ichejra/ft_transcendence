@@ -2,17 +2,28 @@ import { FaUserFriends } from "react-icons/fa";
 import { IoMdTime } from "react-icons/io";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import EditProfileModal from "../modals/EditProfileModal";
-import { editUserProfile } from "../../features/userProfileSlice";
+import { editUserProfile, User } from "../../features/userProfileSlice";
 import { useParams } from "react-router";
 import Button from "../utils/Button";
+import { acceptFriendRequest } from "../../features/friendsManagentSlice";
+import { useState } from "react";
+import { useEffect } from "react";
 
-const ProfileHeader: React.FC = () => {
+interface Props {
+  user: User;
+  users: User[];
+  friends: User[];
+}
+
+const ProfileHeader: React.FC<Props> = ({ user, users, friends }) => {
+  const [isPending, setIsPending] = useState(true);
+  const [isFriend, setIsFriend] = useState(true);
   const { id: profileID } = useParams();
   const dispatch = useAppDispatch();
-  const { pendingUsers } = useAppSelector((state) => state.friends);
-  const { users, user, friends, editProfile } = useAppSelector(
-    (state) => state.user
+  const { pendingUsers, pendingReq, acceptReq } = useAppSelector(
+    (state) => state.friends
   );
+  const { editProfile } = useAppSelector((state) => state.user);
   const userProfile =
     users.find((user) => user.id === Number(profileID)) || user;
 
@@ -20,8 +31,19 @@ const ProfileHeader: React.FC = () => {
     console.log("Friend Added");
   };
 
-  const acceptFriend = () => {
-    console.log("Friend accepted");
+  const acceptFriend = (id: number) => {
+    const checkFriend = friends.find(
+      (friend) => friend.id === Number(profileID)
+    );
+    dispatch(acceptFriendRequest(id));
+    if (checkFriend) {
+      setIsFriend(true);
+    }
+    console.log(
+      "Friend " +
+        users.find((user) => user.id === id)?.display_name +
+        " accepted"
+    );
   };
 
   const rejectFriend = () => {
@@ -36,12 +58,15 @@ const ProfileHeader: React.FC = () => {
     dispatch(editUserProfile(true));
     console.log("profile updated");
   };
-
-  const isPpending = pendingUsers.find(
-    (friend) => friend.id === Number(profileID)
-  );
-
-  const isFriend = friends.find((friend) => friend.id === Number(profileID));
+  // TODO fix buttons events and manage them
+  // useEffect(() => {
+  //   const checkUser = pendingUsers.find(
+  //     (friend) => friend.id === Number(profileID)
+  //   );
+  //   if (checkUser) {
+  //     setIsPending(false);
+  //   }
+  // }, [pendingReq]);
 
   return (
     <div className="flex flex-col md:flex-row items-center md:my-16 my-10">
@@ -70,10 +95,10 @@ const ProfileHeader: React.FC = () => {
       <div className="flex md:items-start md:mt-10">
         {user.id !== Number(profileID) ? (
           <div className="mt-2 text-gray-800 flex">
-            {isPpending && (
+            {isPending && (
               <div className="flex">
                 <Button
-                  func={acceptFriend}
+                  funcWithParam={() => acceptFriend(userProfile.id)}
                   type={"accept"}
                   color={"yellow-400"}
                 />
@@ -84,7 +109,7 @@ const ProfileHeader: React.FC = () => {
                 />
               </div>
             )}
-            {!isFriend && !isPpending && (
+            {!isFriend && !isPending && (
               <Button func={addFriend} type={"adduser"} color="yellow-400" />
             )}
             {isFriend && (

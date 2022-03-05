@@ -10,7 +10,7 @@ const Login = () => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    if (Cookies.get("jwt")) {
+    if (Cookies.get("accessToken")) {
       dispatch(fetchCurrentUser());
       dispatch(fetchAllUsers());
     }

@@ -8,12 +8,14 @@ const initialState: {
   acceptReq: boolean;
   pendingReq: boolean;
   pendingUsers: User[];
+  friends: User[];
 } = {
   isFriend: false,
   sentReq: false,
   acceptReq: false,
   pendingReq: false,
   pendingUsers: [],
+  friends: new Array(),
 };
 
 // fetch the friends managment endpoints
@@ -30,7 +32,7 @@ export const fetchRequestStatus = createAsyncThunk(
         },
         {
           headers: {
-            authorization: `Bearer ${Cookies.get("jwt")}`,
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
           },
         }
       );
@@ -49,13 +51,35 @@ export const fetchPendingStatus = createAsyncThunk(
         `http://localhost:3000/users/pending-friends`,
         {
           headers: {
-            authorization: `Bearer ${Cookies.get("jwt")}`,
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
           },
         }
       );
-      console.log("pending friends >> ", response.data);
+      // console.log("pending friends >> ", response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
+
+export const acceptFriendRequest = createAsyncThunk(
+  "user/acceptFriendRequest",
+  async (id: number, _api) => {
+    try {
+      const response = await axios.patch(
+        "http://localhost:3000/users/friend-accept",
+        { applicantId: id },
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      console.log("acept friends =>", response.data);
+
+      return _api.fulfillWithValue(response.data);
+    } catch (error) {
       return _api.rejectWithValue(error);
     }
   }
@@ -64,7 +88,13 @@ export const fetchPendingStatus = createAsyncThunk(
 export const friendsManagementSlice = createSlice({
   name: "friendsManagment",
   initialState,
-  reducers: {},
+  reducers: {
+    addToFriendsList: (state, action: PayloadAction<User>) => {
+      const tsts: User[] = state.friends;
+      tsts.push(action.payload);
+      console.log(tsts);
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(fetchRequestStatus.fulfilled, (state, action: any) => {
       state.sentReq = false;
@@ -77,8 +107,16 @@ export const friendsManagementSlice = createSlice({
       state.pendingReq = true;
       state.acceptReq = false;
     });
+    builder.addCase(acceptFriendRequest.fulfilled, (state, action: any) => {
+      state.friends.push(action.payload);
+      state.sentReq = false;
+      state.pendingReq = false;
+      state.acceptReq = true;
+    });
   },
 });
+
+export const { addToFriendsList } = friendsManagementSlice.actions;
 
 export default friendsManagementSlice.reducer;
 

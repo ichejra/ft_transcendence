@@ -2,17 +2,29 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { AiOutlineRight } from "react-icons/ai";
 import UsersModal from "../modals/ConfirmationModal";
-import { useAppSelector } from "../../app/hooks";
 import { FaUsersSlash } from "react-icons/fa";
+import { User, fetchUserFriends } from "../../features/userProfileSlice";
+import { useEffect } from "react";
+import { useAppDispatch } from "../../app/hooks";
 
-const FriendsList: React.FC = () => {
+interface Props {
+  friends: User[];
+}
+
+const FriendsList: React.FC<Props> = ({ friends }) => {
+  const dispatch = useAppDispatch();
   const [confirmationModal, setConfirmationModal] = useState(false);
-  const { friends } = useAppSelector((state) => state.user);
+  console.log("frds: ", friends);
+
+  useEffect(() => {
+    dispatch(fetchUserFriends());
+  }, []);
+
   return (
     <div className="lg:w-1/4 pb-12 ">
       <div className="flex justify-between">
         <h1 className="text-xl font-bold p-2">Friends</h1>
-        <Link to="/profile/1/list">
+        <Link to="/profile/list">
           <div className="cursor-pointer flex items-center font-bold text-gray-600 hover:text-yellow-400 transition duration-300">
             See All
             <AiOutlineRight />
