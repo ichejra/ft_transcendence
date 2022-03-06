@@ -7,6 +7,9 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { Socket } from 'socket.io';
+import { User } from 'src/users/entities/user.entity';
+
 
 @WebSocketGateway({
   cors: {
@@ -18,6 +21,8 @@ export class GameGateway
 {
   @WebSocketServer()
   server; //https://docs.nestjs.com/websockets/gateways#server
+  @SubscribeMessage('join_game')
+  joinGame(client: Socket, user: User): void {}
   @SubscribeMessage('message')
   //when a client emits the message, The handleEvent() method will be executed.
   handleConnection(@MessageBody() message: string): void {
@@ -43,3 +48,6 @@ export class GameGateway
 //   }
 
 // }
+
+
+
