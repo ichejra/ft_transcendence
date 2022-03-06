@@ -2,12 +2,19 @@ import { FaUserFriends } from "react-icons/fa";
 import { IoMdTime } from "react-icons/io";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import EditProfileModal from "../modals/EditProfileModal";
-import { editUserProfile, User } from "../../features/userProfileSlice";
+import {
+  editUserProfile,
+  fetchAllUsers,
+  User,
+} from "../../features/userProfileSlice";
 import { useParams } from "react-router";
 import Button from "../utils/Button";
-import { acceptFriendRequest } from "../../features/friendsManagentSlice";
-import { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
+import Cookies from "js-cookie";
+import {
+  fetchPendingStatus,
+  fetchRequestStatus,
+} from "../../features/friendsManagmentSlice";
 
 interface Props {
   user: User;
@@ -16,40 +23,29 @@ interface Props {
 }
 
 const ProfileHeader: React.FC<Props> = ({ user, users, friends }) => {
-  const [isPending, setIsPending] = useState(true);
-  const [isFriend, setIsFriend] = useState(true);
+  //! useState
+  const [isPending, setIsPending] = useState(false);
+  const [isFriend, setIsFriend] = useState(false);
+  const [userProfile, setUserProfile] = useState(user);
+
+  //! useParams
   const { id: profileID } = useParams();
+
+  //! useAppDispatch
   const dispatch = useAppDispatch();
-  const { pendingUsers, pendingReq, acceptReq } = useAppSelector(
-    (state) => state.friends
-  );
+
+  //! useAppSelector
   const { editProfile } = useAppSelector((state) => state.user);
-  const userProfile =
-    users.find((user) => user.id === Number(profileID)) || user;
 
-  const addFriend = () => {
-    console.log("Friend Added");
-  };
-
-  const acceptFriend = (id: number) => {
-    const checkFriend = friends.find(
-      (friend) => friend.id === Number(profileID)
-    );
-    dispatch(acceptFriendRequest(id));
-    if (checkFriend) {
-      setIsFriend(true);
+  const addFriend = (id: number) => {
+    if (Cookies.get("accessToken")) {
+      dispatch(fetchRequestStatus(id.toString()));
+      dispatch(fetchPendingStatus());
+      setIsPending(true);
     }
-    console.log(
-      "Friend " +
-        users.find((user) => user.id === id)?.display_name +
-        " accepted"
-    );
   };
 
-  const rejectFriend = () => {
-    console.log("Friend rejected");
-  };
-
+  //TODO setup the unfriend user function
   const removeFriend = () => {
     console.log("Friend removed");
   };
@@ -58,15 +54,27 @@ const ProfileHeader: React.FC<Props> = ({ user, users, friends }) => {
     dispatch(editUserProfile(true));
     console.log("profile updated");
   };
-  // TODO fix buttons events and manage them
-  // useEffect(() => {
-  //   const checkUser = pendingUsers.find(
-  //     (friend) => friend.id === Number(profileID)
-  //   );
-  //   if (checkUser) {
-  //     setIsPending(false);
-  //   }
-  // }, [pendingReq]);
+
+  useEffect(() => {
+    setUserProfile((userprofile) => {
+      userprofile = users.find((user) => user.id === Number(profileID)) || user;
+      return userprofile;
+    });
+
+    setIsFriend((state) => {
+      state =
+        friends.find((user) => user.id === Number(profileID)) === undefined
+          ? false
+          : true;
+      return state;
+    });
+  }, [profileID]);
+
+  useEffect(() => {
+    if (Cookies.get("accessToken")) {
+      dispatch(fetchAllUsers());
+    }
+  }, []);
 
   return (
     <div className="flex flex-col md:flex-row items-center md:my-16 my-10">
@@ -95,22 +103,12 @@ const ProfileHeader: React.FC<Props> = ({ user, users, friends }) => {
       <div className="flex md:items-start md:mt-10">
         {user.id !== Number(profileID) ? (
           <div className="mt-2 text-gray-800 flex">
-            {isPending && (
-              <div className="flex">
-                <Button
-                  funcWithParam={() => acceptFriend(userProfile.id)}
-                  type={"accept"}
-                  color={"yellow-400"}
-                />
-                <Button
-                  func={rejectFriend}
-                  type={"reject"}
-                  color={"gray-200"}
-                />
-              </div>
-            )}
             {!isFriend && !isPending && (
-              <Button func={addFriend} type={"adduser"} color="yellow-400" />
+              <Button
+                func={() => addFriend(userProfile.id)}
+                type={"adduser"}
+                color="yellow-400"
+              />
             )}
             {isFriend && (
               <Button func={removeFriend} type="remove" color="gray-200" />

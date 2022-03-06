@@ -165,9 +165,17 @@ export const userProfileSlice = createSlice({
     builder.addCase(fetchNoRelationUsers.fulfilled, (state, action: any) => {
       state.nrusers = action.payload;
     });
+    builder.addCase(fetchNoRelationUsers.rejected, (state, action: any) => {
+      state.isError = { isError: true, message: action.payload };
+    });
+
     builder.addCase(fetchAllUsers.fulfilled, (state, action: any) => {
       state.users = action.payload;
     });
+    builder.addCase(fetchAllUsers.rejected, (state, action: any) => {
+      state.isError = { isError: true, message: action.payload };
+    });
+
     builder.addCase(fetchCurrentUser.fulfilled, (state, action: any) => {
       state.user = action.payload;
       state.isLoggedIn = true;
@@ -175,14 +183,19 @@ export const userProfileSlice = createSlice({
     builder.addCase(fetchCurrentUser.rejected, (state, action: any) => {
       state.isError = { isError: true, message: action.payload };
     });
+
     builder.addCase(completeProfileInfo.fulfilled, (state, action: any) => {
       state.user = action.payload;
     });
     builder.addCase(completeProfileInfo.rejected, (state, action: any) => {
       state.isError = { isError: true, message: action.payload };
     });
+
     builder.addCase(fetchUserFriends.fulfilled, (state, action: any) => {
       state.friends = action.payload;
+    });
+    builder.addCase(fetchUserFriends.rejected, (state, action: any) => {
+      state.isError = { isError: true, message: action.payload };
     });
   },
 });

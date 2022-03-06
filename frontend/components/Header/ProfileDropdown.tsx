@@ -14,7 +14,7 @@ import {
   fetchCurrentUser,
   showNotificationsList,
 } from "../../features/userProfileSlice";
-import { fetchPendingStatus } from "../../features/friendsManagentSlice";
+import { fetchPendingStatus } from "../../features/friendsManagmentSlice";
 
 const ProfileDropdown = () => {
   const [dropDown, setDropdown] = useState(false);
@@ -64,7 +64,9 @@ const ProfileDropdown = () => {
   }, [logout]);
 
   useEffect(() => {
-    dispatch(fetchPendingStatus());
+    if (Cookies.get("accessToken")) {
+      dispatch(fetchPendingStatus());
+    }
   }, []);
 
   return (

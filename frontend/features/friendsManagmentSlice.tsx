@@ -15,11 +15,8 @@ const initialState: {
   acceptReq: false,
   pendingReq: false,
   pendingUsers: [],
-  friends: new Array(),
+  friends: [],
 };
-
-// fetch the friends managment endpoints
-// friends array fetch
 
 export const fetchRequestStatus = createAsyncThunk(
   "user/fetchRequestStatus",
@@ -88,13 +85,7 @@ export const acceptFriendRequest = createAsyncThunk(
 export const friendsManagementSlice = createSlice({
   name: "friendsManagment",
   initialState,
-  reducers: {
-    addToFriendsList: (state, action: PayloadAction<User>) => {
-      const tsts: User[] = state.friends;
-      tsts.push(action.payload);
-      console.log(tsts);
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder.addCase(fetchRequestStatus.fulfilled, (state, action: any) => {
       state.sentReq = false;
@@ -115,8 +106,6 @@ export const friendsManagementSlice = createSlice({
     });
   },
 });
-
-export const { addToFriendsList } = friendsManagementSlice.actions;
 
 export default friendsManagementSlice.reducer;
 

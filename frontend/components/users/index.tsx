@@ -2,19 +2,18 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { FaUsersSlash } from "react-icons/fa";
+import Cookies from "js-cookie";
 import {
   fetchNoRelationUsers,
   fetchAllUsers,
 } from "../../features/userProfileSlice";
-import Cookies from "js-cookie";
 import {
   fetchRequestStatus,
   fetchPendingStatus,
-} from "../../features/friendsManagentSlice";
+} from "../../features/friendsManagmentSlice";
 
 const AllUsers: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { pendingReq } = useAppSelector((state) => state.friends);
   const {
     nrusers: users,
     user: { id: userID },
@@ -66,15 +65,19 @@ interface Props {
 const User: React.FC<Props> = ({ id, avatar_url, display_name, user_name }) => {
   const dispatch = useAppDispatch();
 
-  const { isFriend, pendingUsers } = useAppSelector((state) => state.friends);
+  const { pendingUsers } = useAppSelector((state) => state.friends);
 
   const sendFriendRequest = (id: number) => {
-    dispatch(fetchRequestStatus(id.toString()));
-    dispatch(fetchPendingStatus());
+    if (Cookies.get("accessToken")) {
+      dispatch(fetchRequestStatus(id.toString()));
+      dispatch(fetchPendingStatus());
+    }
   };
 
   useEffect(() => {
-    dispatch(fetchNoRelationUsers());
+    if (Cookies.get("accessToken")) {
+      dispatch(fetchNoRelationUsers());
+    }
   }, [pendingUsers]);
 
   return (
@@ -96,35 +99,20 @@ const User: React.FC<Props> = ({ id, avatar_url, display_name, user_name }) => {
           </p>
         </div>
       </div>
-      {isFriend ? (
-        <div className="mt-2 text-gray-800 flex">
-          <button
-            // onClick={() => setConfirmationModal(true)}
-            className="hover:bg-gray-100 bg-gray-200 mr-2 px-2 py-1 rounded-md font-bold transition duration-300"
-          >
-            unfriend
-          </button>
-          <Link to={`/profile/${id}`}>
-            <button className="hover:bg-yellow-300 bg-yellow-400 mr-2 px-2 py-1 rounded-md font-bold transition duration-300">
-              view profile
-            </button>
-          </Link>
-        </div>
-      ) : (
-        <div className="mt-2 text-gray-800 flex w-5/6 justify-center">
-          <div className="w-full text-center">
-            <div className="hover:bg-gray-100 bg-gray-200 px-2 py-1 w-full mb-2 rounded-md font-bold transition duration-300">
-              <Link to={`/profile/${id}`}>profile</Link>
-            </div>
-            <button
-              onClick={() => sendFriendRequest(id)}
-              className="hover:bg-yellow-300 bg-yellow-400 px-2 py-1 w-full rounded-md font-bold transition duration-300"
-            >
-              Add Friend
-            </button>
+
+      <div className="mt-2 text-gray-800 flex w-5/6 justify-center">
+        <div className="w-full text-center">
+          <div className="hover:bg-gray-100 bg-gray-200 px-2 py-1 w-full mb-2 rounded-md font-bold transition duration-300">
+            <Link to={`/profile/${id}`}>View Profile</Link>
           </div>
+          <button
+            onClick={() => sendFriendRequest(id)}
+            className="hover:bg-yellow-300 bg-yellow-400 px-2 py-1 w-full rounded-md font-bold transition duration-300"
+          >
+            Add Friend
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 };
