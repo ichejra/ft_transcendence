@@ -28,13 +28,13 @@ export class GameGateway
   server; //https://docs.nestjs.com/websockets/gateways#server
 
   handleConnection(client: Socket): void {
-    // this.broadcast.emit('message', message);
+    // TODO: handle connection
   }
   handleDisconnect(client: Socket): void {
-    // this.broadcast.emit('message', message);
+    // TODO: handle disconnection
   }
   afterInit(server: any): any {
-    // this.broadcast.emit('message', message);
+    // ?
   }
 
   @SubscribeMessage('join_game')
@@ -58,6 +58,17 @@ export class GameGateway
       this.joinGame([first, second], '');
     }
   }
+
+  private clearQueue(game: GameObj) : void {
+    this.queue.delete(game.getPlayersSockets()[0]);
+    this.queue.delete(game.getPlayersSockets()[1]);
+  }
+
+
+
+
+
+
 }
 
 
