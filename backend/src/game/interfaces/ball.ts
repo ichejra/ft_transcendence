@@ -18,15 +18,15 @@ class Ball {
     this._velocityY = 5;
   }
 
-  public moveBall() : void {
-     this._x += this._velocityX;
-     this._y += this._velocityY;
-     //! in case
-      // if (
-      //   ball.y - ball.radius >= ctx.canvas.height ||
-      //   ball.y + ball.radius <= 0
-      // )
-      //   ball.y -= ball.velocityY;
+  public moveBall(): void {
+    this._x += this._velocityX;
+    this._y += this._velocityY;
+    //! in case
+    // if (
+    //   ball.y - ball.radius >= ctx.canvas.height ||
+    //   ball.y + ball.radius <= 0
+    // )
+    //   ball.y -= ball.velocityY;
   }
   public resetBall = () => {
     this._x = Consts.CANVAS_W / 2;
@@ -59,7 +59,8 @@ class Ball {
       paddleLeft < ballRight &&
       paddleTop < ballBottom &&
       paddleRight > ballLeft &&
-      paddleBottom > ballTop);
+      paddleBottom > ballTop
+    );
   };
 
   public getX(): number {
@@ -67,6 +68,12 @@ class Ball {
   }
   public getY(): number {
     return this._y;
+  }
+  public setValocityX(velocityX: number): void {
+    this._velocityX = velocityX;
+  }
+  public setValocityY(velocityY: number): void {
+    this._velocityY = velocityY;
   }
   public getValocityX(): number {
     return this._velocityX;
@@ -76,6 +83,9 @@ class Ball {
   }
   public getSpeed(): number {
     return this._speed;
+  }
+  public setSpeed(newSpeed : number): void {
+    this._speed = newSpeed;
   }
 }
 

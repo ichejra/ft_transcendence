@@ -50,12 +50,14 @@ export class GameService {
   // }
   //! understanding purpose
   private readonly game: GameInterface
+  repo: any;
   constructor(
-    @InjectRepository(Game)
-    private gameRepository: Repository<Game>
-    ) {}
+    @InjectRepository(Game) gameRepository
+    ) {
+      this.repo = gameRepository;
+    }
 
     async insertGameData(data: GameDto) : Promise<Game> {
-      return this.gameRepository.save(data);
+      return this.repo.save(data);
     }
 }

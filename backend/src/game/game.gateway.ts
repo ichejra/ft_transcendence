@@ -9,7 +9,9 @@ import {
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { User } from 'src/users/entities/user.entity';
-
+import GameObj from 'src/game/interfaces/game';
+import Player from 'src/game/interfaces/player';
+import { Game } from './entities/game.entity';
 
 @WebSocketGateway({
   cors: {
@@ -19,35 +21,45 @@ import { User } from 'src/users/entities/user.entity';
 export class GameGateway
   implements OnGatewayConnection, OnGatewayInit, OnGatewayDisconnect
 {
+  private games: GameObj[] = [];
+  private queue: Set<Socket> = new Set<Socket>(); // players in queue
+
   @WebSocketServer()
   server; //https://docs.nestjs.com/websockets/gateways#server
-  @SubscribeMessage('join_game')
-  joinGame(client: Socket, user: User): void {}
-  @SubscribeMessage('message')
-  //when a client emits the message, The handleEvent() method will be executed.
-  handleConnection(@MessageBody() message: string): void {
+
+  handleConnection(client: Socket): void {
     // this.broadcast.emit('message', message);
   }
-  handleDisconnect(@MessageBody() message: string): void {
+  handleDisconnect(client: Socket): void {
     // this.broadcast.emit('message', message);
   }
   afterInit(server: any): any {
     // this.broadcast.emit('message', message);
   }
-  // handleMessage(@MessageBody() message: string): void {
-  //   // this.broadcast.emit('message', message);
-  // }
+
+  @SubscribeMessage('join_game')
+  private joinGame(socketsArr: Socket[], payload: any): void {
+    const newGame = new GameObj(
+      new Player(socketsArr[0], true),
+      new Player(socketsArr[1], false),
+    );
+    this.games.push(newGame);
+  }
+
+  @SubscribeMessage('join_queue')
+  private joinQueue(client: Socket, payload: any): void {
+    if (this.queue.has(client) === true)
+      return;
+    this.queue.add(client);
+    if (this.queue.size > 1)
+    {
+      const [first] = this.queue;
+      const [, second] = this.queue;
+      this.joinGame([first, second], '');
+    }
+  }
 }
-// import { MessageBody, SubscribeMessage, WebSocketGateway } from "@nestjs/websockets";
 
-// @WebSocketGateway(3000, {namespace: 'game'})
-// export class GameGateway {
-//   @SubscribeMessage('join_game')
-//   joinGame(client: socket) : void {
-
-//   }
-
-// }
 
 
 
