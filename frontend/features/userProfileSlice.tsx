@@ -56,7 +56,7 @@ export const fetchNoRelationUsers = createAsyncThunk(
         "http://localhost:3000/users/no_relation",
         {
           headers: {
-            authorization: `Bearer ${Cookies.get("jwt")}`,
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
           },
         }
       );
@@ -75,7 +75,7 @@ export const fetchAllUsers = createAsyncThunk(
         "http://localhost:3000/users/all_users",
         {
           headers: {
-            authorization: `Bearer ${Cookies.get("jwt")}`,
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
           },
         }
       );
@@ -94,7 +94,7 @@ export const fetchCurrentUser = createAsyncThunk(
     try {
       const response = await axios.get("http://localhost:3000/users/me", {
         headers: {
-          authorization: `Bearer ${Cookies.get("jwt")}`,
+          authorization: `Bearer ${Cookies.get("accessToken")}`,
         },
       });
       return _api.fulfillWithValue(response.data);
@@ -110,9 +110,11 @@ export const fetchUserFriends = createAsyncThunk(
     try {
       const response = await axios.get("http://localhost:3000/users/friends", {
         headers: {
-          authorization: `Bearer ${Cookies.get("jwt")}`,
+          authorization: `Bearer ${Cookies.get("accessToken")}`,
         },
       });
+      console.log("Friends => ", response.data);
+
       return _api.fulfillWithValue(response.data);
     } catch (error) {
       return _api.rejectWithValue(error);
@@ -129,7 +131,7 @@ export const completeProfileInfo = createAsyncThunk(
         data,
         {
           headers: {
-            authorization: `Bearer ${Cookies.get("jwt")}`,
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
             "Content-Type": "multipart/form-data",
           },
         }
@@ -146,7 +148,7 @@ export const userProfileSlice = createSlice({
   initialState,
   reducers: {
     logOutUser: (state = initialState) => {
-      Cookies.remove("jwt");
+      Cookies.remove("accessToken");
       state.isLoggedIn = false;
     },
     editUserProfile: (state = initialState, action: PayloadAction<boolean>) => {
@@ -163,9 +165,17 @@ export const userProfileSlice = createSlice({
     builder.addCase(fetchNoRelationUsers.fulfilled, (state, action: any) => {
       state.nrusers = action.payload;
     });
+    builder.addCase(fetchNoRelationUsers.rejected, (state, action: any) => {
+      state.isError = { isError: true, message: action.payload };
+    });
+
     builder.addCase(fetchAllUsers.fulfilled, (state, action: any) => {
       state.users = action.payload;
     });
+    builder.addCase(fetchAllUsers.rejected, (state, action: any) => {
+      state.isError = { isError: true, message: action.payload };
+    });
+
     builder.addCase(fetchCurrentUser.fulfilled, (state, action: any) => {
       state.user = action.payload;
       state.isLoggedIn = true;
@@ -173,14 +183,19 @@ export const userProfileSlice = createSlice({
     builder.addCase(fetchCurrentUser.rejected, (state, action: any) => {
       state.isError = { isError: true, message: action.payload };
     });
+
     builder.addCase(completeProfileInfo.fulfilled, (state, action: any) => {
       state.user = action.payload;
     });
     builder.addCase(completeProfileInfo.rejected, (state, action: any) => {
       state.isError = { isError: true, message: action.payload };
     });
+
     builder.addCase(fetchUserFriends.fulfilled, (state, action: any) => {
       state.friends = action.payload;
+    });
+    builder.addCase(fetchUserFriends.rejected, (state, action: any) => {
+      state.isError = { isError: true, message: action.payload };
     });
   },
 });

@@ -15,20 +15,19 @@ import { AuthRoute, CompleteProfile } from "../components/privateRoutes";
 import CompleteUserProfileInfo from "../components/auth/CompleteUserProfileInfo";
 import { useAppSelector, useAppDispatch } from "../app/hooks";
 import { useEffect } from "react";
-import { fetchAllUsers, fetchCurrentUser } from "../features/userProfileSlice";
+import { fetchCurrentUser } from "../features/userProfileSlice";
 import Cookies from "js-cookie";
 const Home: NextPage = () => {
   const { isLoggedIn } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    if (Cookies.get("jwt")) {
+    if (Cookies.get("accessToken")) {
       dispatch(fetchCurrentUser());
-      dispatch(fetchAllUsers());
     }
   }, []);
 
-  if (Cookies.get("jwt") && !isLoggedIn) {
+  if (Cookies.get("accessToken") && !isLoggedIn) {
     return <div className="loading"></div>;
   }
   return (
@@ -79,7 +78,7 @@ const Home: NextPage = () => {
           }
         ></Route>
         <Route
-          path="/profile/:id/list"
+          path="/profile/list"
           element={
             <AuthRoute>
               <CompleteProfile>

@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import loggedInReducer from "../features/isLoggedInTestSlice";
 import sidebarReducer from "../features/sidebarSlice";
 import userProfileReducer from "../features/userProfileSlice";
-import friendsManagentReducer from "../features/friendsManagentSlice";
+import friendsManagentReducer from "../features/friendsManagmentSlice";
 
 export const store = configureStore({
   reducer: {

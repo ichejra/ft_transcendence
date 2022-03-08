@@ -8,16 +8,15 @@ const initialState: {
   acceptReq: boolean;
   pendingReq: boolean;
   pendingUsers: User[];
+  friends: User[];
 } = {
   isFriend: false,
   sentReq: false,
   acceptReq: false,
   pendingReq: false,
   pendingUsers: [],
+  friends: [],
 };
-
-// fetch the friends managment endpoints
-// friends array fetch
 
 export const fetchRequestStatus = createAsyncThunk(
   "user/fetchRequestStatus",
@@ -30,7 +29,7 @@ export const fetchRequestStatus = createAsyncThunk(
         },
         {
           headers: {
-            authorization: `Bearer ${Cookies.get("jwt")}`,
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
           },
         }
       );
@@ -49,13 +48,35 @@ export const fetchPendingStatus = createAsyncThunk(
         `http://localhost:3000/users/pending-friends`,
         {
           headers: {
-            authorization: `Bearer ${Cookies.get("jwt")}`,
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
           },
         }
       );
-      console.log("pending friends >> ", response.data);
+      // console.log("pending friends >> ", response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
+
+export const acceptFriendRequest = createAsyncThunk(
+  "user/acceptFriendRequest",
+  async (id: number, _api) => {
+    try {
+      const response = await axios.patch(
+        "http://localhost:3000/users/friend-accept",
+        { applicantId: id },
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      console.log("acept friends =>", response.data);
+
+      return _api.fulfillWithValue(response.data);
+    } catch (error) {
       return _api.rejectWithValue(error);
     }
   }
@@ -76,6 +97,12 @@ export const friendsManagementSlice = createSlice({
       state.sentReq = true;
       state.pendingReq = true;
       state.acceptReq = false;
+    });
+    builder.addCase(acceptFriendRequest.fulfilled, (state, action: any) => {
+      state.friends.push(action.payload);
+      state.sentReq = false;
+      state.pendingReq = false;
+      state.acceptReq = true;
     });
   },
 });

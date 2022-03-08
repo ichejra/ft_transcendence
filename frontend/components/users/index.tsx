@@ -2,25 +2,27 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { FaUsersSlash } from "react-icons/fa";
-import { fetchNoRelationUsers } from "../../features/userProfileSlice";
 import Cookies from "js-cookie";
 import {
-  sendFriendReq,
-  cancelFriendReq,
+  fetchNoRelationUsers,
+  fetchAllUsers,
+} from "../../features/userProfileSlice";
+import {
   fetchRequestStatus,
-} from "../../features/friendsManagentSlice";
+  fetchPendingStatus,
+} from "../../features/friendsManagmentSlice";
 
 const AllUsers: React.FC = () => {
   const dispatch = useAppDispatch();
-
   const {
     nrusers: users,
     user: { id: userID },
   } = useAppSelector((state) => state.user);
 
   useEffect(() => {
-    if (Cookies.get("jwt")) {
+    if (Cookies.get("accessToken")) {
       dispatch(fetchNoRelationUsers());
+      dispatch(fetchAllUsers());
     }
   }, []);
 
@@ -62,32 +64,21 @@ interface Props {
 
 const User: React.FC<Props> = ({ id, avatar_url, display_name, user_name }) => {
   const dispatch = useAppDispatch();
-  const [sentStatus, setSentSatatus] = useState(false);
-  const [cancelStatus, setCancelStatus] = useState(false);
-  const [sentRequest, setSentRequest] = useState(false);
 
-  const { isFriend, pendingReq, sentReq, acceptReq } = useAppSelector(
-    (state) => state.friends
-  );
-
-  const cancelFriendRequest = () => {
-    dispatch(cancelFriendReq());
-    setSentRequest(false);
-    setCancelStatus(true);
-    setTimeout(() => {
-      setCancelStatus(false);
-    }, 2000);
-  };
+  const { pendingUsers } = useAppSelector((state) => state.friends);
 
   const sendFriendRequest = (id: number) => {
-    // dispatch(sendFriendReq(id));
-    dispatch(fetchRequestStatus(id.toString()));
-    setSentRequest(true);
-    setSentSatatus(true);
-    setTimeout(() => {
-      setSentSatatus(false);
-    }, 2000);
+    if (Cookies.get("accessToken")) {
+      dispatch(fetchRequestStatus(id.toString()));
+      dispatch(fetchPendingStatus());
+    }
   };
+
+  useEffect(() => {
+    if (Cookies.get("accessToken")) {
+      dispatch(fetchNoRelationUsers());
+    }
+  }, [pendingUsers]);
 
   return (
     <div
@@ -108,56 +99,20 @@ const User: React.FC<Props> = ({ id, avatar_url, display_name, user_name }) => {
           </p>
         </div>
       </div>
-      {isFriend ? (
-        <div className="mt-2 text-gray-800 flex">
+
+      <div className="mt-2 text-gray-800 flex w-5/6 justify-center">
+        <div className="w-full text-center">
+          <div className="hover:bg-gray-100 bg-gray-200 px-2 py-1 w-full mb-2 rounded-md font-bold transition duration-300">
+            <Link to={`/profile/${id}`}>View Profile</Link>
+          </div>
           <button
-            // onClick={() => setConfirmationModal(true)}
-            className="hover:bg-gray-100 bg-gray-200 mr-2 px-2 py-1 rounded-md font-bold transition duration-300"
+            onClick={() => sendFriendRequest(id)}
+            className="hover:bg-yellow-300 bg-yellow-400 px-2 py-1 w-full rounded-md font-bold transition duration-300"
           >
-            unfriend
+            Add Friend
           </button>
-          <Link to={`/profile/${id}`}>
-            <button className="hover:bg-yellow-300 bg-yellow-400 mr-2 px-2 py-1 rounded-md font-bold transition duration-300">
-              profile
-            </button>
-          </Link>
         </div>
-      ) : (
-        <div className="mt-2 text-gray-800 flex w-5/6 justify-center">
-          {sentRequest ? (
-            <div className="w-full text-center">
-              <button
-                onClick={cancelFriendRequest}
-                className="hover:bg-gray-100 bg-gray-200 px-2 py-1 w-full rounded-md font-bold transition duration-300"
-              >
-                Cancel
-              </button>
-              {sentStatus && (
-                <p className="text-center text-sm bg-gray-100 text-yellow-400 bg-opacity-50">
-                  Request Sent
-                </p>
-              )}
-            </div>
-          ) : (
-            <div className="w-full text-center">
-              <div className="hover:bg-gray-100 bg-gray-200 px-2 py-1 w-full mb-2 rounded-md font-bold transition duration-300">
-                <Link to={`/profile/${id}`}>profile</Link>
-              </div>
-              <button
-                onClick={() => sendFriendRequest(id)}
-                className="hover:bg-yellow-300 bg-yellow-400 px-2 py-1 w-full rounded-md font-bold transition duration-300"
-              >
-                Add Friend
-              </button>
-              {cancelStatus && (
-                <p className="text-sm text-center bg-gray-100 text-yellow-400 bg-opacity-50">
-                  Request Cancelled
-                </p>
-              )}
-            </div>
-          )}
-        </div>
-      )}
+      </div>
     </div>
   );
 };

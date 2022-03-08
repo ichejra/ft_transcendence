@@ -2,32 +2,50 @@ import { FaUserFriends } from "react-icons/fa";
 import { IoMdTime } from "react-icons/io";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import EditProfileModal from "../modals/EditProfileModal";
-import { editUserProfile } from "../../features/userProfileSlice";
+import {
+  editUserProfile,
+  fetchAllUsers,
+  User,
+} from "../../features/userProfileSlice";
 import { useParams } from "react-router";
 import Button from "../utils/Button";
+import { useState, useEffect } from "react";
+import Cookies from "js-cookie";
+import {
+  fetchPendingStatus,
+  fetchRequestStatus,
+} from "../../features/friendsManagmentSlice";
 
-const ProfileHeader: React.FC = () => {
+interface Props {
+  user: User;
+  users: User[];
+  friends: User[];
+}
+
+const ProfileHeader: React.FC<Props> = ({ user, users, friends }) => {
+  //! useState
+  const [isPending, setIsPending] = useState(false);
+  const [isFriend, setIsFriend] = useState(false);
+  const [userProfile, setUserProfile] = useState(user);
+
+  //! useParams
   const { id: profileID } = useParams();
+
+  //! useAppDispatch
   const dispatch = useAppDispatch();
-  const { pendingUsers } = useAppSelector((state) => state.friends);
-  const { users, user, friends, editProfile } = useAppSelector(
-    (state) => state.user
-  );
-  const userProfile =
-    users.find((user) => user.id === Number(profileID)) || user;
 
-  const addFriend = () => {
-    console.log("Friend Added");
+  //! useAppSelector
+  const { editProfile } = useAppSelector((state) => state.user);
+
+  const addFriend = (id: number) => {
+    if (Cookies.get("accessToken")) {
+      dispatch(fetchRequestStatus(id.toString()));
+      dispatch(fetchPendingStatus());
+      setIsPending(true);
+    }
   };
 
-  const acceptFriend = () => {
-    console.log("Friend accepted");
-  };
-
-  const rejectFriend = () => {
-    console.log("Friend rejected");
-  };
-
+  //TODO setup the unfriend user function
   const removeFriend = () => {
     console.log("Friend removed");
   };
@@ -37,11 +55,26 @@ const ProfileHeader: React.FC = () => {
     console.log("profile updated");
   };
 
-  const isPpending = pendingUsers.find(
-    (friend) => friend.id === Number(profileID)
-  );
+  useEffect(() => {
+    setUserProfile((userprofile) => {
+      userprofile = users.find((user) => user.id === Number(profileID)) || user;
+      return userprofile;
+    });
 
-  const isFriend = friends.find((friend) => friend.id === Number(profileID));
+    setIsFriend((state) => {
+      state =
+        friends.find((user) => user.id === Number(profileID)) === undefined
+          ? false
+          : true;
+      return state;
+    });
+  }, [profileID]);
+
+  useEffect(() => {
+    if (Cookies.get("accessToken")) {
+      dispatch(fetchAllUsers());
+    }
+  }, []);
 
   return (
     <div className="flex flex-col md:flex-row items-center md:my-16 my-10">
@@ -70,22 +103,12 @@ const ProfileHeader: React.FC = () => {
       <div className="flex md:items-start md:mt-10">
         {user.id !== Number(profileID) ? (
           <div className="mt-2 text-gray-800 flex">
-            {isPpending && (
-              <div className="flex">
-                <Button
-                  func={acceptFriend}
-                  type={"accept"}
-                  color={"yellow-400"}
-                />
-                <Button
-                  func={rejectFriend}
-                  type={"reject"}
-                  color={"gray-200"}
-                />
-              </div>
-            )}
-            {!isFriend && !isPpending && (
-              <Button func={addFriend} type={"adduser"} color="yellow-400" />
+            {!isFriend && !isPending && (
+              <Button
+                func={() => addFriend(userProfile.id)}
+                type={"adduser"}
+                color="yellow-400"
+              />
             )}
             {isFriend && (
               <Button func={removeFriend} type="remove" color="gray-200" />

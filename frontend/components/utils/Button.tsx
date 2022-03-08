@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FaUserEdit, FaUserTimes } from "react-icons/fa";
 import { HiUserAdd, HiUserRemove } from "react-icons/hi";
 
 interface Props {
-  func: () => void;
+  func: (id: number) => void;
   type: string;
   color: string;
 }
