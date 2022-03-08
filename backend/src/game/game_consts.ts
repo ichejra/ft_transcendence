@@ -11,6 +11,7 @@ class Consts {
   static readonly BALL_MAX_SPEED = 15;
   static readonly PADDLE_W = 20;
   static readonly PADDLE_H = 100;
+  static readonly PADDLE_DIFF = 10;
   static readonly L_PADDLE_X = Consts.PADDLE_W;
   static readonly R_PADDLE_X = Consts.CANVAS_W - Consts.PADDLE_W;
   static readonly M_PADDLE_X = Consts.CANVAS_W / 2 - Consts.PADDLE_W / 2;
