@@ -10,6 +10,8 @@ import { UserChannel } from './channels/entities/user-channel.entity';
 import { UserFriends } from './users/entities/user-friends.entity';
 import { MailModule } from './mail/mail.module';
 import * as dotenv from 'dotenv';
+import { GameModule } from './game/game.module';
+import { Game } from './game/entities/game.entity';
 
 dotenv.config();
 @Module({
@@ -27,6 +29,7 @@ dotenv.config();
         UserFriends,
         Channel,
         UserChannel,
+        Game
       ],
       synchronize: true,
     }),
@@ -35,7 +38,8 @@ dotenv.config();
     ServeStaticModule.forRoot({
       rootPath: process.env.DESTINATION
     }),
-    MailModule,
+    GameModule,
+    MailModule
   ],
   controllers: [],
   providers: [],
