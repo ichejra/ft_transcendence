@@ -1,7 +1,8 @@
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Strategy } from 'passport-42';
-import { AuthService } from "./auth.service";
+import { UserDto } from "src/users/dto/user.dto";
+import { AuthService } from "../auth.service";
 @Injectable()
 export class IntraStrategy extends PassportStrategy(Strategy, '42') {
 
@@ -26,15 +27,14 @@ export class IntraStrategy extends PassportStrategy(Strategy, '42') {
     
     async validate(accessToken: string, refreshToken: string, profile: any, done: Function) : Promise<any> {
         const { id ,username, emails, photos, displayName } = profile;
-        return  {
+        const user: UserDto =  {
             id: id,
             user_name: username,
             email: emails[0].value,
             display_name: displayName,
             avatar_url: photos[0].value,
-            is_active: false,
-            state: false,
         }
+        done(null, user);
     }
 
 }

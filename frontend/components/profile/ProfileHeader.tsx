@@ -1,35 +1,66 @@
-import { Link } from "react-router-dom";
-import { FaUserEdit, FaUserFriends } from "react-icons/fa";
+import { FaUserFriends } from "react-icons/fa";
 import { IoMdTime } from "react-icons/io";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import EditProfileModal from "../modals/EditProfileModal";
 import { editUserProfile } from "../../features/userProfileSlice";
+import { useParams } from "react-router";
+import Button from "../utils/Button";
 
 const ProfileHeader: React.FC = () => {
+  const { id: profileID } = useParams();
   const dispatch = useAppDispatch();
-  const {
-    user: { avatar_url, user_name, display_name, friends },
-    editProfile,
-  } = useAppSelector((state) => state.user);
+  const { pendingUsers } = useAppSelector((state) => state.friends);
+  const { users, user, friends, editProfile } = useAppSelector(
+    (state) => state.user
+  );
+  const userProfile =
+    users.find((user) => user.id === Number(profileID)) || user;
+
+  const addFriend = () => {
+    console.log("Friend Added");
+  };
+
+  const acceptFriend = () => {
+    console.log("Friend accepted");
+  };
+
+  const rejectFriend = () => {
+    console.log("Friend rejected");
+  };
+
+  const removeFriend = () => {
+    console.log("Friend removed");
+  };
+
+  const editMyProfile = () => {
+    dispatch(editUserProfile(true));
+    console.log("profile updated");
+  };
+
+  const isPpending = pendingUsers.find(
+    (friend) => friend.id === Number(profileID)
+  );
+
+  const isFriend = friends.find((friend) => friend.id === Number(profileID));
 
   return (
     <div className="flex flex-col md:flex-row items-center md:my-16 my-10">
       <div className="md:mx-8 mb-2 md:mb-0">
         <img
-          src={avatar_url}
+          src={userProfile?.avatar_url}
           className="bg-gray-300 w-36 h-36 md:h-56 md:w-56 rounded-full"
         />
       </div>
       <div className="flex flex-col items-center md:items-start md:justify-center px-4 md:mr-48 mb-2 md:mb-0">
         <h1 className="text-xl font-mono md:text-2xl font-bold">
-          {display_name}
+          {userProfile?.display_name}
         </h1>
         <p className="text-gray-400 lowercase text-lg font-mono">
-          @{user_name}
+          @{userProfile?.user_name}
         </p>
         <span className="hidden md:flex text-gray-500 pt-4 mb-2 items-center">
           <FaUserFriends className="w-6 h-8 mr-2" />
-          <p className="text-lg font-medium">{friends?.length} friends</p>
+          <p className="text-lg font-medium">{friends.length} friends</p>
         </span>
         <span className="hidden md:flex text-gray-500 items-center">
           <IoMdTime className="w-6 h-8 mr-2" />
@@ -37,13 +68,32 @@ const ProfileHeader: React.FC = () => {
         </span>
       </div>
       <div className="flex md:items-start md:mt-10">
-        <button
-          onClick={() => dispatch(editUserProfile(true))}
-          className="hover:scale-110 transition duration-300 cursor-pointer flex items-center text-md md:text-lg md:mx-4 py-1 md:py-2 px-6 bg-yellow-400 text-gray-800 rounded-md"
-        >
-          <FaUserEdit className="w-6 h-8 mr-2" />
-          Edit Profile
-        </button>
+        {user.id !== Number(profileID) ? (
+          <div className="mt-2 text-gray-800 flex">
+            {isPpending && (
+              <div className="flex">
+                <Button
+                  func={acceptFriend}
+                  type={"accept"}
+                  color={"yellow-400"}
+                />
+                <Button
+                  func={rejectFriend}
+                  type={"reject"}
+                  color={"gray-200"}
+                />
+              </div>
+            )}
+            {!isFriend && !isPpending && (
+              <Button func={addFriend} type={"adduser"} color="yellow-400" />
+            )}
+            {isFriend && (
+              <Button func={removeFriend} type="remove" color="gray-200" />
+            )}
+          </div>
+        ) : (
+          <Button func={editMyProfile} type="edit" color="yellow-400" />
+        )}
       </div>
       {editProfile && <EditProfileModal />}
     </div>
@@ -51,3 +101,12 @@ const ProfileHeader: React.FC = () => {
 };
 
 export default ProfileHeader;
+
+/* 
+send request => 
+  - sender: status pending:  sent msg
+  - reciever: status pending: accept msg
+accept request => 
+  - sender: status accepted: unfriend msg
+  - reciever: status accepted: unfriend msg
+*/

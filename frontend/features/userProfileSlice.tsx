@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
-import UserProfile from "../components/profile/Profile";
 import axios from "axios";
 
 interface Err {
@@ -8,22 +7,25 @@ interface Err {
   message: string;
 }
 
-interface User {
+export interface User {
   id: number;
-  display_name?: string;
-  user_name?: string;
+  display_name: string;
+  user_name: string;
   email?: string;
   avatar_url: string;
   is_active: boolean;
   state: boolean;
-  friends?: string[];
 }
 interface UserState {
   isLoading: boolean;
   isError: Err;
   user: User;
+  users: User[];
+  nrusers: User[];
+  friends: User[];
   isLoggedIn: boolean;
   editProfile: boolean;
+  showNotifList: boolean;
 }
 
 const initialState: UserState = {
@@ -38,10 +40,53 @@ const initialState: UserState = {
     avatar_url: "",
     is_active: false,
     state: false,
-    friends: [],
   },
+  friends: [],
+  users: [],
+  nrusers: [],
   editProfile: false,
+  showNotifList: false,
 };
+
+export const fetchNoRelationUsers = createAsyncThunk(
+  "users/fetchNoRelationUsers",
+  async (_, _api) => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/users/no_relation",
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("jwt")}`,
+          },
+        }
+      );
+      return _api.fulfillWithValue(response.data);
+    } catch (error) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
+
+export const fetchAllUsers = createAsyncThunk(
+  "users/fetchAllUsers",
+  async (_, _api) => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/users/all_users",
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("jwt")}`,
+          },
+        }
+      );
+      console.log("==>", response.data);
+
+      return _api.fulfillWithValue(response.data);
+    } catch (error) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
 
 export const fetchCurrentUser = createAsyncThunk(
   "users/fetchUserStatus",
@@ -55,6 +100,22 @@ export const fetchCurrentUser = createAsyncThunk(
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const fetchUserFriends = createAsyncThunk(
+  "users/fetchUserFriends",
+  async (_, _api) => {
+    try {
+      const response = await axios.get("http://localhost:3000/users/friends", {
+        headers: {
+          authorization: `Bearer ${Cookies.get("jwt")}`,
+        },
+      });
+      return _api.fulfillWithValue(response.data);
+    } catch (error) {
+      return _api.rejectWithValue(error);
     }
   }
 );
@@ -86,14 +147,25 @@ export const userProfileSlice = createSlice({
   reducers: {
     logOutUser: (state = initialState) => {
       Cookies.remove("jwt");
-      Cookies.remove("user");
       state.isLoggedIn = false;
     },
     editUserProfile: (state = initialState, action: PayloadAction<boolean>) => {
       state.editProfile = action.payload;
     },
+    showNotificationsList: (
+      state = initialState,
+      action: PayloadAction<boolean>
+    ) => {
+      state.showNotifList = action.payload;
+    },
   },
   extraReducers: (builder) => {
+    builder.addCase(fetchNoRelationUsers.fulfilled, (state, action: any) => {
+      state.nrusers = action.payload;
+    });
+    builder.addCase(fetchAllUsers.fulfilled, (state, action: any) => {
+      state.users = action.payload;
+    });
     builder.addCase(fetchCurrentUser.fulfilled, (state, action: any) => {
       state.user = action.payload;
       state.isLoggedIn = true;
@@ -107,9 +179,13 @@ export const userProfileSlice = createSlice({
     builder.addCase(completeProfileInfo.rejected, (state, action: any) => {
       state.isError = { isError: true, message: action.payload };
     });
+    builder.addCase(fetchUserFriends.fulfilled, (state, action: any) => {
+      state.friends = action.payload;
+    });
   },
 });
 
-export const { editUserProfile, logOutUser } = userProfileSlice.actions;
+export const { showNotificationsList, editUserProfile, logOutUser } =
+  userProfileSlice.actions;
 
 export default userProfileSlice.reducer;

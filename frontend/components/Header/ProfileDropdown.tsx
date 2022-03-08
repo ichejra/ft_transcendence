@@ -12,18 +12,20 @@ import Cookies from "js-cookie";
 import {
   editUserProfile,
   fetchCurrentUser,
+  showNotificationsList,
 } from "../../features/userProfileSlice";
 
 const ProfileDropdown = () => {
   const [dropDown, setDropdown] = useState(false);
   const [logout, setLogout] = useState(false);
-  const [isNotification, setIsNotification] = useState(false);
-  const [showNotificationsList, setShowNotificationsList] = useState(false);
   const dropDownRef = useRef<any>(null);
   const notifRef = useRef<any>(null);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { user, isLoggedIn } = useAppSelector((state) => state.user);
+  const { user, isLoggedIn, showNotifList } = useAppSelector(
+    (state) => state.user
+  );
+  const { pendingUsers } = useAppSelector((state) => state.friends);
 
   useEffect(() => {
     //* a mousedown event that listen on the dropdown element to hide it when the click is outside it
@@ -35,18 +37,18 @@ const ProfileDropdown = () => {
       ) {
         setDropdown(false);
       } else if (
-        showNotificationsList &&
+        showNotifList &&
         notifRef.current &&
         !notifRef.current.contains(e.target)
       ) {
-        setShowNotificationsList(false);
+        dispatch(showNotificationsList(false));
       }
     };
     document.addEventListener("mousedown", updateDropDownStatus);
     return () => {
       document.removeEventListener("mousedown", updateDropDownStatus);
     };
-  }, [dropDown, showNotificationsList]);
+  }, [dropDown, showNotifList]);
 
   useEffect(() => {
     if (Cookies.get("jwt")) {
@@ -60,7 +62,6 @@ const ProfileDropdown = () => {
     }
   }, [logout]);
 
-  console.log("dropdownmenu--> ", user);
   return (
     <div className="flex">
       {!isLoggedIn ? (
@@ -76,25 +77,25 @@ const ProfileDropdown = () => {
             <div ref={notifRef}>
               <button
                 type="button"
-                onClick={() => setShowNotificationsList(!showNotificationsList)}
+                onClick={() => dispatch(showNotificationsList(!showNotifList))}
                 className="nav-container mr-4"
               >
-                {!isNotification ? (
+                {pendingUsers.length > 0 ? (
                   <IoMdNotifications size="2rem" />
                 ) : (
                   <IoMdNotificationsOutline size="2rem" />
                 )}
-                <div className="amount-notif-container">
-                  <p className="total-amount">6</p>
-                </div>
+                {pendingUsers.length > 0 && (
+                  <div className="amount-notif-container">
+                    <p className="total-amount">{pendingUsers.length}</p>
+                  </div>
+                )}
               </button>
               {/****************************/}
-              {showNotificationsList && (
+              {showNotifList && (
                 <div
                   className={`${
-                    showNotificationsList
-                      ? "show-dropdown-menu"
-                      : "hide-dropdown-menu"
+                    showNotifList ? "show-dropdown-menu" : "hide-dropdown-menu"
                   } notifications-list`}
                 >
                   <Notifications />
@@ -102,7 +103,8 @@ const ProfileDropdown = () => {
               )}
             </div>
           )}
-          {/******************************************************************************/}
+          {/*################################################################################*/}
+
           <div ref={dropDownRef}>
             {isLoggedIn && (
               <button

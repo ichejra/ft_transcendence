@@ -3,7 +3,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import  { diskStorage } from 'multer';
 import { UpdateResult, DeleteResult } from 'typeorm';
 
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UserDto } from "src/users/dto/user.dto";
 import { UsersService } from './users.service';
 import * as dotenv from 'dotenv';
@@ -44,14 +44,14 @@ export class UsersController {
   /* Route: logout the user 
     http://${host}:${port}/users/Logout
     -> clear user session
-  */
+  
     @Get('/logout')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
     logout(@Req() _req, @Res() _res): Promise<any> {
         return this.usersService.logout(_req, _res);
     }
-  /*
+  
     @Get(':id')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
@@ -90,10 +90,10 @@ export class UsersController {
     http://${host}:${port}/users/friend-request/:recipientId
     add to friends with pending status
     */
-  @Patch('/friend-request/:recipientId')
+  @Patch('/friend-request/')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  sendReqFriend(@Req() _req: any, @Param('recipientId') recipientId: number | string): Promise<User> {
+  sendReqFriend(@Req() _req: any, @Body('recipientId') recipientId: number | string): Promise<User> {
     return this.usersService.insertToFriends( Number(_req.user.id), Number(recipientId))
   }
 
@@ -101,30 +101,30 @@ export class UsersController {
     http://${host}:${port}/users/friend-accepte/:applicantId
     -> user who logged is the recipeint and the applicant will be accpeted
     */
-  @Patch('/friend-accept/:applicantId')
+  @Patch('/friend-accept/')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  acceptReqFriend(@Req() _req: any, @Param('applicantId') applicantId: number | string): Promise<User> {
+  acceptReqFriend(@Req() _req: any, @Body('applicantId') applicantId: number | string): Promise<User> {
     return this.usersService.acceptFriend( Number(_req.user.id), Number(applicantId));
   }
 
   /* Route: block friend
     http://${host}:${port}/users/friend-accept/:applicantId
     */
-  @Patch('/friend-block/:blockId')
+  @Patch('/friend-block/')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  blockFriend(@Req() _req: any, @Param('blockId') blockId: number | string): Promise<User> {
+  blockFriend(@Req() _req: any, @Body('blockId') blockId: number | string): Promise<User> {
     return this.usersService.blockFriend(Number(_req.user.id), Number(blockId));
   }
 
   /* Route: unblock friend
     http://${host}:${port}/users/friend-unblock/:unblockId
   */
-  @Patch('/friend-unblock/:unblockId')
+  @Patch('/friend-unblock/')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  unblockFriend(@Req() _req: any, @Param('unblockId') unblockId: number | string): Promise<User> {
+  unblockFriend(@Req() _req: any, @Body('unblockId') unblockId: number | string): Promise<User> {
     return this.usersService.unblockFriend(Number(_req.user.id) ,Number(unblockId));
   }
 
@@ -169,5 +169,15 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   getNoRelationUsers(@Req() _req: any): Promise<User[]> {
     return this.usersService.getNoRelationUsers(Number(_req.user.id));
+  }
+
+  /* Route for cancelling, rejecting and removing a friend 
+    http://${host}:${port}/users/remove-relation
+  */
+  @Patch('remove-relation')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  removeRelation(@Req() _req: any, @Body('rejectedId') rejectedId: number | string) : Promise<User> {
+    return this.usersService.removeRelation(Number(_req.user.id), Number(rejectedId));
   }
 }

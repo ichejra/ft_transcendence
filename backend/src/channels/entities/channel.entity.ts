@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 export enum ChannelType {
     PRIVATE = "private",
@@ -22,4 +22,7 @@ export class Channel {
         default: ChannelType.PUBLIC,
     })
     type: ChannelType;
+
+    @CreateDateColumn()
+    created_at: Date;
 }

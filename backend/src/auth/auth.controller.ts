@@ -1,8 +1,8 @@
 import { BadRequestException, Controller, Get, HttpCode, Post, Req, Res, UseGuards } from "@nestjs/common";
 import { Request, Response } from "express";
 import { AuthService } from "./auth.service";
-import { IntraAuthGuard } from "./intra-auth.guard";
-import { JwtAuthGuard } from "./jwt-auth.guard";
+import { IntraAuthGuard } from "./guards/intra-auth.guard";
+import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 
 @Controller('auth')
 export class AuthController {
