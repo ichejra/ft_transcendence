@@ -1,92 +1,80 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { BsPersonCheck } from "react-icons/bs";
+import { FaTimes } from "react-icons/fa";
+import {
+  fetchPendingStatus,
+  acceptFriendRequest,
+} from "../../features/friendsManagmentSlice";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { showNotificationsList } from "../../features/userProfileSlice";
+import Cookies from "js-cookie";
 
 const Notifications = () => {
-  const [allRead, setAllRead] = useState(false);
+  const dispatch = useAppDispatch();
+  const { pendingUsers, pendingReq } = useAppSelector((state) => state.friends);
+  const { users } = useAppSelector((state) => state.user);
 
-  const notifications = [
-    {
-      id: 1,
-      title: "notif1",
-      link: "/profile/1",
-      time: "3",
-      description: "Baga accepted your friend request",
-    },
-    {
-      id: 2,
-      title: "notif2",
-      link: "/profile/2",
-      time: "3",
-      description: "Baga accepted your friend request",
-    },
-    {
-      id: 3,
-      title: "notif3",
-      link: "/profile/3",
-      time: "3",
-      description: "Baga accepted your friend request",
-    },
-    {
-      id: 4,
-      title: "notif4",
-      link: "/profile/4",
-      time: "3",
-      description: "Baga accepted your friend request",
-    },
-    {
-      id: 5,
-      title: "notif5",
-      link: "/profile/5",
-      time: "3",
-      description: "Baga accepted your friend request",
-    },
-    {
-      id: 6,
-      title: "notif6",
-      link: "/profile/6",
-      time: "3",
-      description: "Baga accepted your friend request",
-    },
-  ];
+  const acceptFriend = (id: number) => {
+    dispatch(acceptFriendRequest(id));
+    console.log(
+      "Friend " +
+        users.find((user) => user.id === id)?.display_name +
+        " accepted"
+    );
+  };
+
+  //TODO setup the reject user function
+  const rejectFriend = () => {
+    console.log("Friend rejected");
+  };
+
+  //? re-render the component each time a friend get accepted or rejected to update the pending users
+  useEffect(() => {
+    if (Cookies.get("accessToken")) {
+      dispatch(fetchPendingStatus());
+    }
+  }, [pendingReq]);
+
+  console.log("pending users =>>", pendingUsers);
 
   return (
     <ul className="bg-black rounded-xl bg-opacity-75 p-2">
-      <p
-        className="text-sm flex justify-end hover:text-yellow-400 transition duration-300"
-        onClick={() => setAllRead(!allRead)}
-      >
-        Mark all as read
-      </p>
-      {notifications.map((notif) => {
-        const { id, title, link, time, description } = notif;
+      {pendingUsers.length > 0 ? (
+        <p className="text-sm flex justify-end m-1">Notifcations</p>
+      ) : (
+        <p className="text-sm flex justify-end m-1">No Notifcations</p>
+      )}
+
+      {pendingUsers.map((user) => {
+        const { id, display_name, avatar_url } = user;
         return (
-          <li
-            key={id}
-            className="hover:bg-gray-80 rounded-lg transition duration-300 px-2"
-          >
-            <Link to={link}>
-              <div className="flex flex-col">
-                <p
-                  className={`text-md text-yellow-300 ${
-                    allRead && "opacity-75"
-                  }`}
-                >
-                  {title}
-                </p>
-                <p
-                  className={`text-base font-light ${allRead && "opacity-75"}`}
-                >
-                  {description}
-                </p>
-                <p
-                  className={`${
-                    !allRead && "text-yellow-300"
-                  } flex items-end justify-end text-sm opacity-75`}
-                >
-                  {time}min ago
-                </p>
+          <li onClick={() => dispatch(showNotificationsList(false))} key={id}>
+            <div className="flex m-1 p-2 border rounded-lg items-center justify-between">
+              <div className="flex mr-2">
+                <img src={avatar_url} className="w-16 h-16 rounded-full mr-2" />
+                <div>
+                  <p className={`text-md text-yellow-300`}>Friend Request</p>
+                  <p className={`text-base font-light font-sans`}>
+                    <span className="font-bold">{display_name}</span> sent you a
+                    friend request.
+                  </p>
+                </div>
               </div>
-            </Link>
+              <div className="flex">
+                <BsPersonCheck
+                  onClick={() => acceptFriend(id)}
+                  className="hover:bg-yellow-300 transition duration-300 cursor-pointer mx-1 p-1 w-8 h-8 bg-yellow-400 text-gray-800 rounded-full"
+                >
+                  accept
+                </BsPersonCheck>
+                <FaTimes
+                  onClick={rejectFriend}
+                  className="hover:bg-gray-100 transition duration-300 cursor-pointer mx-1 p-1 w-8 h-8 bg-gray-200 text-gray-800 rounded-full"
+                >
+                  reject
+                </FaTimes>
+              </div>
+            </div>
           </li>
         );
       })}

@@ -1,18 +1,20 @@
-import { fetchCurrentUser } from "../../features/userProfileSlice";
-import { useAppDispatch } from "../../app/hooks";
-import { useLocation } from "react-router";
+import {
+  fetchCurrentUser,
+  fetchAllUsers,
+} from "../../features/userProfileSlice";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useEffect } from "react";
 import Cookies from "js-cookie";
 
 const Login = () => {
   const dispatch = useAppDispatch();
-  const location = useLocation();
 
   useEffect(() => {
-    if (Cookies.get("jwt")) {
+    if (Cookies.get("accessToken")) {
       dispatch(fetchCurrentUser());
+      dispatch(fetchAllUsers());
     }
-  }, [location]);
+  }, []);
 
   return (
     <div className="page-100 absolute bg-gray-800 w-full h-full top-0 left-0 flex justify-center items-center">

@@ -4,6 +4,7 @@ import HomePage from "../components/home";
 import About from "../components/about";
 import Channels from "../components/channels";
 import PongGame from "../components/game";
+import AllUsers from "../components/users";
 import UserProfile from "../components/profile/Profile";
 import Login from "../components/auth/Login";
 import Header from "../components/Header";
@@ -21,12 +22,12 @@ const Home: NextPage = () => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    if (Cookies.get("jwt")) {
+    if (Cookies.get("accessToken")) {
       dispatch(fetchCurrentUser());
     }
   }, []);
 
-  if (Cookies.get("user") && !isLoggedIn) {
+  if (Cookies.get("accessToken") && !isLoggedIn) {
     return <div className="loading"></div>;
   }
   return (
@@ -55,6 +56,16 @@ const Home: NextPage = () => {
             </AuthRoute>
           }
         />
+        <Route
+          path="/users"
+          element={
+            <AuthRoute>
+              <CompleteProfile>
+                <AllUsers />
+              </CompleteProfile>
+            </AuthRoute>
+          }
+        />
         <Route path="/about" element={<About />} />
         <Route
           path="/profile/:id"
@@ -67,7 +78,7 @@ const Home: NextPage = () => {
           }
         ></Route>
         <Route
-          path="/profile/:id/list"
+          path="/profile/list"
           element={
             <AuthRoute>
               <CompleteProfile>
