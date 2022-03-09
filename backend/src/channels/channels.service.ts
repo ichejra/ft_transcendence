@@ -1,5 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { Socket } from "socket.io";
+import { User } from "src/users/entities/user.entity";
 import { Repository } from "typeorm";
 import { ChannelDto } from "./dto/channel.dto";
 import { UpdateChannelDto } from "./dto/update-channel.dto";
@@ -33,5 +35,10 @@ export class ChannelsService {
     }
 
 
-    /* */
+    /* function for getting user from socket */
+    async getUserFromSocket(socket: Socket): Promise<User> {
+        const cookie = socket.handshake.headers.cookie;
+        console.log(cookie);
+        return ;
+    }
 }

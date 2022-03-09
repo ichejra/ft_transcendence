@@ -40,4 +40,4 @@ export class UserChannel {
         default: MemberStatus.ACTIVED,
     })
     userStatus?: MemberStatus;
-}
+};
