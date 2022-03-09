@@ -160,18 +160,19 @@ export class UsersService {
 
   /* used for getting all the pending requests of the users  */
   async getPendingRequests(userId: number) : Promise<User[]> {
-   return await this.userFriendsRepository.query(
+    return await this.userFriendsRepository.query(
       `SELECT * FROM users
       WHERE "users"."id"
-      IN (SELECT "recipientId" FROM user_friends WHERE "user_friends"."applicantId" = $1 AND "user_friends"."status" = $2)
-      OR "users"."id"
       IN (SELECT "applicantId" FROM user_friends WHERE "user_friends"."recipientId" = $1 AND "user_friends"."status" = $2)`,
       [
         userId, 
         UserFriendsRelation.PENDING
       ]);
-  }
-
+    }
+    /* Removed lines */
+    // IN (SELECT "recipientId" FROM user_friends WHERE "user_friends"."applicantId" = $1 AND "user_friends"."status" = $2)
+    // OR "users"."id"
+    
   /* used for getting the friends */
   async getUserFriends(userId: number) : Promise<User[]> {
     return await this.userFriendsRepository.query(
