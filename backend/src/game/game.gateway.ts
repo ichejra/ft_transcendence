@@ -18,7 +18,9 @@ import Consts from './game_consts';
   cors: {
     origin: '*',
   },
+  namespace: 'game',
 })
+
 export class GameGateway
   implements OnGatewayConnection, OnGatewayInit, OnGatewayDisconnect
 {
@@ -55,9 +57,10 @@ export class GameGateway
     if (this.queue.has(client) === true) return;
     this.queue.add(client);
     if (this.queue.size > 1) {
+      console.log(this.queue.size);
       const [first] = this.queue;
-      console.log(first);
       const [, second] = this.queue;
+      // console.log('first: ', first, 'second: ' , second);
       this.joinGame([first, second], '');
     }
   }
@@ -67,26 +70,78 @@ export class GameGateway
     this.queue.delete(game.getPlayersSockets()[1]);
   }
 
-  @SubscribeMessage('paddle_backward')
-  private handleArrowDown(client: Socket): void {
-    // player.getPaddle().move_backward();
-  }
-
-
-  @SubscribeMessage('paddle_forward')
-  private handleArrowUp(client: Socket): void {
+  @SubscribeMessage('ArrowUp')
+  handleUpPaddle(socket: Socket, key: string): void {
     let gameFound = this.games.find((game) => {
       return (
-        game.getPlayersSockets()[0] === client || game.getPlayersSockets()[1]
+        game.getPlayersSockets()[0] === socket ||
+        game.getPlayersSockets()[1] === socket
       );
-    })
+    });
     if (gameFound) {
-      gameFound.getGamePlayer(client).getPaddle().setY(Consts.PADDLE_INIT_Y + Consts.PADDLE_DIFF);
+      let player = gameFound.getGamePlayer(socket);
+      if (key === 'down') {
+        player.getPaddle().move_forward('down');
+      } else if (key === 'up') {
+        player.getPaddle().move_forward('up');
+      }
     }
-    // player.getPaddle().move_forward();
   }
+  
+  @SubscribeMessage('ArrowDown')
+  handleDownPaddle(socket: Socket, key: string): void {
+    let gameFound = this.games.find((game) => {
+      return (
+        game.getPlayersSockets()[0] === socket ||
+        game.getPlayersSockets()[1] === socket
+      );
+    });
+    if (gameFound) {
+      let player = gameFound.getGamePlayer(socket);
+      if (key === 'down') {
+        player.getPaddle().move_backward('down');
+      } else if (key === 'up') {
+        player.getPaddle().move_backward('up');
+      }
+    }
+  }
+
+  // @SubscribeMessage('keydown')
+  // private handleKeydown(client: Socket, key: string): void {
+  //   let gameFound = this.games.find((game) => {
+  //     return (
+  //       game.getPlayersSockets()[0] === client ||
+  //       game.getPlayersSockets()[1] === client
+  //     );
+  //   });
+  //   if (gameFound) {
+  //     if (key === 'ArrowUp') {
+  //       gameFound
+  //         .getGamePlayer(client)
+  //         .getPaddle()
+  //         .setPadSpeed(-Consts.PADDLE_DIFF);
+  //     } else if (key === 'ArrowDown') {
+  //       gameFound
+  //         .getGamePlayer(client)
+  //         .getPaddle()
+  //         .setPadSpeed(Consts.PADDLE_DIFF);
+  //     }
+  //   }
+  //   // player.getPaddle().move_backward();
+  // }
+
+  // @SubscribeMessage('keyup')
+  // private handleKeyup(client: Socket, key: string): void {
+  //   let gameFound = this.games.find((game) => {
+  //     return (
+  //       game.getPlayersSockets()[0] === client ||
+  //       game.getPlayersSockets()[1] === client
+  //     );
+  //   });
+  //   if (gameFound) {
+  //     // console.log('arrow up clicked');
+  //     gameFound.getGamePlayer(client).getPaddle().setPadSpeed(0);
+  //   }
+  //   // player.getPaddle().move_forward();
+  // }
 }
-
-
-
-

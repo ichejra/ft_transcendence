@@ -17,7 +17,7 @@ class GameObj {
     this._player1 = player1;
     this._player2 = player2;
     this._ball = new Ball();
-    this._interval = setInterval(() => this.playGame, 1000 / 60);
+    this._interval = setInterval(() => this.playGame(), 1000 / 60);
   }
 
   public resetGame(): void {
@@ -47,6 +47,7 @@ class GameObj {
   public getPlayersSockets(): Socket[] {
     return [this._player1.getSocket(), this._player2.getSocket()];
   }
+
   public playGame(): void {
     if (this._ball.PaddleBallCollision(this._player1.getPaddle())) {
       let collidePoint =
@@ -63,6 +64,7 @@ class GameObj {
       // this._ball.setSpeed(this._ball.getSpeed() + 0.2);÷
       // * if this paddle height > 50, paddle.height--;
     }
+
     if (this._ball.PaddleBallCollision(this._player2.getPaddle())) {
       let collidePoint =
         this._ball.getY() -
@@ -78,6 +80,7 @@ class GameObj {
       // this._ball.setSpeed(this._ball.getSpeed() + 0.2);÷
       // * if this paddle height > 50, paddle.height--;
     }
+
     if (this._ball.getX() - Consts.BALL_RADIUS <= 0) {
       this._player2.incScore();
       this._ball.resetBall();
@@ -85,7 +88,25 @@ class GameObj {
       this._player1.incScore();
       this._ball.resetBall();
     }
+
+    // console.log('playGame: ', this._player1.getPaddle().getY());
+    // console.log('playGame: ', this._player2.getPaddle().getY());
     this._player1.getSocket().emit('game_state', {
+      ball: {
+        x: this._ball.getX(),
+        y: this._ball.getY(), 
+      },
+      paddles: {
+        leftPad: this._player1.getPaddle().getY(),
+        rightPad: this._player2.getPaddle().getY(),
+      },
+      score: {
+        score1: this._player1.getScore(),
+        score2: this._player2.getScore(),
+      },
+    });
+
+    this._player2.getSocket().emit('game_state', {
       ball: {
         x: this._ball.getX(),
         y: this._ball.getY(),
@@ -95,10 +116,12 @@ class GameObj {
         rightPad: this._player2.getPaddle().getY(),
       },
       score: {
-        player1: this._player1.getScore(),
-        player2: this._player2.getScore(),
+        score1: this._player1.getScore(),
+        score2: this._player2.getScore(),
       },
     });
+
+    // this._ball.moveBall();
   }
 }
 

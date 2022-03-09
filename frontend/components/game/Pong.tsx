@@ -1,8 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 
-
-const socket = io('http://localhost:3000');
+const socket = io('http://localhost:3000/game');
 
 const CANVAS_WIDTH = 1000;
 const CANVAS_HEIGHT = 600;
@@ -14,10 +13,9 @@ const R_PADX = CANVAS_WIDTH - PAD_WIDTH;
 const PADY_INIT = CANVAS_HEIGHT / 2 - PAD_HEIGHT / 2;
 const NET_W = 5;
 const NET_H = 10;
-const NETX = CANVAS_WIDTH /2 - NET_W /2;
+const NETX = CANVAS_WIDTH / 2 - NET_W / 2;
 const NETY = 0;
 const NET_C = 'white';
-
 
 class Rect {
   _ctx: any;
@@ -46,13 +44,13 @@ class Rect {
     this._ctx.fillRect(this._x, this._y, this._w, this._h);
   }
 }
-  // const net = {
-  //   x: 1000 / 2 - 5 / 2, //first 2 is the width
-  //   y: 0,
-  //   width: 5,
-  //   height: 10,
-  //   color: 'white',
-  // };
+// const net = {
+//   x: 1000 / 2 - 5 / 2, //first 2 is the width
+//   y: 0,
+//   width: 5,
+//   height: 10,
+//   color: 'white',
+// };
 class Circle {
   _ctx: any;
   _x: number;
@@ -77,17 +75,17 @@ class Circle {
 
 interface IFrame {
   ball: {
-    x: number,
-    y: number,
-  },
+    x: number;
+    y: number;
+  };
   paddles: {
-    leftPad: number,
-    rightPad: number,
-  },
+    leftPad: number;
+    rightPad: number;
+  };
   score: {
-    player1: number,
-    player2: number,
-  },
+    score1: number;
+    score2: number;
+  };
 }
 
 class Paddle extends Rect {}
@@ -104,39 +102,79 @@ const stateInit: IFrame = {
     rightPad: PADY_INIT,
   },
   score: {
-    player1: 0,
-    player2: 0,
+    score1: 0,
+    score2: 0,
   },
 };
 
 const Pong = () => {
   const canvasRef = useRef(null);
   const [frame, setFrame] = useState(stateInit);
+
   const joinMatch = () => {
     socket.emit('join_queue', 'default');
   };
-  useEffect (() => {
-    document.addEventListener('keydown', (e) => {
-      switch (e.code) {
-        case 'KeyS':
-        case 'ArrowDown':
-          // Handle "backward"
-          socket.emit('paddle_backward');
-          break;
-        case 'KeyW':
-        case 'ArrowUp':
-          // Handle "forward"
-          socket.emit('paddle_forward');
-          break;
-      }
-    })
-  })
 
   socket.on('game_state', (newState) => {
     setFrame(newState);
-  })
+    console.log('I am frame from front', frame.paddles.leftPad);
+  });
+
+  // useEffect(() => {
+  //   document.addEventListener('keydown', (e) => {
+  //     switch (e.code) {
+  //       case 'KeyS':
+  //       case 'ArrowDown':
+  //         socket.emit('keydown', 'ArrowDown');
+  //         break;
+  //       case 'KeyW':
+  //       case 'ArrowUp':
+  //         socket.emit('keydown', 'ArrowUp');
+  //         break;
+  //     }
+  //   })
+  //   document.addEventListener('keyup', (e) => {
+  //     switch (e.code) {
+  //       case 'KeyS':
+  //       case 'ArrowDown':
+  //         socket.emit('keyup', 'ArrowUp');
+  //         break;
+  //       case 'KeyW':
+  //       case 'ArrowUp':
+  //         socket.emit('keyup', 'ArrowDown');
+  //         break;
+  //     }
+  //   });
+  // }, []);
+
+  const movePaddle = (e: any) => {
+    if (e.code === 'ArrowUp') {
+      console.log('------> keydown');
+      socket.emit('ArrowUp', 'down');
+    } else if (e.code === 'ArrowDown') {
+      socket.emit('ArrowDown', 'down');
+    }
+  };
+  const stopPaddle = (e: any) => {
+    if (e.code === 'ArrowUp') {
+      socket.emit('ArrowUp', 'up');
+    } else if (e.code === 'ArrowDown') {
+      socket.emit('ArrowDown', 'down');
+    }
+  };
+
   useEffect(() => {
-    const canvas:any = canvasRef.current;
+    document.addEventListener('keydown', movePaddle);
+    document.addEventListener('keyup', stopPaddle);
+    return () => {
+      document.removeEventListener('keydown', movePaddle);
+      document.removeEventListener('keyup', stopPaddle);
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log(frame);
+    const canvas: any = canvasRef.current;
     const ctx = canvas.getContext('2d');
     const table = new Rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, 'black', ctx);
     table.drawRect();
@@ -162,7 +200,13 @@ const Pong = () => {
       ctx
     );
     paddle2.drawRect();
-    const ball = new Ball(frame.ball.x, frame.ball.y, BALL_RADIUS, 'white', ctx);
+    const ball = new Ball(
+      frame.ball.x,
+      frame.ball.y,
+      BALL_RADIUS,
+      'white',
+      ctx
+    );
     ball.drawCircle();
   }, [frame]);
   //*draw
@@ -179,4 +223,3 @@ const Pong = () => {
 };
 
 export default Pong;
-
