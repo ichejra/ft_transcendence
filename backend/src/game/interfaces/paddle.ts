@@ -31,36 +31,20 @@ class Paddle {
   //* move the paddle
   public movePaddle() {
     if (this._padSpeed === 0) return;
-    console.log('mooooooove')
     this._y += this._padSpeed;
-    if (this._y + Consts.PADDLE_H + Consts.PADDLE_W / 2 > Consts.CANVAS_H) {
-      this._y = Consts.CANVAS_H - Consts.PADDLE_H - Consts.PADDLE_W / 2;
+    if (this._y + Consts.PADDLE_H > Consts.CANVAS_H) {
+      console.log('hana');
       this._padSpeed = 0;
+      this._y = Consts.CANVAS_H - Consts.PADDLE_H;
       return;
     }
-    if (this._y < Consts.PADDLE_W / 2) {
-      this._y = Consts.PADDLE_W / 2;
+    if (this._y <= 0) {
       this._padSpeed = 0;
+      this._y = 0;
       return;
     }
   }
-
-  //! public movePaddle() {
-  //   // console.log('I am movePaddle')
-  //   // let rect = ctx.canvas.getBoundingClientRect();
-  //   // if (e.clientY >= ctx.canvas.height - user.height + rect.top) {
-  //   //   user.y = ctx.canvas.height - user.height;
-  //   // } else {
-  //   //   user.y = e.clientY - rect.top;
-  //   // }
-  //   // console.log('rect' , rect);
-  //   this._y += this._padSpeed;
-  //   // console.log(this._y);
-  //   if (this._y <= 0 || this._y + Consts.PADDLE_H >= Consts.CANVAS_H) {
-  //     this._padSpeed = 0;
-  //     return;
-  //   }
-  // }
+  
   public isLeft() {
     return this._x - Consts.PADDLE_W <= 0;
   }
@@ -74,7 +58,6 @@ class Paddle {
       this._padSpeed = -Consts.PADDLE_DIFF;
     } else {
       this._padSpeed = 0;
-      console.log('speed ===== ', this._padSpeed);
     }
   }
   
@@ -83,7 +66,6 @@ class Paddle {
       this._padSpeed = Consts.PADDLE_DIFF;
     } else {
       this._padSpeed = 0;
-      console.log('speed ===== ', this._padSpeed);
     }
   }
 }

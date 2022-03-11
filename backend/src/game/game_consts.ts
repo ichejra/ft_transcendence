@@ -1,7 +1,7 @@
 class Consts {
   // private readonly 'STARTING OF ALL COMPONENTS';
-  static readonly CANVAS_H = 1000;
-  static readonly CANVAS_W = 600;
+  static readonly CANVAS_H = 600;
+  static readonly CANVAS_W = 1000;
   static readonly MAX_SCORE = 10;
   static readonly MAX_WATCHERS = 10;
   static readonly BALL_RADIUS = 12;

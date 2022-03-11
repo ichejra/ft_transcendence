@@ -13,6 +13,7 @@ import GameObj from 'src/game/interfaces/game';
 import Player from 'src/game/interfaces/player';
 import { Game } from './entities/game.entity';
 import Consts from './game_consts';
+import { clear } from 'console';
 
 @WebSocketGateway({
   cors: {
@@ -60,9 +61,14 @@ export class GameGateway
       console.log(this.queue.size);
       const [first] = this.queue;
       const [, second] = this.queue;
+      this.queue.clear();
       // console.log('first: ', first, 'second: ' , second);
       this.joinGame([first, second], '');
     }
+  }
+  @SubscribeMessage('stop_game')
+  private stopGame(client: Socket, payload: any): void {
+    
   }
 
   private clearQueue(game: GameObj): void {
@@ -105,43 +111,4 @@ export class GameGateway
       }
     }
   }
-
-  // @SubscribeMessage('keydown')
-  // private handleKeydown(client: Socket, key: string): void {
-  //   let gameFound = this.games.find((game) => {
-  //     return (
-  //       game.getPlayersSockets()[0] === client ||
-  //       game.getPlayersSockets()[1] === client
-  //     );
-  //   });
-  //   if (gameFound) {
-  //     if (key === 'ArrowUp') {
-  //       gameFound
-  //         .getGamePlayer(client)
-  //         .getPaddle()
-  //         .setPadSpeed(-Consts.PADDLE_DIFF);
-  //     } else if (key === 'ArrowDown') {
-  //       gameFound
-  //         .getGamePlayer(client)
-  //         .getPaddle()
-  //         .setPadSpeed(Consts.PADDLE_DIFF);
-  //     }
-  //   }
-  //   // player.getPaddle().move_backward();
-  // }
-
-  // @SubscribeMessage('keyup')
-  // private handleKeyup(client: Socket, key: string): void {
-  //   let gameFound = this.games.find((game) => {
-  //     return (
-  //       game.getPlayersSockets()[0] === client ||
-  //       game.getPlayersSockets()[1] === client
-  //     );
-  //   });
-  //   if (gameFound) {
-  //     // console.log('arrow up clicked');
-  //     gameFound.getGamePlayer(client).getPaddle().setPadSpeed(0);
-  //   }
-  //   // player.getPaddle().move_forward();
-  // }
 }

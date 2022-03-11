@@ -42,6 +42,7 @@ class Ball {
     ) {
       // ! checking if the ball hits the border
       this._velocityY = -this._velocityY;
+      // console.log('ball: ',this._y);
     }
   }
   PaddleBallCollision = (paddle: Paddle) => {

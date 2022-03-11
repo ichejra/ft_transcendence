@@ -15,7 +15,6 @@ const NET_W = 5;
 const NET_H = 10;
 const NETX = CANVAS_WIDTH / 2 - NET_W / 2;
 const NETY = 0;
-const NET_C = 'white';
 
 class Rect {
   _ctx: any;
@@ -114,38 +113,9 @@ const Pong = () => {
   const joinMatch = () => {
     socket.emit('join_queue', 'default');
   };
-
-  socket.on('game_state', (newState) => {
-    setFrame(newState);
-    console.log('I am frame from front', frame.paddles.leftPad);
-  });
-
-  // useEffect(() => {
-  //   document.addEventListener('keydown', (e) => {
-  //     switch (e.code) {
-  //       case 'KeyS':
-  //       case 'ArrowDown':
-  //         socket.emit('keydown', 'ArrowDown');
-  //         break;
-  //       case 'KeyW':
-  //       case 'ArrowUp':
-  //         socket.emit('keydown', 'ArrowUp');
-  //         break;
-  //     }
-  //   })
-  //   document.addEventListener('keyup', (e) => {
-  //     switch (e.code) {
-  //       case 'KeyS':
-  //       case 'ArrowDown':
-  //         socket.emit('keyup', 'ArrowUp');
-  //         break;
-  //       case 'KeyW':
-  //       case 'ArrowUp':
-  //         socket.emit('keyup', 'ArrowDown');
-  //         break;
-  //     }
-  //   });
-  // }, []);
+  // const stopMatch = () => {
+  //   socket.emit('stop_game', 'default');
+  // };
 
   const movePaddle = (e: any) => {
     if (e.code === 'ArrowUp') {
@@ -159,21 +129,25 @@ const Pong = () => {
     if (e.code === 'ArrowUp') {
       socket.emit('ArrowUp', 'up');
     } else if (e.code === 'ArrowDown') {
-      socket.emit('ArrowDown', 'down');
+      socket.emit('ArrowDown', 'up');
     }
   };
 
   useEffect(() => {
     document.addEventListener('keydown', movePaddle);
     document.addEventListener('keyup', stopPaddle);
+    socket.on('game_state', (newState) => {
+      setFrame(newState);
+      console.log('I am frame from front', frame.paddles.leftPad);
+    });
     return () => {
       document.removeEventListener('keydown', movePaddle);
       document.removeEventListener('keyup', stopPaddle);
+      socket.off('game_state');
     };
   }, []);
 
   useEffect(() => {
-    console.log(frame);
     const canvas: any = canvasRef.current;
     const ctx = canvas.getContext('2d');
     const table = new Rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, 'black', ctx);
@@ -218,6 +192,8 @@ const Pong = () => {
         height={CANVAS_HEIGHT}
       ></canvas>
       <button onClick={joinMatch}>Play Now</button>
+      <br />
+      <button onClick={stopMatch}>Stop Now</button>
     </div>
   );
 };

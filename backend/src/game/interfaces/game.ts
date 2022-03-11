@@ -36,10 +36,10 @@ class GameObj {
     );
   }
 
-  public getGamePlayer(playerSocket: Socket) : Player {
+  public getGamePlayer(playerSocket: Socket): Player {
     return this._player1.getSocket() === playerSocket
-          ? this._player1
-          : this._player2;
+      ? this._player1
+      : this._player2;
   }
 
   // * add watchers
@@ -49,11 +49,12 @@ class GameObj {
   }
 
   public playGame(): void {
+    this._ball.ballHorizontalBounce();
     if (this._ball.PaddleBallCollision(this._player1.getPaddle())) {
       let collidePoint =
         this._ball.getY() -
         (this._player1.getPaddle().getY() + Consts.PADDLE_H / 2);
-      collidePoint = collidePoint / (Consts.PADDLE_H / 2);
+      // collidePoint = collidePoint / (Consts.PADDLE_H / 2);
       let angleRad = (Math.PI / 4) * collidePoint;
       let direction =
         this._ball.getX() + Consts.BALL_RADIUS < Consts.CANVAS_W / 2 ? 1 : -1;
@@ -69,7 +70,7 @@ class GameObj {
       let collidePoint =
         this._ball.getY() -
         (this._player2.getPaddle().getY() + Consts.PADDLE_H / 2);
-      collidePoint = collidePoint / (Consts.PADDLE_H / 2);
+      // collidePoint = collidePoint / (Consts.PADDLE_H / 2);
       let angleRad = (Math.PI / 4) * collidePoint;
       let direction =
         this._ball.getX() + Consts.BALL_RADIUS < Consts.CANVAS_W / 2 ? 1 : -1;
@@ -88,13 +89,12 @@ class GameObj {
       this._player1.incScore();
       this._ball.resetBall();
     }
+    this._ball.moveBall();
 
-    // console.log('playGame: ', this._player1.getPaddle().getY());
-    // console.log('playGame: ', this._player2.getPaddle().getY());
     this._player1.getSocket().emit('game_state', {
       ball: {
         x: this._ball.getX(),
-        y: this._ball.getY(), 
+        y: this._ball.getY(),
       },
       paddles: {
         leftPad: this._player1.getPaddle().getY(),
@@ -121,7 +121,6 @@ class GameObj {
       },
     });
 
-    // this._ball.moveBall();
   }
 }
 
