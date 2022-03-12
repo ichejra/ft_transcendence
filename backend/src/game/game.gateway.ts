@@ -21,7 +21,6 @@ import { clear } from 'console';
   },
   namespace: 'game',
 })
-
 export class GameGateway
   implements OnGatewayConnection, OnGatewayInit, OnGatewayDisconnect
 {
@@ -44,12 +43,12 @@ export class GameGateway
   @SubscribeMessage('join_game')
   private joinGame(socketsArr: Socket[], payload: any): void {
     console.log('join game: am here');
-    this.games.push(
-      new GameObj(
-        new Player(socketsArr[0], true),
-        new Player(socketsArr[1], false),
-      ),
+    const game = new GameObj(
+      new Player(socketsArr[0], true),
+      new Player(socketsArr[1], false),
     );
+    this.games.push(game);
+    this.clearQueue(game);
   }
 
   @SubscribeMessage('join_queue')
@@ -67,8 +66,16 @@ export class GameGateway
     }
   }
   @SubscribeMessage('stop_game')
-  private stopGame(client: Socket, payload: any): void {
-    
+  private stopGame(socket: Socket, payload: any): void {
+    let gameFound = this.games.find((game) => {
+      return (
+        game.getPlayersSockets()[0] === socket ||
+        game.getPlayersSockets()[1] === socket
+      );
+    });
+    if (gameFound) {
+      clearInterval(gameFound.getInterval());
+    }
   }
 
   private clearQueue(game: GameObj): void {
@@ -93,7 +100,7 @@ export class GameGateway
       }
     }
   }
-  
+
   @SubscribeMessage('ArrowDown')
   handleDownPaddle(socket: Socket, key: string): void {
     let gameFound = this.games.find((game) => {

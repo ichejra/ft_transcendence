@@ -33,7 +33,6 @@ class Paddle {
     if (this._padSpeed === 0) return;
     this._y += this._padSpeed;
     if (this._y + Consts.PADDLE_H > Consts.CANVAS_H) {
-      console.log('hana');
       this._padSpeed = 0;
       this._y = Consts.CANVAS_H - Consts.PADDLE_H;
       return;

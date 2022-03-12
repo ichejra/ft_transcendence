@@ -113,9 +113,9 @@ const Pong = () => {
   const joinMatch = () => {
     socket.emit('join_queue', 'default');
   };
-  // const stopMatch = () => {
-  //   socket.emit('stop_game', 'default');
-  // };
+  const stopMatch = () => {
+    socket.emit('stop_game', 'default');
+  };
 
   const movePaddle = (e: any) => {
     if (e.code === 'ArrowUp') {
@@ -194,6 +194,7 @@ const Pong = () => {
       <button onClick={joinMatch}>Play Now</button>
       <br />
       <button onClick={stopMatch}>Stop Now</button>
+      {/* handle change color in here */}
     </div>
   );
 };

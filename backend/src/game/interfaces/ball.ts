@@ -14,8 +14,8 @@ class Ball {
     this._x = Consts.CANVAS_W / 2;
     this._y = Consts.CANVAS_H / 2;
     this._speed = Consts.BALL_SPEED;
-    this._velocityX = 5;
-    this._velocityY = 5;
+    this._velocityX = Consts.BALL_SPEED * this._getRandomDirection();
+    this._velocityY = Consts.BALL_SPEED * this._getRandomDirection();
   }
 
   public moveBall(): void {
@@ -28,11 +28,21 @@ class Ball {
     // )
     //   ball.y -= ball.velocityY;
   }
+  private _getRandomDirection(): number {
+    const rand =  Math.floor(Math.random() * 1337) ;
+    // console.log(rand);
+    
+    if (rand % 2 == 0) return -1;
+    return 1;
+  }
+
+
   public resetBall = () => {
     this._x = Consts.CANVAS_W / 2;
     this._y = Consts.CANVAS_H / 2;
     this._speed = Consts.BALL_SPEED;
-    this._velocityX = -this._velocityX;
+    this._velocityX = Consts.BALL_SPEED * this._getRandomDirection();
+    this._velocityY = Consts.BALL_SPEED * this._getRandomDirection();
   };
 
   ballHorizontalBounce(): void {
@@ -70,16 +80,19 @@ class Ball {
   public getY(): number {
     return this._y;
   }
-  public setValocityX(velocityX: number): void {
+  public setVelocityX(velocityX: number): void {
     this._velocityX = velocityX;
+    // console.log('veloX ', this._velocityX);
+    
   }
-  public setValocityY(velocityY: number): void {
+  public setVelocityY(velocityY: number): void {
     this._velocityY = velocityY;
+    // console.log('veloY ', this._velocityY);
   }
-  public getValocityX(): number {
+  public getVelocityX(): number {
     return this._velocityX;
   }
-  public getValocityY(): number {
+  public getVelocityY(): number {
     return this._velocityY;
   }
   public getSpeed(): number {

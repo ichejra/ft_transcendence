@@ -7,7 +7,7 @@ class Consts {
   static readonly BALL_RADIUS = 12;
   static readonly BALL_INIT_X = Consts.CANVAS_W/2;
   static readonly BALL_INIT_Y = Consts.CANVAS_H/2;
-  static readonly BALL_SPEED = 10;
+  static readonly BALL_SPEED = 5;
   static readonly BALL_MAX_SPEED = 15;
   static readonly PADDLE_W = 20;
   static readonly PADDLE_H = 100;

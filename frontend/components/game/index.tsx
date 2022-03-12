@@ -51,8 +51,8 @@ const PongGame = () => {
   //   };
 
   // //! /////////////////////
-  // const [tableColor, setTableColor] = useState('#000000');
-  // const [count, setCount] = useState(0);
+  const [tableColor, setTableColor] = useState('#000000');
+  const [count, setCount] = useState(0);
   // const user: User = {
   //   x: 1000 / 30,
   //   y: 600 / 2 - 100 / 2, //100 is the height
@@ -222,21 +222,21 @@ const PongGame = () => {
   //   drawRect(comp.x, comp.y, comp.width, comp.height, comp.color, ctx);
   //   drawCircle(ball.x, ball.y, ball.radius, ball.color, ctx);
   // };
-  // const handleClick = () => {
-  //   setCount(count + 1);
-  //   // if (count === 0) setTableColor('#0818A8');
-  //   // if (count === 0) setTableColor('#000080');
-  //   // if (count === 0) setTableColor('#191970');
-  //   // if (count === 0) setTableColor('#00008B'); //blue
-  //   if (count === 0) setTableColor('#00A36C'); // green
-  //   else if (count === 1) setTableColor('#fbb3c2'); // pink
-  //   else if (count === 2) setTableColor('#FF59A1'); //pink
-  //   else if (count === 3) setTableColor('#CD5C5C'); // pink
-  //   else if (count == 4) {
-  //     setCount(0);
-  //     setTableColor('#000000');
-  //   }
-  // };
+  const handleClick = () => {
+    setCount(count + 1);
+    // if (count === 0) setTableColor('#0818A8');
+    // if (count === 0) setTableColor('#000080');
+    // if (count === 0) setTableColor('#191970');
+    // if (count === 0) setTableColor('#00008B'); //blue
+    if (count === 0) setTableColor('#00A36C'); // green
+    else if (count === 1) setTableColor('#fbb3c2'); // pink
+    else if (count === 2) setTableColor('#FF59A1'); //pink
+    else if (count === 3) setTableColor('#CD5C5C'); // pink
+    else if (count == 4) {
+      setCount(0);
+      setTableColor('#000000');
+    }
+  };
 
   return (
     <div>
@@ -253,7 +253,7 @@ const PongGame = () => {
       </div> */}
       <div>
         <button
-          className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
+          className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded' 
          
         >
           Change Color
