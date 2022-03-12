@@ -11,11 +11,11 @@ const Sidebar = () => {
 
   return (
     <aside
-      className={`px-2 h-screen py-4 w-full bg-black bg-opacity-75 text-yellow-400 ${
+      className={`about-title-family z-10 px-2 h-screen py-4 w-full bg-black bg-opacity-80 txt-cyan ${
         isSidebarOpen ? "show-sidebar sidebar" : "sidebar"
       }`}
     >
-      <div className="text-2xl ml-4 mt-4 font-bold text-yellow-500">
+      <div className="text-2xl ml-4 mt-4 font-bold">
         <h1>LOGO</h1>
       </div>
       <button
@@ -25,14 +25,14 @@ const Sidebar = () => {
       >
         <FaTimes
           size="3rem"
-          className="hover:text-yellow-400 transition duration-300 "
+          className="header-item transition duration-300 "
         />
       </button>
       <ul className="flex flex-col mt-10">
         <li>
           <Link to="/">
             <button
-              className="rounded-lg text-left w-full hover:text-yellow-400 hover:bg-gray-600 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-4 px-2"
+              className="rounded-lg text-left w-full hover:bg-gray-600 transition duration-300 cursor-pointer text-lg font-medium mx-2 py-4 px-2"
               onClick={() => dispatch(closeSidebar())}
               type="button"
             >
@@ -43,7 +43,7 @@ const Sidebar = () => {
         <li>
           <Link to="/channels">
             <button
-              className="rounded-lg text-left w-full hover:text-yellow-400 hover:bg-gray-600 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-4 px-2"
+              className="rounded-lg text-left w-full  hover:bg-gray-600 transition duration-300 cursor-pointer text-lg font-medium mx-2 py-4 px-2"
               onClick={() => dispatch(closeSidebar())}
               type="button"
             >
@@ -54,7 +54,7 @@ const Sidebar = () => {
         <li>
           <Link to="/game">
             <button
-              className="rounded-lg text-left w-full hover:text-yellow-400 hover:bg-gray-600 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-4 px-2"
+              className="rounded-lg text-left w-full  hover:bg-gray-600 transition duration-300 cursor-pointer text-lg font-medium mx-2 py-4 px-2"
               onClick={() => dispatch(closeSidebar())}
               type="button"
             >
@@ -65,7 +65,7 @@ const Sidebar = () => {
         <li>
           <Link to="/users">
             <button
-              className="rounded-lg text-left w-full hover:text-yellow-400 hover:bg-gray-600 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-4 px-2"
+              className="rounded-lg text-left w-full  hover:bg-gray-600 transition duration-300 cursor-pointer text-lg font-medium mx-2 py-4 px-2"
               onClick={() => dispatch(closeSidebar())}
               type="button"
             >
@@ -76,7 +76,7 @@ const Sidebar = () => {
         <li>
           <Link to="/about">
             <button
-              className="rounded-lg text-left w-full hover:text-yellow-400 hover:bg-gray-600 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-4 px-2"
+              className="rounded-lg text-left w-full  hover:bg-gray-600 transition duration-300 cursor-pointer text-lg font-medium mx-2 py-4 px-2"
               onClick={() => dispatch(closeSidebar())}
               type="button"
             >

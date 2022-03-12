@@ -3,6 +3,7 @@ import loggedInReducer from "../features/isLoggedInTestSlice";
 import sidebarReducer from "../features/sidebarSlice";
 import userProfileReducer from "../features/userProfileSlice";
 import friendsManagentReducer from "../features/friendsManagmentSlice";
+import globalStateReducer from "../features/globalSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     loginStatus: loggedInReducer,
     user: userProfileReducer,
     friends: friendsManagentReducer,
+    globalState: globalStateReducer,
   },
 });
 
