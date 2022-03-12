@@ -1,6 +1,7 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router";
 import { useAppSelector } from "../../app/hooks";
+import SocketProvider from "../../pages/SocketProvider";
 
 export const AuthRoute: React.FC = ({ children }) => {
   const location = useLocation();
@@ -20,5 +21,5 @@ export const CompleteProfile: React.FC = ({ children }) => {
   if (!username) {
     return <Navigate to="/complete-info" replace={true} />;
   }
-  return <>{children}</>;
+  return <SocketProvider>{children}</SocketProvider>;
 };

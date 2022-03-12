@@ -1,13 +1,14 @@
 import { useEffect } from "react";
 import { BsPersonCheck } from "react-icons/bs";
 import { FaTimes } from "react-icons/fa";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { showNotificationsList } from "../../features/userProfileSlice";
+import Cookies from "js-cookie";
+import { socket } from "../../pages/SocketProvider";
 import {
   fetchPendingStatus,
   acceptFriendRequest,
 } from "../../features/friendsManagmentSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { showNotificationsList } from "../../features/userProfileSlice";
-import Cookies from "js-cookie";
 
 const Notifications = () => {
   const dispatch = useAppDispatch();
@@ -16,6 +17,7 @@ const Notifications = () => {
 
   const acceptFriend = (id: number) => {
     dispatch(acceptFriendRequest(id));
+    socket.emit("refresh", {});
     console.log(
       "Friend " +
         users.find((user) => user.id === id)?.display_name +
@@ -32,6 +34,7 @@ const Notifications = () => {
   useEffect(() => {
     if (Cookies.get("accessToken")) {
       dispatch(fetchPendingStatus());
+      socket.emit("refresh", {});
     }
   }, [pendingReq]);
 
@@ -53,7 +56,7 @@ const Notifications = () => {
               <div className="flex mr-2">
                 <img src={avatar_url} className="w-16 h-16 rounded-full mr-2" />
                 <div>
-                  <p className={`text-md text-yellow-300`}>Friend Request</p>
+                  <p className={`text-md txt-cyan`}>Friend Request</p>
                   <p className={`text-base font-light font-sans`}>
                     <span className="font-bold">{display_name}</span> sent you a
                     friend request.
@@ -63,7 +66,7 @@ const Notifications = () => {
               <div className="flex">
                 <BsPersonCheck
                   onClick={() => acceptFriend(id)}
-                  className="hover:bg-yellow-300 transition duration-300 cursor-pointer mx-1 p-1 w-8 h-8 bg-yellow-400 text-gray-800 rounded-full"
+                  className="hover:bg-cyan-500 transition duration-300 cursor-pointer mx-1 p-1 w-8 h-8 bg-cyan text-gray-800 rounded-full"
                 >
                   accept
                 </BsPersonCheck>

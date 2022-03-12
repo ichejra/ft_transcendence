@@ -15,6 +15,7 @@ import {
   showNotificationsList,
 } from "../../features/userProfileSlice";
 import { fetchPendingStatus } from "../../features/friendsManagmentSlice";
+import { socket } from "../../pages/SocketProvider";
 
 const ProfileDropdown = () => {
   const [dropDown, setDropdown] = useState(false);
@@ -68,27 +69,31 @@ const ProfileDropdown = () => {
       dispatch(fetchPendingStatus());
     }
   }, []);
-
+  
   return (
     <div className="flex">
       {!isLoggedIn ? (
-        <div className="flex py-1 items-center transition duration-300 cursor-pointer text-2xl font-medium mx-2 px-2">
-          <button className="hover:scale-110 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-1 px-4 bg-yellow-400 text-gray-800 rounded-md">
+        <div className="flex py-1 items-center transition duration-300 cursor-pointer text-xl font-medium mx-2 px-2">
+          {/* <button className="hover:scale-110 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-1 px-4 bg-yellow-400 text-gray-800 rounded-md about-family"> */}
+          <button className="hover:scale-110 transition duration-300 login-button">
             <Link to="/auth">Login</Link>
           </button>
         </div>
       ) : (
-        <div className="dropdown flex items-center transition duration-300 cursor-pointer text-2xl font-medium mx-2 px-2">
+        <div className="dropdown flex items-center transition duration-300 cursor-pointer text-2xl font-medium mx-2 px-2 z-10">
           {isLoggedIn && (
             <div ref={notifRef}>
               <button
                 type="button"
-                onClick={() => dispatch(showNotificationsList(!showNotifList))}
+                onClick={() => {
+                  dispatch(showNotificationsList(!showNotifList));
+                  socket.emit("refresh", {});
+                }}
                 className="nav-container mr-4"
               >
                 {pendingUsers.length > 0 &&
                 pendingUsers.filter((puser) => puser.id !== user.id) ? (
-                  <IoMdNotifications size="2rem" />
+                  <IoMdNotifications size="2rem" className="txt-cyan" />
                 ) : (
                   <IoMdNotificationsOutline size="2rem" />
                 )}
@@ -117,7 +122,7 @@ const ProfileDropdown = () => {
                 onClick={() => setDropdown(!dropDown)}
                 className="flex items-center px-2 "
               >
-                <p className="mr-4 text-xl hover:text-yellow-400 transition duration-300">
+                <p className="mr-4 text-sm header-item transition duration-300 about-title-family">
                   {user.user_name}
                 </p>
                 <img
