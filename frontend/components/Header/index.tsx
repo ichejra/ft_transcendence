@@ -19,7 +19,9 @@ const Header: React.FC = () => {
           <GoThreeBars size="3rem" className="txt-cyan" />
         </button>
         <div className="nav-links cursor-pointer text-2xl text-yellow-500 font-bold">
-          <Link to="/">LOGO</Link>
+          <Link to="/">
+            <img src="./images/logo-ft-transcendence.png" className="w-28" />
+          </Link>
         </div>
         <ul className="nav-links flex md:justify-between w-1/2 2xl:w-1/3 about-title-family">
           <li className="header-item hover:scale-110 transition duration-300 cursor-pointer text-md font-medium mx-2 px-2">

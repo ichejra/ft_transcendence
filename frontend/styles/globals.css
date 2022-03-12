@@ -470,6 +470,12 @@ canvas {
   }
   .play-button {
     margin-left: 20px;
+    padding: 0.5rem 2.5rem;
+    font-size: 14px;
+  }
+  .login-button {
+    padding: 0.4rem 1.5rem;
+    font-size: 17px;
   }
   .title-family,
   .text-family {
