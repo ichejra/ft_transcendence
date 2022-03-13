@@ -15,6 +15,7 @@ export interface User {
   avatar_url: string;
   is_active: boolean;
   state: boolean;
+  created_at: string;
 }
 interface UserState {
   isLoading: boolean;
@@ -40,6 +41,7 @@ const initialState: UserState = {
     avatar_url: "",
     is_active: false,
     state: false,
+    created_at: "",
   },
   friends: [],
   users: [],

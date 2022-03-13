@@ -4,9 +4,11 @@ import Sidebar from "./Sidebar";
 import ProfileDropdown from "./ProfileDropdown";
 import { openSidebar } from "../../features/sidebarSlice";
 import { useAppDispatch } from "../../app/hooks";
+import React, { useEffect, useState } from "react";
 
 const Header: React.FC = () => {
   const dispatch = useAppDispatch();
+
   return (
     <>
       <nav className="className='font-mono pl-6 py-4 bg-black  shadow-md shadow-black/10 text-white flex items-center justify-between">
@@ -16,14 +18,14 @@ const Header: React.FC = () => {
             dispatch(openSidebar());
           }}
         >
-          <GoThreeBars size="3rem" className="txt-cyan" />
+          <GoThreeBars size="2rem" className="txt-cyan" />
         </button>
         <div className="nav-links cursor-pointer text-2xl text-yellow-500 font-bold">
           <Link to="/">
             <img src="./images/logo-ft-transcendence.png" className="w-28" />
           </Link>
         </div>
-        <ul className="nav-links flex md:justify-between w-1/2 2xl:w-1/3 about-title-family">
+        <ul className="items-list nav-links flex md:justify-between w-1/2 2xl:w-1/3 about-title-family">
           <li className="header-item hover:scale-110 transition duration-300 cursor-pointer text-md font-medium mx-2 px-2">
             <Link to="/">Home</Link>
           </li>

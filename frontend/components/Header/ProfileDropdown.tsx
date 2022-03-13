@@ -15,7 +15,7 @@ import {
   showNotificationsList,
 } from "../../features/userProfileSlice";
 import { fetchPendingStatus } from "../../features/friendsManagmentSlice";
-import { socket } from "../../pages/SocketProvider";
+// import { socket } from "../../pages/SocketProvider";
 
 const ProfileDropdown = () => {
   const [dropDown, setDropdown] = useState(false);
@@ -87,7 +87,7 @@ const ProfileDropdown = () => {
                 type="button"
                 onClick={() => {
                   dispatch(showNotificationsList(!showNotifList));
-                  socket.emit("refresh", {});
+                  // socket.emit("refresh", {});
                 }}
                 className="nav-container mr-4"
               >
@@ -122,7 +122,7 @@ const ProfileDropdown = () => {
                 onClick={() => setDropdown(!dropDown)}
                 className="flex items-center px-2 "
               >
-                <p className="mr-4 text-sm header-item transition duration-300 about-title-family">
+                <p className="hidden md:block mr-4 text-sm header-item transition duration-300 about-title-family">
                   {user.user_name}
                 </p>
                 <img

@@ -4,7 +4,7 @@ import { FaTimes } from "react-icons/fa";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { showNotificationsList } from "../../features/userProfileSlice";
 import Cookies from "js-cookie";
-import { socket } from "../../pages/SocketProvider";
+// import { socket } from "../../pages/SocketProvider";
 import {
   fetchPendingStatus,
   acceptFriendRequest,
@@ -17,7 +17,7 @@ const Notifications = () => {
 
   const acceptFriend = (id: number) => {
     dispatch(acceptFriendRequest(id));
-    socket.emit("refresh", {});
+    // socket.emit("refresh", {});
     console.log(
       "Friend " +
         users.find((user) => user.id === id)?.display_name +
@@ -34,7 +34,7 @@ const Notifications = () => {
   useEffect(() => {
     if (Cookies.get("accessToken")) {
       dispatch(fetchPendingStatus());
-      socket.emit("refresh", {});
+      // socket.emit("refresh", {});
     }
   }, [pendingReq]);
 
