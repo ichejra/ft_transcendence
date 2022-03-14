@@ -44,8 +44,8 @@ export class AuthService {
         } catch(err) {
             console.log(err);
         }
-        const payload: JwtPayload = { id: (await user).id ,user_name: (await user).user_name, email: (await user).email};
-        const jwtToken  = await this.jwtService.sign(payload);
+        const payload: JwtPayload = { id: user.id ,user_name: user.user_name, email: user.email};
+        const jwtToken = this.jwtService.sign(payload);
         _res.cookie('accessToken', jwtToken);
         return  _res.redirect(url);
     }
@@ -56,5 +56,15 @@ export class AuthService {
             _res.clearCookie('accessToken');
         }
         return _res.redirect(process.env.HOME_PAGE);
+    }
+
+    getUserFromToken = async (token: string): Promise<User> => {
+        const payload: JwtPayload = this.jwtService.verify(token, { 
+            secret: process.env.JWT_SECRET,
+        });
+        if (payload.id) {
+            return await this.usersService.findOne(Number(payload.id));
+        }
+        return null;
     }
 }

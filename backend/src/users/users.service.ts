@@ -1,10 +1,11 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm'
+import { Socket } from 'socket.io';
 import { Repository, UpdateResult, DeleteResult } from 'typeorm'
 
 import { UserDto } from './dto/user.dto';
 import { UserFriends, UserFriendsRelation } from './entities/user-friends.entity';
-import { User } from './entities/user.entity';
+import { User, UserState } from './entities/user.entity';
 
 class NotFoundException extends HttpException {
   constructor() {
@@ -64,8 +65,16 @@ export class UsersService {
     }
   }
 
-  async remove(id: number | string): Promise<DeleteResult> {
-    try{
+  // function used for updating user state
+  updateState = async (id: number, state: UserState) : Promise<User> => {
+    return await this.usersRepository.update(id, { state: state }
+      ).then( async () => {
+      return await this.usersRepository.findOne(id);
+    });
+  }
+
+  async remove(id: number | string): Promise<any> {
+    try {
       return await this.usersRepository.delete(id);
     }
     catch(e) {
@@ -82,7 +91,7 @@ export class UsersService {
   }
 
   // method used for insert the logged user id and requested user id in a database table("user_friends") with status pending until accept
-  async insertToFriends(userId, recipientId): Promise<User> {
+  async insertToFriends(userId: any, recipientId: any): Promise<User> {
     const relation = await this.userFriendsRepository.query(
       `SELECT "id" FROM user_friends
       WHERE ("applicantId" = $1 AND "recipientId" = $2)
@@ -160,6 +169,9 @@ export class UsersService {
 
   /* used for getting all the pending requests of the users  */
   async getPendingRequests(userId: number) : Promise<User[]> {
+    /* Removed lines */
+    // IN (SELECT "recipientId" FROM user_friends WHERE "user_friends"."applicantId" = $1 AND "user_friends"."status" = $2)
+    // OR "users"."id"
     return await this.userFriendsRepository.query(
       `SELECT * FROM users
       WHERE "users"."id"
@@ -169,9 +181,7 @@ export class UsersService {
         UserFriendsRelation.PENDING
       ]);
     }
-    /* Removed lines */
-    // IN (SELECT "recipientId" FROM user_friends WHERE "user_friends"."applicantId" = $1 AND "user_friends"."status" = $2)
-    // OR "users"."id"
+    
     
   /* used for getting the friends */
   async getUserFriends(userId: number) : Promise<User[]> {
@@ -229,8 +239,8 @@ export class UsersService {
       OR ("user_friends"."recipientId" = $2 AND "user_friends"."applicantId" = $1)
       `,
       [userId, rejectedId]
-    ).then(()=>{
-      return this.usersRepository.findOne(rejectedId);
+    ).then( async () => {
+      return await this.usersRepository.findOne(rejectedId);
     })
   }
 
@@ -238,9 +248,9 @@ export class UsersService {
   async turnOnTwoFactorAuthentication(userId: number, bool: boolean): Promise<User> {
     return await this.usersRepository.update(userId, {
       is_2fa_enabled: bool,
-    }).then(() => {
-      return this.usersRepository.findOne(userId);
+    }).then( async () => {
+      return await this.usersRepository.findOne(userId);
     });
   }
 
-}
+};
