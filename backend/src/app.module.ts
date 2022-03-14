@@ -12,35 +12,37 @@ import * as dotenv from 'dotenv';
 import { ChannelsModule } from './channels/channels.module';
 import { GameModule } from './game/game.module';
 import { Game } from './game/entities/game.entity';
+import { Message } from './channels/entities/message.entity';
 
 dotenv.config();
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: '../.env' }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: `.env`
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.POSTGRES_HOST,
-      port: parseInt(<string>process.env.POSTGRES_PORT),
-      username: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DB,
+      host: process.env.TYPEORM_HOST,
+      port: parseInt(<string>process.env.TYPEORM_PORT),
+      username: process.env.TYPEORM_USERNAME,
+      password: process.env.TYPEORM_PASSWORD,
+      database: process.env.TYPEORM_DATABASE,
       entities: [
         User,
         UserFriends,
         Channel,
         UserChannel,
-        Game
+        Game,
+        Message
       ],
       synchronize: true,
     }),
     UsersModule,
     AuthModule,
-    ServeStaticModule.forRoot({
-      rootPath: process.env.DESTINATION
-    }),
+    ServeStaticModule.forRoot({ rootPath: process.env.DESTINATION }),
     ChannelsModule,
     GameModule,
-    MailModule
   ],
   controllers: [],
   providers: [],

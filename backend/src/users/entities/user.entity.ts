@@ -1,7 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany, JoinTable, PrimaryColumn, CreateDateColumn } from 'typeorm'
+import { Channel } from 'src/channels/entities/channel.entity';
+import { UserChannel } from 'src/channels/entities/user-channel.entity';
+import { Message } from 'src/channels/entities/message.entity';
+import { Entity, Column, OneToMany, ManyToMany, JoinTable, PrimaryColumn, CreateDateColumn } from 'typeorm'
 import { UserFriends } from './user-friends.entity';
 
-export enum UserStatus {
+export enum UserState {
     ONLINE = "online",
     OFFLINE = "offline",
     IN_GAME = "in_game"
@@ -12,13 +15,28 @@ export class User {
     @PrimaryColumn({ type: "int" })
     id: number;
 
-    @Column({ default: '', unique: true })
+    @Column({
+        type: 'varchar',
+        length: 255,
+        default: '',
+        unique: true
+    })
     user_name: string;
 
-    @Column({default: '', unique: true })
+    @Column({
+        type: 'varchar',
+        length: 255,
+        default: '',
+        unique: true
+    })
     email: string;
 
-    @Column({default: '', unique: true })
+    @Column({
+        type: 'varchar',
+        length: 255,
+        default: '',
+        unique: true
+    })
     display_name: string;
 
     @Column({default: ''})
@@ -29,10 +47,10 @@ export class User {
 
     @Column({
         type: 'enum',
-        enum: UserStatus,
-        default: UserStatus.OFFLINE
+        enum: UserState,
+        default: UserState.OFFLINE
     })
-    status: UserStatus;
+    state: UserState;
 
     @OneToMany(() => UserFriends, (e: UserFriends) => e.applicant)
     sentRequestFriends: UserFriends[];
@@ -40,6 +58,16 @@ export class User {
     @OneToMany(() => UserFriends, (e: UserFriends) => e.recipient)
     recievedFriendRequest: UserFriends[];
 
-    @CreateDateColumn()
-    created_at: Date;
+    @OneToMany(() => Message, (e: Message) => e.author)
+    messages: Message[];
+
+    // @OneToMany(() => UserChannel, (e: UserChannel) => e.channel)
+
+    @CreateDateColumn({
+        type: 'timestamp',
+        default: () => 'CURRENT_TIMESTAMP',
+    })
+    createdAt: Date;
+
+    
 }
