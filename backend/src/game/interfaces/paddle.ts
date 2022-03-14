@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io';
-import Consts from '../game_consts';
+import { Consts, GameStates } from '../game_consts';
 
 class Paddle {
   private _x: number;
@@ -67,6 +67,10 @@ class Paddle {
       this._padSpeed = 0;
     }
   }
+
 }
+
+
+
 
 export default Paddle;

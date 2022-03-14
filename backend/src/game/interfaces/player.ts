@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io';
-import Consts from '../game_consts';
+import { Consts, GameStates } from '../game_consts';
 import Paddle from './paddle';
 
 class Player {
@@ -16,7 +16,10 @@ class Player {
     this._paddle = isLeft
       ? new Paddle(Consts.L_PADDLE_X)
       : new Paddle(Consts.R_PADDLE_X);
-    this._interval = setInterval(() => this._paddle.movePaddle(), 1000 / 60);
+    this._interval = setInterval(
+      () => this._paddle.movePaddle(),
+      1000 / Consts.framePerSec,
+    ); //TODO  consider this : 1000 / Consts.framePerSec / 2 && increasing the ball speed of course
   }
 
   public getSocket(): Socket {
@@ -27,6 +30,9 @@ class Player {
   }
   public getScore(): number {
     return this._score;
+  }
+  public setScore(score: number): void {
+    this._score = score;
   }
   public getPaddle(): Paddle {
     return this._paddle;
@@ -45,6 +51,14 @@ class Player {
   public reset(): void {
     this._score = 0;
   }
+
+  public clearPlayer = () => {
+    clearInterval(this._interval);
+  }
 }
 
 export default Player;
+
+
+//TODO: check the socket.io prb
+//TODO: do the winner

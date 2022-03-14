@@ -12,7 +12,7 @@ import { User } from 'src/users/entities/user.entity';
 import GameObj from 'src/game/interfaces/game';
 import Player from 'src/game/interfaces/player';
 import { Game } from './entities/game.entity';
-import Consts from './game_consts';
+// import { Consts, GameState } from './game_consts';
 import { clear } from 'console';
 
 @WebSocketGateway({
@@ -33,8 +33,20 @@ export class GameGateway
   handleConnection(client: Socket): void {
     // TODO: handle connection
   }
-  handleDisconnect(client: Socket): void {
+
+  handleDisconnect(socket: Socket): void {
     // TODO: handle disconnection
+    // tstae
+    let gameFound = this.games.find((game) => {
+      return (
+        game.getPlayersSockets()[0] === socket ||
+        game.getPlayersSockets()[1] === socket
+      );
+    });
+    if (gameFound) {
+      gameFound.playerDisconnect(socket);
+    }
+
   }
   afterInit(server: any): any {
     // ?
@@ -46,6 +58,7 @@ export class GameGateway
     const game = new GameObj(
       new Player(socketsArr[0], true),
       new Player(socketsArr[1], false),
+      this.removeGame.bind(this),
     );
     this.games.push(game);
     this.clearQueue(game);
@@ -65,6 +78,7 @@ export class GameGateway
       this.joinGame([first, second], '');
     }
   }
+  //! ////////////////////////
   @SubscribeMessage('stop_game')
   private stopGame(socket: Socket, payload: any): void {
     let gameFound = this.games.find((game) => {
@@ -74,13 +88,19 @@ export class GameGateway
       );
     });
     if (gameFound) {
-      clearInterval(gameFound.getInterval());
+      gameFound.stopGame();
     }
   }
+  //! ////////////////////////
 
   private clearQueue(game: GameObj): void {
     this.queue.delete(game.getPlayersSockets()[0]);
     this.queue.delete(game.getPlayersSockets()[1]);
+  }
+
+  private removeGame(game: GameObj) {
+    this.clearQueue(game);
+    this.games.splice(this.games.indexOf(game), 1);
   }
 
   @SubscribeMessage('ArrowUp')

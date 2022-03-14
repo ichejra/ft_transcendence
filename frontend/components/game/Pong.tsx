@@ -3,14 +3,22 @@ import { io } from 'socket.io-client';
 
 const socket = io('http://localhost:3000/game');
 
-const CANVAS_WIDTH = 1000;
 const CANVAS_HEIGHT = 600;
+const CANVAS_WIDTH = 1000;
+const MAX_SCORE = 10;
+const MAX_WATCHERS = 10;
+const BALL_RADIUS = 12;
+const BALL_INIT_X = CANVAS_WIDTH / 2;
+const BALL_INIT_Y = CANVAS_HEIGHT / 2;
+const BALL_SPEED = 6;
+const BALL_MAX_SPEED = 15;
+const PAD_WIDTH = 15;
 const PAD_HEIGHT = 100;
-const PAD_WIDTH = 10;
-const BALL_RADIUS = 10;
-const L_PADX = 0;
-const R_PADX = CANVAS_WIDTH - PAD_WIDTH;
+const PADDLE_DIFF = 10;
+const L_PADX = 0 + 20;
+const R_PADX = CANVAS_WIDTH - PAD_WIDTH - 20;
 const PADY_INIT = CANVAS_HEIGHT / 2 - PAD_HEIGHT / 2;
+
 const NET_W = 5;
 const NET_H = 10;
 const NETX = CANVAS_WIDTH / 2 - NET_W / 2;
@@ -43,6 +51,7 @@ class Rect {
     this._ctx.fillRect(this._x, this._y, this._w, this._h);
   }
 }
+
 // const net = {
 //   x: 1000 / 2 - 5 / 2, //first 2 is the width
 //   y: 0,
@@ -72,6 +81,27 @@ class Circle {
   }
 }
 
+class Text {
+  _x: number;
+  _y: number;
+  _text: string;
+  _color: string;
+  _ctx: any;
+
+  constructor(x: number, y: number, text: string, color: string, ctx: any) {
+    this._x = x;
+    this._y = y;
+    this._text = text;
+    this._color = color;
+    this._ctx = ctx;
+  }
+  drawText() {
+    this._ctx.fillStyle = this._color;
+    this._ctx.font = '45px fantasy';
+    this._ctx.fillText(this._text, this._x, this._y);
+  }
+}
+
 interface IFrame {
   ball: {
     x: number;
@@ -85,16 +115,19 @@ interface IFrame {
     score1: number;
     score2: number;
   };
+  state: string;
+  isWinner: boolean;
 }
 
 class Paddle extends Rect {}
 class Net extends Rect {}
 class Ball extends Circle {}
+class Score extends Text {}
 
 const stateInit: IFrame = {
   ball: {
-    x: CANVAS_WIDTH / 2,
-    y: CANVAS_HEIGHT / 2,
+    x: BALL_INIT_X,
+    y: BALL_INIT_Y,
   },
   paddles: {
     leftPad: PADY_INIT,
@@ -104,6 +137,9 @@ const stateInit: IFrame = {
     score1: 0,
     score2: 0,
   },
+  state: 'void',
+  //* set Winner
+  isWinner: false,
 };
 
 const Pong = () => {
@@ -138,7 +174,7 @@ const Pong = () => {
     document.addEventListener('keyup', stopPaddle);
     socket.on('game_state', (newState) => {
       setFrame(newState);
-      console.log('I am frame from front', frame.paddles.leftPad);
+      // console.log('I am frame from front', frame.paddles.leftPad);
     });
     return () => {
       document.removeEventListener('keydown', movePaddle);
@@ -182,6 +218,41 @@ const Pong = () => {
       ctx
     );
     ball.drawCircle();
+    const player1Score = new Score(
+      CANVAS_WIDTH / 4,
+      CANVAS_HEIGHT / 5,
+      frame.score.score1.toString(),
+      'white',
+      ctx
+    );
+    player1Score.drawText();
+    const player2Score = new Score(
+      (3 * CANVAS_WIDTH) / 4,
+      CANVAS_HEIGHT / 5,
+      frame.score.score2.toString(),
+      'white',
+      ctx
+    );
+    // console.log(frame.score.score1);
+    // console.log(frame.score.score2);
+    player2Score.drawText();
+    if (frame.state === 'OVER') {
+      const clearTable = new Rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, 'black', ctx);
+      clearTable.drawRect();
+      const gameOver = new Text(
+        3 * CANVAS_WIDTH / 8,
+        CANVAS_HEIGHT / 2,
+        'GAME OVER',
+        'white',
+        ctx
+      );
+      gameOver.drawText();
+      if (frame.isWinner) {
+        console.log('winner');
+        
+      } else
+        console.log('loooser');
+    }
   }, [frame]);
   //*draw
   return (
@@ -200,3 +271,11 @@ const Pong = () => {
 };
 
 export default Pong;
+
+//* Done: show the score on the screen
+//* Done: stop the game when a score reaches the max score
+
+
+//TODO: consider make the ball square
+//TODO: add this color to the game after the UI finished: #05f2db
+//TODO: add game over in the end of the game and the winner for the winner and loser for the looser

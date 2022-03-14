@@ -1,5 +1,4 @@
-import { Socket } from 'socket.io';
-import Consts from '../game_consts';
+import { Consts, GameStates } from '../game_consts';
 import Paddle from './paddle';
 
 class Ball {
@@ -8,7 +7,6 @@ class Ball {
   private _velocityX: number;
   private _velocityY: number;
   private _speed: number;
-  private _score: number;
 
   constructor() {
     this._x = Consts.CANVAS_W / 2;
@@ -29,13 +27,10 @@ class Ball {
     //   ball.y -= ball.velocityY;
   }
   private _getRandomDirection(): number {
-    const rand =  Math.floor(Math.random() * 1337) ;
-    // console.log(rand);
-    
+    const rand = Math.floor(Math.random() * 1337);
     if (rand % 2 == 0) return -1;
     return 1;
   }
-
 
   public resetBall = () => {
     this._x = Consts.CANVAS_W / 2;
@@ -52,9 +47,9 @@ class Ball {
     ) {
       // ! checking if the ball hits the border
       this._velocityY = -this._velocityY;
-      // console.log('ball: ',this._y);
     }
   }
+
   PaddleBallCollision = (paddle: Paddle) => {
     const paddleTop = paddle.getY();
     const paddleBottom = paddle.getY() + Consts.PADDLE_H;
@@ -65,6 +60,7 @@ class Ball {
     const ballBottom = this._y + Consts.BALL_RADIUS;
     const ballLeft = this._x - Consts.BALL_RADIUS;
     const ballRight = this._x + Consts.BALL_RADIUS;
+    // console.log('hi from PaddleBallSpeed: I am ball speed: ', this._speed);
 
     return (
       paddleLeft < ballRight &&
@@ -82,12 +78,9 @@ class Ball {
   }
   public setVelocityX(velocityX: number): void {
     this._velocityX = velocityX;
-    // console.log('veloX ', this._velocityX);
-    
   }
   public setVelocityY(velocityY: number): void {
     this._velocityY = velocityY;
-    // console.log('veloY ', this._velocityY);
   }
   public getVelocityX(): number {
     return this._velocityX;
@@ -98,8 +91,9 @@ class Ball {
   public getSpeed(): number {
     return this._speed;
   }
-  public setSpeed(newSpeed : number): void {
-    this._speed = newSpeed;
+  public setSpeed(newSpeed: number): void {
+    if (this._speed < Consts.BALL_MAX_SPEED)
+      this._speed = newSpeed;
   }
 }
 
