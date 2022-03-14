@@ -72,17 +72,6 @@ const Sidebar = () => {
             </button>
           </Link>
         </li>
-        <li>
-          <Link to="/about">
-            <button
-              className="rounded-lg text-left w-full  hover:bg-gray-600 transition duration-300 cursor-pointer text-lg font-medium mx-2 py-4 px-2"
-              onClick={() => dispatch(closeSidebar())}
-              type="button"
-            >
-              about
-            </button>
-          </Link>
-        </li>
       </ul>
     </aside>
   );

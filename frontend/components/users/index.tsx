@@ -12,7 +12,7 @@ import {
   fetchRequestStatus,
   fetchPendingStatus,
 } from "../../features/friendsManagmentSlice";
-
+//TODO Refactor users UI/UX
 const AllUsers: React.FC = () => {
   const dispatch = useAppDispatch();
   const {
@@ -40,7 +40,7 @@ const AllUsers: React.FC = () => {
   }
 
   return (
-    <div className="page-100 flex justify-center md:py-12">
+    <div className="page-100 mt-20 flex justify-center md:py-12">
       <div className="md:w-5/6 items-center md:border-2 shadow-xl rounded-3xl bg-white">
         <div className="flex flex-col py-4">
           <div className="flex flex-wrap justify-center">

@@ -23,7 +23,7 @@ const info = [
 
 const HomePage: React.FC = () => {
   return (
-    <div className="page-50 w-full flex bg-black flex-col items-center">
+    <div className="page-50 mt-20 w-full flex bg-black flex-col items-center">
       <div className="hero-bg relative w-full xl:w-5/6 2xl:w-4/6 flex items-center justify-between">
         <div className="home-script">
           <h1 className="home-title">PING PONG</h1>

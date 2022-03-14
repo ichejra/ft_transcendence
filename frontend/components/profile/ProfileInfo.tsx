@@ -67,7 +67,7 @@ const ProfileInfo: React.FC<Props> = ({ user_me }) => {
   //   </div>
   // );
   return (
-    <div className="md:relative left-[24rem] xl:left-[28rem] md:w-[22rem] lg:w-[24rem] xl:w-[28rem]">
+    <div className="md:relative left-[26rem] xl:left-[30rem] md:w-[22rem] lg:w-[24rem] xl:w-[28rem]">
       <div className="flex justify-between mr-2">
         <h1 className="about-family text-xl py-2 px-4 text-white text-opacity-80">
           Game history

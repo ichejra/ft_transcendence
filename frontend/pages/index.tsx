@@ -1,7 +1,6 @@
 import type { NextPage } from "next";
 import { Routes, Route } from "react-router-dom";
 import HomePage from "../components/home";
-import About from "../components/about";
 import Channels from "../components/channels";
 import PongGame from "../components/game";
 import AllUsers from "../components/users";
@@ -20,6 +19,7 @@ import Cookies from "js-cookie";
 import Head from "next/head";
 import SocketProvider from "./SocketProvider";
 
+//TODO Protect routes
 const Home: NextPage = () => {
   const { isLoggedIn } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
@@ -46,7 +46,6 @@ const Home: NextPage = () => {
       <Header />
       <Routes>
         <Route path="/" element={<HomePage />} />
-
         <Route
           path="/channels"
           element={
@@ -77,17 +76,6 @@ const Home: NextPage = () => {
             </AuthRoute>
           }
         />
-        <Route path="/about" element={<About />} />
-        <Route
-          path="/profile/:id"
-          element={
-            <AuthRoute>
-              <CompleteProfile>
-                <UserProfile />
-              </CompleteProfile>
-            </AuthRoute>
-          }
-        ></Route>
         <Route
           path="/profile/list"
           element={
@@ -98,6 +86,16 @@ const Home: NextPage = () => {
             </AuthRoute>
           }
         />
+        <Route
+          path="/profile/:id"
+          element={
+            <AuthRoute>
+              <CompleteProfile>
+                <UserProfile />
+              </CompleteProfile>
+            </AuthRoute>
+          }
+        ></Route>
         <Route
           path="/complete-info"
           element={

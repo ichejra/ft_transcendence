@@ -17,7 +17,7 @@ const Login = () => {
   }, []);
 
   return (
-    <div className="page-100 absolute bg-gray-800 w-full h-full top-0 left-0 flex justify-center items-center">
+    <div className="page-100 fixed z-50 bg-gray-800 w-full h-full top-0 left-0 flex justify-center items-center">
       <div className="flex flex-col items-center justify-center w-full md:w-3/6 2xl:w-1/5 h-full md:h-1/4 py-12 bg-gray-200 text-gray-800 sm:rounded-xl shadow-xl">
         <h1 className="font-bold font-mono text-3xl mb-8 tracking-wider">
           Login

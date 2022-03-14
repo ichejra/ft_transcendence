@@ -25,7 +25,7 @@ const Notifications = () => {
     );
   };
 
-  //TODO setup the reject user function
+  //TODO add notifications-friends sockets
   const rejectFriend = () => {
     console.log("Friend rejected");
   };

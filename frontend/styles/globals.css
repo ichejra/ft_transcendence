@@ -74,7 +74,7 @@ canvas {
 }
 
 .page-100 {
-  min-height: calc(100vh - 8.85rem);
+  min-height: calc(100vh - 4.75rem);
 }
 
 .page-50 {
@@ -269,6 +269,12 @@ canvas {
 
 .profile-cover-bg {
   background-image: url("../public/images/coverProfile.jpeg");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.complete-info-cover-bg {
+  background-image: url("../public/images/complete_info.jpeg");
   background-repeat: no-repeat;
   background-size: cover;
 }

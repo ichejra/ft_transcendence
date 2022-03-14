@@ -11,6 +11,14 @@ interface Props {
   friends: User[];
 }
 
+// const friendsPosition = [
+//   "friends--index-one",
+//   "friends--index-two",
+//   "friends--index-three",
+// ];
+
+const friendsPosition = ["left-[1rem]", "left-[3rem]", "left-[5rem]"];
+
 const FriendsList: React.FC<Props> = ({ friends }) => {
   const dispatch = useAppDispatch();
   const [confirmationModal, setConfirmationModal] = useState(false);
@@ -67,7 +75,7 @@ const FriendsList: React.FC<Props> = ({ friends }) => {
   // );
 
   return (
-    <div className="md:relative left-[24rem] xl:left-[28rem] md:w-[22rem] lg:w-[24rem] my-4 xl:w-[28rem]">
+    <div className="md:relative left-[26rem] xl:left-[30rem] md:w-[22rem] lg:w-[24rem] my-4 xl:w-[28rem]">
       <div className="flex justify-between mr-2">
         <h1 className="about-family text-xl py-2 px-4 text-white text-opacity-80">
           Friends
@@ -99,11 +107,7 @@ const FriendsList: React.FC<Props> = ({ friends }) => {
               return (
                 <div
                   key={id}
-                  className={`absolute left-[${
-                    !index ? "1rem" : 2 * index + 1 + "rem"
-                  }] ${
-                    "z" + !index ? 10 : (index + 1) * 10
-                  } hover:bg-gray-200  cursor-pointer rounded-lg transition 2duration-300`}
+                  className={`absolute ${friendsPosition[index]} hover:bg-gray-200  cursor-pointer rounded-lg transition 2duration-300`}
                 >
                   <Link key={id} to={`/profile/${id}`}>
                     <img
@@ -115,13 +119,13 @@ const FriendsList: React.FC<Props> = ({ friends }) => {
               );
             })}
             <p
-              className={`absolute left-[${
+              className={`absolute ${
                 friends.length > 1 && friends.length < 3
-                  ? 7
+                  ? "left-[7rem]"
                   : friends.length > 2
-                  ? 9
-                  : 5
-              }rem] right-[1rem] about-family text-[13px] text-gray-500`}
+                  ? "left-[9rem]"
+                  : "left-[5rem]"
+              } right-[1rem] about-family text-[13px] text-gray-500`}
             >
               Friends with {friends[0].display_name}{" "}
               {friends.length > 1 && (
@@ -136,3 +140,8 @@ const FriendsList: React.FC<Props> = ({ friends }) => {
 };
 
 export default FriendsList;
+/*  friends.length > 1 && friends.length < 3
+                  ? 7
+                  : friends.length > 2
+                  ? 9
+                  : 5 */

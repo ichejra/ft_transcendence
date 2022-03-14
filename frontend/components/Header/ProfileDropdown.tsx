@@ -17,6 +17,8 @@ import {
 import { fetchPendingStatus } from "../../features/friendsManagmentSlice";
 // import { socket } from "../../pages/SocketProvider";
 
+//TODO hide dropdown menu
+
 const ProfileDropdown = () => {
   const [dropDown, setDropdown] = useState(false);
   const [logout, setLogout] = useState(false);
@@ -72,7 +74,7 @@ const ProfileDropdown = () => {
   
   return (
     <div className="flex">
-      {!isLoggedIn ? (
+      {!isLoggedIn || false ? (
         <div className="flex py-1 items-center transition duration-300 cursor-pointer text-xl font-medium mx-2 px-2">
           {/* <button className="hover:scale-110 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-1 px-4 bg-yellow-400 text-gray-800 rounded-md about-family"> */}
           <button className="hover:scale-110 transition duration-300 login-button">

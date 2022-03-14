@@ -26,6 +26,7 @@ interface UserState {
   friends: User[];
   isLoggedIn: boolean;
   editProfile: boolean;
+  // completeInfo: boolean;
   showNotifList: boolean;
 }
 
@@ -47,6 +48,7 @@ const initialState: UserState = {
   users: [],
   nrusers: [],
   editProfile: false,
+  // completeInfo: false,
   showNotifList: false,
 };
 
@@ -188,6 +190,7 @@ export const userProfileSlice = createSlice({
 
     builder.addCase(completeProfileInfo.fulfilled, (state, action: any) => {
       state.user = action.payload;
+      // state.completeInfo = true;
     });
     builder.addCase(completeProfileInfo.rejected, (state, action: any) => {
       state.isError = { isError: true, message: action.payload };
