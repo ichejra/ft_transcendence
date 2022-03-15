@@ -47,12 +47,13 @@ export class ChatGatway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
     public async handleConnection(client: Socket, ...args: any[]): Promise<void>{
         this.logger.log(`Client connected: ${client.id}`);
-        // client.emit() target the client
+        await this.clientsService.addConnection(client);
+        //! client.emit() target the client
     }
 
     public async handleDisconnect(client: Socket) : Promise<void> {
-        await this.clientsService.eraseConnection(client);
         this.logger.log(`Client disconnected: ${client.id}`);
+        await this.clientsService.eraseConnection(client);
     }
 
     @SubscribeMessage ('user_connection')
@@ -72,16 +73,15 @@ export class ChatGatway implements OnGatewayInit, OnGatewayConnection, OnGateway
     async handleJoinChannel(@ConnectedSocket() client: Socket, room: string) {
         const user = await this.clientsService.getUserFromSocket(client);
         const channel = await this.channelsService.getChannelByName(room);
-        // check the channel privacy
-        // if (channel.type === ChannelType.PRIVATE) { }
+        // TODO:- check the channel privacy
         await this.channelsService.joinChannel(channel.id, user.id);
         client.join(room);
-        // update user channel relation add the user
+        // TODO: update user channel relation add the user
     }
 
     @SubscribeMessage('leave_channel')
     async handleLeaveChannel(@ConnectedSocket() client: Socket, room: string) {
         client.leave(room);
-        // remove relation in user_channel table
+        // TODO: remove relation in user_channel table
     }
 }

@@ -33,5 +33,6 @@ dotenv.config()
         TwoFactorAuthService,
         MailService
     ],
+    exports: [ AuthService ]
 })
 export class AuthModule {}

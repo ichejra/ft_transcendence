@@ -25,7 +25,6 @@ export class AuthController {
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
     getProfile(@Req() _req: any): Promise<any> {
-        console.log(_req.user);
         return _req.user;
     }
 
