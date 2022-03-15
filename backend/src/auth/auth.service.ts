@@ -20,7 +20,6 @@ export class AuthService {
         if (!user) {
             return null;
         }
-        console.log(user);
         return user;
     }
 
@@ -42,6 +41,7 @@ export class AuthService {
                 url = process.env.HOME_PAGE; // redirect to Home page
             }
         } catch(err) {
+            // ! error handling
             console.log(err);
         }
         const payload: JwtPayload = { id: user.id ,user_name: user.user_name, email: user.email};

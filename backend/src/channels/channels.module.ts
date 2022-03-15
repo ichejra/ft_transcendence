@@ -10,6 +10,9 @@ import { MessagesService } from "./messages.service";
 import { ClientsService } from "./clients.service";
 import { UserChannel } from "./entities/user-channel.entity";
 import { AuthModule } from "src/auth/auth.module";
+import { AuthService } from "src/auth/auth.service";
+import { JwtModule } from "@nestjs/jwt";
+import { UserConnections } from "./models/user-connections.model";
 
 
 @Module({
@@ -17,6 +20,10 @@ import { AuthModule } from "src/auth/auth.module";
         TypeOrmModule.forFeature([ Channel, UserChannel, Message ]),
         UsersModule,
         AuthModule,
+        JwtModule.register({
+            secret: process.env.JWT_SECRET ,
+            signOptions: { expiresIn: process.env.JWT_EXPIRESIN }
+        }),
     ],
     controllers: [ ChannelsController ],
     providers: [
@@ -24,6 +31,7 @@ import { AuthModule } from "src/auth/auth.module";
         ChatGatway,
         MessagesService,
         ClientsService,
+        UserConnections
     ]
 })
 export class ChannelsModule {}

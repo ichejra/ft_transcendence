@@ -2,6 +2,6 @@ import { Socket } from "socket.io";
 import { User } from "src/users/entities/user.entity";
 
 export class UserConnections extends User {
+    connections: Array<Socket>;
 
-    connections: Map<number, Socket[]>;
 }

@@ -9,17 +9,21 @@ import { UserConnections } from "./models/user-connections.model";
 
 @Injectable()
 export class ClientsService {
+
     constructor(
-        private readonly usersService: UsersService,
+        private usersService: UsersService,
+        private authService: AuthService,
         ){}
-        
-    private readonly authService: AuthService
-    private readonly userConnections: UserConnections;
+
+    private sockets = new Array<Socket>();
+    private connections = new Map<number, Array<Socket>>();
     
     /* function for getting user from socket by access token */
     async getUserFromSocket(socket: Socket): Promise<User> {
-        const cookie = socket.handshake.headers.cookie;
-        const { accessToken } = parse(cookie);
+        const accessToken = socket.handshake.auth.key;
+        if (!accessToken) {
+            throw new WsException('Unauthorized');
+        }
         const user = await this.authService.getUserFromToken(accessToken);
         if (!user) {
             throw new WsException('Invalid token.');
@@ -29,33 +33,42 @@ export class ClientsService {
     
     // save user connections
     addConnection = async (socket: Socket): Promise<any> => {
-        const { id } = await this.getUserFromSocket(socket);
-        const key = this.userConnections.connections.get(id);
-        let sockets: Socket[] = [];
-        if (!key) {  // client log in first connection
-            sockets.push(socket);
-            this.userConnections.connections.set(id, sockets);
-            await this.usersService.updateState(Number(id), UserState.ONLINE);
-        } else { // client create new connection
-            sockets = this.userConnections.connections.get(id);
-            sockets.push(socket);
-            this.userConnections.connections[id] = sockets;
+        let user: User = null;
+        try {
+            user = await this.getUserFromSocket(socket);
+        } catch(e) {
+            return ;
         }
+        const keyCheck = this.connections.has(user.id);
+        if (!keyCheck) {
+            await this.usersService.updateState(Number(user.id), UserState.ONLINE);
+        }
+        this.sockets.push(socket);
+        this.connections.set(user.id, this.sockets);
+        this.sockets = [];
     }
 
     // this function use for deleting the connection from connections array
     eraseConnection = async (socket: Socket): Promise<any> => {
-        const { id } = await this.getUserFromSocket(socket);
-        let sockets: Socket[] = this.userConnections.connections.get(id);
-        sockets.filter((sock) => { return socket.id !== sock.id });
-        if (!sockets.length) { // if sockets array empty that mean the client disconnected 
-            this.userConnections.connections.delete(id);
-            await this.usersService.updateState(Number(id), UserState.OFFLINE);
+       let user: User = null;
+        try {
+            user = await this.getUserFromSocket(socket);
+        } catch(e) {
+            return ;
         }
-        if (!this.userConnections.connections.size) {
-            this.userConnections.connections.clear();
+        this.sockets = this.connections.get(user.id).filter((sock) => { 
+            return sock.id !== socket.id;
+        });
+        if (!this.sockets.length){
+            await this.usersService.updateState(Number(user.id), UserState.OFFLINE);
+            this.connections.delete(user.id);
+        } else {
+            this.connections.set(user.id, this.sockets);
         }
-
+        this.sockets = [];
+        if (!this.connections.size) {
+            this.connections.clear();
+        }
     }
 
 }
