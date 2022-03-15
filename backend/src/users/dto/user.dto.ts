@@ -1,5 +1,5 @@
 import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsNumberString, IsString, IsUrl } from "class-validator";
-import { UserStatus } from "../entities/user.entity";
+import { UserState } from "../entities/user.entity";
 
 export class UserDto {
     @IsNumber()
@@ -18,9 +18,9 @@ export class UserDto {
     display_name?: string;
 
     @IsEnum({
-        enum: UserStatus
+        enum: UserState
     })
-    status?: UserStatus;
+    state?: UserState;
 
     @IsUrl()
     @IsNotEmpty()

@@ -10,12 +10,21 @@ export class Channel {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ default: "", unique: true })
+    @Column({
+        type: 'varchar',
+        length: 255,
+        default: '',
+        unique: true
+     })
     name: string;
 
-    @Column()
+    @Column({
+        type: 'varchar',
+        length: 255,
+        nullable: true
+    })
     password?: string;
-
+ 
     @Column({
         type: "enum",
         enum: ChannelType,
@@ -23,6 +32,9 @@ export class Channel {
     })
     type: ChannelType;
 
-    @CreateDateColumn()
-    created_at: Date;
+    @CreateDateColumn({
+        type: 'timestamp',
+        default: () => 'CURRENT_TIMESTAMP',
+    })
+    createdAt: Date;
 }

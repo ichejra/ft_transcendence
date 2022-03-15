@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { FaUsersSlash } from "react-icons/fa";
 import Cookies from "js-cookie";
+import { socket } from "../../pages/SocketProvider";
 import {
   fetchNoRelationUsers,
   fetchAllUsers,
@@ -71,6 +72,7 @@ const User: React.FC<Props> = ({ id, avatar_url, display_name, user_name }) => {
     if (Cookies.get("accessToken")) {
       dispatch(fetchRequestStatus(id.toString()));
       dispatch(fetchPendingStatus());
+      socket.emit("refresh", {});
     }
   };
 

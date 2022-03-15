@@ -14,9 +14,12 @@ import NotFound from "../components/NotFound";
 import { AuthRoute, CompleteProfile } from "../components/privateRoutes";
 import CompleteUserProfileInfo from "../components/auth/CompleteUserProfileInfo";
 import { useAppSelector, useAppDispatch } from "../app/hooks";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { fetchCurrentUser } from "../features/userProfileSlice";
 import Cookies from "js-cookie";
+import Head from "next/head";
+import SocketProvider from "./SocketProvider";
+
 const Home: NextPage = () => {
   const { isLoggedIn } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
@@ -30,8 +33,16 @@ const Home: NextPage = () => {
   if (Cookies.get("accessToken") && !isLoggedIn) {
     return <div className="loading"></div>;
   }
+
   return (
     <>
+      <Head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fredoka+One&display=swap"
+          rel="stylesheet"
+        />
+        <title>Ping pong</title>
+      </Head>
       <Header />
       <Routes>
         <Route path="/" element={<HomePage />} />
