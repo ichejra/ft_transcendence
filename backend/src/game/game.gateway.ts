@@ -13,7 +13,6 @@ import GameObj from 'src/game/interfaces/game';
 import Player from 'src/game/interfaces/player';
 import { Game } from './entities/game.entity';
 // import { Consts, GameState } from './game_consts';
-import { clear } from 'console';
 
 @WebSocketGateway({
   cors: {
@@ -44,7 +43,7 @@ export class GameGateway
       );
     });
     if (gameFound) {
-      gameFound.playerDisconnect(socket);
+      gameFound.playerLeftGame(socket);
     }
 
   }
@@ -55,13 +54,14 @@ export class GameGateway
   @SubscribeMessage('join_game')
   private joinGame(socketsArr: Socket[], payload: any): void {
     console.log('join game: am here');
+    //TODO: change players state to inGame
     const game = new GameObj(
       new Player(socketsArr[0], true),
       new Player(socketsArr[1], false),
       this.removeGame.bind(this),
     );
     this.games.push(game);
-    this.clearQueue(game);
+    this.clearMatchFromQueue(game);
   }
 
   @SubscribeMessage('join_queue')
@@ -81,6 +81,7 @@ export class GameGateway
   //! ////////////////////////
   @SubscribeMessage('stop_game')
   private stopGame(socket: Socket, payload: any): void {
+    //* change players state to online
     let gameFound = this.games.find((game) => {
       return (
         game.getPlayersSockets()[0] === socket ||
@@ -93,13 +94,13 @@ export class GameGateway
   }
   //! ////////////////////////
 
-  private clearQueue(game: GameObj): void {
+  private clearMatchFromQueue(game: GameObj): void {
     this.queue.delete(game.getPlayersSockets()[0]);
     this.queue.delete(game.getPlayersSockets()[1]);
   }
 
   private removeGame(game: GameObj) {
-    this.clearQueue(game);
+    this.clearMatchFromQueue(game);
     this.games.splice(this.games.indexOf(game), 1);
   }
 

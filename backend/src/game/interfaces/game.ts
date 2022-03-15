@@ -49,8 +49,6 @@ class GameObj {
 
   public sendData = () => {
     const current = this.dataToBeSent();
-    // this._player1.getSocket().emit('game_state', {...current, isWinner: this._player1.isWinner()});
-    // this._player2.getSocket().emit('game_state', {...current, isWinner: this._player2.isWinner()});
     this._player1.getSocket().emit('game_state', {...current, isWinner: this._player1.isWinner()});
     this._player2.getSocket().emit('game_state', {...current, isWinner: this._player2.isWinner()});
   }
@@ -97,10 +95,8 @@ class GameObj {
   }
 
   public playGame(): void {
-    // console.log('collision 0', this._ball.getSpeed());
     this._ball.ballHorizontalBounce();
     if (this._ball.PaddleBallCollision(this._player1.getPaddle())) {
-      // console.log('collision 1', this._ball.getSpeed());
       let collidePoint =
         this._ball.getY() -
         (this._player1.getPaddle().getY() + Consts.PADDLE_H / 2);
@@ -117,7 +113,6 @@ class GameObj {
     }
 
     if (this._ball.PaddleBallCollision(this._player2.getPaddle())) {
-      // console.log('collision 2', this._ball.getSpeed());
       let collidePoint =
         this._ball.getY() -
         (this._player2.getPaddle().getY() + Consts.PADDLE_H / 2);
@@ -143,43 +138,13 @@ class GameObj {
     this._ball.moveBall();
 
     this.sendData();
-    // this._player1.getSocket().emit('game_state', {
-    //   ball: {
-    //     x: this._ball.getX(),
-    //     y: this._ball.getY(),
-    //   },
-    //   paddles: {
-    //     leftPad: this._player1.getPaddle().getY(),
-    //     rightPad: this._player2.getPaddle().getY(),
-    //   },
-    //   score: {
-    //     score1: this._player1.getScore(),
-    //     score2: this._player2.getScore(),
-    //   },
-    //   state: this.gameState(),
-    // });
-
-    // this._player2.getSocket().emit('game_state', {
-    //   ball: {
-    //     x: this._ball.getX(),
-    //     y: this._ball.getY(),
-    //   },
-    //   paddles: {
-    //     leftPad: this._player1.getPaddle().getY(),
-    //     rightPad: this._player2.getPaddle().getY(),
-    //   },
-    //   score: {
-    //     score1: this._player1.getScore(),
-    //     score2: this._player2.getScore(),
-    //   },
-    //   state: this.gameState(),
-    // });
     if (this.gameState() === GameStates.OVER) {
       this.stopGame();
     }
   }
 
-  public playerDisconnect = (client: Socket): void => {
+  public playerLeftGame = (client: Socket): void => {
+    //TODO: change players status to online
     if (this._player1.getSocket() === client) {
       this._player1.setScore(0);
       this._player2.setScore(Consts.MAX_SCORE);
@@ -187,41 +152,7 @@ class GameObj {
       this._player2.setScore(0);
       this._player1.setScore(Consts.MAX_SCORE);
     }
-    //! refacor
     this.sendData();
-    // this._player1.getSocket().emit('game_state', {
-    //   ball: {
-    //     x: this._ball.getX(),
-    //     y: this._ball.getY(),
-    //   },
-    //   paddles: {
-    //     leftPad: this._player1.getPaddle().getY(),
-    //     rightPad: this._player2.getPaddle().getY(),
-    //   },
-    //   score: {
-    //     score1: this._player1.getScore(),
-    //     score2: this._player2.getScore(),
-    //   },
-    //   state: this.gameState(),
-    // });
-
-    // this._player2.getSocket().emit('game_state', {
-    //   ball: {
-    //     x: this._ball.getX(),
-    //     y: this._ball.getY(),
-    //   },
-    //   paddles: {
-    //     leftPad: this._player1.getPaddle().getY(),
-    //     rightPad: this._player2.getPaddle().getY(),
-    //   },
-    //   score: {
-    //     score1: this._player1.getScore(),
-    //     score2: this._player2.getScore(),
-    //   },
-    //   state: this.gameState(),
-    // });
-    //! refacor
-
     this.stopGame();
   };
 
@@ -238,4 +169,4 @@ export default GameObj;
 //TODO: arrow func
 //TODO: set spectators
 //TODO: check unused func
-//TODO: deal with ball speed after finding someone to plsy with
+//TODO: deal with ball speed after finding someone to play with
