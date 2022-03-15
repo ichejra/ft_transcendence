@@ -12,13 +12,16 @@ import { User } from 'src/users/entities/user.entity';
 import GameObj from 'src/game/interfaces/game';
 import Player from 'src/game/interfaces/player';
 import { Game } from './entities/game.entity';
+import { GameService } from './game.service';
+import { GameDto } from './dto/game.dto';
+import { Inject } from '@nestjs/common';
 // import { Consts, GameState } from './game_consts';
 
 @WebSocketGateway({
   cors: {
     origin: '*',
   },
-  namespace: 'game',
+  namespace: 'game', //! remove it later
 })
 export class GameGateway
   implements OnGatewayConnection, OnGatewayInit, OnGatewayDisconnect
@@ -28,6 +31,9 @@ export class GameGateway
 
   @WebSocketServer()
   server; //https://docs.nestjs.com/websockets/gateways#server
+
+  @Inject()
+  private gameService: GameService;
 
   handleConnection(client: Socket): void {
     // TODO: handle connection
@@ -45,7 +51,6 @@ export class GameGateway
     if (gameFound) {
       gameFound.playerLeftGame(socket);
     }
-
   }
   afterInit(server: any): any {
     // ?
@@ -54,7 +59,6 @@ export class GameGateway
   @SubscribeMessage('join_game')
   private joinGame(socketsArr: Socket[], payload: any): void {
     console.log('join game: am here');
-    //TODO: change players state to inGame
     const game = new GameObj(
       new Player(socketsArr[0], true),
       new Player(socketsArr[1], false),
@@ -66,15 +70,18 @@ export class GameGateway
 
   @SubscribeMessage('join_queue')
   private joinQueue(client: Socket, payload: any): void {
+    //TODO: change players state to inGame
     console.log('join queue: am here');
     if (this.queue.has(client) === true) return;
+    //TODO: check the same user
+    // this.queue.forEach((sock) => {
+    //   if client.userId ==== sock.userId
+    // })
     this.queue.add(client);
     if (this.queue.size > 1) {
       console.log(this.queue.size);
-      const [first] = this.queue;
-      const [, second] = this.queue;
+      const [first, second] = this.queue;
       this.queue.clear();
-      // console.log('first: ', first, 'second: ' , second);
       this.joinGame([first, second], '');
     }
   }
@@ -100,6 +107,14 @@ export class GameGateway
   }
 
   private removeGame(game: GameObj) {
+    //! insert data here
+    //! assign winner and looser Id & check if it works
+    //TODO: set data in database
+    const GameData = new GameDto();
+    GameData.score = '1-1';
+    GameData.winnerId = 62399;
+    GameData.loserId = 62397;
+    this.gameService.insertGameData(GameData);
     this.clearMatchFromQueue(game);
     this.games.splice(this.games.indexOf(game), 1);
   }

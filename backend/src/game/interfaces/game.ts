@@ -4,6 +4,10 @@ import Paddle from './paddle';
 import Ball from './ball';
 import Player from './player';
 import { Game } from '../entities/game.entity';
+import { User } from 'src/users/entities/user.entity';
+import { ClientsService } from 'src/channels/clients.service';
+import { GameService } from '../game.service';
+import { GameDto } from '../dto/game.dto';
 
 class GameObj {
   private _id: string;
@@ -13,6 +17,7 @@ class GameObj {
   private _remove: Function;
   private _spectators: Socket[] = [];
   private _interval: NodeJS.Timer;
+  private gameService: GameService;
 
   constructor(
     player1: Player,
@@ -59,6 +64,11 @@ class GameObj {
   //   this._player2.reset();
   // }
 
+  // public getPlayersAsUsers() : User {
+  //   const socket1 = this._player1.getSocket();
+  //   const socket2 = this._player2.getSocket();
+  //   const user1 = new ClientsService();
+  // }
   public getId(): string {
     return this._id;
   }
@@ -166,6 +176,7 @@ export default GameObj;
 
 //* DONE: handle players disconnection
 //* DONE: Refactor playGame
+//! TODO: Refactor add data to database
 //TODO: arrow func
 //TODO: set spectators
 //TODO: check unused func
