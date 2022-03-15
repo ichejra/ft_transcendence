@@ -26,6 +26,7 @@ const ProfileDropdown = () => {
   const notifRef = useRef<any>(null);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  // const { refresh } = useAppSelector((state) => state.globalState);
   const { user, isLoggedIn, showNotifList } = useAppSelector(
     (state) => state.user
   );
@@ -61,6 +62,7 @@ const ProfileDropdown = () => {
   }, []);
 
   useEffect(() => {
+    console.log(1);
     if (logout) {
       dispatch(logOutUser());
     }
@@ -71,7 +73,14 @@ const ProfileDropdown = () => {
       dispatch(fetchPendingStatus());
     }
   }, []);
-  
+
+  // useEffect(() => {
+  //   if (Cookies.get("accessToken")) {
+  //     console.log("OK SOCKET TRIGGERED");
+  //     dispatch(fetchPendingStatus());
+  //   }
+  // }, [refresh]);
+
   return (
     <div className="flex">
       {!isLoggedIn || false ? (
@@ -89,7 +98,6 @@ const ProfileDropdown = () => {
                 type="button"
                 onClick={() => {
                   dispatch(showNotificationsList(!showNotifList));
-                  // socket.emit("refresh", {});
                 }}
                 className="nav-container mr-4"
               >

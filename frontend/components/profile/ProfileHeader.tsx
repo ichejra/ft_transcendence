@@ -1,20 +1,22 @@
 import { FaUserFriends } from "react-icons/fa";
-import { IoMdTime } from "react-icons/io";
 import { AiFillCalendar } from "react-icons/ai";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import EditProfileModal from "../modals/EditProfileModal";
 import {
+  User,
   editUserProfile,
   fetchAllUsers,
-  User,
+  fetchNoRelationUsers,
+  fetchUserFriends,
 } from "../../features/userProfileSlice";
 import { useParams } from "react-router";
-import Button from "../utils/Button";
+import { PButton } from "../utils/Button";
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import {
   fetchPendingStatus,
   fetchRequestStatus,
+  removeFriendRelation,
 } from "../../features/friendsManagmentSlice";
 
 interface Props {
@@ -28,6 +30,7 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
   const [isPending, setIsPending] = useState(false);
   const [isFriend, setIsFriend] = useState(false);
   const [userProfile, setUserProfile] = useState(user_me);
+  const [disabled, setDisabled] = useState(false);
 
   //! useParams
   const { id: profileID } = useParams();
@@ -37,20 +40,44 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
 
   //! useAppSelector
   const { editProfile } = useAppSelector((state) => state.user);
+  const { rejectUser } = useAppSelector((state) => state.friends);
 
   const addFriend = (id: number) => {
     if (Cookies.get("accessToken")) {
-      dispatch(fetchRequestStatus(id.toString()));
-      dispatch(fetchPendingStatus());
+      dispatch(fetchRequestStatus(id.toString())).then(() => {
+        dispatch(fetchPendingStatus()).then(() => {
+          dispatch(fetchNoRelationUsers());
+        });
+      });
       setIsPending(true);
     }
   };
 
-  console.log(profileID);
+  const removeFriend = (id: number) => {
+    if (Cookies.get("accessToken")) {
+      dispatch(removeFriendRelation(id))
+        .then(() => {
+          dispatch(fetchUserFriends());
+          dispatch(fetchNoRelationUsers());
+        })
+        .then(() => {
+          setIsFriend(false);
+        });
+    }
+  };
 
-  //TODO setup the unfriend user function
-  const removeFriend = () => {
-    console.log("Friend removed");
+  const cancelRequest = (id: number) => {
+    if (Cookies.get("accessToken")) {
+      dispatch(removeFriendRelation(id))
+        .then(() => {
+          dispatch(fetchUserFriends());
+          dispatch(fetchNoRelationUsers());
+        })
+        .then(() => {
+          setIsFriend(false);
+          setIsPending(false);
+        });
+    }
   };
 
   const editMyProfile = () => {
@@ -59,10 +86,12 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
   };
 
   useEffect(() => {
+    console.log(5);
     setUserProfile(user_me);
   }, [user_me]);
 
   useEffect(() => {
+    console.log(6);
     setUserProfile((userprofile) => {
       let newUserprofile = users.find((user) => user.id === Number(profileID));
       userprofile = newUserprofile !== undefined ? newUserprofile : user_me;
@@ -124,15 +153,41 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
             {user_me.id !== Number(profileID) ? (
               <div>
                 {!isFriend && !isPending && (
-                  <Button
-                    func={() => addFriend(userProfile.id)}
-                    type={"adduser"}
+                  <PButton
+                    type={"Add Friend"}
+                    func={addFriend}
+                    id={userProfile.id}
+                    style="bg-blue txt-cyan"
+                    icon={2}
                   />
                 )}
-                {isFriend && <Button func={removeFriend} type="remove" />}
+                {isFriend && (
+                  <PButton
+                    func={removeFriend}
+                    type="Unfriend"
+                    id={userProfile.id}
+                    style="bg-blue-400 text-cyan-200"
+                    icon={3}
+                  />
+                )}
+                {isPending && (
+                  <PButton
+                    func={cancelRequest}
+                    type="Cancel Request"
+                    id={userProfile.id}
+                    style="bg-blue-400 text-cyan-200"
+                    icon={3}
+                  />
+                )}
               </div>
             ) : (
-              <Button func={editMyProfile} type="edit" />
+              <PButton
+                func={editMyProfile}
+                type="Edit Profile"
+                id={userProfile.id}
+                style="bg-blue txt-cyan"
+                icon={1}
+              />
             )}
             {editProfile && <EditProfileModal />}
           </div>
@@ -143,12 +198,3 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
 };
 
 export default ProfileHeader;
-
-/* 
-send request => 
-  - sender: status pending:  sent msg
-  - reciever: status pending: accept msg
-accept request => 
-  - sender: status accepted: unfriend msg
-  - reciever: status accepted: unfriend msg
-*/

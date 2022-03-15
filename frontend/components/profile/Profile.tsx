@@ -9,9 +9,12 @@ const UserProfile: React.FC = () => {
   const { users, user, friends, editProfile } = useAppSelector(
     (state) => state.user
   );
+  const { rejectUser } = useAppSelector((state) => state.friends);
+
   const { id } = useParams();
 
   useEffect(() => {
+    console.log(4);
     dispatch(fetchUserFriends());
   }, [editProfile]);
 

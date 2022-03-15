@@ -13,12 +13,10 @@ export const AuthRoute: React.FC = ({ children }) => {
   return <>{children}</>;
 };
 
-export const CompleteProfile: React.FC = ({ children, ...rest }) => {
+export const CompleteProfile: React.FC = ({ children }) => {
   const {
     user: { user_name: username },
   } = useAppSelector((state) => state.user);
-
-  console.log("->>", rest);
 
   if (!username) {
     return <Navigate to="/complete-info" replace={true} />;

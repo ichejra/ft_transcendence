@@ -210,7 +210,8 @@ canvas {
   font-family: "Press Start 2P";
 }
 
-.profile-card-bg-color {
+.profile-card-bg-color,
+.user-card-bg {
   background-color: #16152b;
 }
 

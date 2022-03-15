@@ -17,7 +17,7 @@ import { useEffect, useState } from "react";
 import { fetchCurrentUser } from "../features/userProfileSlice";
 import Cookies from "js-cookie";
 import Head from "next/head";
-import SocketProvider from "./SocketProvider";
+// import SocketProvider from "./SocketProvider";
 
 //TODO Protect routes
 const Home: NextPage = () => {

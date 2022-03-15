@@ -83,7 +83,7 @@ export const fetchAllUsers = createAsyncThunk(
           },
         }
       );
-      console.log("==>", response.data);
+      console.log("[US] ARU ==>", response.data);
 
       return _api.fulfillWithValue(response.data);
     } catch (error) {
@@ -117,7 +117,7 @@ export const fetchUserFriends = createAsyncThunk(
           authorization: `Bearer ${Cookies.get("accessToken")}`,
         },
       });
-      console.log("Friends => ", response.data);
+      console.log("[US] Friends => ", response.data);
 
       return _api.fulfillWithValue(response.data);
     } catch (error) {

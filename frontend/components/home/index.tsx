@@ -21,6 +21,8 @@ const info = [
   },
 ];
 
+//TODO edit team member card frame
+
 const HomePage: React.FC = () => {
   return (
     <div className="page-50 mt-20 w-full flex bg-black flex-col items-center">
