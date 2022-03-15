@@ -74,11 +74,11 @@ canvas {
 }
 
 .page-100 {
-  min-height: 50vh;
+  min-height: calc(100vh - 4.75rem);
 }
 
 .page-50 {
-  min-height: calc(100vh - 8.85rem);
+  min-height: 50vh;
 }
 
 .page {
@@ -210,6 +210,11 @@ canvas {
   font-family: "Press Start 2P";
 }
 
+.profile-card-bg-color,
+.user-card-bg {
+  background-color: #16152b;
+}
+
 .text-family,
 .about-family {
   font-family: "Fredoka One";
@@ -263,6 +268,18 @@ canvas {
   top: 4rem;
 }
 
+.profile-cover-bg {
+  background-image: url("../public/images/coverProfile.jpeg");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.complete-info-cover-bg {
+  background-image: url("../public/images/complete_info.jpeg");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 .right-paddle {
   position: absolute;
   width: 12px;
@@ -275,6 +292,11 @@ canvas {
 .txt-cyan {
   color: #05f2db;
 }
+
+.bg-blue {
+  background-color: #0711d9;
+}
+
 .bg-cyan {
   background-color: #05f2db;
 }
@@ -470,6 +492,12 @@ canvas {
   }
   .play-button {
     margin-left: 20px;
+    padding: 0.5rem 2.5rem;
+    font-size: 14px;
+  }
+  .login-button {
+    padding: 0.4rem 1.5rem;
+    font-size: 17px;
   }
   .title-family,
   .text-family {

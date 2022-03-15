@@ -7,15 +7,21 @@ const initialState: {
   sentReq: boolean;
   acceptReq: boolean;
   pendingReq: boolean;
+  rejectUser: boolean;
+  blockUser: boolean;
   pendingUsers: User[];
   friends: User[];
+  blockedUsers: User[];
 } = {
   isFriend: false,
   sentReq: false,
   acceptReq: false,
   pendingReq: false,
+  rejectUser: false,
+  blockUser: false,
   pendingUsers: [],
   friends: [],
+  blockedUsers: [],
 };
 
 export const fetchRequestStatus = createAsyncThunk(
@@ -82,6 +88,65 @@ export const acceptFriendRequest = createAsyncThunk(
   }
 );
 
+export const blockUserRequest = createAsyncThunk(
+  "user/blockUserRequest",
+  async (id: number, _api) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:3000/users/friend-block`,
+        { blockId: id },
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      return _api.fulfillWithValue(response.data);
+    } catch (error: any) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
+
+export const fetchBlockedUsers = createAsyncThunk(
+  "user/fetchBlockedUsers",
+  async (_, _api) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/users/blocked-friends`,
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      return _api.fulfillWithValue(response.data);
+    } catch (error: any) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
+
+export const removeFriendRelation = createAsyncThunk(
+  "user/removeFriendRelation",
+  async (id: number, _api) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:3000/users/remove-relation`,
+        { rejectedId: id },
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      return _api.fulfillWithValue(response.data);
+    } catch (error: any) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
+
 export const friendsManagementSlice = createSlice({
   name: "friendsManagment",
   initialState,
@@ -103,6 +168,15 @@ export const friendsManagementSlice = createSlice({
       state.sentReq = false;
       state.pendingReq = false;
       state.acceptReq = true;
+    });
+    builder.addCase(blockUserRequest.fulfilled, (state) => {
+      state.blockUser = true;
+    });
+    builder.addCase(fetchBlockedUsers.fulfilled, (state, action: any) => {
+      state.blockedUsers = action.payload;
+    });
+    builder.addCase(removeFriendRelation.fulfilled, (state) => {
+      state.rejectUser = true;
     });
   },
 });

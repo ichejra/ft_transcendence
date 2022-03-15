@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import Member from "../utils/TeamMember";
 
 const info = [
   {
@@ -20,9 +21,11 @@ const info = [
   },
 ];
 
+//TODO edit team member card frame
+
 const HomePage: React.FC = () => {
   return (
-    <div className="page-50 w-full flex bg-black flex-col items-center">
+    <div className="page-50 mt-20 w-full flex bg-black flex-col items-center">
       <div className="hero-bg relative w-full xl:w-5/6 2xl:w-4/6 flex items-center justify-between">
         <div className="home-script">
           <h1 className="home-title">PING PONG</h1>
@@ -98,25 +101,6 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </div> */}
-    </div>
-  );
-};
-
-interface Props {
-  img: string;
-  color: string;
-}
-
-const Member: React.FC<Props> = ({ img, color }) => {
-  console.log(color);
-
-  return (
-    <div className={`w-[204px] h-[261px] ${color} relative`}>
-      <div className="absolute w-16 h-14 bg-white right-0 bottom-10"></div>
-      <div className="absolute w-16 h-14 bg-white top-10"></div>
-      <div className="absolute w-[194px] h-[251px] bg-red-200 left-[5px] top-[5px]">
-        <img src={img} className="w-full h-full" />
-      </div>
     </div>
   );
 };

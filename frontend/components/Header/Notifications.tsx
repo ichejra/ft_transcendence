@@ -2,12 +2,17 @@ import { useEffect } from "react";
 import { BsPersonCheck } from "react-icons/bs";
 import { FaTimes } from "react-icons/fa";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { showNotificationsList } from "../../features/userProfileSlice";
+import {
+  fetchNoRelationUsers,
+  fetchUserFriends,
+  showNotificationsList,
+} from "../../features/userProfileSlice";
 import Cookies from "js-cookie";
-import { socket } from "../../pages/SocketProvider";
+// import { socket } from "../../pages/SocketProvider";
 import {
   fetchPendingStatus,
   acceptFriendRequest,
+  removeFriendRelation,
 } from "../../features/friendsManagmentSlice";
 
 const Notifications = () => {
@@ -16,8 +21,14 @@ const Notifications = () => {
   const { users } = useAppSelector((state) => state.user);
 
   const acceptFriend = (id: number) => {
-    dispatch(acceptFriendRequest(id));
-    socket.emit("refresh", {});
+    if (Cookies.get("accessToken")) {
+      dispatch(acceptFriendRequest(id)).then(() => {
+        dispatch(fetchUserFriends());
+        dispatch(fetchPendingStatus());
+        dispatch(fetchNoRelationUsers());
+      });
+    }
+    // socket.emit("refresh", {});
     console.log(
       "Friend " +
         users.find((user) => user.id === id)?.display_name +
@@ -25,16 +36,23 @@ const Notifications = () => {
     );
   };
 
-  //TODO setup the reject user function
-  const rejectFriend = () => {
+  //TODO add notifications-friends sockets
+  const rejectFriend = (id: number) => {
+    if (Cookies.get("accessToken")) {
+      dispatch(removeFriendRelation(id)).then(() => {
+        dispatch(fetchNoRelationUsers());
+        dispatch(fetchPendingStatus());
+      });
+    }
     console.log("Friend rejected");
   };
 
   //? re-render the component each time a friend get accepted or rejected to update the pending users
   useEffect(() => {
+    console.log(2);
     if (Cookies.get("accessToken")) {
       dispatch(fetchPendingStatus());
-      socket.emit("refresh", {});
+      // socket.emit("refresh", {});
     }
   }, [pendingReq]);
 
@@ -71,7 +89,7 @@ const Notifications = () => {
                   accept
                 </BsPersonCheck>
                 <FaTimes
-                  onClick={rejectFriend}
+                  onClick={() => rejectFriend(id)}
                   className="hover:bg-gray-100 transition duration-300 cursor-pointer mx-1 p-1 w-8 h-8 bg-gray-200 text-gray-800 rounded-full"
                 >
                   reject

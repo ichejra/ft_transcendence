@@ -1,31 +1,44 @@
-import React, { useEffect } from "react";
-import { FaUserEdit, FaUserTimes } from "react-icons/fa";
-import { HiUserAdd, HiUserRemove } from "react-icons/hi";
+import React from "react";
+import { FaUserEdit } from "react-icons/fa";
+import { HiUserAdd } from "react-icons/hi";
+import { MdPersonRemove } from "react-icons/md";
+
+const icons = [
+  ,
+  <FaUserEdit size="1.5rem" className="mr-2" />,
+  <HiUserAdd size="1.5rem" className="mr-2" />,
+  <MdPersonRemove size="1.5rem" className="mr-2" />,
+];
 
 interface Props {
-  func: (id: number) => void;
   type: string;
-  color: string;
+  style: string;
+  id: number;
+  func: (id: number) => void;
+  icon?: number;
 }
 
-const Button: React.FC<Props> = ({ func, type, color }) => {
+const ProfileButton: React.FC<Props> = ({ func, type, id, style, icon }) => {
   return (
     <button
-      onClick={func}
-      className={`hover:scale-110 transition duration-300 cursor-pointer flex items-center text-md md:text-lg md:mx-4 py-1 md:py-2 px-6 bg-${color} text-gray-800 rounded-md`}
+      onClick={() => func(id)}
+      className={`hover:scale-105 transition duration-300 w-[214px] h-[37px] flex items-center justify-center rounded-md about-family ${style}`}
     >
-      {type === "accept" && <HiUserAdd className="w-6 h-8 mr-2" />}
-      {type === "accept" && "Accept"}
-      {type === "reject" && <FaUserTimes className="w-6 h-8 mr-2" />}
-      {type === "reject" && "Reject"}
-      {type === "adduser" && <HiUserAdd className="w-6 h-8 mr-2" />}
-      {type === "adduser" && "Add Friend"}
-      {type === "remove" && <HiUserRemove className="w-6 h-8 mr-2" />}
-      {type === "remove" && "Unfriend"}
-      {type === "edit" && <FaUserEdit className="w-6 h-8 mr-2" />}
-      {type === "edit" && "Edit Profile"}
+      {icon && icons[icon]}
+      {type}
     </button>
   );
 };
 
-export default Button;
+const UsersButton: React.FC<Props> = ({ type, style, id, func }) => {
+  return (
+    <button
+      onClick={() => func(id)}
+      className={`${style} transition duration-300 border rounded-md  m-1 p-1 w-[150px] tracking-wider`}
+    >
+      {type}
+    </button>
+  );
+};
+
+export { ProfileButton as PButton, UsersButton as UButton };

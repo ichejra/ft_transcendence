@@ -15,6 +15,7 @@ export interface User {
   avatar_url: string;
   is_active: boolean;
   state: boolean;
+  created_at: string;
 }
 interface UserState {
   isLoading: boolean;
@@ -25,6 +26,7 @@ interface UserState {
   friends: User[];
   isLoggedIn: boolean;
   editProfile: boolean;
+  // completeInfo: boolean;
   showNotifList: boolean;
 }
 
@@ -40,11 +42,13 @@ const initialState: UserState = {
     avatar_url: "",
     is_active: false,
     state: false,
+    created_at: "",
   },
   friends: [],
   users: [],
   nrusers: [],
   editProfile: false,
+  // completeInfo: false,
   showNotifList: false,
 };
 
@@ -79,7 +83,7 @@ export const fetchAllUsers = createAsyncThunk(
           },
         }
       );
-      console.log("==>", response.data);
+      console.log("[US] ARU ==>", response.data);
 
       return _api.fulfillWithValue(response.data);
     } catch (error) {
@@ -113,7 +117,7 @@ export const fetchUserFriends = createAsyncThunk(
           authorization: `Bearer ${Cookies.get("accessToken")}`,
         },
       });
-      console.log("Friends => ", response.data);
+      console.log("[US] Friends => ", response.data);
 
       return _api.fulfillWithValue(response.data);
     } catch (error) {
@@ -186,6 +190,7 @@ export const userProfileSlice = createSlice({
 
     builder.addCase(completeProfileInfo.fulfilled, (state, action: any) => {
       state.user = action.payload;
+      // state.completeInfo = true;
     });
     builder.addCase(completeProfileInfo.rejected, (state, action: any) => {
       state.isError = { isError: true, message: action.payload };

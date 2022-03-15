@@ -15,7 +15,9 @@ import {
   showNotificationsList,
 } from "../../features/userProfileSlice";
 import { fetchPendingStatus } from "../../features/friendsManagmentSlice";
-import { socket } from "../../pages/SocketProvider";
+// import { socket } from "../../pages/SocketProvider";
+
+//TODO hide dropdown menu
 
 const ProfileDropdown = () => {
   const [dropDown, setDropdown] = useState(false);
@@ -24,6 +26,7 @@ const ProfileDropdown = () => {
   const notifRef = useRef<any>(null);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  // const { refresh } = useAppSelector((state) => state.globalState);
   const { user, isLoggedIn, showNotifList } = useAppSelector(
     (state) => state.user
   );
@@ -59,6 +62,7 @@ const ProfileDropdown = () => {
   }, []);
 
   useEffect(() => {
+    console.log(1);
     if (logout) {
       dispatch(logOutUser());
     }
@@ -69,10 +73,17 @@ const ProfileDropdown = () => {
       dispatch(fetchPendingStatus());
     }
   }, []);
-  
+
+  // useEffect(() => {
+  //   if (Cookies.get("accessToken")) {
+  //     console.log("OK SOCKET TRIGGERED");
+  //     dispatch(fetchPendingStatus());
+  //   }
+  // }, [refresh]);
+
   return (
     <div className="flex">
-      {!isLoggedIn ? (
+      {!isLoggedIn || false ? (
         <div className="flex py-1 items-center transition duration-300 cursor-pointer text-xl font-medium mx-2 px-2">
           {/* <button className="hover:scale-110 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-1 px-4 bg-yellow-400 text-gray-800 rounded-md about-family"> */}
           <button className="hover:scale-110 transition duration-300 login-button">
@@ -87,7 +98,6 @@ const ProfileDropdown = () => {
                 type="button"
                 onClick={() => {
                   dispatch(showNotificationsList(!showNotifList));
-                  socket.emit("refresh", {});
                 }}
                 className="nav-container mr-4"
               >
@@ -122,7 +132,7 @@ const ProfileDropdown = () => {
                 onClick={() => setDropdown(!dropDown)}
                 className="flex items-center px-2 "
               >
-                <p className="mr-4 text-sm header-item transition duration-300 about-title-family">
+                <p className="hidden md:block mr-4 text-sm header-item transition duration-300 about-title-family">
                   {user.user_name}
                 </p>
                 <img
