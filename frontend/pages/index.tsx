@@ -19,7 +19,7 @@ import Cookies from "js-cookie";
 import Head from "next/head";
 // import SocketProvider from "./SocketProvider";
 
-//TODO Protect routes
+
 const Home: NextPage = () => {
   const { isLoggedIn } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();

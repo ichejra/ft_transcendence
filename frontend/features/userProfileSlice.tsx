@@ -15,7 +15,7 @@ export interface User {
   avatar_url: string;
   is_active: boolean;
   state: boolean;
-  created_at: string;
+  createdAt: string;
 }
 interface UserState {
   isLoading: boolean;
@@ -26,7 +26,7 @@ interface UserState {
   friends: User[];
   isLoggedIn: boolean;
   editProfile: boolean;
-  // completeInfo: boolean;
+  completeInfo: boolean;
   showNotifList: boolean;
 }
 
@@ -42,13 +42,13 @@ const initialState: UserState = {
     avatar_url: "",
     is_active: false,
     state: false,
-    created_at: "",
+    createdAt: "",
   },
   friends: [],
   users: [],
   nrusers: [],
   editProfile: false,
-  // completeInfo: false,
+  completeInfo: false,
   showNotifList: false,
 };
 
@@ -64,6 +64,8 @@ export const fetchNoRelationUsers = createAsyncThunk(
           },
         }
       );
+      console.log("[US] NRU ==>", response.data);
+
       return _api.fulfillWithValue(response.data);
     } catch (error) {
       return _api.rejectWithValue(error);
@@ -182,6 +184,9 @@ export const userProfileSlice = createSlice({
 
     builder.addCase(fetchCurrentUser.fulfilled, (state, action: any) => {
       state.user = action.payload;
+      if (state.user.user_name) {
+        state.completeInfo = true;
+      }
       state.isLoggedIn = true;
     });
     builder.addCase(fetchCurrentUser.rejected, (state, action: any) => {
@@ -190,7 +195,7 @@ export const userProfileSlice = createSlice({
 
     builder.addCase(completeProfileInfo.fulfilled, (state, action: any) => {
       state.user = action.payload;
-      // state.completeInfo = true;
+      state.completeInfo = true;
     });
     builder.addCase(completeProfileInfo.rejected, (state, action: any) => {
       state.isError = { isError: true, message: action.payload };

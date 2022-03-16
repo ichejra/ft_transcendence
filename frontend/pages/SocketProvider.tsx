@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-// import { io } from "socket.io-client";
+import { io } from "socket.io-client";
 import {
   fetchAllUsers,
   fetchUserFriends,
@@ -11,8 +11,13 @@ import {
 } from "../features/friendsManagmentSlice";
 import { updateGlobalState } from "../features/globalSlice";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
+import Cookies from "js-cookie";
 
-// export const socket = io("http://localhost:3000");
+// export const socket = io("http://localhost:3000", {
+//     auth: {
+//       key: Cookies.get("accessToken"),
+//     }
+// });
 
 const SocketProvider: React.FC = ({ children }) => {
   const dispatch = useAppDispatch();

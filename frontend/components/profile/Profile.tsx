@@ -23,7 +23,7 @@ const UserProfile: React.FC = () => {
       <div className="flex flex-col w-full 2xl:w-[80rem] items-center shadow-xl rounded-none lg:rounded-xl bg-black">
         <ProfileHeader user_me={user} users={users} friends={friends} />
         <div className="w-full mt-4">
-          <ProfileInfo user_me={user} />
+          <ProfileInfo user_me={user} users={users} />
           {/* <div className='w-96 h-80 bg-yellow-400'></div> */}
           {user.id === Number(id) && <FriendsList friends={friends} />}
         </div>

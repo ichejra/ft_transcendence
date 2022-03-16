@@ -5,12 +5,11 @@ import { FaUsersSlash } from "react-icons/fa";
 import { User, fetchUserFriends } from "../../features/userProfileSlice";
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { friendsPosition } from "../../consts";
 
 interface Props {
   friends: User[];
 }
-
-const friendsPosition = ["left-[1rem]", "left-[3rem]", "left-[5rem]"];
 
 const FriendsList: React.FC<Props> = ({ friends }) => {
   const dispatch = useAppDispatch();

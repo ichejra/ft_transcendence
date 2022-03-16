@@ -30,7 +30,6 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
   const [isPending, setIsPending] = useState(false);
   const [isFriend, setIsFriend] = useState(false);
   const [userProfile, setUserProfile] = useState(user_me);
-  const [disabled, setDisabled] = useState(false);
 
   //! useParams
   const { id: profileID } = useParams();
@@ -40,7 +39,6 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
 
   //! useAppSelector
   const { editProfile } = useAppSelector((state) => state.user);
-  const { rejectUser } = useAppSelector((state) => state.friends);
 
   const addFriend = (id: number) => {
     if (Cookies.get("accessToken")) {
@@ -135,7 +133,7 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
             <div className="flex font-normal text-sm">
               <AiFillCalendar size="1.1rem" className="mr-2" />
               <p className="text-[10px]">
-                {new Date(userProfile.created_at).toLocaleString("default", {
+                {new Date(userProfile.createdAt).toLocaleString("default", {
                   day: "2-digit",
                   month: "long",
                   year: "numeric",
@@ -149,6 +147,21 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
               </div>
             )}
           </div>
+          {/* <div className="h-full w-full text-center">
+            <div className="rounded-full border border-gray-600 h-full w-full mb-2 flex">
+              <div className="rounded-l-full about-family text-sm w-2/3 txt-cyan bg-blue-400">
+                7.5
+              </div>
+            </div>
+            <div className="rounded-full h-full w-full mb-2 flex">
+              <div className="rounded-l-full about-family text-sm w-2/3 bg-green-400">
+                10 wins
+              </div>
+              <div className="rounded-r-full about-family text-sm w-1/3 bg-red-400">
+                5 loses
+              </div>
+            </div>
+          </div> */}
           <div className="flex justify-center md:justify-start">
             {user_me.id !== Number(profileID) ? (
               <div>

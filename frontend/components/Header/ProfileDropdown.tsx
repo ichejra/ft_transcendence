@@ -17,8 +17,6 @@ import {
 import { fetchPendingStatus } from "../../features/friendsManagmentSlice";
 // import { socket } from "../../pages/SocketProvider";
 
-//TODO hide dropdown menu
-
 const ProfileDropdown = () => {
   const [dropDown, setDropdown] = useState(false);
   const [logout, setLogout] = useState(false);
@@ -27,7 +25,7 @@ const ProfileDropdown = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   // const { refresh } = useAppSelector((state) => state.globalState);
-  const { user, isLoggedIn, showNotifList } = useAppSelector(
+  const { user, isLoggedIn, completeInfo, showNotifList } = useAppSelector(
     (state) => state.user
   );
   const { pendingUsers, pendingReq } = useAppSelector((state) => state.friends);
@@ -83,12 +81,13 @@ const ProfileDropdown = () => {
 
   return (
     <div className="flex">
-      {!isLoggedIn || false ? (
+      {!isLoggedIn || !completeInfo ? (
         <div className="flex py-1 items-center transition duration-300 cursor-pointer text-xl font-medium mx-2 px-2">
-          {/* <button className="hover:scale-110 transition duration-300 cursor-pointer text-2xl font-medium mx-2 py-1 px-4 bg-yellow-400 text-gray-800 rounded-md about-family"> */}
-          <button className="hover:scale-110 transition duration-300 login-button">
-            <Link to="/auth">Login</Link>
-          </button>
+          <Link to={`${!isLoggedIn ? "/auth" : "/complete-info"}`}>
+            <button className="hover:scale-110 transition duration-300 login-button">
+              Login
+            </button>
+          </Link>
         </div>
       ) : (
         <div className="dropdown flex items-center transition duration-300 cursor-pointer text-2xl font-medium mx-2 px-2 z-10">
@@ -148,9 +147,9 @@ const ProfileDropdown = () => {
             >
               <ul
                 onClick={() => setDropdown(false)}
-                className="bg-black rounded-xl bg-opacity-75 py-2"
+                className="user-card-bg rounded-xl p-2 about-family tracking-wider"
               >
-                <li className="py-2 pl-2 rounded-t-xl hover:bg-gray-800 hover:text-yellow-400 transition duration-300">
+                <li className="py-2 pl-2 rounded-t-xl hover:bg-gray-800 header-item transition duration-300">
                   <Link to={`/profile/${user.id}`}>
                     <span className="flex items-center pr-16">
                       <CgProfile size="1.5rem" />
@@ -158,7 +157,7 @@ const ProfileDropdown = () => {
                     </span>
                   </Link>
                 </li>
-                <li className="py-2 pl-2 hover:bg-gray-800 hover:text-yellow-400 transition duration-300">
+                <li className="py-2 pl-2 hover:bg-gray-800 header-item transition duration-300">
                   <button
                     onClick={() => {
                       navigate(`/profile/${user.id}`);
@@ -174,7 +173,7 @@ const ProfileDropdown = () => {
                 <li>
                   <hr />
                 </li>
-                <li className="pt-2 pl-2 rounded-b-xl hover:bg-gray-800 hover:text-yellow-400 transition duration-300">
+                <li className="pt-2 pl-2 rounded-b-xl hover:bg-gray-800 header-item transition duration-300">
                   <Link to="/" onClick={() => setLogout(true)}>
                     <span className="flex items-center">
                       <HiOutlineLogout size="1.5rem" />

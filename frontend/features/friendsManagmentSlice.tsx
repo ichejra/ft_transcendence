@@ -157,24 +157,29 @@ export const friendsManagementSlice = createSlice({
       state.pendingReq = true;
       state.acceptReq = false;
     });
+    
     builder.addCase(fetchPendingStatus.fulfilled, (state, action: any) => {
       state.pendingUsers = action.payload;
       state.sentReq = true;
       state.pendingReq = true;
       state.acceptReq = false;
     });
+    
     builder.addCase(acceptFriendRequest.fulfilled, (state, action: any) => {
       state.friends.push(action.payload);
       state.sentReq = false;
       state.pendingReq = false;
       state.acceptReq = true;
     });
+    
     builder.addCase(blockUserRequest.fulfilled, (state) => {
       state.blockUser = true;
     });
+    
     builder.addCase(fetchBlockedUsers.fulfilled, (state, action: any) => {
       state.blockedUsers = action.payload;
     });
+    
     builder.addCase(removeFriendRelation.fulfilled, (state) => {
       state.rejectUser = true;
     });

@@ -1,11 +1,13 @@
 import { useRef } from "react";
 import { FaTimes } from "react-icons/fa";
+import { User } from "../../features/userProfileSlice";
 
 interface Props {
   setOpenModal: (a: boolean) => void;
+  user: User;
 }
 
-const HistoryModal: React.FC<Props> = ({ setOpenModal }) => {
+const HistoryModal: React.FC<Props> = ({ setOpenModal, user }) => {
   const divRef = useRef(null);
   return (
     <div
@@ -18,14 +20,12 @@ const HistoryModal: React.FC<Props> = ({ setOpenModal }) => {
         ref={divRef}
         className="flex flex-col justify-center items-center h-full"
       >
-        <div className="bg-white overflow-auto h-1/2 w-5/6 md:w-4/5 lg:w-4/6 rounded-xl p-4">
+        <div className="user-card-bg text-gray-200 overflow-auto md:h-[40rem] w-full md:w-[40rem] rounded-xl p-4">
           <div className="flex justify-between items-center mx-2 mb-10">
-            <h1 className="font-medium font-sans text-gray-800 text-3xl">
-              History
-            </h1>
+            <h1 className="font-medium font-sans text-3xl">History</h1>
             <FaTimes
               size="2rem"
-              className="cursor-pointer hover:text-yellow-400 transition duration-300"
+              className="cursor-pointer header-item transition duration-300"
               onClick={() => setOpenModal(false)}
             />
           </div>
@@ -33,30 +33,32 @@ const HistoryModal: React.FC<Props> = ({ setOpenModal }) => {
             return (
               <div
                 key={index}
-                className="flex justify-between items-center py-2 md:p-2"
+                className="flex items-center justify-between px-6 py-3 md:px-4 border border-gray-700 my-2 rounded-md"
               >
-                <div className="flex items-center justify-between bg-green-300 w-1/2 lg:w-2/5 rounded-l-full lg:rounded-full sm:pr-4">
-                  <img
-                    src="/images/profile.jpeg"
-                    className="w-14 h-14 rounded-full"
-                  />
-                  <h1 className="md:text-xl font-bold md:py-2 px-4 text-green-800">
-                    Jdoe
-                  </h1>
-                  <p className="pr-2">10</p>
+                <div className="flex items-center space-x-10">
+                  <div className="flex flex-col items-center">
+                    <img
+                      src={user.avatar_url}
+                      className="w-12 h-12 lg:w-14 lg:h-14 rounded-full"
+                    />
+                    <h1 className="about-family text-[14px] mt-1">
+                      {user.user_name}
+                    </h1>
+                  </div>
                 </div>
-                <span className="hidden lg:block text-yellow-400 text-xl md:text-2xl font-bold">
-                  VS
+                <span className="flex  md:text-xl font-bold space-x-2">
+                  <p className="about-family">10</p>
+                  <span>-</span>
+                  <p className="about-family">7</p>
                 </span>
-                <div className="flex items-center justify-between bg-red-300 w-1/2 lg:w-2/5 rounded-r-full lg:rounded-full sm:pl-4">
-                  <p className="pl-2">7</p>
-                  <h1 className="md:text-xl font-bold md:py-2 px-4 text-red-800">
-                    Sdave
-                  </h1>
-                  <img
-                    src="/images/profile.jpeg"
-                    className="w-14 h-14 rounded-full"
-                  />
+                <div className="flex items-center space-x-10">
+                  <div className="flex flex-col items-center">
+                    <img
+                      src="/images/profile.jpeg"
+                      className="w-12 h-12 lg:w-14 lg:h-14 rounded-full"
+                    />
+                    <h1 className="about-family text-[14px] mt-1">SalvaDor</h1>
+                  </div>
                 </div>
               </div>
             );
