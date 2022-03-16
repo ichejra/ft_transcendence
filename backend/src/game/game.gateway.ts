@@ -8,20 +8,22 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
-import { User } from 'src/users/entities/user.entity';
+import { User, UserState } from 'src/users/entities/user.entity';
 import GameObj from 'src/game/interfaces/game';
 import Player from 'src/game/interfaces/player';
 import { Game } from './entities/game.entity';
 import { GameService } from './game.service';
 import { GameDto } from './dto/game.dto';
 import { Inject } from '@nestjs/common';
+import { ClientsService } from 'src/channels/clients.service';
+import { UsersService } from 'src/users/users.service';
 // import { Consts, GameState } from './game_consts';
 
 @WebSocketGateway({
   cors: {
     origin: '*',
   },
-  namespace: 'game', //! remove it later
+  // namespace: 'game', //! remove it later
 })
 export class GameGateway
   implements OnGatewayConnection, OnGatewayInit, OnGatewayDisconnect
@@ -34,6 +36,11 @@ export class GameGateway
 
   @Inject()
   private gameService: GameService;
+
+  @Inject()
+  private clientsService: ClientsService;
+  @Inject()
+  private usersService: UsersService;
 
   handleConnection(client: Socket): void {
     // TODO: handle connection
@@ -56,12 +63,26 @@ export class GameGateway
     // ?
   }
 
+  private async getPlayerAsUser(client: Socket): Promise<User> {
+    let user: User = null;
+    try {
+      user = await this.clientsService.getUserFromSocket(client);
+    } catch (error) {
+      return;
+    }
+    return user;
+  }
+
   @SubscribeMessage('join_game')
-  private joinGame(socketsArr: Socket[], payload: any): void {
+  private async joinGame(socketsArr: Socket[], payload: any) {
     console.log('join game: am here');
     const game = new GameObj(
       new Player(socketsArr[0], true),
       new Player(socketsArr[1], false),
+      await this.getPlayerAsUser(socketsArr[0]),
+      await this.getPlayerAsUser(socketsArr[1]),
+      // await this.clientsService.getUserFromSocket(socketsArr[0]),
+      // await this.clientsService.getUserFromSocket(socketsArr[1]),
       this.removeGame.bind(this),
     );
     this.games.push(game);
@@ -69,18 +90,29 @@ export class GameGateway
   }
 
   @SubscribeMessage('join_queue')
-  private joinQueue(client: Socket, payload: any): void {
-    //TODO: change players state to inGame
+  private async joinQueue(client: Socket, payload: any): Promise<void> {
     console.log('join queue: am here');
     if (this.queue.has(client) === true) return;
-    //TODO: check the same user
-    // this.queue.forEach((sock) => {
-    //   if client.userId ==== sock.userId
-    // })
     this.queue.add(client);
     if (this.queue.size > 1) {
       console.log(this.queue.size);
       const [first, second] = this.queue;
+      const user1 = await this.getPlayerAsUser(first);
+      const user2 = await this.getPlayerAsUser(second);
+      //* DONE (wa9): check the same user
+      if (user1.id === user2.id) {
+        console.log('hi');
+        this.queue.delete(first);
+        return ;
+      }
+      //* DONE: change players state to inGame
+      //TODO: check state later with anouar
+      // console.log('joinQueue user1 online: ', user1.state);
+      // console.log('joinQueue user2 online: ', user2.state);
+      await this.usersService.updateState(Number(user1.id), UserState.IN_GAME);
+      await this.usersService.updateState(Number(user2.id), UserState.IN_GAME);
+      // console.log('joinQueue user1 ingame: ', user1.state);
+      // console.log('joinQueue user2 ingame: ', user2.state);
       this.queue.clear();
       this.joinGame([first, second], '');
     }
@@ -106,14 +138,28 @@ export class GameGateway
     this.queue.delete(game.getPlayersSockets()[1]);
   }
 
-  private removeGame(game: GameObj) {
-    //! insert data here
-    //! assign winner and looser Id & check if it works
-    //TODO: set data in database
+  private async removeGame(game: GameObj) {
+    //TODO: check state later with anouar
+    //* DONE: set data in database
+    const user1 = await this.getPlayerAsUser(game.getPlayer1().getSocket());
+    const user2 = await this.getPlayerAsUser(game.getPlayer2().getSocket());
+    // console.log('removeGame user1 in_game: ', user1.state);
+    // console.log('removeGame user2 in_game: ', user2.state);
+    console.log('-----------------------------------');
+    await this.usersService.updateState(Number(user1.id), UserState.ONLINE);
+    await this.usersService.updateState(Number(user2.id), UserState.ONLINE);
     const GameData = new GameDto();
-    GameData.score = '1-1';
-    GameData.winnerId = 62399;
-    GameData.loserId = 62397;
+    GameData.score = `${game.getPlayer1().getScore()}-${game
+      .getPlayer2()
+      .getScore()}`;
+    GameData.winner = await this.clientsService.getUserFromSocket(
+      game.getWinnerSocket(),
+    );
+    GameData.loser = await this.clientsService.getUserFromSocket(
+      game.getLoserSocket(),
+    );
+    // console.log('removeGame user1 online: ', user1.state);
+    // console.log('removeGame user2 online: ', user2.state);
     this.gameService.insertGameData(GameData);
     this.clearMatchFromQueue(game);
     this.games.splice(this.games.indexOf(game), 1);

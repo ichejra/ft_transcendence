@@ -58,15 +58,11 @@ export class GameService {
     
 
     async insertGameData(data: GameDto) : Promise<Game> {
-      console.log('I am from game service', data.winnerId);
-      // return await this.gameRepository.query(
-      //     `INSERT INTO game(
-      //       winnerId,
-      //       loserId,
-      //       score
-      //       ) VALUES ($1, $2, $3)`,
-      //       [ data.winnerId, data.loserId, data.score ]
-      // );
-      return await this.gameRepository.save(data);
+      // console.log('I am from game service', data.winner);
+      return await this.gameRepository.save({
+        winner: data.winner,
+        loser: data.loser,
+        score: data.score
+      });
     }
 }

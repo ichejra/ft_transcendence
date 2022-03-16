@@ -6,14 +6,14 @@ export class Game {
   @PrimaryGeneratedColumn()
   id?: number;
 
-  @ManyToOne(() => User, {
+  @ManyToOne(() => User, (e: User) => e.wonGames, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'winnerId' })
   winner?: User;
 
-  @ManyToOne(() => User, {
+  @ManyToOne(() => User, (e: User) => e.lostGames, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
