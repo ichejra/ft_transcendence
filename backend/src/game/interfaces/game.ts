@@ -13,6 +13,8 @@ class GameObj {
   private _id: string;
   private _player1: Player;
   private _player2: Player;
+  private _player1AsUser: User;
+  private _player2AsUser: User;
   private _ball: Ball;
   private _remove: Function;
   private _spectators: Socket[] = [];
@@ -22,10 +24,14 @@ class GameObj {
   constructor(
     player1: Player,
     player2: Player,
+    user1: User,
+    user2: User,
     removeGame: Function /* , type mn b3d */,
   ) {
     this._player1 = player1;
     this._player2 = player2;
+    this._player1AsUser = user1;
+    this._player2AsUser = user2;
     this._ball = new Ball();
     this._remove = removeGame;
     this._interval = setInterval(
@@ -34,8 +40,8 @@ class GameObj {
     );
   }
 
-  private dataToBeSent = () : BroadcastObject => {
-    return ({
+  private dataToBeSent = (): BroadcastObject => {
+    return {
       ball: {
         x: this._ball.getX(),
         y: this._ball.getY(),
@@ -49,14 +55,18 @@ class GameObj {
         score2: this._player2.getScore(),
       },
       state: this.gameState(),
-    })
-  }
+    };
+  };
 
   public sendData = () => {
     const current = this.dataToBeSent();
-    this._player1.getSocket().emit('game_state', {...current, isWinner: this._player1.isWinner()});
-    this._player2.getSocket().emit('game_state', {...current, isWinner: this._player2.isWinner()});
-  }
+    this._player1
+      .getSocket()
+      .emit('game_state', { ...current, isWinner: this._player1.isWinner() });
+    this._player2
+      .getSocket()
+      .emit('game_state', { ...current, isWinner: this._player2.isWinner() });
+  };
 
   //! public resetGame(): void {
   //   this._ball.resetBall();
@@ -65,12 +75,22 @@ class GameObj {
   // }
 
   // public getPlayersAsUsers() : User {
-  //   const socket1 = this._player1.getSocket();
-  //   const socket2 = this._player2.getSocket();
-  //   const user1 = new ClientsService();
+    // 
   // }
   public getId(): string {
     return this._id;
+  }
+  public getPlayer1(): Player {
+    return this._player1;
+  }
+  public getPlayer2(): Player {
+    return this._player2;
+  }
+  public getPlayer1AsUser(): User {
+    return this._player1AsUser;
+  }
+  public getPlayer2AsUser(): User {
+    return this._player1AsUser;
   }
 
   public getGamePlayer(playerSocket: Socket): Player {
@@ -82,7 +102,20 @@ class GameObj {
   public getInterval() {
     return this._interval;
   }
-  // * add watchers
+  // * add specs
+  public addSpectators(spectator: Socket) : void {
+    if (this._spectators.length < Consts.MAX_SPECTATORS)
+      this._spectators.push(spectator);
+  }
+
+  public getWinnerSocket(): Socket {
+    if (this._player1.isWinner()) return this._player1.getSocket();
+    else return this._player2.getSocket();
+  }
+  public getLoserSocket(): Socket {
+    if (!this._player1.isWinner()) return this._player1.getSocket();
+    else return this._player2.getSocket();
+  }
 
   public getPlayersSockets = (): Socket[] => {
     return [this._player1.getSocket(), this._player2.getSocket()];
@@ -98,10 +131,16 @@ class GameObj {
   };
 
   public stopGame(): void {
+    
     clearInterval(this._interval);
+    this.clearSpectators();
+    // console.log('user1: ', this._player1AsUser);
+    // console.log('user2: ', this._player2AsUser);
     this._player1.clearPlayer();
     this._player2.clearPlayer();
     this._remove(this);
+    // console.log('stopGame user1 online: ', this._player1AsUser.state);
+    // console.log('stopGame user2 online: ', this._player2AsUser.state);
   }
 
   public playGame(): void {
@@ -154,7 +193,7 @@ class GameObj {
   }
 
   public playerLeftGame = (client: Socket): void => {
-    //TODO: change players status to online
+    //* DONE: change players status to online
     if (this._player1.getSocket() === client) {
       this._player1.setScore(0);
       this._player2.setScore(Consts.MAX_SCORE);
@@ -166,17 +205,17 @@ class GameObj {
     this.stopGame();
   };
 
-  // public removeSpectators() : void {
-  //   if (this._spectators.length > 0)
-  //     this._spectators.splice(0, this._spectators.length);
-  // }
+  public clearSpectators() : void {
+    if (this._spectators.length > 0)
+      this._spectators.splice(0, this._spectators.length);
+  }
 }
 
 export default GameObj;
 
 //* DONE: handle players disconnection
 //* DONE: Refactor playGame
-//! TODO: Refactor add data to database
+//* DONE: add data to database
 //TODO: arrow func
 //TODO: set spectators
 //TODO: check unused func

@@ -59,6 +59,4 @@ class Player {
 
 export default Player;
 
-
-//TODO: check the socket.io prb
-//TODO: do the winner
+//* DONE: do the winner

@@ -6,11 +6,11 @@ export class GameDto {
   @IsNumber()
   id?: number;
 
-  @IsNumber()
-  winnerId: number;
+  // @IsNumber()
+  winner: User;
 
-  @IsNumber()
-  loserId: number;
+  // @IsNumber()
+  loser: User;
 
   @IsString()
   score?: string

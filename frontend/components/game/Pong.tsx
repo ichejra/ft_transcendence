@@ -1,9 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
-// import { socket } from '../../pages/SocketProvider';
+// import { io } from 'socket.io-client';
+import { socket } from '../../pages/SocketProvider';
 // import { socket } from '/Users/ichejra/Desktop/ft_trans/frontend/pages/SocketProvider.tsx';
 
-const socket = io('http://localhost:3000/game'); //! remove it later
+// const socket = io('http://localhost:3000/game'); //! remove it later
 
 const CANVAS_HEIGHT = 600;
 const CANVAS_WIDTH = 1000;
