@@ -1,7 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
+// import { socket } from '../../pages/SocketProvider';
+// import { socket } from '/Users/ichejra/Desktop/ft_trans/frontend/pages/SocketProvider.tsx';
 
-const socket = io('http://localhost:3000/game');
+const socket = io('http://localhost:3000/game'); //! remove it later
 
 const CANVAS_HEIGHT = 600;
 const CANVAS_WIDTH = 1000;
@@ -237,8 +239,8 @@ const Pong = () => {
     // console.log(frame.score.score2);
     player2Score.drawText();
     if (frame.state === 'OVER') {
-      const clearTable = new Rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, 'black', ctx);
-      clearTable.drawRect();
+      // const clearTable = new Rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, 'black', ctx);
+      // clearTable.drawRect();
       const gameOver = new Text(
         3 * CANVAS_WIDTH / 8,
         CANVAS_HEIGHT / 2,

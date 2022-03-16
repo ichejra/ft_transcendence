@@ -1,32 +1,37 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
 @Entity('game')
-export class Game /* extends BaseEntity */ {
+export class Game {
   @PrimaryGeneratedColumn()
-  _id: number;
+  id?: number;
 
-  //* add other columns
-  // @Column()
-  // type: string;
+  @ManyToOne(() => User, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'winnerId' })
+  winner?: User;
 
-  // @Column()
-  // player1: User;
+  @ManyToOne(() => User, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'loserId' })
+  loser?: User;
 
-  // @Column()
-  // player2: User;
+  @Column({
+    type: 'varchar',
+    name: 'score',
+    length: 10,
+  })
+  score?: string;
 
-  // @Column()
-  // winner: User;
-
-  // @Column()
-  // looser: User;
-
-  // @Column()
-  // score1: number;
-
-  // @Column()
-  // score2: number;
-}
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  playedAt?: Date;
+};
 
 //* create a table in our database

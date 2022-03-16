@@ -1,7 +1,7 @@
 //* deal with the database
 import { Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { InsertValuesMissingError, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { GameDto } from "./dto/game.dto";
 import { Game } from "./entities/game.entity";
 import { GameInterface } from "./interfaces/game.interface";
@@ -49,15 +49,24 @@ export class GameService {
   //   return await this.gameRepository.findByIdAndUpdate(id, game, { new: true }); //! look for the similar function of findByIdAndUpdate in typeore
   // }
   //! understanding purpose
-  private readonly game: GameInterface
-  repo: any;
+  // private readonly game: GameInterface
   constructor(
-    @InjectRepository(Game) gameRepository
+    @InjectRepository(Game) 
+    private gameRepository: Repository<Game>
     ) {
-      this.repo = gameRepository;
     }
+    
 
     async insertGameData(data: GameDto) : Promise<Game> {
-      return this.repo.save(data);
+      console.log('I am from game service', data.winnerId);
+      // return await this.gameRepository.query(
+      //     `INSERT INTO game(
+      //       winnerId,
+      //       loserId,
+      //       score
+      //       ) VALUES ($1, $2, $3)`,
+      //       [ data.winnerId, data.loserId, data.score ]
+      // );
+      return await this.gameRepository.save(data);
     }
 }

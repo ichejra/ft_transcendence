@@ -1,7 +1,7 @@
 export class Consts {
   static readonly CANVAS_H = 600;
   static readonly CANVAS_W = 1000;
-  static readonly MAX_SCORE = 10;
+  static readonly MAX_SCORE = 5;
   static readonly MAX_WATCHERS = 10;
   static readonly BALL_RADIUS = 12;
   static readonly BALL_INIT_X = Consts.CANVAS_W/2;
