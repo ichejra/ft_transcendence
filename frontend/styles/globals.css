@@ -7,6 +7,7 @@ html,
 body {
   height: 100%;
   margin: 0;
+  background-color: #16152b;
   /* font-family: monospace; */
 }
 
@@ -181,28 +182,34 @@ canvas {
   background-color: black;
   background-repeat: no-repeat;
   background-size: cover;
-  height: 600px;
+  height: 700px;
 }
 
 .hero-img {
-  width: 600px;
-  height: 600px;
+  display: block;
+  width: 700px;
+  height: 700px;
+}
+
+.title-family,
+.text-family {
+  margin-left: 80px;
 }
 
 .home-title {
   font-family: "Press Start 2P";
   font-style: normal;
   font-weight: 400;
-  font-size: 45px;
+  font-size: 55px;
   color: #05f2db;
-  margin-left: 40px;
+  margin-left: 80px;
 }
 
 .home-quote {
   color: #05f2db;
   font-family: "Fredoka One";
-  font-size: 20px;
-  margin-left: 40px;
+  font-size: 25px;
+  margin-left: 80px;
 }
 
 .title-family,
@@ -225,7 +232,7 @@ canvas {
   color: #05f2db;
   padding: 0.8rem 4rem;
   font-family: "Fredoka One";
-  margin-left: 40px;
+  margin-left: 80px;
   border-radius: 8px;
   margin-top: 3.5rem;
 }
@@ -288,6 +295,46 @@ canvas {
   right: 2.5rem;
   top: 4rem;
 }
+/* 
+!----------------------------
+ */
+.portrait1 {
+  background-color: #1d4ed8;
+}
+.portrait1 .leftPaddle {
+  top: 11rem;
+}
+.portrait1 .rightPaddle {
+  top: 2rem;
+}
+
+/* 
+!----------------------------
+ */
+.portrait2 {
+  background-color: #f472b6;
+}
+.portrait2 .leftPaddle,
+.portrait2 .rightPaddle {
+  top: 6.5rem;
+}
+
+/* 
+!----------------------------
+ */
+.portrait3 {
+  background-color: #1d4ed8;
+}
+.portrait3 .leftPaddle {
+  top: 2rem;
+}
+.portrait3 .rightPaddle {
+  top: 11rem;
+}
+
+/* 
+  !----------------------------
+*/
 
 .txt-cyan {
   color: #05f2db;
@@ -316,19 +363,19 @@ canvas {
     height: 700px;
   }
   .home-title {
-    font-size: 60px;
-    margin-left: 100px;
+    font-size: 55px;
+    margin-left: 80px;
   }
   .home-quote {
     font-size: 25px;
-    margin-left: 100px;
+    margin-left: 80px;
   }
   .play-button {
-    margin-left: 100px;
+    margin-left: 80px;
   }
   .title-family,
   .text-family {
-    margin-left: 100px;
+    margin-left: 80px;
   }
 }
 

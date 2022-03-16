@@ -1,3 +1,4 @@
+import Cookies from "js-cookie";
 import React from "react";
 import { Navigate, useLocation } from "react-router";
 import { useAppSelector } from "../../app/hooks";
@@ -15,11 +16,13 @@ export const AuthRoute: React.FC = ({ children }) => {
 
 export const CompleteProfile: React.FC = ({ children }) => {
   const {
-    user: { user_name: username },
+    user: { user_name: username, id },
+    completeInfo,
   } = useAppSelector((state) => state.user);
+  console.log(completeInfo);
 
   if (!username) {
     return <Navigate to="/complete-info" replace={true} />;
   }
-  return <SocketProvider>{children}</SocketProvider>;
+  return <>{children}</>;
 };

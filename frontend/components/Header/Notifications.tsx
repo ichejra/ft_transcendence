@@ -28,6 +28,7 @@ const Notifications = () => {
         dispatch(fetchNoRelationUsers());
       });
     }
+    dispatch(showNotificationsList(false));
     // socket.emit("refresh", {});
     console.log(
       "Friend " +
@@ -44,6 +45,7 @@ const Notifications = () => {
         dispatch(fetchPendingStatus());
       });
     }
+    dispatch(showNotificationsList(false));
     console.log("Friend rejected");
   };
 
@@ -59,7 +61,7 @@ const Notifications = () => {
   console.log("pending users =>>", pendingUsers);
 
   return (
-    <ul className="bg-black rounded-xl bg-opacity-75 p-2">
+    <ul className="user-card-bg about-family tracking-wider rounded-xl p-2">
       {pendingUsers.length > 0 ? (
         <p className="text-sm flex justify-end m-1">Notifcations</p>
       ) : (
@@ -69,15 +71,17 @@ const Notifications = () => {
       {pendingUsers.map((user) => {
         const { id, display_name, avatar_url } = user;
         return (
-          <li onClick={() => dispatch(showNotificationsList(false))} key={id}>
-            <div className="flex m-1 p-2 border rounded-lg items-center justify-between">
+          <li key={id}>
+            <div className="flex m-1 p-2 border border-gray-500 rounded-lg items-center justify-between">
               <div className="flex mr-2">
                 <img src={avatar_url} className="w-16 h-16 rounded-full mr-2" />
                 <div>
                   <p className={`text-md txt-cyan`}>Friend Request</p>
-                  <p className={`text-base font-light font-sans`}>
-                    <span className="font-bold">{display_name}</span> sent you a
-                    friend request.
+                  <p className={`font-light text-sm text-gray-400`}>
+                    <span className="font-bold text-md text-white">
+                      {display_name}
+                    </span>{" "}
+                    sent you a friend request.
                   </p>
                 </div>
               </div>

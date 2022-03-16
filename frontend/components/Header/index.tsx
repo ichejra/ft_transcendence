@@ -3,12 +3,12 @@ import { GoThreeBars } from "react-icons/go";
 import Sidebar from "./Sidebar";
 import ProfileDropdown from "./ProfileDropdown";
 import { openSidebar } from "../../features/sidebarSlice";
-import { useAppDispatch } from "../../app/hooks";
-import React, { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import React from "react";
 
-//TODO hide menu for non logged
 const Header: React.FC = () => {
   const dispatch = useAppDispatch();
+  const { isLoggedIn, completeInfo } = useAppSelector((state) => state.user);
 
   return (
     <>
@@ -26,7 +26,7 @@ const Header: React.FC = () => {
             <img src="./images/logo-ft-transcendence.png" className="w-28" />
           </Link>
         </div>
-        {true && (
+        {isLoggedIn && completeInfo && (
           <ul
             className={`items-list nav-links flex md:justify-between w-1/2 2xl:w-1/3 about-title-family`}
           >

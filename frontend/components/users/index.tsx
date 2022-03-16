@@ -9,7 +9,10 @@ import {
 
 const AllUsers: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { nrusers } = useAppSelector((state) => state.user);
+  const {
+    nrusers,
+    user: { id: userID },
+  } = useAppSelector((state) => state.user);
 
   useEffect(() => {
     if (Cookies.get("accessToken")) {
@@ -18,7 +21,7 @@ const AllUsers: React.FC = () => {
     }
   }, []);
 
-  return <GlobalUsers users={nrusers} />;
+  return <GlobalUsers users={nrusers.filter((user) => user.id !== userID)} />;
 };
 
 export default AllUsers;

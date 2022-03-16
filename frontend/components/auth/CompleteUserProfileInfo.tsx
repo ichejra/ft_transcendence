@@ -46,9 +46,10 @@ export const CompleteProfileInfo: React.FC = () => {
       completeProfileInfo({
         data: formData,
       })
-    );
-    dispatch(editUserProfile(false));
-    navigate(`/profile/${user.id}`);
+    ).then(() => {
+      navigate(`/profile/${user.id}`);
+    });
+    // dispatch(editUserProfile(false));
   };
 
   useEffect(() => {
