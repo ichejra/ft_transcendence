@@ -14,6 +14,7 @@ import { GameModule } from './game/game.module';
 import { Game } from './game/entities/game.entity';
 import { Message } from './channels/entities/message.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { EventsModule } from './events/events.module';
 
 dotenv.config();
 @Module({
@@ -35,7 +36,7 @@ dotenv.config();
         Channel,
         UserChannel,
         Game,
-        Message
+        Message,
       ],
       synchronize: true,
     }),
@@ -44,6 +45,7 @@ dotenv.config();
     ServeStaticModule.forRoot({ rootPath: process.env.DESTINATION }),
     ChannelsModule,
     GameModule,
+    EventsModule
   ],
   controllers: [],
   providers: [],

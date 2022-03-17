@@ -7,12 +7,10 @@ import { Channel } from "./entities/channel.entity";
 import { Message } from "src/channels/entities/message.entity";
 import { UsersModule } from "src/users/users.module";
 import { MessagesService } from "./messages.service";
-import { ClientsService } from "./clients.service";
+import { ConnectionsService } from "../events/connections.service";
 import { UserChannel } from "./entities/user-channel.entity";
 import { AuthModule } from "src/auth/auth.module";
-import { AuthService } from "src/auth/auth.service";
 import { JwtModule } from "@nestjs/jwt";
-import { UserConnections } from "./models/user-connections.model";
 
 
 @Module({
@@ -30,8 +28,7 @@ import { UserConnections } from "./models/user-connections.model";
         ChannelsService,
         ChatGatway,
         MessagesService,
-        ClientsService,
-        UserConnections
+        ConnectionsService,
     ]
 })
 export class ChannelsModule {}
