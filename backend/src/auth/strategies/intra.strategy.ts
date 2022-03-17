@@ -29,7 +29,6 @@ export class IntraStrategy extends PassportStrategy(Strategy, '42') {
         const { id ,username, emails, photos, displayName } = profile;
         const user: UserDto =  {
             id: id,
-            user_name: username,
             email: emails[0].value,
             display_name: displayName,
             avatar_url: photos[0].value,

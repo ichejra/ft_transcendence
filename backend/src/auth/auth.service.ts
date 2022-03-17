@@ -65,6 +65,7 @@ export class AuthService {
         if (payload.id) {
             return await this.usersService.findOne(Number(payload.id));
         }
+        console.log(payload);
         return null;
     }
 }

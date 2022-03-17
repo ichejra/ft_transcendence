@@ -1,7 +1,11 @@
-import { Channel } from 'src/channels/entities/channel.entity';
-import { UserChannel } from 'src/channels/entities/user-channel.entity';
-import { Message } from 'src/channels/entities/message.entity';
-import { Entity, Column, OneToMany, ManyToMany, JoinTable, PrimaryColumn, CreateDateColumn } from 'typeorm'
+
+import {
+    Entity,
+    Column,
+    OneToMany,
+    PrimaryColumn,
+    CreateDateColumn
+} from 'typeorm'
 import { UserFriends } from './user-friends.entity';
 
 export enum UserState {
@@ -57,11 +61,6 @@ export class User {
 
     @OneToMany(() => UserFriends, (e: UserFriends) => e.recipient)
     recievedFriendRequest: UserFriends[];
-
-    @OneToMany(() => Message, (e: Message) => e.author)
-    messages: Message[];
-
-    // @OneToMany(() => UserChannel, (e: UserChannel) => e.channel)
 
     @CreateDateColumn({
         type: 'timestamp',

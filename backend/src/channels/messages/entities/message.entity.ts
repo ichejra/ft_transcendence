@@ -1,12 +1,22 @@
 import { User } from "src/users/entities/user.entity";
-import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import {
+    BaseEntity,
+    Column,
+    CreateDateColumn,
+    Entity,
+    JoinColumn,
+    ManyToOne,
+    PrimaryGeneratedColumn
+} from "typeorm";
+import { Channel } from "../../entities/channel.entity";
 
 @Entity('messages')
 export class Message extends BaseEntity {
     
-    constructor(author: User, content: string) {
+    constructor(author: User, channel: Channel, content: string) {
         super();
         this.author = author;
+        this.channel = channel;
         this.content = content;
     }
     
@@ -14,9 +24,13 @@ export class Message extends BaseEntity {
     id: number;
 
     
-    @ManyToOne(() => User, (e: User) => e.messages, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+    @ManyToOne(() => User, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
     @JoinColumn({name: 'authorId'})
     author: User;
+
+    @ManyToOne(() => Channel, { onDelete: 'CASCADE', onUpdate: 'CASCADE'})
+    @JoinColumn({name: 'channelId'})
+    channel?: Channel;
 
     @Column({
         type: 'varchar',
