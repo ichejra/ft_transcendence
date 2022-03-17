@@ -22,9 +22,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     @WebSocketServer()
     private server: Server;
 
-    // @Inject()
-    // private eventsSerice: EventsService;
-
     @Inject()
     private connectionsService: ConnectionsService;
 

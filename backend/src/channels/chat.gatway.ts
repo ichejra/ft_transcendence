@@ -14,10 +14,11 @@ import {
     Server,
     Socket
 } from "socket.io";
-import { Message } from "src/channels/entities/message.entity";
+import { Message } from "src/channels/messages/entities/message.entity";
 import { ChannelsService } from "./channels.service";
-import { MessagesService } from "./messages.service";
+import { MessagesService } from "./messages/messages.service";
 import { ConnectionsService } from "../events/connections.service";
+import { Channel } from "./entities/channel.entity";
 
 @WebSocketGateway({  
     cors: {
@@ -30,12 +31,9 @@ export class ChatGatway implements OnGatewayInit {
 
     @Inject()
     private channelsService: ChannelsService;
-    
-    @Inject()
-    private messagesService: MessagesService;
 
-    @Inject()
-    private connectionsService: ConnectionsService;
+    // @Inject()
+    // private connectionsService: ConnectionsService;
 
     private logger: Logger = new Logger('ChatGateway');
 
@@ -43,31 +41,24 @@ export class ChatGatway implements OnGatewayInit {
         this.logger.log('Initialized');
     }
 
-    @SubscribeMessage ('user_connection')
-    async handleNewConnection(@ConnectedSocket() client: Socket) {
-    }
+    // TODO: add some stuff for a direct messages here
 
     @SubscribeMessage('send_message')
-    async handleMessage(@ConnectedSocket() client: Socket, payload: any) {
-        const author = await this.connectionsService.getUserFromSocket(client);
-        const { msg, channel } = payload;
-        const message: Message = await this.messagesService.createMessage(author, msg);
-       this.server.to(channel).emit('receive_message', message); 
+    async handleMessage(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
+        const channel: Channel = await this.channelsService.getChannelById(payload.channelId);
+        const message: Message = await this.channelsService.saveMessage(client, channel, payload.content);
+       this.server.to(channel.name).emit('receive_message', message); 
     }
 
     @SubscribeMessage('join_channel')
-    async handleJoinChannel(@ConnectedSocket() client: Socket, room: string) {
-        const user = await this.connectionsService.getUserFromSocket(client);
-        const channel = await this.channelsService.getChannelByName(room);
-        // TODO:- check the channel privacy
-        await this.channelsService.joinChannel(channel.id, user.id);
-        client.join(room);
-        // TODO: update user channel relation add the user
+    async handleJoinChannel(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
+        const channel: Channel = await this.channelsService.joinChannel(client, payload);
+        client.join(channel.name);
     }
 
     @SubscribeMessage('leave_channel')
-    async handleLeaveChannel(@ConnectedSocket() client: Socket, room: string) {
-        client.leave(room);
-        // TODO: remove relation in user_channel table
+    async handleLeaveChannel(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
+        const channel: Channel = await this.channelsService.leaveChannel(client, payload);
+        client.leave(channel.name);
     }
 }

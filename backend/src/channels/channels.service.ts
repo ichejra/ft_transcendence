@@ -2,10 +2,21 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/users/entities/user.entity";
 import { Repository } from "typeorm";
+import { Socket } from "socket.io";
 import { ChannelDto } from "./dto/channel.dto";
 import { UpdateChannelDto } from "./dto/update-channel.dto";
-import { Channel } from "./entities/channel.entity";
-import { MemberStatus, UserChannel, UserRole } from "./entities/user-channel.entity";
+import {
+    Channel,
+    ChannelType
+} from "./entities/channel.entity";
+import {
+    MemberStatus,
+    UserChannel,
+    UserRole
+} from "./entities/user-channel.entity";
+import { Message } from "./messages/entities/message.entity";
+import { MessagesService } from "./messages/messages.service";
+import { ConnectionsService } from "src/events/connections.service";
 
 @Injectable()
 export class ChannelsService {
@@ -13,7 +24,9 @@ export class ChannelsService {
         @InjectRepository(Channel)
         private channelsRepository: Repository<Channel>,
         @InjectRepository(UserChannel)
-        private userChannelRepository: Repository<UserChannel>
+        private userChannelRepository: Repository<UserChannel>,
+        private messagesService: MessagesService,
+        private connectionsService: ConnectionsService
         ) {}
     /* Channels */
     /* Method: create a new channel in database */
@@ -21,14 +34,11 @@ export class ChannelsService {
         // save channel
         const channel_ = await this.channelsRepository.save(channel);
         // create relation between user and target channel
-        await this.userChannelRepository.query(
-            `INSERT INTO user_channel (
-                userId,
-                channelId,
-                userRole,
-            ) VALUE ($1, $2, $3)`,
-            [ user.id, channel_.id, UserRole.OWNER ]
-        );
+        await this.userChannelRepository.save({
+            user: user,
+            channel: channel_,
+            userRole: UserRole.OWNER
+        });
         return channel_;
     }
 
@@ -60,37 +70,46 @@ export class ChannelsService {
     }
 
     /* joining channel -> user_channel table updating */
-    joinChannel = async (channelId: number, userId: number) : Promise<any> => {
-        // user channel relation creation
-        await this.userChannelRepository.query(
-            `INSERT INTO user_channel (
-                userId,
-                channelId,
-                userRole
-            ) VALUE($1, $2, $3)`,
-            [ userId, channelId, UserRole.MEMBER ]
-        );
+    joinChannel = async (socket: Socket, payload: any) : Promise<Channel> => {
+        // get user and channel
+        const user = await this.connectionsService.getUserFromSocket(socket);
+        // TODO:- check the channel privacy
+        const channel = await this.getChannelById(payload.channelId);
+        if (channel.type === ChannelType.PRIVATE)
+        {
+            // require a password
+        }
+        // update user channel relation add the user
+        await this.userChannelRepository.save({
+            user: user,
+            channel: channel,
+            userRole: UserRole.MEMBER
+        })
+        return channel;
     }
 
     /* leave channel -> (if Owner then destroy channel) delete relation or banned the user */
-    leaveChannel = async (channelId: number, userId: number) : Promise<any> => {
+    leaveChannel = async (socket: Socket, payload: any) : Promise<Channel> => {
         // get user_channel relation
+        const user = await this.connectionsService.getUserFromSocket(socket);
+        const channel = await this.getChannelById(payload.channelId);
         const relation = await this.userChannelRepository.findOne({
             where: {
-                user: userId,
-                channel: channelId
+                user,
+                channel
             }
         });
-        // user channel relation destroy
+        // remove relation in user_channel
         await this.userChannelRepository.query(
             `DELETE FROM user_channel
             WHERE "user_channel"."channelId" = $1
             AND "user_channel"."userId" = $2`,
-            [ channelId, userId ]
+            [ channel.id, user.id ]
         );
-        if (relation.userRole === UserRole.OWNER) { // Destroy channel
-            await this.deleteChannel(channelId);
+        if (relation.userRole === UserRole.OWNER) { // ! Destroy channel
+            await this.deleteChannel(channel.id);
         }
+        return channel;
     }
 
     /* Add admin to a channel */
@@ -159,5 +178,11 @@ export class ChannelsService {
                 [ status, channelId, memberId]
             );
         }
+    }
+
+    // saving messages
+    saveMessage = async (socket: Socket, channel: Channel, content: string): Promise<Message> => {
+        const author = await this.connectionsService.getUserFromSocket(socket);
+        return await this.messagesService.createMessage(author, channel, content);
     }
 }

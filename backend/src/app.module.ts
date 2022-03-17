@@ -12,7 +12,7 @@ import * as dotenv from 'dotenv';
 import { ChannelsModule } from './channels/channels.module';
 import { GameModule } from './game/game.module';
 import { Game } from './game/entities/game.entity';
-import { Message } from './channels/entities/message.entity';
+import { Message } from './channels/messages/entities/message.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { EventsModule } from './events/events.module';
 
