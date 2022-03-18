@@ -1,4 +1,7 @@
-import { ISendMailOptions, MailerOptions, MailerService } from '@nestjs-modules/mailer';
+import {
+    ISendMailOptions, 
+    MailerService
+} from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

@@ -3,8 +3,6 @@ import {
   HttpStatus,
   Injectable
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm'
-import { Socket } from 'socket.io';
 import { Connection } from 'typeorm'
 
 import { UserDto } from './dto/user.dto';
@@ -54,12 +52,13 @@ export class UsersService {
        if (!file && user_name) {
         await this.connection.getRepository(User).update(id, {user_name: user_name});
       } else if (!user_name && file) {
-        await this.connection.getRepository(User).update(id, 
+        await this.connection.getRepository(User).update(id,
           { avatar_url:  `http://${process.env.HOST}:${process.env.PORT}/${file.filename}`}
           );
       } else if (file && user_name) {
         await this.connection.getRepository(User).update(id,
-          { user_name: user_name,
+          { 
+            user_name: user_name,
             avatar_url:  `http://${process.env.HOST}:${process.env.PORT}/${file.filename}`
           });
       }

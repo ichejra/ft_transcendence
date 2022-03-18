@@ -1,4 +1,11 @@
-import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsNumberString, IsString, IsUrl } from "class-validator";
+import { 
+    IsEmail,
+    IsEnum,
+    IsNotEmpty,
+    IsNumber,
+    IsString,
+    IsUrl
+} from "class-validator";
 import { UserState } from "../entities/user.entity";
 
 export class UserDto {
