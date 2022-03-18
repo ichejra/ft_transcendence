@@ -1,4 +1,3 @@
-
 import {
     Entity,
     Column,
@@ -66,7 +65,5 @@ export class User {
         type: 'timestamp',
         default: () => 'CURRENT_TIMESTAMP',
     })
-    createdAt: Date;
-
-    
+    createdAt: Date; 
 }
