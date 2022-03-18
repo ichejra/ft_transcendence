@@ -10,7 +10,6 @@ import { UserFriends } from './entities/user-friends.entity';
 dotenv.config();
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ User, UserFriends ]),
     MulterModule.register({
       dest: process.env.DESTINATION,
     })

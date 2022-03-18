@@ -14,11 +14,9 @@ import {
     Server,
     Socket
 } from "socket.io";
-import { Message } from "src/channels/messages/entities/message.entity";
-import { ChannelsService } from "./channels.service";
-import { MessagesService } from "./messages/messages.service";
-import { ConnectionsService } from "../events/connections.service";
-import { Channel } from "./entities/channel.entity";
+import { ChannelsService } from "./channels/channels.service";
+import { Channel } from "./channels/entities/channel.entity";
+import { MessageChannel } from "./messages/entities/message-channel.entity";
 
 @WebSocketGateway({  
     cors: {
@@ -32,9 +30,6 @@ export class ChatGatway implements OnGatewayInit {
     @Inject()
     private channelsService: ChannelsService;
 
-    // @Inject()
-    // private connectionsService: ConnectionsService;
-
     private logger: Logger = new Logger('ChatGateway');
 
     public async afterInit(server: Server) : Promise<void> {
@@ -46,8 +41,8 @@ export class ChatGatway implements OnGatewayInit {
     @SubscribeMessage('send_message')
     async handleMessage(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
         const channel: Channel = await this.channelsService.getChannelById(payload.channelId);
-        const message: Message = await this.channelsService.saveMessage(client, channel, payload.content);
-       this.server.to(channel.name).emit('receive_message', message); 
+        const message: MessageChannel = await this.channelsService.saveMessage(client, channel, payload.content);
+        this.server.to(channel.name).emit('receive_message', message); 
     }
 
     @SubscribeMessage('join_channel')

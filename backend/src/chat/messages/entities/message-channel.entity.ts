@@ -8,10 +8,10 @@ import {
     ManyToOne,
     PrimaryGeneratedColumn
 } from "typeorm";
-import { Channel } from "../../entities/channel.entity";
+import { Channel } from "../../channels/entities/channel.entity";
 
-@Entity('messages')
-export class Message extends BaseEntity {
+@Entity('messages_channels')
+export class MessageChannel extends BaseEntity {
     
     constructor(author: User, channel: Channel, content: string) {
         super();
@@ -23,7 +23,6 @@ export class Message extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    
     @ManyToOne(() => User, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
     @JoinColumn({name: 'authorId'})
     author: User;

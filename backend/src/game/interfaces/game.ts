@@ -5,7 +5,6 @@ import Ball from './ball';
 import Player from './player';
 import { Game } from '../entities/game.entity';
 import { User } from 'src/users/entities/user.entity';
-import { ClientsService } from 'src/channels/clients.service';
 import { GameService } from '../game.service';
 import { GameDto } from '../dto/game.dto';
 

@@ -15,8 +15,8 @@ import { Game } from './entities/game.entity';
 import { GameService } from './game.service';
 import { GameDto } from './dto/game.dto';
 import { Inject } from '@nestjs/common';
-import { ClientsService } from 'src/channels/clients.service';
 import { UsersService } from 'src/users/users.service';
+import { ConnectionsService } from 'src/events/connections.service';
 // import { Consts, GameState } from './game_consts';
 
 @WebSocketGateway({
@@ -38,7 +38,7 @@ export class GameGateway
   private gameService: GameService;
 
   @Inject()
-  private clientsService: ClientsService;
+  private clientsService: ConnectionsService;
   @Inject()
   private usersService: UsersService;
 

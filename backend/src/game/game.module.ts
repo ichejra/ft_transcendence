@@ -1,9 +1,8 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AuthModule } from "src/auth/auth.module";
-import { AuthService } from "src/auth/auth.service";
-import { ChannelsModule } from "src/channels/channels.module";
-import { ClientsService } from "src/channels/clients.service";
+import { ChannelsModule } from "src/chat/channels/channels.module";
+import { ConnectionsService } from "src/events/connections.service";
 import { UsersModule } from "src/users/users.module";
 import { Game } from "./entities/game.entity";
 // import { GameController } from "./game.controller";
@@ -21,7 +20,7 @@ import { GameService } from "./game.service";
   providers: [
     GameService,
     GameGateway,
-    ClientsService
+    ConnectionsService
   ], //? Gateways are not instantiated until they are referenced in the providers array of an existing module.
 })
 export class GameModule {}

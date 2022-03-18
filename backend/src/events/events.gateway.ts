@@ -51,7 +51,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     async handleNotification(@ConnectedSocket() client: Socket, @MessageBody('userId') userId: number | string) {
         const targets: Set<Socket> = await this.connectionsService.getUserConnections(Number(userId));
         targets.forEach((target) => {
-            target.emit('receive_notification');
+            this.server.to(target.id).emit('receive_notification');
         });
     }
 }
