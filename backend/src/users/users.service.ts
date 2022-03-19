@@ -1,8 +1,8 @@
 import {
-  HttpException,
-  HttpStatus,
-  Injectable
+  Injectable,
+  NotFoundException
 } from '@nestjs/common';
+import { ForbiddenException } from 'src/exceptions/forbidden.exception';
 import { Connection } from 'typeorm'
 
 import { UserDto } from './dto/user.dto';
@@ -11,12 +11,6 @@ import {
   UserFriendsRelation
 } from './entities/user-friends.entity';
 import { User, UserState } from './entities/user.entity';
-
-class NotFoundException extends HttpException {
-  constructor() {
-    super('resource is not found.', HttpStatus.NOT_FOUND);
-  }
-}
 
 @Injectable()
 export class UsersService {
@@ -28,10 +22,7 @@ export class UsersService {
     try {
       return await this.connection.getRepository(User).save(user);
     } catch (e) {
-      throw new HttpException({
-        status: HttpStatus.FORBIDDEN,
-        error: `Forbidden: cannot create user.`,
-      }, HttpStatus.FORBIDDEN);
+      throw new ForbiddenException(`Forbidden: cannot create user.`);
     }
   }
 
