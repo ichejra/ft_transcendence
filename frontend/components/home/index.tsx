@@ -1,6 +1,11 @@
 import { Link } from "react-router-dom";
 import Member from "../utils/TeamMember";
 import { frameData } from "../../consts";
+import { socket } from "../../pages/SocketProvider";
+
+socket.emit("connection", () => {
+  console.log("connected");
+});
 
 const HomePage: React.FC = () => {
   return (
