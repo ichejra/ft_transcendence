@@ -106,13 +106,8 @@ export class GameGateway
         return ;
       }
       //* DONE: change players state to inGame
-      //TODO: check state later with anouar
-      // console.log('joinQueue user1 online: ', user1.state);
-      // console.log('joinQueue user2 online: ', user2.state);
       await this.usersService.updateState(Number(user1.id), UserState.IN_GAME);
       await this.usersService.updateState(Number(user2.id), UserState.IN_GAME);
-      // console.log('joinQueue user1 ingame: ', user1.state);
-      // console.log('joinQueue user2 ingame: ', user2.state);
       this.queue.clear();
       this.joinGame([first, second], '');
     }
@@ -139,13 +134,11 @@ export class GameGateway
   }
 
   private async removeGame(game: GameObj) {
-    //TODO: check state later with anouar
     //* DONE: set data in database
     const user1 = await this.getPlayerAsUser(game.getPlayer1().getSocket());
     const user2 = await this.getPlayerAsUser(game.getPlayer2().getSocket());
-    // console.log('removeGame user1 in_game: ', user1.state);
-    // console.log('removeGame user2 in_game: ', user2.state);
     console.log('-----------------------------------');
+    //* DONE: chenge players state to online 
     await this.usersService.updateState(Number(user1.id), UserState.ONLINE);
     await this.usersService.updateState(Number(user2.id), UserState.ONLINE);
     const GameData = new GameDto();
@@ -158,8 +151,6 @@ export class GameGateway
     GameData.loser = await this.clientsService.getUserFromSocket(
       game.getLoserSocket(),
     );
-    // console.log('removeGame user1 online: ', user1.state);
-    // console.log('removeGame user2 online: ', user2.state);
     this.gameService.insertGameData(GameData);
     this.clearMatchFromQueue(game);
     this.games.splice(this.games.indexOf(game), 1);
