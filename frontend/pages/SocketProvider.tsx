@@ -13,11 +13,11 @@ import { updateGlobalState } from "../features/globalSlice";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import Cookies from "js-cookie";
 
-// export const socket = io("http://localhost:3000", {
-//     auth: {
-//       key: Cookies.get("accessToken"),
-//     }
-// });
+export const socket = io("http://localhost:3000", {
+    auth: {
+      key: Cookies.get("accessToken"),
+    }
+});
 
 const SocketProvider: React.FC = ({ children }) => {
   const dispatch = useAppDispatch();
