@@ -24,7 +24,7 @@ export class UsersController {
   /* route get all users 
     https://${host}:${port}/users/all_users
   */ 
-  @Get('all_users')
+  @Get('/all_users')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   findAll() : Promise<User[]> {
@@ -40,25 +40,6 @@ export class UsersController {
   getProfile(@Req() _req: any) {
     return this.usersService.findOne( Number(_req.user.id) );
   }
-
-  /* Route: logout the user 
-    http://${host}:${port}/users/Logout
-    -> clear user session
-  
-    @Get('/logout')
-    @HttpCode(200)
-    @UseGuards(JwtAuthGuard)
-    logout(@Req() _req, @Res() _res): Promise<any> {
-        return this.usersService.logout(_req, _res);
-    }
-  
-    @Get(':id')
-    @HttpCode(200)
-    @UseGuards(JwtAuthGuard)
-    findOne(@Param('id', ParseIntPipe) id: string): Promise<UserDto> {
-      return this.usersService.findOne(Number(id));
-    }
-  */
 
   @Patch('update-profile')
   @HttpCode(200)
@@ -87,7 +68,7 @@ export class UsersController {
 
   /* User friends section */
   /* Route: send friend request
-    http://${host}:${port}/users/friend-request/:recipientId
+    http://${host}:${port}/users/friend-request/
     add to friends with pending status
     */
   @Patch('/friend-request/')
@@ -98,7 +79,7 @@ export class UsersController {
   }
 
   /* Route: accept friend
-    http://${host}:${port}/users/friend-accepte/:applicantId
+    http://${host}:${port}/users/friend-accepte/
     -> user who logged is the recipeint and the applicant will be accpeted
     */
   @Patch('/friend-accept/')
@@ -109,7 +90,7 @@ export class UsersController {
   }
 
   /* Route: block friend
-    http://${host}:${port}/users/friend-accept/:applicantId
+    http://${host}:${port}/users/friend-accept/
     */
   @Patch('/friend-block/')
   @HttpCode(200)
@@ -119,7 +100,7 @@ export class UsersController {
   }
 
   /* Route: unblock friend
-    http://${host}:${port}/users/friend-unblock/:unblockId
+    http://${host}:${port}/users/friend-unblock/
   */
   @Patch('/friend-unblock/')
   @HttpCode(200)

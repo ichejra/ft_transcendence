@@ -15,6 +15,7 @@ import { EventsModule } from './events/events.module';
 import { ChatModule } from './chat/chat.module';
 import { DirectMessage } from './chat/messages/entities/direct-messages.entity';
 import { MessageChannel } from './chat/messages/entities/message-channel.entity';
+import { AppController } from './app.controller';
 
 dotenv.config();
 @Module({
@@ -43,12 +44,14 @@ dotenv.config();
     }),
     UsersModule,
     AuthModule,
-    ServeStaticModule.forRoot({ rootPath: process.env.DESTINATION }),
+    ServeStaticModule.forRoot({
+      rootPath: process.env.DESTINATION
+    }),
     ChatModule,
     GameModule,
     EventsModule,
   ],
-  controllers: [],
+  controllers: [ AppController ],
   providers: [],
 })
 export class AppModule {}
