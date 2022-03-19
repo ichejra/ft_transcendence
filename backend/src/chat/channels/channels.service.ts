@@ -16,6 +16,7 @@ import {
 import { MessagesService } from "../messages/messages.service";
 import { ConnectionsService } from "src/events/connections.service";
 import { MessageChannel } from "../messages/entities/message-channel.entity";
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class ChannelsService {
@@ -27,15 +28,23 @@ export class ChannelsService {
     /* Channels */
     /* Method: create a new channel in database */
     async createChannel(user: User, channel: ChannelDto) : Promise<Channel> {
+        // ! check channel type to hASH THE PASSWORD
+        let newChannel: Channel;
+        if (channel.type === ChannelType.PRIVATE) {
+            const hashPwd = await bcrypt.hash(channel.password, 10);
+            newChannel = new Channel(channel.name, ChannelType.PRIVATE, hashPwd);
+        } else {
+            newChannel = new Channel(channel.name, ChannelType.PUBLIC);
+        }
         // save channel
-        const channel_ = await this.connection.getRepository(Channel).save(channel);
+        newChannel = await this.connection.getRepository(Channel).save(newChannel);
         // create relation between user and target channel
         await this.connection.getRepository(UserChannel).save({
             user: user,
-            channel: channel_,
+            channel: newChannel,
             userRole: UserRole.OWNER
         });
-        return channel_;
+        return newChannel;
     }
 
     /* get a channel by id */

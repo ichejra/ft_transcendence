@@ -8,6 +8,7 @@ import { ChatGatway } from "./chat.gatway";
 import { DirectChatModule } from "./direct-chat/direct-chat.module";
 import { MessagesService } from "./messages/messages.service";
 import { MessagesModule } from './messages/messages.module';
+import { DirectChatService } from "./direct-chat/direct-chat.service";
 
 @Module({
     imports: [
@@ -22,7 +23,8 @@ import { MessagesModule } from './messages/messages.module';
         ChatGatway,
         ChannelsService,
         MessagesService,
-        ConnectionsService
+        ConnectionsService,
+        DirectChatService
     ]
 })
 export class ChatModule {}

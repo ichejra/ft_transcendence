@@ -38,7 +38,7 @@ export class ChannelsController {
     @Get('/:channelId')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    getChennelById(@Param('channelId', ParseIntPipe) channelId: number): Promise<Channel> {
+    getChannelById(@Param('channelId', ParseIntPipe) channelId: number): Promise<Channel> {
         return this.channelsService.getChannelById(Number(channelId));
     }
 
