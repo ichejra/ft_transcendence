@@ -71,4 +71,5 @@ export class ChatGatway implements OnGatewayInit {
         const channel: Channel = await this.channelsService.leaveChannel(client, payload);
         client.leave(channel.name);
     }
+
 }

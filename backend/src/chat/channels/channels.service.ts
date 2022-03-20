@@ -17,6 +17,7 @@ import { MessagesService } from "../messages/messages.service";
 import { ConnectionsService } from "src/events/connections.service";
 import { MessageChannel } from "../messages/entities/message-channel.entity";
 import * as bcrypt from "bcrypt";
+import { ForbiddenException } from "src/exceptions/forbidden.exception";
 
 @Injectable()
 export class ChannelsService {
@@ -45,6 +46,11 @@ export class ChannelsService {
             userRole: UserRole.OWNER
         });
         return newChannel;
+    }
+
+    // Get all channels
+    getChannels = async (): Promise<Channel[]> => {
+        return await this.connection.getRepository(Channel).find();
     }
 
     /* get a channel by id */
@@ -111,8 +117,22 @@ export class ChannelsService {
             AND "user_channel"."userId" = $2`,
             [ channel.id, user.id ]
         );
-        if (relation.userRole === UserRole.OWNER) { // ! Destroy channel
-            await this.deleteChannel(channel.id);
+        if (relation.userRole === UserRole.OWNER) {
+            const admins = await this.connection.getRepository(UserChannel).query(
+                `SELECT * FROM user_channel
+                WHERE "user_channel"."channelId" = $1
+                AND "user_channel"."userRole" = $2`,
+                [ channel.id, UserRole.ADMIN ]
+            );
+            if (admins.length === 0){
+                // ! Destroy channel
+                await this.deleteChannel(channel.id);
+            } else {
+                await this.connection.getRepository(UserChannel).update({
+                        user: admins[0],
+                        channel: channel
+                    }, { userRole: UserRole.OWNER });
+            }
         }
         return channel;
     }
@@ -184,6 +204,27 @@ export class ChannelsService {
             );
         }
     }
+
+    // Set or update password
+    setUpdatePassword = async (userId: number, channelId :number, newPwd: string): Promise<any> => {
+        const relation = await this.connection.getRepository(UserChannel).findOne({
+            where:{
+                userId: userId,
+                channelId: channelId,
+            }
+        });
+        if (relation && relation.userRole !== UserRole.OWNER) {
+            throw new ForbiddenException('Forbidden: permission denied');
+        }
+        const hashPwd = await bcrypt.hash(newPwd, 10);
+        await this.connection.getRepository(Channel).update(channelId, {
+            password: hashPwd,
+            type: ChannelType.PRIVATE
+        });
+        return { success: true, message: 'Password changed' };
+    }
+
+    // Remove password
 
     // saving messages
     saveMessage = async (socket: Socket, channel: Channel, content: string): Promise<MessageChannel> => {

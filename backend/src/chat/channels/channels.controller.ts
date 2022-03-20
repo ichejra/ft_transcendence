@@ -28,10 +28,20 @@ export class ChannelsController {
     @Post('create')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    createChannel(@Req() _req: any, @Body() data: ChannelDto) {
+    createChannel(@Req() _req: any, @Body() data: ChannelDto): Promise<Channel> {
         return this.channelsService.createChannel(_req.user, data);
     }
 
+    /* Route for getting all channels 
+        http://${host}:${port}/channels
+    */
+    @Get()
+    @HttpCode(200)
+    @UseGuards(JwtAuthGuard)
+    getChanels(): Promise<Channel[]> {
+        return this.channelsService.getChannels();
+    }
+    
     /* Route get channel 
         http://${host}:${port}/channels/{channelId}
     */
