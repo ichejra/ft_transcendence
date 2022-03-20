@@ -47,7 +47,7 @@ const Home: NextPage = () => {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route
-          path="/channels"
+          path="/channels/:id"
           element={
             <AuthRoute>
               <CompleteProfile>
