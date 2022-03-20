@@ -1,4 +1,7 @@
-import { Inject, Logger } from "@nestjs/common";
+import {
+    Inject,
+    Logger
+} from "@nestjs/common";
 import {
     ConnectedSocket,
     MessageBody,

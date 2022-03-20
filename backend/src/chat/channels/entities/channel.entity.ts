@@ -1,4 +1,5 @@
 import {
+    BaseEntity,
     Column,
     CreateDateColumn,
     Entity,
@@ -11,7 +12,14 @@ export enum ChannelType {
 }
 
 @Entity('channels')
-export class Channel {
+export class Channel extends BaseEntity {
+
+    constructor(name: string, type: ChannelType, password?: string) {
+        super();
+        this.name = name;
+        this.type = type;
+        this.password = password;
+    }
     @PrimaryGeneratedColumn()
     id: number;
 

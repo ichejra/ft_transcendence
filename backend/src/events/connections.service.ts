@@ -76,4 +76,9 @@ export class ConnectionsService {
         return sockets;
     }
 
+    // get receiver by id
+    public getReceiverById = async (id: number) : Promise<User> => {
+        return await this.usersService.findOne(id);
+    } 
+
 }

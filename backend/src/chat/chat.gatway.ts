@@ -17,6 +17,8 @@ import {
 import { ChannelsService } from "./channels/channels.service";
 import { Channel } from "./channels/entities/channel.entity";
 import { MessageChannel } from "./messages/entities/message-channel.entity";
+import { DirectChatService } from "./direct-chat/direct-chat.service";
+import { ConnectionsService } from "src/events/connections.service";
 
 @WebSocketGateway({  
     cors: {
@@ -29,6 +31,10 @@ export class ChatGatway implements OnGatewayInit {
 
     @Inject()
     private channelsService: ChannelsService;
+    @Inject()
+    private directChatService: DirectChatService;
+    @Inject()
+    private connectionsService: ConnectionsService;
 
     private logger: Logger = new Logger('ChatGateway');
 
@@ -36,13 +42,22 @@ export class ChatGatway implements OnGatewayInit {
         this.logger.log('Initialized');
     }
 
-    // TODO: add some stuff for a direct messages here
-
+    // ? handling messages for direct chat
     @SubscribeMessage('send_message')
-    async handleMessage(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
+    async handleDirectMessage(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
+        const message = await this.directChatService.saveMessage(client, payload);
+        const receiverSockets = await this.connectionsService.getUserConnections(payload.receiverId);
+        receiverSockets.forEach((sock) => {
+            this.server.to(sock.id).emit('receive_message', message);
+        });
+    }
+
+    // ? handling messages for channels
+    @SubscribeMessage('send_message_channel')
+    async handleChannelMessage(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
         const channel: Channel = await this.channelsService.getChannelById(payload.channelId);
         const message: MessageChannel = await this.channelsService.saveMessage(client, channel, payload.content);
-        this.server.to(channel.name).emit('receive_message', message); 
+        this.server.to(channel.name).emit('receive_message_channel', message); 
     }
 
     @SubscribeMessage('join_channel')
