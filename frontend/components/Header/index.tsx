@@ -42,6 +42,9 @@ const Header: React.FC = () => {
             <li className="header-item hover:scale-110 transition duration-300 cursor-pointer text-md font-medium mx-2 px-2">
               <Link to="/users">Users</Link>
             </li>
+            <li className="header-item hover:scale-110 transition duration-300 cursor-pointer text-md font-medium mx-2 px-2">
+              <Link to="/liveGames">Live Games</Link>
+            </li>
           </ul>
         )}
         <ProfileDropdown />

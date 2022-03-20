@@ -7,6 +7,7 @@ import { Game } from '../entities/game.entity';
 import { User } from 'src/users/entities/user.entity';
 import { GameService } from '../game.service';
 import { GameDto } from '../dto/game.dto';
+import { isDecimal } from 'class-validator';
 
 class GameObj {
   private _id: string;
@@ -16,8 +17,9 @@ class GameObj {
   private _player2AsUser: User;
   private _ball: Ball;
   private _remove: Function;
-  private _spectators: Socket[] = [];
+  private _spectators: Socket[] = []; // TODO: Set instead of array
   private _interval: NodeJS.Timer;
+  private _isDefault: boolean;
   private gameService: GameService;
 
   constructor(
@@ -25,7 +27,7 @@ class GameObj {
     player2: Player,
     user1: User,
     user2: User,
-    removeGame: Function /* , type mn b3d */,
+    removeGame: Function , isDefault: boolean,
   ) {
     this._player1 = player1;
     this._player2 = player2;
@@ -37,6 +39,11 @@ class GameObj {
       () => this.playGame(),
       1000 / Consts.framePerSec,
     );
+    this._isDefault = isDefault;
+  }
+
+  public getIsDefault() : boolean {
+    return this._isDefault;
   }
 
   private dataToBeSent = (): BroadcastObject => {
@@ -48,6 +55,8 @@ class GameObj {
       paddles: {
         leftPad: this._player1.getPaddle().getY(),
         rightPad: this._player2.getPaddle().getY(),
+        leftPadH: this._player1.getPaddle().getHeight(),
+        rightPadH: this._player2.getPaddle().getHeight(),
       },
       score: {
         score1: this._player1.getScore(),
@@ -59,12 +68,16 @@ class GameObj {
 
   public sendData = () => {
     const current = this.dataToBeSent();
+    
     this._player1
       .getSocket()
       .emit('game_state', { ...current, isWinner: this._player1.isWinner() });
     this._player2
       .getSocket()
       .emit('game_state', { ...current, isWinner: this._player2.isWinner() });
+    this._spectators.forEach((spec) => {
+      spec.emit('game_state', {...current, /* send the winner  */}) //TODO: watcher: send the winner too 
+    })
   };
 
   //! public resetGame(): void {
@@ -73,9 +86,7 @@ class GameObj {
   //   this._player2.reset();
   // }
 
-  // public getPlayersAsUsers() : User {
-    // 
-  // }
+
   public getId(): string {
     return this._id;
   }
@@ -89,9 +100,14 @@ class GameObj {
     return this._player1AsUser;
   }
   public getPlayer2AsUser(): User {
-    return this._player1AsUser;
+    return this._player2AsUser;
   }
 
+  public hasUser(userId: number): boolean {
+    if (userId === this._player1AsUser.id || userId === this._player2AsUser.id)
+      return true;
+    return false;
+  }
   public getGamePlayer(playerSocket: Socket): Player {
     return this._player1.getSocket() === playerSocket
       ? this._player1
@@ -100,11 +116,6 @@ class GameObj {
 
   public getInterval() {
     return this._interval;
-  }
-  // * add specs
-  public addSpectators(spectator: Socket) : void {
-    if (this._spectators.length < Consts.MAX_SPECTATORS)
-      this._spectators.push(spectator);
   }
 
   public getWinnerSocket(): Socket {
@@ -130,7 +141,6 @@ class GameObj {
   };
 
   public stopGame(): void {
-    
     clearInterval(this._interval);
     this.clearSpectators();
     // console.log('user1: ', this._player1AsUser);
@@ -157,7 +167,14 @@ class GameObj {
       );
       this._ball.setVelocityY(this._ball.getSpeed() * Math.sin(angleRad));
       this._ball.setSpeed(this._ball.getSpeed() + 0.2);
-      // * if this paddle height > 50, paddle.height--;
+      if (!this._isDefault) {
+
+        if (this._player1.getPaddle().getHeight() > 40)
+          this._player1
+            .getPaddle()
+            .setHeight(this._player1.getPaddle().getHeight() - 2);
+      }
+        
     }
 
     if (this._ball.PaddleBallCollision(this._player2.getPaddle())) {
@@ -173,15 +190,27 @@ class GameObj {
       );
       this._ball.setVelocityY(this._ball.getSpeed() * Math.sin(angleRad));
       this._ball.setSpeed(this._ball.getSpeed() + 0.2);
-      // * if this paddle height > 50, paddle.height--;
+      //TODO: with obstacle
+      if (!this._isDefault) {
+        // * if this paddle height > 50, paddle.height--;
+        if (this._player2.getPaddle().getHeight() > 40)
+          this._player2
+            .getPaddle()
+            .setHeight(this._player2.getPaddle().getHeight() - 2);
+      }
+      
     }
 
     if (this._ball.getX() - Consts.BALL_RADIUS <= 0) {
       this._player2.incScore();
       this._ball.resetBall();
+      this._player1.getPaddle().resetPaddle();
+      this._player2.getPaddle().resetPaddle();
     } else if (this._ball.getX() + Consts.BALL_RADIUS >= Consts.CANVAS_W) {
       this._player1.incScore();
       this._ball.resetBall();
+      this._player1.getPaddle().resetPaddle();
+      this._player2.getPaddle().resetPaddle();
     }
     this._ball.moveBall();
 
@@ -204,11 +233,25 @@ class GameObj {
     this.stopGame();
   };
 
-  public clearSpectators() : void {
+  // * add specs
+  public addSpectators(spectator: Socket): void {
+    if (this._spectators.length < Consts.MAX_SPECTATORS)
+      this._spectators.push(spectator);
+    //! this.sendData();
+  }
+
+  public clearSpectators(): void {
     if (this._spectators.length > 0)
       this._spectators.splice(0, this._spectators.length);
   }
+
+  public removeSpectator(spectator: Socket) : void {
+    if (this._spectators.includes(spectator))
+      this._spectators.splice(this._spectators.indexOf(spectator), 1);
+  }
 }
+
+
 
 export default GameObj;
 
@@ -219,3 +262,5 @@ export default GameObj;
 //TODO: set spectators
 //TODO: check unused func
 //TODO: deal with ball speed after finding someone to play with
+//TODO: payload
+//TODO: pause
