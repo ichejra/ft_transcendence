@@ -36,6 +36,8 @@ export interface BroadcastObject {
   paddles: {
     leftPad: number;
     rightPad: number;
+    leftPadH: number;
+    rightPadH: number;
   };
   score: {
     score1: number;

@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 import { fetchCurrentUser } from "../features/userProfileSlice";
 import Cookies from "js-cookie";
 import Head from "next/head";
+import LiveGames from "../components/liveGames";
 import SocketProvider from "./SocketProvider";
 
 
@@ -38,14 +39,14 @@ const Home: NextPage = () => {
     <SocketProvider>
       <Head>
         <link
-          href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fredoka+One&display=swap"
-          rel="stylesheet"
+          href='https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fredoka+One&display=swap'
+          rel='stylesheet'
         />
         <title>Ping pong</title>
       </Head>
       <Header />
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path='/' element={<HomePage />} />
         <Route
           path="/channels/:id"
           element={
@@ -57,17 +58,27 @@ const Home: NextPage = () => {
           }
         />
         <Route
-          path="/game"
+          path='/game'
           element={
             <AuthRoute>
               <CompleteProfile>
-                <PongGame />
+                <PongGame userType='player' />
               </CompleteProfile>
             </AuthRoute>
           }
         />
         <Route
-          path="/users"
+          path='/watch'
+          element={
+            <AuthRoute>
+              <CompleteProfile>
+                <PongGame userType='spectator' />
+              </CompleteProfile>
+            </AuthRoute>
+          }
+        />
+        <Route
+          path='/users'
           element={
             <AuthRoute>
               <CompleteProfile>
@@ -77,7 +88,17 @@ const Home: NextPage = () => {
           }
         />
         <Route
-          path="/profile/list"
+          path='/liveGames'
+          element={
+            <AuthRoute>
+              <CompleteProfile>
+                <LiveGames />
+              </CompleteProfile>
+            </AuthRoute>
+          }
+        />
+        <Route
+          path='/profile/list'
           element={
             <AuthRoute>
               <CompleteProfile>
@@ -87,7 +108,7 @@ const Home: NextPage = () => {
           }
         />
         <Route
-          path="/profile/:id"
+          path='/profile/:id'
           element={
             <AuthRoute>
               <CompleteProfile>
@@ -97,15 +118,15 @@ const Home: NextPage = () => {
           }
         ></Route>
         <Route
-          path="/complete-info"
+          path='/complete-info'
           element={
             <AuthRoute>
               <CompleteUserProfileInfo />
             </AuthRoute>
           }
         />
-        <Route path="/auth" element={<Login />} />
-        <Route path="*" element={<NotFound />} />
+        <Route path='/auth' element={<Login />} />
+        <Route path='*' element={<NotFound />} />
       </Routes>
       <Footer />
     </SocketProvider>
