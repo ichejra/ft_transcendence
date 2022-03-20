@@ -9,14 +9,16 @@ import {
   fetchPendingStatus,
   fetchBlockedUsers,
 } from "../features/friendsManagmentSlice";
+import { getChannelsList } from "../features/chatSlice";
+
 import { updateGlobalState } from "../features/globalSlice";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import Cookies from "js-cookie";
 
 export const socket = io("http://localhost:3000", {
-    auth: {
-      key: Cookies.get("accessToken"),
-    }
+  auth: {
+    key: Cookies.get("accessToken"),
+  },
 });
 
 const SocketProvider: React.FC = ({ children }) => {
@@ -33,12 +35,15 @@ const SocketProvider: React.FC = ({ children }) => {
   }, [socket]);
 
   useEffect(() => {
-    dispatch(fetchUserFriends());
-    dispatch(fetchAllUsers());
-    dispatch(fetchNoRelationUsers());
-    dispatch(fetchPendingStatus());
-    dispatch(fetchBlockedUsers());
-    console.log("--------------------> refershhhhhh");
+    if (Cookies.get("accessToken")) {
+      dispatch(fetchUserFriends());
+      dispatch(fetchAllUsers());
+      dispatch(fetchNoRelationUsers());
+      dispatch(fetchPendingStatus());
+      dispatch(fetchBlockedUsers());
+      dispatch(getChannelsList());
+      console.log("--------------------> refershhhhhh");
+    }
   }, [refresh]);
 
   return <>{children}</>;

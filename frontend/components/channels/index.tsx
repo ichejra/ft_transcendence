@@ -1,29 +1,47 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoMdSend } from "react-icons/io";
 import { HiViewGridAdd } from "react-icons/hi";
 import NewChannelModal from "../modals/NewChannelModal";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { setNewChannelModal } from "../../features/chatSlice";
+import {
+  setNewChannelModal,
+  getChannelsList,
+  getSingleChannel,
+} from "../../features/chatSlice";
+import { useNavigate, useParams } from "react-router";
 
 const Channels = () => {
   const [message, setMessage] = useState("");
-  const [channelId, setChannelId] = useState(0);
   const dispatch = useAppDispatch();
-  const { createNewChannel } = useAppSelector((state) => state.channels);
+  const { id: channelId } = useParams();
+  const navigate = useNavigate();
+  const { createNewChannel, channels, channel } = useAppSelector(
+    (state) => state.channels
+  );
 
   const sendMessage = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!message) return;
     console.log(message);
     setMessage("");
   };
 
-  const getChannelContent = (index: number) => {
-    setChannelId(index + 1);
+  const getChannelContent = (id: number) => {
+    dispatch(getSingleChannel(id));
+    navigate(`/channels/${id}`);
   };
 
   const createChannel = () => {
     dispatch(setNewChannelModal(true));
   };
+
+  useEffect(() => {
+    dispatch(getChannelsList());
+  }, []);
+
+  useEffect(() => {
+    dispatch(getSingleChannel(Number(channelId)));
+  }, []);
 
   return (
     <div className="page-100 h-full w-full mt-20 flex about-family channels-bar-bg">
@@ -33,13 +51,18 @@ const Channels = () => {
             Inbox
           </div>
           <hr className="mx-10" />
-          {Array.from({ length: 10 }).map((item, index) => {
+          {channels.map((channel) => {
+            const { id, name } = channel;
             return (
               <div
-                onClick={() => getChannelContent(index)}
+                key={id}
+                onClick={() => getChannelContent(id)}
                 className="hover:scale-105 cursor-pointer transition duration-300 border border-blue-400 bg-transparent text-gray-200 rounded-lg w-[70px] h-[70px] flex items-center justify-center mx-6 my-3"
               >
-                ch{index + 1}
+                {name.split(" ").length >= 2
+                  ? name.split(" ")[0][0].toUpperCase() +
+                    name.split(" ")[1][0].toUpperCase()
+                  : name.substring(0, 2).toUpperCase()}
               </div>
             );
           })}
@@ -54,12 +77,15 @@ const Channels = () => {
       </div>
       <div className="relative text-white ml-6 left-[7.4rem]">
         <div className="fixed user-card-bg border-b border-l border-gray-700 shadow-gray-700 shadow-sm left-[7.4rem] text-white p-2 w-full">
-          channel {channelId}
+          <h1 className="text-xl">#{channel.name.split(" ").join("-")}</h1>
         </div>
-        <div className="mt-12">
+        <div className="mt-16">
           {Array.from({ length: 30 }).map((item, index) => {
             return (
-              <div className="my-8 mr-2 flex about-family items-center">
+              <div
+                key={index}
+                className="my-8 mr-2 flex about-family items-center"
+              >
                 <img
                   src="/images/profile.jpeg"
                   className="w-10 h-10 rounded-full mr-2"
