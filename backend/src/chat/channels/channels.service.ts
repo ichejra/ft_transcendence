@@ -31,20 +31,24 @@ export class ChannelsService {
     async createChannel(user: User, channel: ChannelDto) : Promise<Channel> {
         // ! check channel type to hASH THE PASSWORD
         let newChannel: Channel;
-        if (channel.type === ChannelType.PRIVATE) {
-            const hashPwd = await bcrypt.hash(channel.password, 10);
-            newChannel = new Channel(channel.name, ChannelType.PRIVATE, hashPwd);
-        } else {
-            newChannel = new Channel(channel.name, ChannelType.PUBLIC);
+        try {
+            if (channel.type === ChannelType.PRIVATE) {
+                const hashPwd = await bcrypt.hash(channel.password, 10);
+                newChannel = new Channel(channel.name, ChannelType.PRIVATE, hashPwd);
+            } else {
+                newChannel = new Channel(channel.name, ChannelType.PUBLIC);
+            }
+            // save channel
+                newChannel = await this.connection.getRepository(Channel).save(newChannel);
+            // create relation between user and target channel
+            await this.connection.getRepository(UserChannel).save({
+                user: user,
+                channel: newChannel,
+                userRole: UserRole.OWNER
+            });
+        } catch (err) {
+            throw new ForbiddenException();
         }
-        // save channel
-        newChannel = await this.connection.getRepository(Channel).save(newChannel);
-        // create relation between user and target channel
-        await this.connection.getRepository(UserChannel).save({
-            user: user,
-            channel: newChannel,
-            userRole: UserRole.OWNER
-        });
         return newChannel;
     }
 
