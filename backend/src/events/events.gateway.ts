@@ -47,12 +47,16 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     @SubscribeMessage('connection')
     async handleNewConnection(@ConnectedSocket() client: Socket) {
+        console.log('Ikhan safi');
         await this.connectionsService.addConnection(client);
     }
 
     @SubscribeMessage('send_notification')
     async handleNotification(@ConnectedSocket() client: Socket, @MessageBody('userId') userId: number | string) {
+        console.log('imane galt lia ma lgitich m3a mn:', userId);
+        
         const targets: Set<Socket> = await this.connectionsService.getUserConnections(Number(userId));
+        console.log(targets)
         targets.forEach((target) => {
             this.server.to(target.id).emit('receive_notification');
         });

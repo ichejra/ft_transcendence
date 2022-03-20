@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { FaUsersSlash } from "react-icons/fa";
 import Cookies from "js-cookie";
-// import { socket } from "../../pages/SocketProvider";
+import { socket } from "../../pages/SocketProvider";
 import {
   fetchNoRelationUsers,
   fetchAllUsers,
@@ -99,6 +99,7 @@ const User: React.FC<UserProps> = ({
           dispatch(fetchNoRelationUsers());
         });
       });
+      socket.emit("send_notification", { userId: id });
     }
   };
 
@@ -115,8 +116,8 @@ const User: React.FC<UserProps> = ({
       dispatch(removeFriendRelation(id)).then(() => {
         dispatch(fetchUserFriends());
         dispatch(fetchNoRelationUsers());
+        socket.emit("send_notification", { userId: id });
       });
-      // socket.emit("refresh", id);
     }
   };
 

@@ -17,7 +17,7 @@ import { useEffect, useState } from "react";
 import { fetchCurrentUser } from "../features/userProfileSlice";
 import Cookies from "js-cookie";
 import Head from "next/head";
-// import SocketProvider from "./SocketProvider";
+import SocketProvider from "./SocketProvider";
 
 
 const Home: NextPage = () => {
@@ -35,7 +35,7 @@ const Home: NextPage = () => {
   }
 
   return (
-    <>
+    <SocketProvider>
       <Head>
         <link
           href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fredoka+One&display=swap"
@@ -47,7 +47,7 @@ const Home: NextPage = () => {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route
-          path="/channels"
+          path="/channels/:id"
           element={
             <AuthRoute>
               <CompleteProfile>
@@ -108,7 +108,7 @@ const Home: NextPage = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
-    </>
+    </SocketProvider>
   );
 };
 

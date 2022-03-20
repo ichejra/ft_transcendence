@@ -4,6 +4,7 @@ import sidebarReducer from "../features/sidebarSlice";
 import userProfileReducer from "../features/userProfileSlice";
 import friendsManagentReducer from "../features/friendsManagmentSlice";
 import globalStateReducer from "../features/globalSlice";
+import channelsManagmentReducer from "../features/chatSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     user: userProfileReducer,
     friends: friendsManagentReducer,
     globalState: globalStateReducer,
+    channels: channelsManagmentReducer,
   },
 });
 

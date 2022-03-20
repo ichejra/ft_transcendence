@@ -8,7 +8,7 @@ import {
   showNotificationsList,
 } from "../../features/userProfileSlice";
 import Cookies from "js-cookie";
-// import { socket } from "../../pages/SocketProvider";
+import { socket } from "../../pages/SocketProvider";
 import {
   fetchPendingStatus,
   acceptFriendRequest,
@@ -26,10 +26,10 @@ const Notifications = () => {
         dispatch(fetchUserFriends());
         dispatch(fetchPendingStatus());
         dispatch(fetchNoRelationUsers());
+        socket.emit("send_notification", { userId: id });
       });
     }
     dispatch(showNotificationsList(false));
-    // socket.emit("refresh", {});
     console.log(
       "Friend " +
         users.find((user) => user.id === id)?.display_name +
@@ -43,6 +43,7 @@ const Notifications = () => {
       dispatch(removeFriendRelation(id)).then(() => {
         dispatch(fetchNoRelationUsers());
         dispatch(fetchPendingStatus());
+        socket.emit("send_notification", { userId: id });
       });
     }
     dispatch(showNotificationsList(false));
