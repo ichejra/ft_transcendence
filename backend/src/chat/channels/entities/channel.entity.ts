@@ -1,7 +1,9 @@
 import {
+    BaseEntity,
     Column,
     CreateDateColumn,
     Entity,
+    PrimaryColumn,
     PrimaryGeneratedColumn
 } from "typeorm";
 
@@ -11,14 +13,21 @@ export enum ChannelType {
 }
 
 @Entity('channels')
-export class Channel {
+export class Channel extends BaseEntity {
+
+    constructor(name: string, type: ChannelType, password?: string) {
+        super();
+        this.name = name;
+        this.type = type;
+        this.password = password;
+    }
+
     @PrimaryGeneratedColumn()
-    id: number;
+    id?: number;
 
     @Column({
         type: 'varchar',
         length: 255,
-        default: '',
         unique: true
      })
     name: string;
@@ -35,11 +44,11 @@ export class Channel {
         enum: ChannelType,
         default: ChannelType.PUBLIC,
     })
-    type: ChannelType;
+    type?: ChannelType;
 
     @CreateDateColumn({
         type: 'timestamp',
         default: () => 'CURRENT_TIMESTAMP',
     })
-    createdAt: Date;
+    createdAt?: Date;
 }

@@ -4,6 +4,7 @@ import {
     CreateDateColumn,
     Entity,
     JoinColumn,
+    ManyToOne,
     OneToOne,
     PrimaryGeneratedColumn
 } from "typeorm";
@@ -26,11 +27,11 @@ export class UserChannel {
     @PrimaryGeneratedColumn()
     id?: number;
 
-    @OneToOne(() => User, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+    @ManyToOne(() => User, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
     @JoinColumn({name: 'userId'})
     user?: User;
 
-    @OneToOne(() => Channel, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+    @ManyToOne(() => Channel, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
     @JoinColumn({name: 'channelId'})
     channel?: Channel;
 

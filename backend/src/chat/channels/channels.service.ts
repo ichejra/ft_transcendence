@@ -16,6 +16,8 @@ import {
 import { MessagesService } from "../messages/messages.service";
 import { ConnectionsService } from "src/events/connections.service";
 import { MessageChannel } from "../messages/entities/message-channel.entity";
+import * as bcrypt from "bcrypt";
+import { ForbiddenException } from "src/exceptions/forbidden.exception";
 
 @Injectable()
 export class ChannelsService {
@@ -27,15 +29,32 @@ export class ChannelsService {
     /* Channels */
     /* Method: create a new channel in database */
     async createChannel(user: User, channel: ChannelDto) : Promise<Channel> {
-        // save channel
-        const channel_ = await this.connection.getRepository(Channel).save(channel);
-        // create relation between user and target channel
-        await this.connection.getRepository(UserChannel).save({
-            user: user,
-            channel: channel_,
-            userRole: UserRole.OWNER
-        });
-        return channel_;
+        // ! check channel type to hASH THE PASSWORD
+        let newChannel: Channel;
+        try {
+            if (channel.type === ChannelType.PRIVATE) {
+                const hashPwd = await bcrypt.hash(channel.password, 10);
+                newChannel = new Channel(channel.name, ChannelType.PRIVATE, hashPwd);
+            } else {
+                newChannel = new Channel(channel.name, ChannelType.PUBLIC);
+            }
+            // save channel
+                newChannel = await this.connection.getRepository(Channel).save(newChannel);
+            // create relation between user and target channel
+            await this.connection.getRepository(UserChannel).save({
+                user: user,
+                channel: newChannel,
+                userRole: UserRole.OWNER
+            });
+        } catch (err) {
+            throw new ForbiddenException();
+        }
+        return newChannel;
+    }
+
+    // Get all channels
+    getChannels = async (): Promise<Channel[]> => {
+        return await this.connection.getRepository(Channel).find();
     }
 
     /* get a channel by id */
@@ -102,8 +121,22 @@ export class ChannelsService {
             AND "user_channel"."userId" = $2`,
             [ channel.id, user.id ]
         );
-        if (relation.userRole === UserRole.OWNER) { // ! Destroy channel
-            await this.deleteChannel(channel.id);
+        if (relation.userRole === UserRole.OWNER) {
+            const admins = await this.connection.getRepository(UserChannel).query(
+                `SELECT * FROM user_channel
+                WHERE "user_channel"."channelId" = $1
+                AND "user_channel"."userRole" = $2`,
+                [ channel.id, UserRole.ADMIN ]
+            );
+            if (admins.length === 0){
+                // ! Destroy channel
+                await this.deleteChannel(channel.id);
+            } else {
+                await this.connection.getRepository(UserChannel).update({
+                        user: admins[0],
+                        channel: channel
+                    }, { userRole: UserRole.OWNER });
+            }
         }
         return channel;
     }
@@ -175,6 +208,27 @@ export class ChannelsService {
             );
         }
     }
+
+    // Set or update password
+    setUpdatePassword = async (userId: number, channelId :number, newPwd: string): Promise<any> => {
+        const relation = await this.connection.getRepository(UserChannel).findOne({
+            where:{
+                userId: userId,
+                channelId: channelId,
+            }
+        });
+        if (relation && relation.userRole !== UserRole.OWNER) {
+            throw new ForbiddenException('Forbidden: permission denied');
+        }
+        const hashPwd = await bcrypt.hash(newPwd, 10);
+        await this.connection.getRepository(Channel).update(channelId, {
+            password: hashPwd,
+            type: ChannelType.PRIVATE
+        });
+        return { success: true, message: 'Password changed' };
+    }
+
+    // Remove password
 
     // saving messages
     saveMessage = async (socket: Socket, channel: Channel, content: string): Promise<MessageChannel> => {

@@ -19,6 +19,8 @@ import {
   removeFriendRelation,
 } from "../../features/friendsManagmentSlice";
 
+import { socket } from "../../pages/SocketProvider";
+
 interface Props {
   user_me: User;
   users: User[];
@@ -45,6 +47,7 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
       dispatch(fetchRequestStatus(id.toString())).then(() => {
         dispatch(fetchPendingStatus()).then(() => {
           dispatch(fetchNoRelationUsers());
+          socket.emit("send_notification", { userId: id });
         });
       });
       setIsPending(true);
@@ -57,6 +60,7 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
         .then(() => {
           dispatch(fetchUserFriends());
           dispatch(fetchNoRelationUsers());
+          socket.emit("send_notification", { userId: id });
         })
         .then(() => {
           setIsFriend(false);
@@ -70,6 +74,7 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
         .then(() => {
           dispatch(fetchUserFriends());
           dispatch(fetchNoRelationUsers());
+          socket.emit("send_notification", { userId: id });
         })
         .then(() => {
           setIsFriend(false);

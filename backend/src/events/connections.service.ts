@@ -49,13 +49,6 @@ export class ConnectionsService {
         }
     }
 
-    private printSet(sockets : Set<Socket>){
-        sockets.forEach((sock)=>{
-            console.log(sock.id, '\n');
-        }
-        );
-    }
-
     // this function use for deleting the connection from connections array
     public eraseConnection = async (socket: Socket): Promise<any> => {
        let user: User;
@@ -78,7 +71,14 @@ export class ConnectionsService {
 
     // Getting a all user connections
     public getUserConnections = async (userId: number) : Promise<Set<Socket>> => {
-        return this.connections.get(userId);
+        const sockets = this.connections.get(userId);
+        // console.log(sockets);
+        return sockets;
     }
+
+    // get receiver by id
+    public getReceiverById = async (id: number) : Promise<User> => {
+        return await this.usersService.findOne(id);
+    } 
 
 }
