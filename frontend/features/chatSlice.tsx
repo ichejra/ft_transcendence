@@ -10,10 +10,18 @@ interface Channel {
   password: string;
 }
 
-interface ChannelMessage {
-  id: number;
+export interface ChannelMessage {
   author: User;
   channel: Channel;
+  content: string;
+  createdAt: string;
+  id: number;
+}
+
+interface DBChannelMessage {
+  id: number;
+  authorId: number;
+  channelId: number;
   content: string;
   createdAt: string;
 }
@@ -31,6 +39,7 @@ interface InitialState {
   channels: Channel[];
   channel: Channel;
   channelContent: ChannelMessage[];
+  dbChannelContent: DBChannelMessage[];
   directMessage: DirectMessage[];
 }
 
@@ -38,12 +47,13 @@ const initialState: InitialState = {
   createNewChannel: false,
   channels: [],
   channel: {
-    id: NaN,
+    id: 0,
     name: "",
     password: "",
     type: "",
   },
   channelContent: [],
+  dbChannelContent: [],
   directMessage: [],
 };
 
@@ -63,7 +73,7 @@ export const createChannel = createAsyncThunk(
   ) => {
     try {
       const response = await axios.post(
-        `http://localhost:3000/channels/create`,
+        `http://localhost:3000/api/channels/create`,
         {
           name,
           type,
@@ -85,10 +95,10 @@ export const createChannel = createAsyncThunk(
 );
 
 export const getChannelsList = createAsyncThunk(
-  "channels/fetchChannelContent",
+  "channels/getChannelsList",
   async (_, _api) => {
     try {
-      const response = await axios.get(`http://localhost:3000/channels`, {
+      const response = await axios.get(`http://localhost:3000/api/channels`, {
         headers: {
           authorization: `Bearer ${Cookies.get("accessToken")}`,
         },
@@ -105,7 +115,7 @@ export const getSingleChannel = createAsyncThunk(
   async (channelId: number, _api) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/channels/${channelId}`,
+        `http://localhost:3000/api/channels/${channelId}`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -126,7 +136,7 @@ export const getChannelContent = createAsyncThunk(
 
     try {
       const response = await axios.get(
-        `http://localhost:3000/messages/channels/${channelId}`,
+        `http://localhost:3000/api/messages/channels/${channelId}`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -149,7 +159,7 @@ export const getDirectContent = createAsyncThunk(
 
     try {
       const response = await axios.get(
-        `http://localhost:3000/messages/direct//${userId}`,
+        `http://localhost:3000/api/messages/direct/${userId}`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -175,6 +185,14 @@ const channelsManagmentSlice = createSlice({
     ) => {
       state.createNewChannel = action.payload;
     },
+    addNewMessage: (
+      state: InitialState = initialState,
+      action: PayloadAction<ChannelMessage>
+    ) => {
+      const message: ChannelMessage = { ...action.payload };
+      state.channelContent.push(message);
+      console.log("CC ===> ", state.channelContent);
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(createChannel.fulfilled, (state, action: any) => {
@@ -187,7 +205,7 @@ const channelsManagmentSlice = createSlice({
       state.channel = action.payload;
     });
     builder.addCase(getChannelContent.fulfilled, (state, action: any) => {
-      state.channelContent = action.payload;
+      state.dbChannelContent = action.payload;
     });
     builder.addCase(getDirectContent.fulfilled, (state, action: any) => {
       state.directMessage = action.payload;
@@ -195,7 +213,8 @@ const channelsManagmentSlice = createSlice({
   },
 });
 
-export const { setNewChannelModal } = channelsManagmentSlice.actions;
+export const { setNewChannelModal, addNewMessage } =
+  channelsManagmentSlice.actions;
 
 export default channelsManagmentSlice.reducer;
 

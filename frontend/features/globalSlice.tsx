@@ -1,7 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState: { refresh: boolean } = {
+const initialState: { refresh: boolean; updateMessages: boolean } = {
   refresh: false,
+  updateMessages: false,
 };
 
 const updateGlobalSlice = createSlice({
@@ -11,9 +12,13 @@ const updateGlobalSlice = createSlice({
     updateGlobalState: (state = initialState) => {
       state.refresh = !state.refresh;
     },
+    updateChannelContent: (state = initialState) => {
+      state.updateMessages = !state.updateMessages;
+    },
   },
 });
 
-export const { updateGlobalState } = updateGlobalSlice.actions;
+export const { updateGlobalState, updateChannelContent } =
+  updateGlobalSlice.actions;
 
 export default updateGlobalSlice.reducer;

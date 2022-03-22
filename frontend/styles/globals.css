@@ -265,6 +265,10 @@ canvas {
   top: 0;
 }
 
+.highlight {
+  background-color: rgb(38, 54, 145);
+}
+
 .ball {
   position: absolute;
   background-color: #c4c4c4;
