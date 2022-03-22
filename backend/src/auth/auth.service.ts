@@ -16,11 +16,15 @@ export class AuthService {
     /* an async function  used for validate the user if exist in database */
     async validateUser(payload: JwtPayload): Promise<User> {
         const { id } = payload;
-        const user = await this.usersService.findOne( Number(id) );
-        if (!user) {
+        try {
+            const user = await this.usersService.findOne( Number(id) );
+            if (!user) {
+                return null;
+            }
+            return user;
+        } catch {
             return null;
         }
-        return user;
     }
 
     /* function used for creating the user if not exist and sign it */

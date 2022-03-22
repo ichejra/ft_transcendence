@@ -61,8 +61,8 @@ export class ChannelsController {
     updateChannel(
         @Param('channelId', ParseIntPipe) channelId: number,
         @Body() data: UpdateChannelDto) : Promise<Channel> {
-       return this.channelsService.updateChannel(channelId, data);
-   }
+        return this.channelsService.updateChannel(channelId, data);
+    }
 
     /* Route delete channel */
     @Delete('/:channelId')

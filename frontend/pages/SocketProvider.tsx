@@ -16,9 +16,9 @@ import { useAppDispatch, useAppSelector } from "../app/hooks";
 import Cookies from "js-cookie";
 
 export const socket = io("http://localhost:3000", {
-  auth: {
-    token: Cookies.get("accessToken"),
-  },
+    auth: {
+      token: Cookies.get("accessToken"),
+    }
 });
 
 const SocketProvider: React.FC = ({ children }) => {

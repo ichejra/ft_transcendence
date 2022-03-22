@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { useLocation } from 'react-router';
 // import { io } from 'socket.io-client';
 import { socket } from '../../pages/SocketProvider';
 // import { socket } from '/Users/ichejra/Desktop/ft_trans/frontend/pages/SocketProvider.tsx';
@@ -112,6 +113,8 @@ interface IFrame {
   paddles: {
     leftPad: number;
     rightPad: number;
+    leftPadH: number;
+    rightPadH: number;
   };
   score: {
     score1: number;
@@ -134,6 +137,8 @@ const stateInit: IFrame = {
   paddles: {
     leftPad: PADY_INIT,
     rightPad: PADY_INIT,
+    leftPadH: PAD_HEIGHT,
+    rightPadH: PAD_HEIGHT,
   },
   score: {
     score1: 0,
@@ -144,17 +149,27 @@ const stateInit: IFrame = {
   isWinner: false,
 };
 
-const Pong = () => {
+interface userType {
+  userType: string;
+}
+
+const Pong: React.FC<userType> = ({userType}) => {
+  const { state } = useLocation();
   const canvasRef = useRef(null);
   const [frame, setFrame] = useState(stateInit);
 
   const joinMatch = () => {
     socket.emit('join_queue', 'default');
   };
+  const joinMatchWithObstacle = () => {
+    socket.emit('join_queue', 'obstacle');
+  }
   const stopMatch = () => {
     socket.emit('stop_game', 'default');
   };
-
+  if (userType='spectator') { //! watcher
+    // socket.emit('spectator', state.userId); //TODO: bring the userId from the button of watch game
+  }
   const movePaddle = (e: any) => {
     if (e.code === 'ArrowUp') {
       console.log('------> keydown');
@@ -172,11 +187,12 @@ const Pong = () => {
   };
 
   useEffect(() => {
+    if (userType === 'spectator') return; //! watcher
     document.addEventListener('keydown', movePaddle);
     document.addEventListener('keyup', stopPaddle);
     socket.on('game_state', (newState) => {
       setFrame(newState);
-      // console.log('I am frame from front', frame.paddles.leftPad);
+      // console.log('I am frame from front', frame.paddles.leftPadH);
     });
     return () => {
       document.removeEventListener('keydown', movePaddle);
@@ -198,7 +214,7 @@ const Pong = () => {
       L_PADX,
       frame.paddles.leftPad,
       PAD_WIDTH,
-      PAD_HEIGHT,
+      frame.paddles.leftPadH,
       'white',
       ctx
     );
@@ -207,7 +223,7 @@ const Pong = () => {
       R_PADX,
       frame.paddles.rightPad,
       PAD_WIDTH,
-      PAD_HEIGHT,
+      frame.paddles.rightPadH,
       'white',
       ctx
     );
@@ -264,9 +280,18 @@ const Pong = () => {
         width={CANVAS_WIDTH}
         height={CANVAS_HEIGHT}
       ></canvas>
-      <button onClick={joinMatch}>Play Now</button>
+      {/* show the uttons only if the userType is a player*/}
+      <button className='text-white' onClick={joinMatch}>
+        Play Now
+      </button>
       <br />
-      <button onClick={stopMatch}>Stop Now</button>
+      <button className='text-white' onClick={stopMatch}>
+        Stop Now
+      </button>
+      <br />
+      <button className='text-white' onClick={joinMatchWithObstacle}>
+        Play with obstacle Now
+      </button>
       {/* handle change color in here */}
     </div>
   );
@@ -278,6 +303,8 @@ export default Pong;
 //* Done: stop the game when a score reaches the max score
 
 
-//TODO: consider make the ball square
+//TODO: show the uttons only if the userType is a player
 //TODO: add this color to the game after the UI finished: #05f2db
 //TODO: add game over in the end of the game and the winner for the winner and loser for the looser
+//TODO: add Live Games page and update it every little bit by listening on a socket every 1s or so
+
