@@ -17,7 +17,7 @@ import Cookies from "js-cookie";
 
 export const socket = io("http://localhost:3000", {
   auth: {
-    key: Cookies.get("accessToken"),
+    token: Cookies.get("accessToken"),
   },
 });
 
