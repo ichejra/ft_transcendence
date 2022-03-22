@@ -28,8 +28,8 @@ export class MessagesService {
     /* function return all the messages that's among to a given channel*/
     getMessagesByChannelId = async (channelId: number): Promise<MessageChannel[]> => {
         return await this.connection.getRepository(MessageChannel).query(
-            `SELECT * FROM messages_channles
-            WHERE "messages_channles"."channelId" = $1`,
+            `SELECT * FROM messages_channels
+            WHERE "messages_channels"."channelId" = $1`,
             [channelId]
         );
     }
@@ -58,5 +58,19 @@ export class MessagesService {
             OR ("direct_messages"."senderId" = $2 AND "direct_messages"."receiverId" = $1)`,
             [ senderId, receiverId ]
         );
+    }
+
+    getDirectChat = async (userId: number) : Promise<User[]> => {
+        const users: User[] = await this.connection.getRepository(User).query(
+            `SELECT id FROM users
+            WHERE "users"."id"
+            IN (SELECT DISTINCT "senderId" FROM direct_messages
+                WHERE "direct_messages"."receiverId" = $1)
+            OR "users"."id"
+            IN (SELECT DISTINCT "receiverId" FROM direct_messages
+                WHERE "direct_messages"."senderId" = $1)`,
+            [ userId ]
+        );
+        return users;
     }
 }

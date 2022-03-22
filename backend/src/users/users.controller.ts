@@ -22,7 +22,7 @@ export class UsersController {
   }
 
   /* route get all users 
-    https://${host}:${port}/users/all_users
+    https://${host}:${port}/api/users/all_users
   */ 
   @Get('/all_users')
   @HttpCode(200)
@@ -32,7 +32,7 @@ export class UsersController {
   }
 
   /* route get the logged user 
-    http://${host}:${port}/users/me
+    http://${host}:${port}/api/users/me
   */
   @Get('me')
   @HttpCode(200)
@@ -57,7 +57,7 @@ export class UsersController {
   }
 
   /* Route delete user 
-    http://${host}:${port}/users/remove-user/:userId
+    http://${host}:${port}/api/users/remove-user/:userId
   */ 
   @Delete('/remove-user/:userID')
   @HttpCode(200)
@@ -68,7 +68,7 @@ export class UsersController {
 
   /* User friends section */
   /* Route: send friend request
-    http://${host}:${port}/users/friend-request/
+    http://${host}:${port}/api/users/friend-request/
     add to friends with pending status
     */
   @Patch('/friend-request/')
@@ -79,7 +79,7 @@ export class UsersController {
   }
 
   /* Route: accept friend
-    http://${host}:${port}/users/friend-accepte/
+    http://${host}:${port}/api/users/friend-accepte/
     -> user who logged is the recipeint and the applicant will be accpeted
     */
   @Patch('/friend-accept/')
@@ -90,7 +90,7 @@ export class UsersController {
   }
 
   /* Route: block friend
-    http://${host}:${port}/users/friend-accept/
+    http://${host}:${port}/api/users/friend-accept/
     */
   @Patch('/friend-block/')
   @HttpCode(200)
@@ -100,7 +100,7 @@ export class UsersController {
   }
 
   /* Route: unblock friend
-    http://${host}:${port}/users/friend-unblock/
+    http://${host}:${port}/api/users/friend-unblock/
   */
   @Patch('/friend-unblock/')
   @HttpCode(200)
@@ -110,7 +110,7 @@ export class UsersController {
   }
 
   /* Route: get pending requests 
-    http://${host}:${port}/users/pending-friends/
+    http://${host}:${port}/api/users/pending-friends/
   */
   @Get('/pending-friends')
   @HttpCode(200)
@@ -120,7 +120,7 @@ export class UsersController {
   }
 
   /* Route friends:
-    http://${host}:${port}/users/friends
+    http://${host}:${port}/api/users/friends
     -> return all friends of the logged user
   */
   @Get('/friends')
@@ -131,7 +131,7 @@ export class UsersController {
   }
 
   /* Route blocked friends 
-    http://${host}:${port}/users/blocked-friends
+    http://${host}:${port}/api/users/blocked-friends
     -> return all the blocked friends from the user
   */
   @Get('/blocked-friends')
@@ -142,7 +142,7 @@ export class UsersController {
   }
 
   /* Route no relation users
-    http://${host}:${port}/users/no_rolation
+    http://${host}:${port}/api/users/no_rolation
     -> return all users that does not has any relation with the logged user.
   */
   @Get('/no_relation')
@@ -153,7 +153,7 @@ export class UsersController {
   }
 
   /* Route for cancelling, rejecting and removing a friend 
-    http://${host}:${port}/users/remove-relation
+    http://${host}:${port}/api/users/remove-relation
   */
   @Patch('remove-relation')
   @HttpCode(200)

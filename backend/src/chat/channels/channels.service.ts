@@ -87,13 +87,17 @@ export class ChannelsService {
     /* joining channel -> user_channel table updating */
     joinChannel = async (socket: Socket, payload: any) : Promise<Channel> => {
         // get user and channel
-        const user = await this.connectionsService.getUserFromSocket(socket);
-        // TODO:- check the channel privacy
         const channel = await this.getChannelById(payload.channelId);
-        if (channel.type === ChannelType.PRIVATE)
-        {
+        // check for channel type
+        if (channel.type === ChannelType.PRIVATE) {
             // require a password
+            const hashPwd = await bcrypt.compare(payload.password, channel.password);
+            if (hashPwd === false) {
+                return null;
+            }
         }
+        // get the user§
+        const user = await this.connectionsService.getUserFromSocket(socket);
         // update user channel relation add the user
         await this.connection.getRepository(UserChannel).save({
             user: user,
@@ -103,7 +107,7 @@ export class ChannelsService {
         return channel;
     }
 
-    /* leave channel -> (if Owner then destroy channel) delete relation or banned the user */
+    /* leave channel -> delete relation channel _ user */
     leaveChannel = async (socket: Socket, payload: any) : Promise<Channel> => {
         // get user_channel relation
         const user = await this.connectionsService.getUserFromSocket(socket);
@@ -129,7 +133,6 @@ export class ChannelsService {
                 [ channel.id, UserRole.ADMIN ]
             );
             if (admins.length === 0){
-                // ! Destroy channel
                 await this.deleteChannel(channel.id);
             } else {
                 await this.connection.getRepository(UserChannel).update({
@@ -215,9 +218,10 @@ export class ChannelsService {
             where:{
                 userId: userId,
                 channelId: channelId,
+                userRole: UserRole.OWNER
             }
         });
-        if (relation && relation.userRole !== UserRole.OWNER) {
+        if (relation === undefined) {
             throw new ForbiddenException('Forbidden: permission denied');
         }
         const hashPwd = await bcrypt.hash(newPwd, 10);
@@ -229,6 +233,27 @@ export class ChannelsService {
     }
 
     // Remove password
+    removePassword = async (userId: number, channelId: number): Promise<any> => {
+        const channel = await this.connection.getRepository(Channel).findOne(channelId);
+        if (channel.type === ChannelType.PRIVATE){
+
+        }
+        const relation = await this.connection.getRepository(UserChannel).findOne({
+            where:{
+                userId: userId,
+                channelId: channelId,
+                userRole: UserRole.OWNER
+            }
+        });
+        if (relation === undefined) {
+            throw new ForbiddenException('Forbidden: permission denied');
+        }
+        await this.connection.getRepository(Channel).update(channelId, {
+            password: null,
+            type: ChannelType.PUBLIC
+        });
+        return {success: true, message: 'Password removed'};
+    }
 
     // saving messages
     saveMessage = async (socket: Socket, channel: Channel, content: string): Promise<MessageChannel> => {

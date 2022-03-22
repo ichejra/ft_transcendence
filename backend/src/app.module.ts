@@ -15,7 +15,6 @@ import { EventsModule } from './events/events.module';
 import { ChatModule } from './chat/chat.module';
 import { DirectMessage } from './chat/messages/entities/direct-messages.entity';
 import { MessageChannel } from './chat/messages/entities/message-channel.entity';
-import { AppController } from './app.controller';
 
 dotenv.config();
 @Module({
@@ -51,7 +50,5 @@ dotenv.config();
     GameModule,
     EventsModule,
   ],
-  controllers: [ AppController ],
-  providers: [],
 })
 export class AppModule {}

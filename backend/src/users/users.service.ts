@@ -1,4 +1,5 @@
 import {
+  HttpException,
   Injectable,
   NotFoundException
 } from '@nestjs/common';
@@ -27,7 +28,11 @@ export class UsersService {
   }
 
   findAll() : Promise<User[]>{
-    return this.connection.getRepository(User).find();
+    try {
+      return this.connection.getRepository(User).find();
+    } catch (err) {
+      throw new HttpException(err.message, err.status);
+    }
   }
 
   async findOne(id: number | string): Promise<User> {
