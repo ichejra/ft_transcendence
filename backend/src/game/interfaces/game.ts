@@ -45,8 +45,9 @@ class GameObj {
   public getIsDefault() : boolean {
     return this._isDefault;
   }
-
+  
   private dataToBeSent = (): BroadcastObject => {
+
     return {
       ball: {
         x: this._ball.getX(),
@@ -66,7 +67,21 @@ class GameObj {
     };
   };
 
+  public liveGameData = () => {
+    return {
+      players: {
+        player1: this._player1AsUser, 
+        player2: this._player2AsUser,
+      },
+      score: {
+        score1: this._player1.getScore(), 
+        score2: this._player2.getScore(),
+      },
+    }
+  }
+
   public sendData = () => {
+
     const current = this.dataToBeSent();
     
     this._player1
@@ -76,7 +91,7 @@ class GameObj {
       .getSocket()
       .emit('game_state', { ...current, isWinner: this._player2.isWinner() });
     this._spectators.forEach((spec) => {
-      spec.emit('game_state', {...current, /* send the winner  */}) //TODO: watcher: send the winner too 
+      spec.emit('game_state', { ...current, /* send the winner  */}) //TODO: watcher: send the winner too 
     })
   };
 
@@ -235,6 +250,8 @@ class GameObj {
 
   // * add specs
   public addSpectators(spectator: Socket): void {
+    // console.log('watcher added');
+    
     if (this._spectators.length < Consts.MAX_SPECTATORS)
       this._spectators.push(spectator);
     //! this.sendData();

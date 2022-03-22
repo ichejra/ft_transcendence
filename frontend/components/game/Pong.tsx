@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
+import { User } from '../../features/userProfileSlice';
 // import { io } from 'socket.io-client';
 import { socket } from '../../pages/SocketProvider';
 // import { socket } from '/Users/ichejra/Desktop/ft_trans/frontend/pages/SocketProvider.tsx';
@@ -106,6 +107,10 @@ class Text {
 }
 
 interface IFrame {
+  players?: {
+    user1: User;
+    user2: User;
+  };
   ball: {
     x: number;
     y: number;
@@ -145,31 +150,30 @@ const stateInit: IFrame = {
     score2: 0,
   },
   state: 'void',
-  //* set Winner
   isWinner: false,
 };
 
-interface userType {
+interface UserType {
   userType: string;
 }
 
-const Pong: React.FC<userType> = ({userType}) => {
-  const { state } = useLocation();
+const Pong: React.FC<UserType> = ({ userType }) => {
   const canvasRef = useRef(null);
   const [frame, setFrame] = useState(stateInit);
+  const [users, setUsers] = useState<User[]>([]);
+  const [leftPlayer, setLeftPlayer] = useState<User>(users[0]);
+  const [rightPlayer, setRightPlayer] = useState<User>(users[1]);
+  console.log('user type: ', userType);
 
   const joinMatch = () => {
     socket.emit('join_queue', 'default');
   };
   const joinMatchWithObstacle = () => {
     socket.emit('join_queue', 'obstacle');
-  }
+  };
   const stopMatch = () => {
     socket.emit('stop_game', 'default');
   };
-  if (userType='spectator') { //! watcher
-    // socket.emit('spectator', state.userId); //TODO: bring the userId from the button of watch game
-  }
   const movePaddle = (e: any) => {
     if (e.code === 'ArrowUp') {
       console.log('------> keydown');
@@ -185,18 +189,30 @@ const Pong: React.FC<userType> = ({userType}) => {
       socket.emit('ArrowDown', 'up');
     }
   };
+  // useEffect(() => {
+  //   socket.emit('get_users');
+  // }, [])
 
   useEffect(() => {
-    if (userType === 'spectator') return; //! watcher
-    document.addEventListener('keydown', movePaddle);
-    document.addEventListener('keyup', stopPaddle);
+    socket.on('set_users', (players) => {
+      setUsers(players);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (userType !== 'spectator') {
+      document.addEventListener('keydown', movePaddle);
+      document.addEventListener('keyup', stopPaddle);
+    }
     socket.on('game_state', (newState) => {
       setFrame(newState);
-      // console.log('I am frame from front', frame.paddles.leftPadH);
+      console.log('I am frame from front', userType);
     });
     return () => {
-      document.removeEventListener('keydown', movePaddle);
-      document.removeEventListener('keyup', stopPaddle);
+      if (userType !== 'spectator') {
+        document.removeEventListener('keydown', movePaddle);
+        document.removeEventListener('keyup', stopPaddle);
+      }
       socket.off('game_state');
     };
   }, []);
@@ -257,42 +273,140 @@ const Pong: React.FC<userType> = ({userType}) => {
     if (frame.state === 'OVER') {
       // const clearTable = new Rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, 'black', ctx);
       // clearTable.drawRect();
-      const gameOver = new Text(
-        3 * CANVAS_WIDTH / 8,
-        CANVAS_HEIGHT / 2,
-        'GAME OVER',
-        'white',
-        ctx
-      );
-      gameOver.drawText();
+      // const gameOver = new Text(
+      //   (3 * CANVAS_WIDTH) / 8,
+      //   CANVAS_HEIGHT / 2,
+      //   'GAME OVER',
+      //   'white',
+      //   ctx
+      // );
+      // gameOver.drawText();
       if (frame.isWinner) {
-        console.log('winner');
-        
-      } else
-        console.log('loooser');
+        //! ///////////////////////
+        // let position;
+        // if (frame.score.score1 > frame.score.score2)
+        //   position = (1 * CANVAS_WIDTH) / 4;
+        // else
+        //   position = (3 * CANVAS_WIDTH) / 4;
+        // const playerMsg = new Text(
+        //   position,
+        //   CANVAS_HEIGHT / 2,
+        //   'Winner',
+        //   'white',
+        //   ctx
+        // );
+        // playerMsg.drawText();
+        //! ///////////////////////
+        const playerMsg = new Text(
+          (3 * CANVAS_WIDTH) / 7,
+          CANVAS_HEIGHT / 3,
+          'WINNER',
+          'white',
+          ctx
+        );
+        const table = new Rect(
+          0,
+          0,
+          CANVAS_WIDTH,
+          CANVAS_HEIGHT,
+          '#45C830',
+          ctx
+        );
+        table.drawRect();
+        playerMsg.drawText();
+
+        // console.log('winner');
+      } else {
+        // console.log('loooser');
+        const playerMsg = new Text(
+          (3 * CANVAS_WIDTH) / 8,
+          CANVAS_HEIGHT / 3,
+          'LOOOSER',
+          'white',
+          ctx
+        );
+        const table = new Rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, 'red', ctx);
+        table.drawRect();
+        playerMsg.drawText();
+      }
     }
   }, [frame]);
   //*draw
+
+  useEffect(() => {
+    if (users.length) {
+      setLeftPlayer(users[0]);
+      setRightPlayer(users[1]);
+      console.log(leftPlayer?.id + '------------------' + rightPlayer?.id);
+    }
+  }, [users]);
+
   return (
-    <div>
+    <div className='flex w-full flex-col items-center'>
       <canvas
         ref={canvasRef}
         width={CANVAS_WIDTH}
         height={CANVAS_HEIGHT}
       ></canvas>
       {/* show the uttons only if the userType is a player*/}
-      <button className='text-white' onClick={joinMatch}>
-        Play Now
-      </button>
-      <br />
-      <button className='text-white' onClick={stopMatch}>
-        Stop Now
-      </button>
-      <br />
-      <button className='text-white' onClick={joinMatchWithObstacle}>
-        Play with obstacle Now
-      </button>
+      <div>
+        <button className='text-white' onClick={joinMatch}>
+          Play Now
+        </button>
+        <br />
+        <button className='text-white' onClick={stopMatch}>
+          Stop Now
+        </button>
+        <br />
+        <button className='text-white' onClick={joinMatchWithObstacle}>
+          Play with obstacle Now
+        </button>
+      </div>
       {/* handle change color in here */}
+      <div className=''>
+        {users.length && (
+          <div className='w-[50rem] flex items-center justify-between'>
+            <div className='  w-1/2 items-center justify-between'>
+              <div className=''>
+                <img
+                  src={leftPlayer?.avatar_url}
+                  className='w-46 h-44 rounded-full m-4'
+                />
+                <h1 className='text-white'>{leftPlayer?.display_name}</h1>
+              </div>
+            </div>
+            <div className='w-1/2 items-center justify-between'>
+              <div className='relative items-center'>
+                <div className='absolute'>
+                  <img
+                    src={rightPlayer?.avatar_url}
+                    className='w-46 h-44 rounded-full'
+                  />
+                  <h1 className='text-white'>{rightPlayer?.display_name}</h1>
+                </div>
+              </div>
+            </div>
+          </div>
+          // <div className='w-[60rem] h-[7rem] m-6 flex justify-between items-center'>
+          //   <div className='bg-red-200 h-[7rem] w-1/2 flex items-center justify-between '>
+          //     <div className='flex items-center'>
+          //       <img
+          //         src={leftPlayer?.avatar_url}
+          //         className='w-20 h-20 rounded-full m-4 ml-5'
+          //       />
+          //     </div>
+          //   </div>
+          //   <div className='bg-purple-700 h-[7rem] w-1/2 flex items-center justify-between '>
+          //     <div className='flex items-center'>
+          //       <img
+          //         src={rightPlayer?.avatar_url}
+          //         className='w-20 h-20 rounded-full m-4 mr-5'
+          //       />
+          //     </div>
+          //   </div>
+          // </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -302,9 +416,9 @@ export default Pong;
 //* Done: show the score on the screen
 //* Done: stop the game when a score reaches the max score
 
-
 //TODO: show the uttons only if the userType is a player
+//TODO: set winner and looser
+//TODO: play and pause //! makainax f subject
 //TODO: add this color to the game after the UI finished: #05f2db
 //TODO: add game over in the end of the game and the winner for the winner and loser for the looser
 //TODO: add Live Games page and update it every little bit by listening on a socket every 1s or so
-
