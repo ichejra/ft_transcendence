@@ -58,7 +58,17 @@ const Home: NextPage = () => {
           }
         />
         <Route
-          path='/game'
+          path="/channels/direct/:id"
+          element={
+            <AuthRoute>
+              <CompleteProfile>
+                <Channels />
+              </CompleteProfile>
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/game"
           element={
             <AuthRoute>
               <CompleteProfile>

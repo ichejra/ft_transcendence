@@ -9,7 +9,7 @@ socket.emit("connection", () => {
 
 const HomePage: React.FC = () => {
   return (
-    <div className="w-full h-full user-card-bg flex justify-center">
+    <div className="w-full h-full  flex justify-center">
       <div className="page-50 mt-20 flex bg-black w-full 2xl:w-[80rem] flex-col items-center">
         <div className="hero-bg relative w-full 2xl:w-[80rem] flex items-center justify-between">
           <div className="home-script">

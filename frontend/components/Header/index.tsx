@@ -4,16 +4,22 @@ import Sidebar from "./Sidebar";
 import ProfileDropdown from "./ProfileDropdown";
 import { openSidebar } from "../../features/sidebarSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { getChannelsList } from "../../features/chatSlice";
 
 const Header: React.FC = () => {
   const dispatch = useAppDispatch();
   const { isLoggedIn, completeInfo } = useAppSelector((state) => state.user);
-  const [channelId, setChannelId] = useState(0);
+  const { channels } = useAppSelector((state) => state.channels);
+
+  useEffect(() => {
+    dispatch(getChannelsList());
+  }, []);
+  console.log(channels);
 
   return (
     <>
-      <nav className="fixed z-10 top-0 border-b border-gray-800 left-0 w-full font-mono pl-6 py-4 bg-black  shadow-md shadow-black/10 text-white flex items-center justify-between">
+      <nav className="fixed z-50 top-0 border-b border-gray-800 left-0 w-full font-mono pl-6 py-4 bg-black  shadow-md shadow-black/10 text-white flex items-center justify-between">
         <button
           className="nav-toggle"
           onClick={() => {
@@ -35,7 +41,8 @@ const Header: React.FC = () => {
               <Link to="/">Home</Link>
             </li>
             <li className="header-item hover:scale-110 transition duration-300 cursor-pointer text-md font-medium mx-2 px-2">
-              <Link to={`/channels/${channelId}`}>Channels</Link>
+              {/* <Link to={`/channels/${channels[0].id}`}>Channels</Link> */}
+              <Link to={`/channels/channels`}>Channels</Link>
             </li>
             <li className="header-item hover:scale-110 transition duration-300 cursor-pointer text-md font-medium mx-2 px-2">
               <Link to="/game">Game</Link>

@@ -1,8 +1,8 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaTimes } from "react-icons/fa";
-import { useAppDispatch } from "../../app/hooks";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { setNewChannelModal } from "../../features/chatSlice";
-import { createChannel } from "../../features/chatSlice";
+import { createChannel, getChannelsList } from "../../features/chatSlice";
 
 const UsersModal: React.FC = () => {
   const divRef = useRef(null);
@@ -23,7 +23,10 @@ const UsersModal: React.FC = () => {
         password: channelPass,
         type: isPrivate ? "private" : "public",
       })
-    );
+    ).then(() => {
+      dispatch(getChannelsList());
+    });
+    dispatch(setNewChannelModal(false));
   };
 
   return (
