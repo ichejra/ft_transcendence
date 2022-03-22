@@ -25,18 +25,18 @@ export class MessagesService {
         });
     }
 
-    /* function return all the messages that's among to a given channel*/
+    /* function return all the messages that's among to a given channel */
     getMessagesByChannelId = async (channelId: number): Promise<MessageChannel[]> => {
-        return await this.connection.getRepository(MessageChannel).query(
-            `SELECT * FROM messages_channels
-            WHERE "messages_channels"."channelId" = $1`,
-            [channelId]
-        );
-    }
-
-    // arrow function use for getting all messages
-    getMessages = async (): Promise<MessageChannel[]> => {
-        return await this.connection.getRepository(MessageChannel).find();
+        const messages: MessageChannel[] = await this
+            .connection
+            .getRepository(MessageChannel)
+            .find({
+            relations: [ 'author', 'channel' ],
+            where: {
+                channel: channelId
+            }
+        });
+        return messages;
     }
 
     //? direct messages
@@ -52,12 +52,21 @@ export class MessagesService {
     }
 
     getAllDirectMessages = async (senderId: number, receiverId: number) : Promise<DirectMessage[]> => {
-        return await this.connection.getRepository(DirectMessage).query(
-            `SELECT * FROM direct_messages
-            WHERE ("direct_messages"."senderId" = $1 AND "direct_messages"."receiverId" = $2)
-            OR ("direct_messages"."senderId" = $2 AND "direct_messages"."receiverId" = $1)`,
-            [ senderId, receiverId ]
-        );
+        try {
+            const messages: DirectMessage[] = await this.connection.getRepository(DirectMessage).find({
+                relations: [ 'sender', 'receiver' ],
+                where: [{
+                    sender: senderId,
+                    receiver: receiverId
+                }, {
+                    sender: receiverId,
+                    receiver: senderId
+                }],
+            })
+            return messages;
+        } catch(err) {
+            throw err;
+        }
     }
 
     getDirectChat = async (userId: number) : Promise<User[]> => {

@@ -23,7 +23,6 @@ export class MessagesController {
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
     async getMessagesChannel(@Param('channelId') channelId: string | number) : Promise<MessageChannel[]>  {
-        console.log(channelId);
         return await this.messagesService.getMessagesByChannelId(Number(channelId));
     }
 
