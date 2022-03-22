@@ -19,6 +19,7 @@ import { Channel } from "./channels/entities/channel.entity";
 import { MessageChannel } from "./messages/entities/message-channel.entity";
 import { DirectChatService } from "./direct-chat/direct-chat.service";
 import { ConnectionsService } from "src/events/connections.service";
+import { ForbiddenException } from "src/exceptions/forbidden.exception";
 
 @WebSocketGateway({  
     cors: {
@@ -63,6 +64,9 @@ export class ChatGatway implements OnGatewayInit {
     @SubscribeMessage('join_channel')
     async handleJoinChannel(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
         const channel: Channel = await this.channelsService.joinChannel(client, payload);
+        if (!channel) {
+            throw new ForbiddenException('Forbidden');
+        }
         client.join(channel.name);
     }
 

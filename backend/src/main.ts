@@ -5,17 +5,18 @@ import {
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
-import { HttpExceptionFilter } from './exceptions/http-exception.filter';
+import { AllExceptionsFilter } from './exceptions/all-exceptions.filter';
 
 dotenv.config();
 async function bootstrap() {
   const logger: Logger = new Logger('AppMain');
-  const app = await NestFactory.create(AppModule);
-  app.enableCors({
-    origin: '*',
-    methods: 'GET,POST,PUT,PATCH,DELETE',
+  const app = await NestFactory.create(AppModule, {
+    cors: {
+      origin: '*',
+    },
   });
-  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalFilters(new AllExceptionsFilter());
+  app.setGlobalPrefix('api', { exclude: ['auth'] });
   app.useGlobalPipes(new ValidationPipe());
   await app.listen(process.env.PORT || 3000);
   logger.log(`Running on http://localhost:${process.env.PORT}`);
