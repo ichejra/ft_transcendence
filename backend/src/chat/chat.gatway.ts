@@ -58,7 +58,7 @@ export class ChatGatway implements OnGatewayInit {
     async handleChannelMessage(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
         const channel: Channel = await this.channelsService.getChannelById(payload.channelId);
         const message: MessageChannel = await this.channelsService.saveMessage(client, channel, payload.content);
-        this.server.to(channel.name).emit('receive_message_channel', message); 
+        client.broadcast.emit('receive_message_channel', message, channel); 
     }
 
     @SubscribeMessage('join_channel')

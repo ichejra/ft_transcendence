@@ -29,7 +29,7 @@ export class MessageChannel extends BaseEntity {
 
     @ManyToOne(() => Channel, { onDelete: 'CASCADE', onUpdate: 'CASCADE'})
     @JoinColumn({name: 'channelId'})
-    channel?: Channel;
+    channel: Channel;
 
     @Column({
         type: 'varchar',

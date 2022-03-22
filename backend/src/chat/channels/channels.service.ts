@@ -1,4 +1,8 @@
-import { Injectable } from "@nestjs/common";
+import {
+    HttpException,
+    HttpStatus,
+    Injectable
+} from "@nestjs/common";
 import { User } from "src/users/entities/user.entity";
 import { Connection } from "typeorm";
 import { Socket } from "socket.io";
@@ -29,9 +33,9 @@ export class ChannelsService {
     /* Channels */
     /* Method: create a new channel in database */
     async createChannel(user: User, channel: ChannelDto) : Promise<Channel> {
-        // ! check channel type to hASH THE PASSWORD
         let newChannel: Channel;
         try {
+            // password hashing§
             if (channel.type === ChannelType.PRIVATE) {
                 const hashPwd = await bcrypt.hash(channel.password, 10);
                 newChannel = new Channel(channel.name, ChannelType.PRIVATE, hashPwd);
@@ -39,7 +43,7 @@ export class ChannelsService {
                 newChannel = new Channel(channel.name, ChannelType.PUBLIC);
             }
             // save channel
-                newChannel = await this.connection.getRepository(Channel).save(newChannel);
+            newChannel = await this.connection.getRepository(Channel).save(newChannel);
             // create relation between user and target channel
             await this.connection.getRepository(UserChannel).save({
                 user: user,
@@ -47,7 +51,7 @@ export class ChannelsService {
                 userRole: UserRole.OWNER
             });
         } catch (err) {
-            throw new ForbiddenException();
+            throw new ForbiddenException("Forbidden: can not create a new channel.");
         }
         return newChannel;
     }
@@ -68,20 +72,34 @@ export class ChannelsService {
     }
 
     /* update channel */
-    async updateChannel(channelId: number, data: UpdateChannelDto): Promise<Channel> {
-        return await this.connection.getRepository(Channel).update(channelId, data).then( async () => { 
-            return await this.connection.getRepository(Channel).findOne(channelId);
-        });
+    async updateChannel(userID:number, channelId: number, data: UpdateChannelDto): Promise<Channel> {
+        if (data.type === ChannelType.PRIVATE) {
+            await this.setUpdatePassword(userID, channelId, data.password);
+        }
+        await this.connection.getRepository(Channel).update(channelId, { name: data.name });
+        return await this.connection.getRepository(Channel).findOne(channelId);
     }
 
     /* delete channel */
-    async deleteChannel(channelId: number): Promise<any> {
+    async deleteChannel(userId:number, channelId: number): Promise<any> {
+        // the user that will remove a channel from the database should be channel owner
         // check the user if he's the owner
+        const role = await this.connection.getRepository(UserChannel).findOne({
+            where: {
+                user: userId,
+                channel: channelId,
+                userRole: UserRole.OWNER,
+            }
+        });
+        if (!role) {
+            throw new HttpException("Forbidden: permission denied: you should be channel owner", HttpStatus.FORBIDDEN);
+        }
         await this.connection.getRepository(UserChannel).query(
             `DELETE FROM user_channel
-            WHERE "user_channel"."channelId" = $1`, [ channelId ]
+            WHERE "user_channel"."channelId" = $1`, [ channelId,  ]
         );
-        return await this.connection.getRepository(Channel).delete(channelId);
+        await this.connection.getRepository(Channel).delete(channelId);
+        return { success: true, message: 'channel has been removed.' };
     }
 
     /* joining channel -> user_channel table updating */
@@ -133,7 +151,7 @@ export class ChannelsService {
                 [ channel.id, UserRole.ADMIN ]
             );
             if (admins.length === 0){
-                await this.deleteChannel(channel.id);
+                await this.deleteChannel(user.id, channel.id);
             } else {
                 await this.connection.getRepository(UserChannel).update({
                         user: admins[0],
@@ -147,44 +165,54 @@ export class ChannelsService {
     /* Add admin to a channel */
     addAdmin = async (channelId: number, ownerId: number, userId: number): Promise<any> => {
         // check that the user is owner
-        const userChannel = await this.connection.getRepository(UserChannel).findOne({
+        const role = await this.connection.getRepository(UserChannel).findOne({
             where: {
                 user: ownerId,
-                channel: channelId
+                channel: channelId,
+                userRole: UserRole.OWNER
             }
         });
-        if (userChannel.userRole === UserRole.OWNER) {
-            // update the userRole of the new admin to the admin
-            await this.connection.getRepository(UserChannel).query(
-                `UPDATE user_channel
-                SET "state" = $1
-                WHERE "channelId" = $2
-                AND "userId" = $3`,
-                [ UserRole.ADMIN, channelId, userId ]  
-            );
+        if (!role) {
+            throw new ForbiddenException('Forbidden: permission denied: you are not the channel owner.');
         }
-    }
+            // update the userRole of the new admin to the admin
+            try {
+                await this.connection.getRepository(UserChannel).query(
+                    `UPDATE user_channel
+                    SET "userRole" = $1
+                    WHERE "channelId" = $2
+                    AND "userId" = $3`,
+                    [ UserRole.ADMIN, channelId, userId ]  
+                );
+            } catch (err) {
+                throw err;
+            }
+            return { success: true };
+
+        }
 
     /* Remove admin */
     removeAdmin = async (channelId: number, adminId: number, userId: number): Promise<any> => {
         // check that the user is owner
-        const userChannel = await this.connection.getRepository(UserChannel).findOne({
+        const role = await this.connection.getRepository(UserChannel).findOne({
             where: {
                 user: adminId,
                 channel: channelId,
                 userRole: (UserRole.OWNER || UserRole.ADMIN)
             }
         });
+        if (!role) {
+            throw new ForbiddenException('Forbidden: permission denied: you are not the channel owner.');
+        }
         // update the userRole of the new admin to the admin
-        if (userChannel) {
             await this.connection.getRepository(UserChannel).query(
                 `UPDATE user_channel
-                SET "state" = $1
+                SET "userRole" = $1
                 WHERE "channelId" = $2
                 AND "userId" = $3`,
                 [ UserRole.MEMBER, channelId, userId ]  
             );
-        }
+            return { success: true };
     }
 
     /* change user status at the channel */
@@ -193,36 +221,47 @@ export class ChannelsService {
         adminId: number,
         memberId: number,
         status: MemberStatus): Promise<any> => {
-        
-        const userChannel = await this.connection.getRepository(UserChannel).findOne({
+        const role = await this.connection.getRepository(UserChannel).findOne({
             where: {
                 user: adminId,
                 channel: channelId,
-                userRole: (UserRole.OWNER || UserRole.ADMIN)
             }
         });
-        if (userChannel) {
-            await this.connection.getRepository(UserChannel).query(
-                `UPDATE user_channel
-                SET "userStatus" = $1
-                WHERE "channelId" = $2
-                AND "userId" = $3`,
-                [ status, channelId, memberId]
-            );
+        if (role.userRole !== UserRole.ADMIN && role.userRole !== UserRole.OWNER) {
+            throw new ForbiddenException('Forbidden: permission denied: you are not an admin of that channel.');
         }
+        const isOwner = await this.connection.getRepository(UserChannel).findOne({
+            where: {
+                user: memberId,
+                channel: channelId,
+                userRole: UserRole.OWNER
+            }
+        });
+        if (isOwner) {
+            throw new ForbiddenException('Forbidden: permission denied: you can mute or ban the channel owner');
+        }
+        await this.connection.getRepository(UserChannel).query(
+            `UPDATE user_channel
+            SET "userStatus" = $1
+            WHERE "channelId" = $2
+            AND "userId" = $3`,
+            [ status, channelId, memberId ]
+        );
+        return { success: true };
     }
 
     // Set or update password
     setUpdatePassword = async (userId: number, channelId :number, newPwd: string): Promise<any> => {
-        const relation = await this.connection.getRepository(UserChannel).findOne({
+        console.log(userId, channelId, newPwd);
+        const role = await this.connection.getRepository(UserChannel).findOne({
             where:{
-                userId: userId,
-                channelId: channelId,
+                user: userId,
+                channel: channelId,
                 userRole: UserRole.OWNER
             }
         });
-        if (relation === undefined) {
-            throw new ForbiddenException('Forbidden: permission denied');
+        if (!role) {
+            throw new ForbiddenException('Forbidden: permission denied: you are not the channel owner');
         }
         const hashPwd = await bcrypt.hash(newPwd, 10);
         await this.connection.getRepository(Channel).update(channelId, {
@@ -235,24 +274,23 @@ export class ChannelsService {
     // Remove password
     removePassword = async (userId: number, channelId: number): Promise<any> => {
         const channel = await this.connection.getRepository(Channel).findOne(channelId);
-        if (channel.type === ChannelType.PRIVATE){
-
-        }
-        const relation = await this.connection.getRepository(UserChannel).findOne({
-            where:{
-                userId: userId,
-                channelId: channelId,
-                userRole: UserRole.OWNER
+        if (channel.type === ChannelType.PRIVATE) {
+            const role = await this.connection.getRepository(UserChannel).findOne({
+                where:{
+                    userId: userId,
+                    channelId: channelId,
+                    userRole: UserRole.OWNER
+                }
+            });
+            if (role === undefined) {
+                throw new ForbiddenException('Forbidden: permission denied: you are not the channel owner.');
             }
-        });
-        if (relation === undefined) {
-            throw new ForbiddenException('Forbidden: permission denied');
+            await this.connection.getRepository(Channel).update(channelId, {
+                password: null,
+                type: ChannelType.PUBLIC
+            });
+            return {success: true, message: 'Password removed'};
         }
-        await this.connection.getRepository(Channel).update(channelId, {
-            password: null,
-            type: ChannelType.PUBLIC
-        });
-        return {success: true, message: 'Password removed'};
     }
 
     // saving messages
