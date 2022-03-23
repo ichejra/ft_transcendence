@@ -11,7 +11,7 @@ import {
   setStaticMessages,
   ChannelMessage,
 } from "../../features/chatSlice";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams, useLocation } from "react-router";
 import DirectChat from "./DirectChat";
 import ChannelContent from "./ChannelContent";
 import { socket } from "../../pages/SocketProvider";
@@ -23,6 +23,7 @@ const ChatRooms = () => {
   const [showChannelContent, setShowChannelContent] = useState(false);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { pathname } = useLocation();
   const { id: channelId } = useParams();
   const { createNewChannel, channels } = useAppSelector(
     (state) => state.channels
@@ -46,6 +47,7 @@ const ChatRooms = () => {
 
   const getDirectMessages = () => {
     setShowDirect(true);
+    setShowChannelContent(false);
     navigate(`/channels/direct`);
   };
 
@@ -72,7 +74,7 @@ const ChatRooms = () => {
           <div
             onClick={getDirectMessages}
             className={`hover:scale-105 ${
-              !Number(channelId) && "highlight"
+              pathname === "/channels/direct" && "highlight"
             } cursor-pointer transition duration-300 border border-blue-400 bg-transparent text-gray-200 rounded-lg w-[70px] h-[70px] flex items-center justify-center mx-6 my-3`}
           >
             Inbox
@@ -89,8 +91,11 @@ const ChatRooms = () => {
                 } relative cursor-pointer transition duration-300 border border-blue-400 bg-transparent text-gray-200 rounded-xl w-[70px] h-[70px] flex items-center justify-center mx-6 my-3`}
               >
                 {type === "private" && (
-                  <div className='absolute -top-[8px] -right-[8px]'>
-                    <SiPrivateinternetaccess size='1.3rem' className='text-blue-400' />
+                  <div className="absolute -top-[8px] -right-[8px]">
+                    <SiPrivateinternetaccess
+                      size="1.3rem"
+                      className="text-blue-400"
+                    />
                   </div>
                 )}
                 {name.split(" ").length >= 2
@@ -108,8 +113,20 @@ const ChatRooms = () => {
           </div>
         </div>
       </div>
-      {(showDirect || !Number(channelId)) && <DirectChat />}
-      {showChannelContent && <ChannelContent channelName={channelName} />}
+      {showChannelContent || showDirect ? (
+        <div>
+          {showChannelContent && <ChannelContent channelName={channelName} />}
+          {showDirect && <DirectChat />}
+        </div>
+      ) : (
+        <div className="relative text-white left-[7.5rem]">
+          <div className="fixed w-full h-full bottom-0 channels-bar-bg text-white flex items-center justify-center">
+            <h1 className="text-[1.3rem] w-[25rem] text-center text-white opacity-40 about-title-family">
+              Join a channel and start chatting
+            </h1>
+          </div>
+        </div>
+      )}
       {createNewChannel && <NewChannelModal />}
     </div>
   );

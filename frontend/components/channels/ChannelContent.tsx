@@ -3,7 +3,22 @@ import { IoMdSend } from "react-icons/io";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { useParams } from "react-router";
 import { socket } from "../../pages/SocketProvider";
-import { getChannelContent } from "../../features/chatSlice";
+import { getChannelMembersList, Member } from "../../features/chatSlice";
+
+//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 interface ContentProps {
   channelName: string;
@@ -12,13 +27,29 @@ interface ContentProps {
 const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
   const [message, setMessage] = useState("");
   const [sendMsg, setSendMsg] = useState(false);
+  const [isMember, setIsMember] = useState(true);
+  const [pass, setPass] = useState("");
   const dispatch = useAppDispatch();
   const msgContainerRef = useRef<HTMLDivElement>(null);
   const { id: channelId } = useParams();
-  const { channelContent, staticMessages } = useAppSelector(
-    (state) => state.channels
-  );
+  const { channelContent, channels, staticMessages, channelMembers } =
+    useAppSelector((state) => state.channels);
   const { updateMessages } = useAppSelector((state) => state.globalState);
+  const { user } = useAppSelector((state) => state.user);
+
+  const JoinChannel = () => {
+    const currentChannel = channels.find((ch) => ch.id === Number(channelId));
+    if (currentChannel) {
+      if (currentChannel.type === "private") {
+        socket.emit("join_channel", { channelId, password: pass });
+        setIsMember(true);
+      } else {
+        socket.emit("join_channel", { channelId });
+        setIsMember(true);
+      }
+    }
+    console.log("joined");
+  };
 
   const sendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +79,28 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
     setMessage(e.target.value);
   };
 
+  useEffect(() => {
+    console.log("-->", channelId);
+
+    dispatch(getChannelMembersList(Number(channelId))).then(
+      ({ payload }: any) => {
+        const checkMember = [...payload].find(
+          (member: Member) => member.user.id === user.id
+        );
+        console.log("checkmember", checkMember);
+
+        if (checkMember !== undefined) {
+          console.log(" ------------------------------------------ member");
+          setIsMember(true);
+        } else {
+          console.log(" ------------------------------------------ Not member");
+
+          setIsMember(false);
+        }
+      }
+    );
+  }, [channelName]);
+
   return (
     <div
       className="relative text-white ml-6 left-[7.4rem]"
@@ -57,39 +110,62 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
         <h1 className="text-xl">#{channelName.split(" ").join("-")}</h1>
       </div>
       <div className="pt-10">
-        {[...channelContent, ...staticMessages].map((message) => {
-          const { id, createdAt, content, author } = message;
-          return (
-            <div key={id} className="my-6 mr-2 flex about-family items-center">
-              <img
-                src={author?.avatar_url}
-                className="w-10 h-10 rounded-full mr-2"
-              />
-              <div>
-                <p className="text-gray-300 text-lg">
-                  {author?.user_name}
-                  <span className="text-gray-500 text-xs mx-1">
-                    {new Date(createdAt).toLocaleString("default", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      second: "2-digit",
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                    })}
-                  </span>
-                </p>
-                <p className="text-xs">{content}</p>
+        {isMember &&
+          [...channelContent, ...staticMessages].map((message) => {
+            const { id, createdAt, content, author } = message;
+            return (
+              <div
+                key={id}
+                className="my-6 mr-2 flex about-family items-center"
+              >
+                <img
+                  src={author?.avatar_url}
+                  className="w-10 h-10 rounded-full mr-2"
+                />
+                <div>
+                  <p className="text-gray-300 text-lg">
+                    {author?.user_name}
+                    <span className="text-gray-500 text-xs mx-1">
+                      {new Date(createdAt).toLocaleString("default", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </p>
+                  <p className="text-xs">{content}</p>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
       </div>
-      <MessageForm
-        message={message}
-        handleChange={handleChange}
-        sendMessage={sendMessage}
-      />
+      {!isMember && (
+        <div className="fixed left-[7.42rem] flex itmes-center justify-center h-16 channels-bar-bg bottom-0 right-0">
+          <button
+            onClick={JoinChannel}
+            className="mx-2 mb-2 px-2 bg-blue-500 w-full h-[2.5rem] rounded-md hover:bg-blue-400 transition duration-300"
+          >
+            Join
+          </button>
+          <form>
+            <input
+              type="password"
+              value={pass}
+              onChange={(e) => setPass(e.target.value)}
+            />
+          </form>
+        </div>
+      )}{" "}
+      {isMember && (
+        <MessageForm
+          message={message}
+          handleChange={handleChange}
+          sendMessage={sendMessage}
+        />
+      )}
     </div>
   );
 };
@@ -131,3 +207,5 @@ const MessageForm: React.FC<FormProps> = ({
 };
 
 export default ChannelContent;
+
+//TODO customize the join channel form

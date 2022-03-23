@@ -30,12 +30,20 @@ interface DirectMessage {
   content: string;
   createdAt: string;
 }
+export interface Member {
+  id: number;
+  userRole: string;
+  userStatus: string;
+  createdAt: string;
+  user: User;
+}
 
 interface InitialState {
   createNewChannel: boolean;
   channels: Channel[];
   channel: Channel;
   channelContent: ChannelMessage[];
+  channelMembers: Member[];
   staticMessages: ChannelMessage[];
   directMessage: DirectMessage[];
 }
@@ -50,6 +58,7 @@ const initialState: InitialState = {
     type: "",
   },
   channelContent: [],
+  channelMembers: [],
   staticMessages: [],
   directMessage: [],
 };
@@ -113,6 +122,25 @@ export const getSingleChannel = createAsyncThunk(
     try {
       const response = await axios.get(
         `http://localhost:3000/api/channels/${channelId}`,
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      return _api.fulfillWithValue(response.data);
+    } catch (error) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
+
+export const getChannelMembersList = createAsyncThunk(
+  "channels/getChannelMembersList",
+  async (channelId: number, _api) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/channels/${channelId}/members`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -204,6 +232,9 @@ const channelsManagmentSlice = createSlice({
     builder.addCase(getDirectContent.fulfilled, (state, action: any) => {
       state.directMessage = action.payload;
     });
+    builder.addCase(getChannelMembersList.fulfilled, (state, action: any) => {
+      state.channelMembers = action.payload;
+    });
   },
 });
 
@@ -213,5 +244,4 @@ export const { setNewChannelModal, setStaticMessages } =
 export default channelsManagmentSlice.reducer;
 //TODO add join/leave button
 //TODO protect private channels
-//TODO add lock icon to private channels
 //TODO update channel (name, password, owners)
