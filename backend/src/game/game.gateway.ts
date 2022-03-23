@@ -17,6 +17,7 @@ import { GameDto } from './dto/game.dto';
 import { Inject } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { ConnectionsService } from 'src/events/connections.service';
+import { LOADIPHLPAPI } from 'dns';
 // import { Consts, GameState } from './game_consts';
 
 @WebSocketGateway({
@@ -29,8 +30,8 @@ export class GameGateway
 {
   private games: GameObj[] = [];
   private queue: Set<Socket> = new Set<Socket>(); // players in queue
-  private defaultGameQueue : Socket[] = [];
-  private obstacleGameQueue : Socket[] = [];
+  private defaultGameQueue: Socket[] = [];
+  private obstacleGameQueue: Socket[] = [];
 
   @WebSocketServer()
   server; //https://docs.nestjs.com/websockets/gateways#server
@@ -74,6 +75,18 @@ export class GameGateway
     return user;
   }
 
+  @SubscribeMessage('liveGames')
+  private getLiveGames(client: Socket){
+    if (this.games.length === 0){
+      client.emit('liveGame_state', []);
+    }
+   const liveData = this.games.map((game)=>{
+      return game.liveGameData();
+    });
+    client.emit('liveGame_state', liveData);
+  }
+
+
   @SubscribeMessage('join_game')
   private async joinGame(socketsArr: Socket[], payload: any) {
     console.log('join game: am here');
@@ -83,8 +96,16 @@ export class GameGateway
       await this.getPlayerAsUser(socketsArr[0]),
       await this.getPlayerAsUser(socketsArr[1]),
       this.removeGame.bind(this),
-      payload === 'default'
+      payload === 'default',
     );
+    socketsArr[0].emit('set_users', [
+      await this.getPlayerAsUser(socketsArr[0]),
+      await this.getPlayerAsUser(socketsArr[1]),
+    ]);
+    socketsArr[1].emit('set_users', [
+      await this.getPlayerAsUser(socketsArr[0]),
+      await this.getPlayerAsUser(socketsArr[1]),
+    ]);
     this.games.push(game);
     this.clearMatchFromQueue(game);
   }
@@ -94,8 +115,7 @@ export class GameGateway
     console.log('join queue: am here');
     if (this.queue.has(client) === true) return;
     this.queue.add(client);
-    if (payload === 'obstacle')
-    {
+    if (payload === 'obstacle') {
       this.obstacleGameQueue.push(client);
       if (this.obstacleGameQueue.length > 1) {
         console.log(this.obstacleGameQueue.length);
@@ -105,7 +125,10 @@ export class GameGateway
         //* DONE (wa9): check the same user
         if (user1.id === user2.id) {
           console.log('hi');
-          this.obstacleGameQueue.splice(this.obstacleGameQueue.indexOf(first), 1);
+          this.obstacleGameQueue.splice(
+            this.obstacleGameQueue.indexOf(first),
+            1,
+          );
           // this.queue.delete(first);
           return;
         }
@@ -122,12 +145,9 @@ export class GameGateway
         this.obstacleGameQueue.splice(0, this.obstacleGameQueue.length);
         this.joinGame([first, second], payload);
       }
-    }
-    else if (payload === 'default')
-    {
+    } else if (payload === 'default') {
       this.defaultGameQueue.push(client);
-      if (this.defaultGameQueue.length > 1)
-      {
+      if (this.defaultGameQueue.length > 1) {
         console.log(this.defaultGameQueue.length);
         const [first, second] = this.defaultGameQueue;
         const user1 = await this.getPlayerAsUser(first);
@@ -137,16 +157,21 @@ export class GameGateway
           console.log('hi');
           this.defaultGameQueue.splice(this.defaultGameQueue.indexOf(first), 1);
           // this.queue.delete(first);
-          return ;
+          return;
         }
         //* DONE: change players state to inGame
-        await this.usersService.updateState(Number(user1.id), UserState.IN_GAME);
-        await this.usersService.updateState(Number(user2.id), UserState.IN_GAME);
+        await this.usersService.updateState(
+          Number(user1.id),
+          UserState.IN_GAME,
+        );
+        await this.usersService.updateState(
+          Number(user2.id),
+          UserState.IN_GAME,
+        );
         this.defaultGameQueue.splice(0, this.defaultGameQueue.length);
         // this.queue.clear();
-        this.joinGame([first , second], payload);
+        this.joinGame([first, second], payload);
       }
-    
     }
     // if (this.queue.size > 1) {
     //   console.log(this.queue.size);
@@ -212,12 +237,19 @@ export class GameGateway
   }
 
   @SubscribeMessage('spectator')
-  private watchGame(socket: Socket, payload: any) {
-    // let gameFound = this.games.find((game) => {
-    //   game.hasUser(payload.id) //! considering payload is the player/user 
-    // });
-    // if (gameFound)
-    //   gameFound.addSpectators(socket);
+  private watchGame(socket: Socket, payload: number) {
+    console.log('hello from watch game');
+    const gameFound = this.games.find((game) => {
+      console.log('id ======= ', payload);
+      if (game.hasUser(payload))
+        return game;
+    });
+    if (gameFound)
+    {
+      console.log('watcher has been added');
+      
+      gameFound.addSpectators(socket);
+    }
   }
 
   //! ////////////////////////
@@ -232,7 +264,7 @@ export class GameGateway
     const user1 = await this.getPlayerAsUser(game.getPlayer1().getSocket());
     const user2 = await this.getPlayerAsUser(game.getPlayer2().getSocket());
     console.log('-----------------------------------');
-    //* DONE: chenge players state to online 
+    //* DONE: chenge players state to online
     await this.usersService.updateState(Number(user1.id), UserState.ONLINE);
     await this.usersService.updateState(Number(user2.id), UserState.ONLINE);
     const GameData = new GameDto();

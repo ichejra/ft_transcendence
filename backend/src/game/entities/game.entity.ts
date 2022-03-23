@@ -33,5 +33,4 @@ export class Game {
   })
   playedAt?: Date;
 };
-
 //* create a table in our database
