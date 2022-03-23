@@ -3,8 +3,7 @@ import { IoMdSend } from "react-icons/io";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { useParams } from "react-router";
 import { socket } from "../../pages/SocketProvider";
-import { ChannelMessage, getChannelContent } from "../../features/chatSlice";
-import { updateChannelContent } from "../../features/globalSlice";
+import { getChannelContent } from "../../features/chatSlice";
 
 interface ContentProps {
   channelName: string;
@@ -13,14 +12,12 @@ interface ContentProps {
 const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
   const [message, setMessage] = useState("");
   const [sendMsg, setSendMsg] = useState(false);
-  const [messages, setMessages] = useState<ChannelMessage[]>([]);
   const dispatch = useAppDispatch();
   const msgContainerRef = useRef<HTMLDivElement>(null);
   const { id: channelId } = useParams();
-  const { channelContent, dbChannelContent } = useAppSelector(
+  const { channelContent, staticMessages } = useAppSelector(
     (state) => state.channels
   );
-  const { users } = useAppSelector((state) => state.user);
   const { updateMessages } = useAppSelector((state) => state.globalState);
 
   const sendMessage = (e: React.FormEvent) => {
@@ -45,26 +42,11 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
       top: document.body.scrollHeight,
       behavior: "smooth",
     });
-    // dispatch(getChannelContent(Number(channelId)));
   }, [updateMessages]);
-
-  useEffect(() => {
-    socket.on("receive_message_channel", (data: ChannelMessage) => {
-      console.log("trigger the update message", data);
-      dispatch(updateChannelContent());
-      setMessages((oldMessages) => {
-        return [...oldMessages, data];
-      });
-    });
-  }, [socket]);
 
   const handleChange = (e: any) => {
     setMessage(e.target.value);
   };
-
-  useEffect(() => {
-    dispatch(getChannelContent(Number(channelId)));
-  }, []);
 
   return (
     <div
@@ -75,63 +57,41 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
         <h1 className="text-xl">#{channelName.split(" ").join("-")}</h1>
       </div>
       <div className="pt-10">
-        {dbChannelContent.map((message) => {
-          const { id, createdAt, content, authorId } = message;
-          const user = users.find((user) => user.id === authorId);
-          return (
-            <div key={id} className="my-6 mr-2 flex about-family items-center">
-              <img
-                src={user?.avatar_url}
-                className="w-10 h-10 rounded-full mr-2"
-              />
-              <div>
-                <p className="text-gray-300 text-lg">
-                  {user?.user_name}
-                  <span className="text-gray-500 text-xs mx-1">
-                    {new Date(createdAt).toLocaleString("default", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      second: "2-digit",
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                    })}
-                  </span>
-                </p>
-                <p className="text-xs">{content}</p>
+        {[...channelContent, ...staticMessages]
+          .sort(
+            (a, b) =>
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          )
+          .map((message) => {
+            const { id, createdAt, content, author } = message;
+            return (
+              <div
+                key={id}
+                className="my-6 mr-2 flex about-family items-center"
+              >
+                <img
+                  src={author?.avatar_url}
+                  className="w-10 h-10 rounded-full mr-2"
+                />
+                <div>
+                  <p className="text-gray-300 text-lg">
+                    {author?.user_name}
+                    <span className="text-gray-500 text-xs mx-1">
+                      {new Date(createdAt).toLocaleString("default", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </p>
+                  <p className="text-xs">{content}</p>
+                </div>
               </div>
-            </div>
-          );
-        })}
-        {messages.map((message) => {
-          const { id, createdAt, content, author } = message;
-          console.log('hello');
-          
-          return (
-            <div key={id} className="my-6 mr-2 flex about-family items-center">
-              <img
-                src={author?.avatar_url}
-                className="w-10 h-10 rounded-full mr-2"
-              />
-              <div>
-                <p className="text-gray-300 text-lg">
-                  {author?.user_name}
-                  <span className="text-gray-500 text-xs mx-1">
-                    {new Date(createdAt).toLocaleString("default", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      second: "2-digit",
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                    })}
-                  </span>
-                </p>
-                <p className="text-xs">{content}</p>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
       </div>
       <MessageForm
         message={message}

@@ -9,7 +9,7 @@ import {
   fetchPendingStatus,
   fetchBlockedUsers,
 } from "../features/friendsManagmentSlice";
-import { getChannelsList, addNewMessage } from "../features/chatSlice";
+import { getChannelsList } from "../features/chatSlice";
 
 import {
   updateChannelContent,

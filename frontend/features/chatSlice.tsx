@@ -1,4 +1,9 @@
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import {
+  createSlice,
+  createAsyncThunk,
+  PayloadAction,
+  current,
+} from "@reduxjs/toolkit";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { User } from "./userProfileSlice";
@@ -12,18 +17,10 @@ interface Channel {
 
 export interface ChannelMessage {
   author: User;
-  channel: Channel;
+  channel?: Channel;
   content: string;
   createdAt: string;
   id: number;
-}
-
-interface DBChannelMessage {
-  id: number;
-  authorId: number;
-  channelId: number;
-  content: string;
-  createdAt: string;
 }
 
 interface DirectMessage {
@@ -39,7 +36,7 @@ interface InitialState {
   channels: Channel[];
   channel: Channel;
   channelContent: ChannelMessage[];
-  dbChannelContent: DBChannelMessage[];
+  staticMessages: ChannelMessage[];
   directMessage: DirectMessage[];
 }
 
@@ -53,7 +50,7 @@ const initialState: InitialState = {
     type: "",
   },
   channelContent: [],
-  dbChannelContent: [],
+  staticMessages: [],
   directMessage: [],
 };
 
@@ -132,8 +129,6 @@ export const getSingleChannel = createAsyncThunk(
 export const getChannelContent = createAsyncThunk(
   "channels/getChannelContent",
   async (channelId: number, _api) => {
-    console.log("get channel messages", channelId);
-
     try {
       const response = await axios.get(
         `http://localhost:3000/api/messages/channels/${channelId}`,
@@ -143,8 +138,7 @@ export const getChannelContent = createAsyncThunk(
           },
         }
       );
-      console.log("messages:", response.data);
-
+      console.log("CHAT SLICE:", response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error) {
       return _api.rejectWithValue(error);
@@ -185,13 +179,12 @@ const channelsManagmentSlice = createSlice({
     ) => {
       state.createNewChannel = action.payload;
     },
-    addNewMessage: (
+    setStaticMessages: (
       state: InitialState = initialState,
       action: PayloadAction<ChannelMessage>
     ) => {
-      const message: ChannelMessage = { ...action.payload };
-      state.channelContent.push(message);
-      console.log("CC ===> ", state.channelContent);
+      state.staticMessages.push(action.payload);
+      // console.log("CHAT SLICE", current(state.staticMessages));
     },
   },
   extraReducers: (builder) => {
@@ -205,7 +198,8 @@ const channelsManagmentSlice = createSlice({
       state.channel = action.payload;
     });
     builder.addCase(getChannelContent.fulfilled, (state, action: any) => {
-      state.dbChannelContent = action.payload;
+      state.channelContent = action.payload;
+      state.staticMessages = [];
     });
     builder.addCase(getDirectContent.fulfilled, (state, action: any) => {
       state.directMessage = action.payload;
@@ -213,13 +207,11 @@ const channelsManagmentSlice = createSlice({
   },
 });
 
-export const { setNewChannelModal, addNewMessage } =
+export const { setNewChannelModal, setStaticMessages } =
   channelsManagmentSlice.actions;
 
 export default channelsManagmentSlice.reducer;
-
-//TODO get channel messages
-//TODO add message to channel
+//TODO add join/leave button
 //TODO protect private channels
 //TODO add lock icon to private channels
 //TODO update channel (name, password, owners)

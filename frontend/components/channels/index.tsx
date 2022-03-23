@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { HiViewGridAdd } from "react-icons/hi";
+import { SiPrivateinternetaccess } from "react-icons/si";
 import NewChannelModal from "../modals/NewChannelModal";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
@@ -7,6 +8,8 @@ import {
   getChannelsList,
   getSingleChannel,
   getChannelContent,
+  setStaticMessages,
+  ChannelMessage,
 } from "../../features/chatSlice";
 import { useNavigate, useParams } from "react-router";
 import DirectChat from "./DirectChat";
@@ -24,13 +27,18 @@ const ChatRooms = () => {
   const { createNewChannel, channels } = useAppSelector(
     (state) => state.channels
   );
-  const { updateMessages } = useAppSelector((state) => state.globalState);
 
   const getChannelMessages = (id: number) => {
     setShowDirect(false);
     setShowChannelContent(true);
     dispatch(getSingleChannel(id)).then(({ payload }: any) => {
-      dispatch(getChannelContent(payload.id));
+      dispatch(getChannelContent(payload.id)).then(() => {
+        window.scrollTo({
+          left: 0,
+          top: document.body.scrollHeight,
+          behavior: "smooth",
+        });
+      });
       setChannelName(payload.name);
     });
     navigate(`/channels/${id}`);
@@ -44,6 +52,14 @@ const ChatRooms = () => {
   const createChannel = () => {
     dispatch(setNewChannelModal(true));
   };
+
+  useEffect(() => {
+    socket.on("receive_message_channel", (data: ChannelMessage) => {
+      console.log("trigger the update message", data);
+      dispatch(updateChannelContent());
+      dispatch(setStaticMessages(data));
+    });
+  }, [socket]);
 
   useEffect(() => {
     dispatch(getChannelsList());
@@ -63,15 +79,20 @@ const ChatRooms = () => {
           </div>
           <hr className="mx-10" />
           {channels.map((channel) => {
-            const { id, name } = channel;
+            const { id, name, type } = channel;
             return (
               <div
                 key={id}
                 onClick={() => getChannelMessages(id)}
                 className={`hover:scale-105 ${
                   id === Number(channelId) && "highlight"
-                } cursor-pointer transition duration-300 border border-blue-400 bg-transparent text-gray-200 rounded-xl w-[70px] h-[70px] flex items-center justify-center mx-6 my-3`}
+                } relative cursor-pointer transition duration-300 border border-blue-400 bg-transparent text-gray-200 rounded-xl w-[70px] h-[70px] flex items-center justify-center mx-6 my-3`}
               >
+                {type === "private" && (
+                  <div className='absolute -top-[8px] -right-[8px]'>
+                    <SiPrivateinternetaccess size='1.3rem' className='text-blue-400' />
+                  </div>
+                )}
                 {name.split(" ").length >= 2
                   ? name.split(" ")[0][0].toUpperCase() +
                     name.split(" ")[1][0].toUpperCase()
