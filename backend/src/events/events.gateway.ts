@@ -30,7 +30,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     private logger: Logger = new Logger('EventsGateway');
 
- 
     public async afterInit(server: Server): Promise<void> {
         this.logger.log('Initialized');
     }
@@ -53,7 +52,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     @SubscribeMessage('send_notification')
     async handleNotification(@ConnectedSocket() client: Socket, @MessageBody('userId') userId: number | string) {
         const targets: Set<Socket> = await this.connectionsService.getUserConnections(Number(userId));
-        console.log(targets)
         targets.forEach((target) => {
             this.server.to(target.id).emit('receive_notification');
         });

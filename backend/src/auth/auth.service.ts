@@ -35,7 +35,11 @@ export class AuthService {
             user = await this.usersService.findOne(Number(_req.user.id));
             // 2FA ENABLE
             if (user && user.is_2fa_enabled === true) {
-                await this.twoFactorAuthService.sendConnectLink(user);
+                try {
+                    await this.twoFactorAuthService.sendConnectLink(user);
+                } catch (err) {
+                    throw new ForbiddenException('connot send the link');
+                }
                 return _res.redirect(process.env.HOME_PAGE);
             }
             if (!user) {
@@ -44,14 +48,13 @@ export class AuthService {
             } else {
                 url = process.env.HOME_PAGE; // redirect to Home page
             }
+            const payload: JwtPayload = { id: user.id ,user_name: user.user_name, email: user.email};
+            const jwtToken = this.jwtService.sign(payload);
+            _res.cookie('accessToken', jwtToken);
+            return  _res.redirect(url);
         } catch(err) {
-            // ! error handling
-            console.log(err);
+            throw new ForbiddenException('user cannot log in');
         }
-        const payload: JwtPayload = { id: user.id ,user_name: user.user_name, email: user.email};
-        const jwtToken = this.jwtService.sign(payload);
-        _res.cookie('accessToken', jwtToken);
-        return  _res.redirect(url);
     }
 
     async logout(_req: any, _res: any): Promise<any> {
@@ -63,13 +66,16 @@ export class AuthService {
     }
 
     getUserFromToken = async (token: string): Promise<User> => {
-        const payload: JwtPayload = this.jwtService.verify(token, { 
-            secret: process.env.JWT_SECRET,
-        });
-        if (payload.id) {
-            return await this.usersService.findOne(Number(payload.id));
+        try {
+            const payload: JwtPayload = this.jwtService.verify(token, { 
+                secret: process.env.JWT_SECRET,
+            });
+            if (payload.id) {
+                return await this.usersService.findOne(Number(payload.id));
+            }
+            return null;
+        } catch (err) {
+            return null;
         }
-        console.log(payload);
-        return null;
     }
 }
