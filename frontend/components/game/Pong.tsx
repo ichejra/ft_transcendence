@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { useLocation } from 'react-router';
+import { useNavigate } from 'react-router';
 import { User } from '../../features/userProfileSlice';
 // import { io } from 'socket.io-client';
 import { socket } from '../../pages/SocketProvider';
@@ -164,6 +164,8 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [leftPlayer, setLeftPlayer] = useState<User>(users[0]);
   const [rightPlayer, setRightPlayer] = useState<User>(users[1]);
+  const navigate = useNavigate();
+
   console.log('user type: ', userType);
 
   const joinMatch = () => {
@@ -308,7 +310,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
           let position;
           if (frame.score.score1 > frame.score.score2)
             position = (1 * CANVAS_WIDTH) / 6;
-          else position = (5 * CANVAS_WIDTH) / 6;
+          else position = (3.9 * CANVAS_WIDTH) / 6;
           //! ///////////////////////
           const playerMsg = new Text(
             position,
@@ -344,7 +346,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
           let position;
           if (frame.score.score1 > frame.score.score2)
             position = (3.6 * CANVAS_WIDTH) / 6;
-          else position = (1 * CANVAS_WIDTH) / 6;
+          else position = (1 * CANVAS_WIDTH) / 8;
           const playerMsg = new Text(
             position,
             CANVAS_HEIGHT / 3,
@@ -365,7 +367,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
     if (users.length) {
       setLeftPlayer(users[0]);
       setRightPlayer(users[1]);
-      console.log(leftPlayer?.id + '------------------' + rightPlayer?.id);
+      // console.log(leftPlayer?.id + '------------------' + rightPlayer?.id);
     }
   }, [users]);
 
@@ -393,21 +395,16 @@ const Pong: React.FC<UserType> = ({ userType }) => {
         </div>
       </div>
       {
-        <div className='relative'>
-          <div>
-            <canvas
-              ref={canvasRef}
-              width={CANVAS_WIDTH}
-              height={CANVAS_HEIGHT}
-            ></canvas>
-          </div>
-          <div className='absolute mb-26 text-white'>
-            <button type='button'>Play Again</button>
-          </div>
+        <div>
+          <canvas
+            ref={canvasRef}
+            width={CANVAS_WIDTH}
+            height={CANVAS_HEIGHT}
+          ></canvas>
         </div>
       }
       <div className=''>
-        {users.length && (
+        {users.length !== 0 && (
           <div className='w-[24rem] md:w-[50rem] flex items-center justify-between'>
             <div className=' flex flex-col items-center'>
               <img
@@ -446,6 +443,13 @@ const Pong: React.FC<UserType> = ({ userType }) => {
           //     </div>
           //   </div>
           // </div>
+        )}
+        {frame.state === 'OVER' && (
+          <div className='play-again-btn items-center'>
+            <button onClick={() => {
+                navigate('/game'); //TODO refresh the page
+              }}>Play Again</button>
+          </div>
         )}
       </div>
     </div>

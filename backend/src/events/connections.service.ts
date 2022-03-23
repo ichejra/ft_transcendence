@@ -59,7 +59,8 @@ export class ConnectionsService {
             user = await this.getUserFromSocket(socket);
         } catch(e) {
             socket.disconnect(); // if the socket not authenticated should disconnect it
-            throw new WsException('unauthorized: unauthenticated connection');
+            // throw new WsException('unauthorized: unauthenticated connection');
+            return;
         }
         try {
 
