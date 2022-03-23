@@ -158,7 +158,8 @@ interface UserType {
 }
 
 const Pong: React.FC<UserType> = ({ userType }) => {
-  const canvasRef = useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const playBtnsRef: React.RefObject<HTMLDivElement> = React.createRef();
   const [frame, setFrame] = useState(stateInit);
   const [users, setUsers] = useState<User[]>([]);
   const [leftPlayer, setLeftPlayer] = useState<User>(users[0]);
@@ -218,116 +219,143 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   }, []);
 
   useEffect(() => {
-    const canvas: any = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const table = new Rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, 'black', ctx);
-    table.drawRect();
-    for (let i = 0; i <= ctx.canvas.width; i += 16) {
-      const net = new Rect(NETX, NETY + i, NET_W, NET_H, 'white', ctx);
-      net.drawRect();
-    }
-    const paddle1 = new Paddle(
-      L_PADX,
-      frame.paddles.leftPad,
-      PAD_WIDTH,
-      frame.paddles.leftPadH,
-      'white',
-      ctx
-    );
-    paddle1.drawRect();
-    const paddle2 = new Paddle(
-      R_PADX,
-      frame.paddles.rightPad,
-      PAD_WIDTH,
-      frame.paddles.rightPadH,
-      'white',
-      ctx
-    );
-    paddle2.drawRect();
-    const ball = new Ball(
-      frame.ball.x,
-      frame.ball.y,
-      BALL_RADIUS,
-      'white',
-      ctx
-    );
-    ball.drawCircle();
-    const player1Score = new Score(
-      CANVAS_WIDTH / 4,
-      CANVAS_HEIGHT / 5,
-      frame.score.score1.toString(),
-      'white',
-      ctx
-    );
-    player1Score.drawText();
-    const player2Score = new Score(
-      (3 * CANVAS_WIDTH) / 4,
-      CANVAS_HEIGHT / 5,
-      frame.score.score2.toString(),
-      'white',
-      ctx
-    );
-    // console.log(frame.score.score1);
-    // console.log(frame.score.score2);
-    player2Score.drawText();
-    if (frame.state === 'OVER') {
-      // const clearTable = new Rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, 'black', ctx);
-      // clearTable.drawRect();
-      // const gameOver = new Text(
-      //   (3 * CANVAS_WIDTH) / 8,
-      //   CANVAS_HEIGHT / 2,
-      //   'GAME OVER',
-      //   'white',
-      //   ctx
-      // );
-      // gameOver.drawText();
-      if (frame.isWinner) {
-        //! ///////////////////////
-        // let position;
-        // if (frame.score.score1 > frame.score.score2)
-        //   position = (1 * CANVAS_WIDTH) / 4;
-        // else
-        //   position = (3 * CANVAS_WIDTH) / 4;
-        // const playerMsg = new Text(
-        //   position,
-        //   CANVAS_HEIGHT / 2,
-        //   'Winner',
-        //   'white',
-        //   ctx
-        // );
-        // playerMsg.drawText();
-        //! ///////////////////////
-        const playerMsg = new Text(
-          (3 * CANVAS_WIDTH) / 7,
-          CANVAS_HEIGHT / 3,
-          'WINNER',
-          'white',
-          ctx
-        );
-        const table = new Rect(
-          0,
-          0,
-          CANVAS_WIDTH,
-          CANVAS_HEIGHT,
-          '#45C830',
-          ctx
-        );
-        table.drawRect();
-        playerMsg.drawText();
+    if (canvasRef == null) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas != null ? canvas.getContext('2d') : null;
+    if (ctx != null && frame.state != 'void') {
+      //! /////////
+      if (canvas) canvas.style.display = 'block';
 
-        // console.log('winner');
-      } else {
-        // console.log('loooser');
-        const playerMsg = new Text(
-          (3 * CANVAS_WIDTH) / 8,
-          CANVAS_HEIGHT / 3,
-          'LOOOSER',
+      if (playBtnsRef != null)
+        if (playBtnsRef.current != null)
+          playBtnsRef.current.style.display = 'none';
+      //! /////////
+
+      const table = new Rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, 'black', ctx);
+      table.drawRect();
+      for (let i = 0; i <= ctx.canvas.height; i += 16) {
+        const net = new Rect(NETX, NETY + i, NET_W, NET_H, 'gray', ctx);
+        net.drawRect();
+      }
+      const paddle1 = new Paddle(
+        L_PADX,
+        frame.paddles.leftPad,
+        PAD_WIDTH,
+        frame.paddles.leftPadH,
+        'white',
+        ctx
+      );
+      paddle1.drawRect();
+      const paddle2 = new Paddle(
+        R_PADX,
+        frame.paddles.rightPad,
+        PAD_WIDTH,
+        frame.paddles.rightPadH,
+        'white',
+        ctx
+      );
+      paddle2.drawRect();
+      const ball = new Ball(
+        frame.ball.x,
+        frame.ball.y,
+        BALL_RADIUS,
+        'white',
+        ctx
+      );
+      ball.drawCircle();
+      const player1Score = new Score(
+        CANVAS_WIDTH / 4,
+        CANVAS_HEIGHT / 5,
+        frame.score.score1.toString(),
+        'white',
+        ctx
+      );
+      player1Score.drawText();
+      const player2Score = new Score(
+        (3 * CANVAS_WIDTH) / 4,
+        CANVAS_HEIGHT / 5,
+        frame.score.score2.toString(),
+        'white',
+        ctx
+      );
+      // console.log(frame.score.score1);
+      // console.log(frame.score.score2);
+      player2Score.drawText();
+      if (frame.state === 'OVER') {
+        const ball = new Ball(
+          frame.ball.x,
+          frame.ball.y,
+          BALL_RADIUS,
+          'black',
+          ctx
+        );
+        ball.drawCircle();
+        // const clearTable = new Rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, 'black', ctx);
+        // clearTable.drawRect();
+        const gameOver = new Text(
+          (2.85 * CANVAS_WIDTH) / 8,
+          CANVAS_HEIGHT / 2,
+          'GAME OVER',
           'white',
           ctx
         );
-        const table = new Rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, 'red', ctx);
-        table.drawRect();
-        playerMsg.drawText();
+        for (let i = 0; i <= ctx.canvas.height; i += 16) {
+          const net = new Rect(NETX, NETY + i, NET_W, NET_H, 'gray', ctx);
+          net.drawRect();
+        }
+        gameOver.drawText();
+        if (frame.isWinner) {
+          let position;
+          if (frame.score.score1 > frame.score.score2)
+            position = (1 * CANVAS_WIDTH) / 6;
+          else position = (5 * CANVAS_WIDTH) / 6;
+          //! ///////////////////////
+          const playerMsg = new Text(
+            position,
+            CANVAS_HEIGHT / 3,
+            'YOU WIN',
+            'white',
+            ctx
+          );
+          playerMsg.drawText();
+          //! ///////////////////////
+          // const playerMsg = new Text(
+          //   (3 * CANVAS_WIDTH) / 8,
+          //   CANVAS_HEIGHT / 3,
+          //   'YOU WIN',
+          //   'white',
+          //   ctx
+          // );
+
+          // const table = new Rect(
+          //   0,
+          //   0,
+          //   CANVAS_WIDTH,
+          //   CANVAS_HEIGHT,
+          //   '#45C830',
+          //   ctx
+          // );
+          // table.drawRect();
+          // playerMsg.drawText();
+
+          // console.log('winner');
+        } else {
+          // console.log('loooser');
+          let position;
+          if (frame.score.score1 > frame.score.score2)
+            position = (3.6 * CANVAS_WIDTH) / 6;
+          else position = (1 * CANVAS_WIDTH) / 6;
+          const playerMsg = new Text(
+            position,
+            CANVAS_HEIGHT / 3,
+            'YOU LOOSE',
+            'white',
+            ctx
+          );
+          // const table = new Rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, 'black', ctx);
+          // table.drawRect();
+          playerMsg.drawText();
+        }
       }
     }
   }, [frame]);
@@ -342,49 +370,62 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   }, [users]);
 
   return (
-    <div className='flex w-full flex-col items-center'>
-      <canvas
-        ref={canvasRef}
-        width={CANVAS_WIDTH}
-        height={CANVAS_HEIGHT}
-      ></canvas>
-      {/* show the uttons only if the userType is a player*/}
-      <div>
-        <button className='text-white' onClick={joinMatch}>
-          Play Now
-        </button>
-        <br />
-        <button className='text-white' onClick={stopMatch}>
-          Stop Now
-        </button>
-        <br />
-        <button className='text-white' onClick={joinMatchWithObstacle}>
-          Play with obstacle Now
-        </button>
+    <div className='flex w-full flex-col items-center relative'>
+      <div
+        ref={playBtnsRef}
+        className='flex md:flex-row flex-col items-center justify-between mt-44 md:w-[50rem] absolute'
+      >
+        <div className='button'>
+          {/* <a>Mobile First</a> */}
+          <button type='button' className='text-white' onClick={joinMatch}>
+            Play Pong
+          </button>
+        </div>
+        {/* <div className='button'>
+          <button className='text-white' onClick={stopMatch}>
+            Stop Now
+          </button>
+        </div> */}
+        <div className='button'>
+          <button className='text-white' onClick={joinMatchWithObstacle}>
+            Play Our Pong
+          </button>
+        </div>
       </div>
-      {/* handle change color in here */}
+      {
+        <div className='relative'>
+          <div>
+            <canvas
+              ref={canvasRef}
+              width={CANVAS_WIDTH}
+              height={CANVAS_HEIGHT}
+            ></canvas>
+          </div>
+          <div className='absolute mb-26 text-white'>
+            <button type='button'>Play Again</button>
+          </div>
+        </div>
+      }
       <div className=''>
         {users.length && (
-          <div className='w-[50rem] flex items-center justify-between'>
-            <div className='  w-1/2 items-center justify-between'>
-              <div className=''>
-                <img
-                  src={leftPlayer?.avatar_url}
-                  className='w-46 h-44 rounded-full m-4'
-                />
-                <h1 className='text-white'>{leftPlayer?.display_name}</h1>
-              </div>
+          <div className='w-[24rem] md:w-[50rem] flex items-center justify-between'>
+            <div className=' flex flex-col items-center'>
+              <img
+                src={leftPlayer?.avatar_url}
+                className='w-28 h-28 md:w-44 md:h-44 rounded-full m-4'
+              />
+              <h1 className='text-white text-center'>
+                {leftPlayer?.display_name}
+              </h1>
             </div>
-            <div className='w-1/2 items-center justify-between'>
-              <div className='relative items-center'>
-                <div className='absolute'>
-                  <img
-                    src={rightPlayer?.avatar_url}
-                    className='w-46 h-44 rounded-full'
-                  />
-                  <h1 className='text-white'>{rightPlayer?.display_name}</h1>
-                </div>
-              </div>
+            <div className='items-center'>
+              <img
+                src={rightPlayer?.avatar_url}
+                className='w-28 h-28 md:w-44 md:h-44 rounded-full m-4'
+              />
+              <h1 className='text-white text-center'>
+                {rightPlayer?.display_name}
+              </h1>
             </div>
           </div>
           // <div className='w-[60rem] h-[7rem] m-6 flex justify-between items-center'>
