@@ -268,7 +268,7 @@ export class ChannelsService {
             }
         });
         if (isOwner) {
-            throw new ForbiddenException('Forbidden: permission denied: you can mute or ban the channel owner');
+            throw new ForbiddenException('Forbidden: permission denied: cannot mute or ban the channel owner');
         }
         await this.connection.getRepository(UserChannel).query(
             `UPDATE user_channel
@@ -282,7 +282,6 @@ export class ChannelsService {
 
     // Set or update password
     setUpdatePassword = async (userId: number, channelId :number, newPwd: string): Promise<any> => {
-        console.log(userId, channelId, newPwd);
         const role = await this.connection.getRepository(UserChannel).findOne({
             where:{
                 user: userId,
@@ -325,7 +324,45 @@ export class ChannelsService {
 
     // saving messages
     saveMessage = async (socket: Socket, channel: Channel, content: string): Promise<MessageChannel> => {
-        const author = await this.connectionsService.getUserFromSocket(socket);
-        return await this.messagesService.createMessage(author, channel, content);
+        try {
+            const author = await this.connectionsService.getUserFromSocket(socket);
+            return await this.messagesService.createMessage(author, channel, content);
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    // kicking the user
+    kickUser = async (adminId: number, userId: number, channelId: number): Promise<any> => {
+        try {
+            const role = await this.connection.getRepository(UserChannel).findOne({
+                where: {
+                    user: adminId,
+                    channel: channelId,
+                }
+            });
+            if (role.userRole !== UserRole.OWNER && role.userRole !== UserRole.ADMIN) {
+                throw new ForbiddenException('Forbidden: permission denied: you do not have permission to kick user.');
+            }
+            const isOwner = await this.connection.getRepository(UserChannel).findOne({
+                where: {
+                    channel: channelId,
+                    user: userId,
+                    userRole: UserRole.OWNER
+                }
+            });
+            if (isOwner) {
+                throw new ForbiddenException('Forbidden: you cannot kick the channel owner.')
+            }
+            await this.connection.getRepository(UserChannel).query(
+                `DELETE FROM user_channel
+                WHERE "user_channel"."channelId" = $1
+                AND "user_channel"."userId" = $2`,
+                [ channelId, userId ]
+            );
+            return { success: true };
+        } catch (err) {
+            throw err;
+        }
     }
 }
