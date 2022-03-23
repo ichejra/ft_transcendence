@@ -49,7 +49,6 @@ export class ChannelsController {
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
     getChannelById(@Param('channelId', ParseIntPipe) channelId: number): Promise<Channel> {
-        console.log('channel id');
         return this.channelsService.getChannelById(Number(channelId));
     }
 
@@ -58,7 +57,6 @@ export class ChannelsController {
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
     getChannelMembers(@Param('channelId', ParseIntPipe) channelId: number): Promise<UserChannel[]> {
-        console.log('members');
         return this.channelsService.getChannelsMembers(Number(channelId));
     }
 
@@ -134,5 +132,15 @@ export class ChannelsController {
         @Body('password') password: string
     ) : Promise<any> {
         return this.channelsService.setUpdatePassword(Number(_req.user.id), channelId, password);
+    }
+
+    @Patch('/:channelId/kick-user')
+    @HttpCode(200)
+    @UseGuards(JwtAuthGuard)
+    kickUser(
+        @Req() _req: any,
+        @Param('channelId', ParseIntPipe) channelId: number,
+        @Body('memberId') memberId: number): Promise<any> {
+        return this.channelsService.kickUser(Number(_req.user.id), memberId, channelId);
     }
 };
