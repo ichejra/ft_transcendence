@@ -5,7 +5,7 @@ import {
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
-import { AllExceptionsFilter } from './exceptions/all-exceptions.filter';
+import { ExceptionsFilter } from './exceptions/exceptions.filter';
 
 dotenv.config();
 async function bootstrap() {
@@ -15,7 +15,7 @@ async function bootstrap() {
       origin: '*',
     },
   });
-  app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalFilters(new ExceptionsFilter());
   app.setGlobalPrefix('api', { exclude: ['auth'] });
   app.useGlobalPipes(new ValidationPipe());
   await app.listen(process.env.PORT || 3000);

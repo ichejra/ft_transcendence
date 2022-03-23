@@ -8,7 +8,7 @@ import {
 
 
 @Catch()
-export class AllExceptionsFilter extends BaseExceptionFilter {
+export class ExceptionsFilter extends BaseExceptionFilter {
 
   catch(exception: any, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();

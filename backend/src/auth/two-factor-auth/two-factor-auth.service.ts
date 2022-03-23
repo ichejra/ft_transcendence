@@ -17,28 +17,30 @@ export class TwoFactorAuthService {
     
     /* method used for changing 2fa bool */
     enableDisableTwoFactorAuth = async (userId: number, bool: boolean) => {
-        return this.usersService.turnOnTwoFactorAuthentication(userId, bool);
+        return this.usersService.turnOnOffTwoFactorAuth(userId, bool);
     }
 
     /* method used for email sending */
     async sendConnectLink(user: User) : Promise<any>{
-        const payload: JwtPayload = { id: user.id, user_name: user.user_name, email: user.email};
-        const token: string = await this.jwtService.sign(payload, {
-            secret: process.env.JWT_SECRET,
-            expiresIn: process.env.JWT_EXPIRESIN
-        });
-
-        const url: string = `http://${process.env.HOST}:${process.env.PORT}/2fa/verify?token=${token}`;
-        const text = `Welcome to ${process.env.APP_NAME} 2FA. To continue, click here: ${url}`;
-
-        return await this.mailService.sendMail({
-            to: user.email,
-            subject: 'Account login',
-            text,
-        }).then(() => {
+        try {
+            const payload: JwtPayload = { id: user.id, user_name: user.user_name, email: user.email};
+            const token: string = await this.jwtService.sign(payload, {
+                secret: process.env.JWT_SECRET,
+                expiresIn: process.env.JWT_EXPIRESIN
+            });
+            
+            const url: string = `http://${process.env.HOST}:${process.env.PORT}/2fa/verify?token=${token}`;
+            const text = `Welcome to ${process.env.APP_NAME} 2FA. To continue, click here: ${url}`;
+            
+            await this.mailService.sendMail({
+                to: user.email,
+                subject: 'Account login',
+                text
+            });
             return { success: true, message: 'check inbox.'}
-        })
-
+        } catch (err) {
+            throw err;
+        }
     }
 
     /* method used for logging verified */
@@ -49,7 +51,7 @@ export class TwoFactorAuthService {
             res.cookie('accessToken', token);
             return res.redirect(process.env.HOME_PAGE);// redirect to Home page
         } else {
-            return res.json({ succes: false, msg: 'UNAUTHORIZED' }).send();// redirect to the error page
+            return res.status(401).json({ succes: false, msg: 'UNAUTHORIZED' }).send();// redirect to the error page
         }
     }
 }

@@ -59,7 +59,7 @@ export class UsersController {
   /* Route delete user 
     http://${host}:${port}/api/users/remove-user/:userId
   */ 
-  @Delete('/remove-user/:userID')
+  @Delete('/remove-user/:userId')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   remove(@Param('userId', ParseIntPipe) userId: string) : Promise<DeleteResult> {
