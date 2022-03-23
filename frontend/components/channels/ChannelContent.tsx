@@ -57,41 +57,33 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
         <h1 className="text-xl">#{channelName.split(" ").join("-")}</h1>
       </div>
       <div className="pt-10">
-        {[...channelContent, ...staticMessages]
-          .sort(
-            (a, b) =>
-              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          )
-          .map((message) => {
-            const { id, createdAt, content, author } = message;
-            return (
-              <div
-                key={id}
-                className="my-6 mr-2 flex about-family items-center"
-              >
-                <img
-                  src={author?.avatar_url}
-                  className="w-10 h-10 rounded-full mr-2"
-                />
-                <div>
-                  <p className="text-gray-300 text-lg">
-                    {author?.user_name}
-                    <span className="text-gray-500 text-xs mx-1">
-                      {new Date(createdAt).toLocaleString("default", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        second: "2-digit",
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                      })}
-                    </span>
-                  </p>
-                  <p className="text-xs">{content}</p>
-                </div>
+        {[...channelContent, ...staticMessages].map((message) => {
+          const { id, createdAt, content, author } = message;
+          return (
+            <div key={id} className="my-6 mr-2 flex about-family items-center">
+              <img
+                src={author?.avatar_url}
+                className="w-10 h-10 rounded-full mr-2"
+              />
+              <div>
+                <p className="text-gray-300 text-lg">
+                  {author?.user_name}
+                  <span className="text-gray-500 text-xs mx-1">
+                    {new Date(createdAt).toLocaleString("default", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    })}
+                  </span>
+                </p>
+                <p className="text-xs">{content}</p>
               </div>
-            );
-          })}
+            </div>
+          );
+        })}
       </div>
       <MessageForm
         message={message}
