@@ -29,7 +29,7 @@ export const fetchRequestStatus = createAsyncThunk(
   async (id: string, _api) => {
     try {
       const response = await axios.patch(
-        `http://localhost:3000/users/friend-request`,
+        `http://localhost:3000/api/users/friend-request`,
         {
           recipientId: id,
         },
@@ -51,7 +51,7 @@ export const fetchPendingStatus = createAsyncThunk(
   async (_, _api) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/users/pending-friends`,
+        `http://localhost:3000/api/users/pending-friends`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -71,7 +71,7 @@ export const acceptFriendRequest = createAsyncThunk(
   async (id: number, _api) => {
     try {
       const response = await axios.patch(
-        "http://localhost:3000/users/friend-accept",
+        "http://localhost:3000/api/users/friend-accept",
         { applicantId: id },
         {
           headers: {
@@ -93,7 +93,7 @@ export const blockUserRequest = createAsyncThunk(
   async (id: number, _api) => {
     try {
       const response = await axios.patch(
-        `http://localhost:3000/users/friend-block`,
+        `http://localhost:3000/api/users/friend-block`,
         { blockId: id },
         {
           headers: {
@@ -113,7 +113,7 @@ export const fetchBlockedUsers = createAsyncThunk(
   async (_, _api) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/users/blocked-friends`,
+        `http://localhost:3000/api/users/blocked-friends`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -132,7 +132,7 @@ export const removeFriendRelation = createAsyncThunk(
   async (id: number, _api) => {
     try {
       const response = await axios.patch(
-        `http://localhost:3000/users/remove-relation`,
+        `http://localhost:3000/api/users/remove-relation`,
         { rejectedId: id },
         {
           headers: {
@@ -157,29 +157,29 @@ export const friendsManagementSlice = createSlice({
       state.pendingReq = true;
       state.acceptReq = false;
     });
-    
+
     builder.addCase(fetchPendingStatus.fulfilled, (state, action: any) => {
       state.pendingUsers = action.payload;
       state.sentReq = true;
       state.pendingReq = true;
       state.acceptReq = false;
     });
-    
+
     builder.addCase(acceptFriendRequest.fulfilled, (state, action: any) => {
       state.friends.push(action.payload);
       state.sentReq = false;
       state.pendingReq = false;
       state.acceptReq = true;
     });
-    
+
     builder.addCase(blockUserRequest.fulfilled, (state) => {
       state.blockUser = true;
     });
-    
+
     builder.addCase(fetchBlockedUsers.fulfilled, (state, action: any) => {
       state.blockedUsers = action.payload;
     });
-    
+
     builder.addCase(removeFriendRelation.fulfilled, (state) => {
       state.rejectUser = true;
     });
