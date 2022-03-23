@@ -23,7 +23,7 @@ export class ChannelsController {
     constructor(private channelsService: ChannelsService) {}
 
     /* Route for creating a channel
-        http://${host}:${port}/channels/create
+        http://${host}:${port}/api/channels/create
     */
     @Post('create')
     @HttpCode(200)
@@ -33,7 +33,7 @@ export class ChannelsController {
     }
 
     /* Route for getting all channels 
-        http://${host}:${port}/channels
+        http://${host}:${port}/api/channels
     */
     @Get()
     @HttpCode(200)
@@ -43,7 +43,7 @@ export class ChannelsController {
     }
     
     /* Route get channel 
-        http://${host}:${port}/channels/{channelId}
+        http://${host}:${port}/api/channels/{channelId}
     */
     @Get('/:channelId')
     @HttpCode(200)
@@ -53,23 +53,24 @@ export class ChannelsController {
     }
 
     /* Route update channel
-        http://${host}:${port}/channels/channelId
+        http://${host}:${port}/api/channels/channelId
     */
     @Patch('/:channelId')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
     updateChannel(
+        @Req() _req: any,
         @Param('channelId', ParseIntPipe) channelId: number,
-        @Body() data: UpdateChannelDto) : Promise<Channel> {
-        return this.channelsService.updateChannel(channelId, data);
+        @Body() data: UpdateChannelDto): Promise<Channel> {
+        return this.channelsService.updateChannel(Number(_req.user.id), channelId, data);
     }
 
     /* Route delete channel */
     @Delete('/:channelId')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    deleteChannel(@Param('channelId', ParseIntPipe) channelId: number) : Promise<any> {
-        return this.channelsService.deleteChannel( Number(channelId) );
+    deleteChannel(@Req() req: any, @Param('channelId', ParseIntPipe) channelId: number) : Promise<any> {
+        return this.channelsService.deleteChannel(Number(req.user.id), Number(channelId));
     }
 
     /* Route add admin -> set a member as admin */
@@ -91,7 +92,7 @@ export class ChannelsController {
         @Req() _req: any, 
         @Param('channelId', ParseIntPipe) channelId: number,
         @Body('memberId') memberId: number): Promise<any> {
-        return this.channelsService.addAdmin(channelId, Number(_req.user.id), memberId);
+        return this.channelsService.removeAdmin(channelId, Number(_req.user.id), memberId);
     }
     /* Route mute member ()-> set the user as mutant */
     @Patch('mute-user/:channelId')
@@ -100,8 +101,8 @@ export class ChannelsController {
     muteUser(
         @Req() _req: any,
         @Param('channelId', ParseIntPipe) channelId: number,
-        @Body('userId') userId: number): Promise<any> {
-        return this.channelsService.changeStatus(channelId, Number(_req.user.id), userId, MemberStatus.MUTED);
+        @Body('memberId') memberId: number): Promise<any> {
+        return this.channelsService.changeStatus(channelId, Number(_req.user.id), memberId, MemberStatus.MUTED);
     }
 
     @Patch('ban-user/:channelId')
@@ -110,7 +111,20 @@ export class ChannelsController {
     banUser(
         @Req() _req: any,
         @Param('channelId', ParseIntPipe) channelId: number,
-        @Body('userId') userId: number): Promise<any> {
-        return this.channelsService.changeStatus(channelId, Number(_req.user.id), userId, MemberStatus.BANNED);
+        @Body('memberId') memberId: number): Promise<any> {
+        return this.channelsService.changeStatus(channelId, Number(_req.user.id), memberId, MemberStatus.BANNED);
+    }
+
+    @Patch('set-update-password/:channelId')
+    @HttpCode(200)
+    @UseGuards(JwtAuthGuard)
+    setUpdatePwd(
+        @Req() _req: any,
+        @Param('channelId') channelId: number,
+        @Body('password') password: string
+    ) : Promise<any> {
+        console.log(password);
+        // return ;
+        return this.channelsService.setUpdatePassword(Number(_req.user.id), channelId, password);
     }
 };
