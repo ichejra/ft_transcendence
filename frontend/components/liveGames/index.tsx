@@ -65,7 +65,7 @@ const LiveGames = () => {
                     className='w-20 h-20 rounded-full m-4 ml-5'
                   />
                   <h1 className='about-family text-[16px] '>
-                    {player1.user_name}
+                    {player1.user_name.slice(0, 6)}
                   </h1>
                 </div>
                 <div className='mr-4 game-family text-[32px] font-bold'>
@@ -91,7 +91,7 @@ const LiveGames = () => {
                 </div>
                 <div className='flex items-center'>
                   <h1 className='about-family text-[16px]'>
-                    {player2.user_name}
+                    {player2.user_name.slice(0, 6)}
                   </h1>
                   <img
                     src={player2.avatar_url}
@@ -177,40 +177,9 @@ const LiveGames = () => {
   );
 };
 
-// const mailchimpURL = `[Your Mailchimp subscription URL]`;
-
-// const outerCardStyle = `
-//       padding: 0;
-//       box-shadow: 0px 5px 35px 0px rgba(50, 50, 93, 0.17);
-//     `;
-// const subContainerStyle = `
-//       box-shadow: 0 2px 5px -1px rgba(50,50,93,.25), 0 1px 3px -1px rgba(0,0,0,.3);
-//       align-items: center;
-//     `;
-// const subInputStyle = `
-//       border-width: 0;
-//       margin: 0;
-//     `;
-// const subButtonStyle = `
-//       border-radius: 0;
-//       flex-grow: 1;
-//       background-color: #fdfdfd;
-//       color: #000000;
-//     `;
-
-// const LiveGames = () => (
-//   <div>
-//     <SubscribeCard
-//       mailchimpURL={mailchimpURL}
-//       outerCardStyle={outerCardStyle}
-//       subContainerStyle={subContainerStyle}
-//       subInputStyle={subInputStyle}
-//       subButtonStyle={subButtonStyle}
-//     />
-//   </div>
-// );
-
 export default LiveGames;
 
+//* DONE: make Watch game button work
+//* DONE: set the length of the username to be static
+
 //TODO: resposivity of live games page
-//TODO: make Watch game button work

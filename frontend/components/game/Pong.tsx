@@ -1,136 +1,35 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { User } from '../../features/userProfileSlice';
-// import { io } from 'socket.io-client';
 import { socket } from '../../pages/SocketProvider';
-// import { socket } from '/Users/ichejra/Desktop/ft_trans/frontend/pages/SocketProvider.tsx';
-
-// const socket = io('http://localhost:3000/game'); //! remove it later
-
-const CANVAS_HEIGHT = 600;
-const CANVAS_WIDTH = 1000;
-const MAX_SCORE = 10;
-const MAX_WATCHERS = 10;
-const BALL_RADIUS = 12;
-const BALL_INIT_X = CANVAS_WIDTH / 2;
-const BALL_INIT_Y = CANVAS_HEIGHT / 2;
-const BALL_SPEED = 6;
-const BALL_MAX_SPEED = 15;
-const PAD_WIDTH = 15;
-const PAD_HEIGHT = 100;
-const PADDLE_DIFF = 10;
-const L_PADX = 0 + 20;
-const R_PADX = CANVAS_WIDTH - PAD_WIDTH - 20;
-const PADY_INIT = CANVAS_HEIGHT / 2 - PAD_HEIGHT / 2;
-
-const NET_W = 5;
-const NET_H = 10;
-const NETX = CANVAS_WIDTH / 2 - NET_W / 2;
-const NETY = 0;
-
-class Rect {
-  _ctx: any;
-  _x: number;
-  _y: number;
-  _w: number;
-  _h: number;
-  _color: string;
-  constructor(
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-    color: string,
-    ctx: any
-  ) {
-    this._x = x;
-    this._y = y;
-    this._w = w;
-    this._h = h;
-    this._color = color;
-    this._ctx = ctx;
-  }
-  drawRect() {
-    this._ctx.fillStyle = this._color;
-    this._ctx.fillRect(this._x, this._y, this._w, this._h);
-  }
-}
-
-// const net = {
-//   x: 1000 / 2 - 5 / 2, //first 2 is the width
-//   y: 0,
-//   width: 5,
-//   height: 10,
-//   color: 'white',
-// };
-class Circle {
-  _ctx: any;
-  _x: number;
-  _y: number;
-  _r: number;
-  _color: string;
-  constructor(x: number, y: number, r: number, color: string, ctx: any) {
-    this._ctx = ctx;
-    this._x = x;
-    this._y = y;
-    this._r = r;
-    this._color = color;
-  }
-  drawCircle() {
-    this._ctx.fillStyle = this._color;
-    this._ctx.beginPath();
-    this._ctx.arc(this._x, this._y, this._r, 0, Math.PI * 2, false);
-    this._ctx.closePath();
-    this._ctx.fill();
-  }
-}
-
-class Text {
-  _x: number;
-  _y: number;
-  _text: string;
-  _color: string;
-  _ctx: any;
-
-  constructor(x: number, y: number, text: string, color: string, ctx: any) {
-    this._x = x;
-    this._y = y;
-    this._text = text;
-    this._color = color;
-    this._ctx = ctx;
-  }
-  drawText() {
-    this._ctx.fillStyle = this._color;
-    this._ctx.font = '45px fantasy';
-    this._ctx.fillText(this._text, this._x, this._y);
-  }
-}
-
-interface IFrame {
-  players?: {
-    user1: User;
-    user2: User;
-  };
-  ball: {
-    x: number;
-    y: number;
-  };
-  paddles: {
-    leftPad: number;
-    rightPad: number;
-    leftPadH: number;
-    rightPadH: number;
-  };
-  score: {
-    score1: number;
-    score2: number;
-  };
-  state: string;
-  isWinner: boolean;
-}
+import {
+  CANVAS_HEIGHT,
+  CANVAS_WIDTH,
+  MAX_SCORE,
+  MAX_WATCHERS,
+  BALL_RADIUS,
+  BALL_INIT_X,
+  BALL_INIT_Y,
+  BALL_SPEED,
+  BALL_MAX_SPEED,
+  PAD_WIDTH,
+  PAD_HEIGHT,
+  PADDLE_DIFF,
+  L_PADX,
+  R_PADX,
+  PADY_INIT,
+  NET_W,
+  NET_H,
+  NETX,
+  NETY,
+  Rect,
+  Circle,
+  Text,
+  IFrame,
+} from './GameConsts';
+import GameRules from './GameRules';
 
 class Paddle extends Rect {}
-class Net extends Rect {}
 class Ball extends Circle {}
 class Score extends Text {}
 
@@ -160,11 +59,11 @@ interface UserType {
 const Pong: React.FC<UserType> = ({ userType }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const playBtnsRef: React.RefObject<HTMLDivElement> = React.createRef();
+  const usersRef: React.RefObject<HTMLDivElement> = React.createRef();
   const [frame, setFrame] = useState(stateInit);
   const [users, setUsers] = useState<User[]>([]);
   const [leftPlayer, setLeftPlayer] = useState<User>(users[0]);
   const [rightPlayer, setRightPlayer] = useState<User>(users[1]);
-  const navigate = useNavigate();
 
   console.log('user type: ', userType);
 
@@ -174,8 +73,15 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   const joinMatchWithObstacle = () => {
     socket.emit('join_queue', 'obstacle');
   };
-  const stopMatch = () => {
-    socket.emit('stop_game', 'default');
+  // const stopMatch = () => {
+  //   socket.emit('stop_game', 'default');
+  // };
+  const handlePlayAgain = () => {
+    console.log('hellooooooo');
+    setUsers([]);
+    setFrame(stateInit);
+    // document.getElementById('canvas')?.remove();
+    // playBtnsRef.current?.style.display = 'block';
   };
   const movePaddle = (e: any) => {
     if (e.code === 'ArrowUp') {
@@ -192,14 +98,14 @@ const Pong: React.FC<UserType> = ({ userType }) => {
       socket.emit('ArrowDown', 'up');
     }
   };
-  // useEffect(() => {
-  //   socket.emit('get_users');
-  // }, [])
 
   useEffect(() => {
     socket.on('set_users', (players) => {
       setUsers(players);
     });
+    return () => {
+      socket.off('set_users');
+    };
   }, []);
 
   useEffect(() => {
@@ -226,13 +132,14 @@ const Pong: React.FC<UserType> = ({ userType }) => {
     const ctx = canvas != null ? canvas.getContext('2d') : null;
     if (ctx != null && frame.state != 'void') {
       //! /////////
-      if (canvas) canvas.style.display = 'block';
-
+      // if (canvas) {
+      //   canvas.style.display = 'block';
+      // }
       if (playBtnsRef != null)
-        if (playBtnsRef.current != null)
+        if (playBtnsRef.current != null) {
           playBtnsRef.current.style.display = 'none';
+        }
       //! /////////
-
       const table = new Rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, 'black', ctx);
       table.drawRect();
       for (let i = 0; i <= ctx.canvas.height; i += 16) {
@@ -280,8 +187,6 @@ const Pong: React.FC<UserType> = ({ userType }) => {
         'white',
         ctx
       );
-      // console.log(frame.score.score1);
-      // console.log(frame.score.score2);
       player2Score.drawText();
       if (frame.state === 'OVER') {
         const ball = new Ball(
@@ -306,103 +211,121 @@ const Pong: React.FC<UserType> = ({ userType }) => {
           net.drawRect();
         }
         gameOver.drawText();
-        if (frame.isWinner) {
-          let position;
-          if (frame.score.score1 > frame.score.score2)
-            position = (1 * CANVAS_WIDTH) / 6;
-          else position = (3.9 * CANVAS_WIDTH) / 6;
-          //! ///////////////////////
-          const playerMsg = new Text(
-            position,
-            CANVAS_HEIGHT / 3,
-            'YOU WIN',
-            'white',
-            ctx
-          );
-          playerMsg.drawText();
-          //! ///////////////////////
-          // const playerMsg = new Text(
-          //   (3 * CANVAS_WIDTH) / 8,
-          //   CANVAS_HEIGHT / 3,
-          //   'YOU WIN',
-          //   'white',
-          //   ctx
-          // );
-
-          // const table = new Rect(
-          //   0,
-          //   0,
-          //   CANVAS_WIDTH,
-          //   CANVAS_HEIGHT,
-          //   '#45C830',
-          //   ctx
-          // );
-          // table.drawRect();
-          // playerMsg.drawText();
-
-          // console.log('winner');
-        } else {
-          // console.log('loooser');
-          let position;
-          if (frame.score.score1 > frame.score.score2)
-            position = (3.6 * CANVAS_WIDTH) / 6;
-          else position = (1 * CANVAS_WIDTH) / 8;
-          const playerMsg = new Text(
-            position,
-            CANVAS_HEIGHT / 3,
-            'YOU LOOSE',
-            'white',
-            ctx
-          );
-          // const table = new Rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, 'black', ctx);
-          // table.drawRect();
-          playerMsg.drawText();
+        if (userType === 'player') {
+          if (frame.isWinner) {
+            let position;
+            if (frame.score.score1 > frame.score.score2)
+              position = (1 * CANVAS_WIDTH) / 6;
+            else position = (3.9 * CANVAS_WIDTH) / 6;
+            //! ///////////////////////
+            const playerMsg = new Text(
+              position,
+              CANVAS_HEIGHT / 3,
+              'YOU WIN',
+              'white',
+              ctx
+            );
+            playerMsg.drawText();
+            //! ///////////////////////
+          } else {
+            let position;
+            if (frame.score.score1 > frame.score.score2)
+              position = (3.6 * CANVAS_WIDTH) / 6;
+            else position = (1 * CANVAS_WIDTH) / 8;
+            const playerMsg = new Text(
+              position,
+              CANVAS_HEIGHT / 3,
+              'YOU LOOSE',
+              'white',
+              ctx
+            );
+            playerMsg.drawText();
+          }
+        } else if (userType === 'spectator') {
+          let playerMsg;
+          if (frame.score.score1 > frame.score.score2) {
+            playerMsg = new Text(
+              (1 * CANVAS_WIDTH) / 6,
+              CANVAS_HEIGHT / 3,
+              'WINNER',
+              'white',
+              ctx
+            );
+            playerMsg.drawText();
+            playerMsg = new Text(
+              (3.9 * CANVAS_WIDTH) / 6,
+              CANVAS_HEIGHT / 3,
+              'LOOSER',
+              'white',
+              ctx
+            );
+            playerMsg.drawText();
+          } else {
+            playerMsg = new Text(
+              (1 * CANVAS_WIDTH) / 6,
+              CANVAS_HEIGHT / 3,
+              'LOOSER',
+              'white',
+              ctx
+            );
+            playerMsg.drawText();
+            playerMsg = new Text(
+              (3.9 * CANVAS_WIDTH) / 6,
+              CANVAS_HEIGHT / 3,
+              'WINNER',
+              'white',
+              ctx
+            );
+            playerMsg.drawText();
+          }
         }
       }
     }
   }, [frame]);
-  //*draw
 
   useEffect(() => {
     if (users.length) {
       setLeftPlayer(users[0]);
       setRightPlayer(users[1]);
-      // console.log(leftPlayer?.id + '------------------' + rightPlayer?.id);
     }
   }, [users]);
 
   return (
     <div className='flex w-full flex-col items-center relative'>
-      <div
-        ref={playBtnsRef}
-        className='flex md:flex-row flex-col items-center justify-between mt-44 md:w-[50rem] absolute'
-      >
-        <div className='button'>
-          {/* <a>Mobile First</a> */}
-          <button type='button' className='text-white' onClick={joinMatch}>
-            Play Pong
-          </button>
-        </div>
-        {/* <div className='button'>
+      <div className='absolute md:-mt-64 -mt-64 w-full items-center'>
+        <GameRules />
+      </div>
+      {userType === 'player' && users.length === 0 && (
+        <div
+          ref={playBtnsRef}
+          className='flex md:flex-row flex-col items-center justify-between mt-24 md:w-[50rem] absolute'
+        >
+          <div className='button'>
+            <button type='button' className='text-white' onClick={joinMatch}>
+              Play Pong
+            </button>
+          </div>
+          {/* <div className='button'>
           <button className='text-white' onClick={stopMatch}>
             Stop Now
           </button>
         </div> */}
-        <div className='button'>
-          <button className='text-white' onClick={joinMatchWithObstacle}>
-            Play Our Pong
-          </button>
+          <div className='button'>
+            <button className='text-white' onClick={joinMatchWithObstacle}>
+              Play Our Pong
+            </button>
+          </div>
         </div>
-      </div>
-      {
-        <div>
+      )}
+      {users.length !== 0 && (
+        <div className='' id='canvas'>
           <canvas
             ref={canvasRef}
             width={CANVAS_WIDTH}
             height={CANVAS_HEIGHT}
           ></canvas>
         </div>
-      }
+      )}
       <div className=''>
         {users.length !== 0 && (
           <div className='w-[24rem] md:w-[50rem] flex items-center justify-between'>
@@ -425,32 +348,24 @@ const Pong: React.FC<UserType> = ({ userType }) => {
               </h1>
             </div>
           </div>
-          // <div className='w-[60rem] h-[7rem] m-6 flex justify-between items-center'>
-          //   <div className='bg-red-200 h-[7rem] w-1/2 flex items-center justify-between '>
-          //     <div className='flex items-center'>
-          //       <img
-          //         src={leftPlayer?.avatar_url}
-          //         className='w-20 h-20 rounded-full m-4 ml-5'
-          //       />
-          //     </div>
-          //   </div>
-          //   <div className='bg-purple-700 h-[7rem] w-1/2 flex items-center justify-between '>
-          //     <div className='flex items-center'>
-          //       <img
-          //         src={rightPlayer?.avatar_url}
-          //         className='w-20 h-20 rounded-full m-4 mr-5'
-          //       />
-          //     </div>
-          //   </div>
-          // </div>
         )}
-        {frame.state === 'OVER' && (
+        {frame.state === 'OVER' && userType === 'player' && (
           <div className='play-again-btn items-center'>
-            <button onClick={() => {
-                navigate('/game'); //TODO refresh the page
-              }}>Play Again</button>
+            <button onClick={handlePlayAgain}>Play Again</button>
           </div>
         )}
+        {/* //TODO optional */}
+        {/* {frame.state === 'OVER' && userType === 'spectator' && (
+          <div className='play-again-btn items-center'>
+            <button
+              onClick={() => {
+                navigate to live games or game
+              }}
+            >
+              Go Back to Live Games
+            </button>
+          </div>
+        )} */}
       </div>
     </div>
   );
@@ -460,10 +375,10 @@ export default Pong;
 
 //* Done: show the score on the screen
 //* Done: stop the game when a score reaches the max score
+//* DONE: show the uttons only if the userType is a player
+//* DONE: set winner and looser
+//* DONE: add game over in the end of the game and the winner for the winner and loser for the looser
+//* DONE: add Live Games page and update it every little bit by listening on a socket every 1s or so
 
-//TODO: show the uttons only if the userType is a player
-//TODO: set winner and looser
 //TODO: play and pause //! makainax f subject
-//TODO: add this color to the game after the UI finished: #05f2db
-//TODO: add game over in the end of the game and the winner for the winner and loser for the looser
-//TODO: add Live Games page and update it every little bit by listening on a socket every 1s or so
+//TODO: when game is over and userType is spectator: navigate to game or live game

@@ -70,9 +70,9 @@ const PongGame: React.FC<UserType> = ({ userType }) => {
         <button onClick={handleSubmitNewMessage}>submit</button>
       </div> */}
       <div>
-        <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+        {/* <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
           Change Color
-        </button>
+        </button> */}
       </div>
     </div>
   );
