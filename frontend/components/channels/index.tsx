@@ -8,14 +8,10 @@ import {
   getChannelsList,
   getSingleChannel,
   getChannelContent,
-  setStaticMessages,
-  ChannelMessage,
 } from "../../features/chatSlice";
 import { useNavigate, useParams, useLocation } from "react-router";
 import DirectChat from "./DirectChat";
 import ChannelContent from "./ChannelContent";
-import { socket } from "../../pages/SocketProvider";
-import { updateChannelContent } from "../../features/globalSlice";
 
 const ChatRooms = () => {
   const [showDirect, setShowDirect] = useState(false);
@@ -54,14 +50,6 @@ const ChatRooms = () => {
   const createChannel = () => {
     dispatch(setNewChannelModal(true));
   };
-
-  useEffect(() => {
-    socket.on("receive_message_channel", (data: ChannelMessage) => {
-      console.log("trigger the update message", data);
-      dispatch(updateChannelContent());
-      dispatch(setStaticMessages(data));
-    });
-  }, [socket]);
 
   useEffect(() => {
     dispatch(getChannelsList());

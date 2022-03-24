@@ -26,26 +26,18 @@ export const socket = io("http://localhost:3000", {
 
 const SocketProvider: React.FC = ({ children }) => {
   const dispatch = useAppDispatch();
-  const { refresh } = useAppSelector(
-    (state) => state.globalState
-  );
+  const { refresh } = useAppSelector((state) => state.globalState);
 
   useEffect(() => {
     socket.on("receive_notification", () => {
       dispatch(updateGlobalState());
       console.log("trigger the refresh");
     });
+
     return () => {
       socket.off("receive_notification");
     };
   }, [socket]);
-
-  // useEffect(() => {
-  //   socket.on("receive_message_channel", (data) => {
-  //     console.log("trigger the update message", data);
-  //     dispatch(addNewMessage(data));
-  //   });
-  // }, [socket]);
 
   useEffect(() => {
     if (Cookies.get("accessToken")) {

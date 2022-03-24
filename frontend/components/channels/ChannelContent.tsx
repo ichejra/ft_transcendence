@@ -3,37 +3,27 @@ import { IoMdSend } from "react-icons/io";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { useParams } from "react-router";
 import { socket } from "../../pages/SocketProvider";
-import { getChannelMembersList, Member } from "../../features/chatSlice";
-
-//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-//TODO FIX channel content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
+import { updateChannelContent } from "../../features/globalSlice";
+import {
+  ChannelMessage,
+  getChannelMembersList,
+  Member,
+  addNewMessage,
+} from "../../features/chatSlice";
 interface ContentProps {
   channelName: string;
 }
 
 const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
   const [message, setMessage] = useState("");
-  const [sendMsg, setSendMsg] = useState(false);
   const [isMember, setIsMember] = useState(true);
   const [pass, setPass] = useState("");
   const dispatch = useAppDispatch();
   const msgContainerRef = useRef<HTMLDivElement>(null);
   const { id: channelId } = useParams();
-  const { channelContent, channels, staticMessages, channelMembers } =
-    useAppSelector((state) => state.channels);
+  const { channelContent, channels, channelMembers } = useAppSelector(
+    (state) => state.channels
+  );
   const { updateMessages } = useAppSelector((state) => state.globalState);
   const { user } = useAppSelector((state) => state.user);
 
@@ -57,8 +47,8 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
     socket.emit("send_message_channel", {
       channelId,
       content: message,
+      room: channelName,
     });
-    setSendMsg(!sendMsg);
     setMessage("");
     window.scrollTo({
       left: 0,
@@ -75,6 +65,20 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
     });
   }, [updateMessages]);
 
+  useEffect(() => {
+    console.log("register");
+    socket.on("receive_message_channel", (data: any) => {
+      console.log("trigger the update message", data);
+      console.log(data.channel?.id, "----", Number(channelId));
+      dispatch(updateChannelContent());
+      dispatch(addNewMessage(data));
+    });
+    return () => {
+      console.log("unregister");
+      socket.off("receive_message_channel");
+    };
+  }, []);
+
   const handleChange = (e: any) => {
     setMessage(e.target.value);
   };
@@ -88,13 +92,11 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
           (member: Member) => member.user.id === user.id
         );
         console.log("checkmember", checkMember);
-
         if (checkMember !== undefined) {
           console.log(" ------------------------------------------ member");
           setIsMember(true);
         } else {
           console.log(" ------------------------------------------ Not member");
-
           setIsMember(false);
         }
       }
@@ -111,7 +113,7 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
       </div>
       <div className="pt-10">
         {isMember &&
-          [...channelContent, ...staticMessages].map((message) => {
+          channelContent.map((message) => {
             const { id, createdAt, content, author } = message;
             return (
               <div

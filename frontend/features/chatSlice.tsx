@@ -44,7 +44,6 @@ interface InitialState {
   channel: Channel;
   channelContent: ChannelMessage[];
   channelMembers: Member[];
-  staticMessages: ChannelMessage[];
   directMessage: DirectMessage[];
 }
 
@@ -59,7 +58,6 @@ const initialState: InitialState = {
   },
   channelContent: [],
   channelMembers: [],
-  staticMessages: [],
   directMessage: [],
 };
 
@@ -207,12 +205,12 @@ const channelsManagmentSlice = createSlice({
     ) => {
       state.createNewChannel = action.payload;
     },
-    setStaticMessages: (
+    addNewMessage: (
       state: InitialState = initialState,
       action: PayloadAction<ChannelMessage>
     ) => {
-      state.staticMessages.push(action.payload);
-      // console.log("CHAT SLICE", current(state.staticMessages));
+      state.channelContent.push(action.payload);
+      // console.log("CHAT SLICE", current(state.channelContent));
     },
   },
   extraReducers: (builder) => {
@@ -227,7 +225,6 @@ const channelsManagmentSlice = createSlice({
     });
     builder.addCase(getChannelContent.fulfilled, (state, action: any) => {
       state.channelContent = action.payload;
-      state.staticMessages = [];
     });
     builder.addCase(getDirectContent.fulfilled, (state, action: any) => {
       state.directMessage = action.payload;
@@ -238,7 +235,7 @@ const channelsManagmentSlice = createSlice({
   },
 });
 
-export const { setNewChannelModal, setStaticMessages } =
+export const { setNewChannelModal, addNewMessage } =
   channelsManagmentSlice.actions;
 
 export default channelsManagmentSlice.reducer;
