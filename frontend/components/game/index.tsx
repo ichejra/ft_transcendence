@@ -58,10 +58,10 @@ const PongGame: React.FC<UserType> = ({ userType }) => {
   };
 
   return (
-    <div>
+    <div className='bg-gray-200'>
       <div className='page-100 flex items-center justify-center'>
         {/* <h1 className="text-2xl">PING PONG</h1> */}
-        <Pong userType={userType}/>
+        <Pong userType={userType} />
         {/* <Pong /> */}
         <ul id='messages'></ul>
       </div>
@@ -70,9 +70,9 @@ const PongGame: React.FC<UserType> = ({ userType }) => {
         <button onClick={handleSubmitNewMessage}>submit</button>
       </div> */}
       <div>
-        <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+        {/* <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
           Change Color
-        </button>
+        </button> */}
       </div>
     </div>
   );

@@ -124,7 +124,6 @@ export class GameGateway
         const user2 = await this.getPlayerAsUser(second);
         //* DONE (wa9): check the same user
         if (user1.id === user2.id) {
-          console.log('hi');
           this.obstacleGameQueue.splice(
             this.obstacleGameQueue.indexOf(first),
             1,
