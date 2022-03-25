@@ -30,13 +30,20 @@ interface DirectMessage {
   content: string;
   createdAt: string;
 }
+export interface Member {
+  id: number;
+  userRole: string;
+  userStatus: string;
+  createdAt: string;
+  user: User;
+}
 
 interface InitialState {
   createNewChannel: boolean;
   channels: Channel[];
   channel: Channel;
   channelContent: ChannelMessage[];
-  staticMessages: ChannelMessage[];
+  channelMembers: Member[];
   directMessage: DirectMessage[];
 }
 
@@ -50,7 +57,7 @@ const initialState: InitialState = {
     type: "",
   },
   channelContent: [],
-  staticMessages: [],
+  channelMembers: [],
   directMessage: [],
 };
 
@@ -126,6 +133,25 @@ export const getSingleChannel = createAsyncThunk(
   }
 );
 
+export const getChannelMembersList = createAsyncThunk(
+  "channels/getChannelMembersList",
+  async (channelId: number, _api) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/channels/${channelId}/members`,
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      return _api.fulfillWithValue(response.data);
+    } catch (error) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
+
 export const getChannelContent = createAsyncThunk(
   "channels/getChannelContent",
   async (channelId: number, _api) => {
@@ -179,12 +205,12 @@ const channelsManagmentSlice = createSlice({
     ) => {
       state.createNewChannel = action.payload;
     },
-    setStaticMessages: (
+    addNewMessage: (
       state: InitialState = initialState,
       action: PayloadAction<ChannelMessage>
     ) => {
-      state.staticMessages.push(action.payload);
-      // console.log("CHAT SLICE", current(state.staticMessages));
+      state.channelContent.push(action.payload);
+      // console.log("CHAT SLICE", current(state.channelContent));
     },
   },
   extraReducers: (builder) => {
@@ -199,19 +225,20 @@ const channelsManagmentSlice = createSlice({
     });
     builder.addCase(getChannelContent.fulfilled, (state, action: any) => {
       state.channelContent = action.payload;
-      state.staticMessages = [];
     });
     builder.addCase(getDirectContent.fulfilled, (state, action: any) => {
       state.directMessage = action.payload;
     });
+    builder.addCase(getChannelMembersList.fulfilled, (state, action: any) => {
+      state.channelMembers = action.payload;
+    });
   },
 });
 
-export const { setNewChannelModal, setStaticMessages } =
+export const { setNewChannelModal, addNewMessage } =
   channelsManagmentSlice.actions;
 
 export default channelsManagmentSlice.reducer;
 //TODO add join/leave button
 //TODO protect private channels
-//TODO add lock icon to private channels
 //TODO update channel (name, password, owners)
