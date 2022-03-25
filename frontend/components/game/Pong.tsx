@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
+import { useAppSelector } from '../../app/hooks';
 import { User } from '../../features/userProfileSlice';
 import { socket } from '../../pages/SocketProvider';
 import {
@@ -56,7 +57,15 @@ interface UserType {
   userType: string;
 }
 
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+let isRefresh = false;
+
 const Pong: React.FC<UserType> = ({ userType }) => {
+  console.log('Pong game built');
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const playBtnsRef: React.RefObject<HTMLDivElement> = React.createRef();
   const usersRef: React.RefObject<HTMLDivElement> = React.createRef();
@@ -64,8 +73,17 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [leftPlayer, setLeftPlayer] = useState<User>(users[0]);
   const [rightPlayer, setRightPlayer] = useState<User>(users[1]);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const userId = useAppSelector((state) => state.user.user.id);
 
-  console.log('user type: ', userType);
+  // console.log('user type: ', userType);
+  // console.log('location: ', location);
+  useEffect(() => {
+    console.log('location: ', location);
+    console.log('user type: ', userType);
+    console.log('player: ', leftPlayer);
+  }, [location]);
 
   const joinMatch = () => {
     socket.emit('join_queue', 'default');
@@ -77,7 +95,8 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   //   socket.emit('stop_game', 'default');
   // };
   const handlePlayAgain = () => {
-    console.log('hellooooooo');
+    console.log('reset game');
+    socket.emit('spectator_left');
     setUsers([]);
     setFrame(stateInit);
     // document.getElementById('canvas')?.remove();
@@ -85,7 +104,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   };
   const movePaddle = (e: any) => {
     if (e.code === 'ArrowUp') {
-      console.log('------> keydown');
+      // console.log('------> keydown');
       socket.emit('ArrowUp', 'down');
     } else if (e.code === 'ArrowDown') {
       socket.emit('ArrowDown', 'down');
@@ -99,8 +118,26 @@ const Pong: React.FC<UserType> = ({ userType }) => {
     }
   };
 
+  if (
+    userType === 'player' &&
+    users.length > 1 &&
+    users[0].id !== userId &&
+    users[1].id !== userId
+  ) {
+    handlePlayAgain();
+    // return;
+  }
+  if (userType === 'player' && !leftPlayer) {
+    socket.emit('spectator_left');
+  }
+
   useEffect(() => {
+    if (users.length !== 0) return;
+    console.log('users length: ', users.length);
+    socket.emit('isAlreadyInGame');
     socket.on('set_users', (players) => {
+      console.log('players', players);
+      isRefresh = true;
       setUsers(players);
     });
     return () => {
@@ -115,7 +152,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
     }
     socket.on('game_state', (newState) => {
       setFrame(newState);
-      console.log('I am frame from front', userType);
+      // console.log('I am frame from front', userType);
     });
     return () => {
       if (userType !== 'spectator') {
@@ -176,7 +213,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
         CANVAS_WIDTH / 4,
         CANVAS_HEIGHT / 5,
         frame.score.score1.toString(),
-        'white',
+        'lightgrey',
         ctx
       );
       player1Score.drawText();
@@ -184,7 +221,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
         (3 * CANVAS_WIDTH) / 4,
         CANVAS_HEIGHT / 5,
         frame.score.score2.toString(),
-        'white',
+        'lightgrey',
         ctx
       );
       player2Score.drawText();
@@ -203,7 +240,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
           (2.85 * CANVAS_WIDTH) / 8,
           CANVAS_HEIGHT / 2,
           'GAME OVER',
-          'white',
+          'lightgrey',
           ctx
         );
         for (let i = 0; i <= ctx.canvas.height; i += 16) {
@@ -222,7 +259,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
               position,
               CANVAS_HEIGHT / 3,
               'YOU WIN',
-              'white',
+              'lightgrey',
               ctx
             );
             playerMsg.drawText();
@@ -236,7 +273,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
               position,
               CANVAS_HEIGHT / 3,
               'YOU LOOSE',
-              'white',
+              'lightgrey',
               ctx
             );
             playerMsg.drawText();
@@ -248,7 +285,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
               (1 * CANVAS_WIDTH) / 6,
               CANVAS_HEIGHT / 3,
               'WINNER',
-              'white',
+              'lightgrey',
               ctx
             );
             playerMsg.drawText();
@@ -256,7 +293,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
               (3.9 * CANVAS_WIDTH) / 6,
               CANVAS_HEIGHT / 3,
               'LOOSER',
-              'white',
+              'lightgrey',
               ctx
             );
             playerMsg.drawText();
@@ -265,7 +302,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
               (1 * CANVAS_WIDTH) / 6,
               CANVAS_HEIGHT / 3,
               'LOOSER',
-              'white',
+              'lightgrey',
               ctx
             );
             playerMsg.drawText();
@@ -273,7 +310,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
               (3.9 * CANVAS_WIDTH) / 6,
               CANVAS_HEIGHT / 3,
               'WINNER',
-              'white',
+              'lightgrey',
               ctx
             );
             playerMsg.drawText();
@@ -290,17 +327,33 @@ const Pong: React.FC<UserType> = ({ userType }) => {
     }
   }, [users]);
 
+
+  useEffect(() => {
+    if (userType === 'spectator') {
+      delay(1000).then(() => {
+        if (!isRefresh) {
+          navigate('/liveGames');
+        }
+      });
+    }
+
+    // return ()=>
+  });
+
+
   return (
     <div className='flex w-full flex-col items-center relative'>
-      <div className='absolute md:-mt-64 -mt-64 w-full items-center'>
-        <GameRules />
-      </div>
+      {users.length === 0 && userType === 'player' && (
+        <div className='absolute  -mt-[26rem] items-center flex justify-center p-22 md:w-[62rem] lg:w-[74rem]'>
+          <GameRules />
+        </div>
+      )}
       {userType === 'player' && users.length === 0 && (
         <div
           ref={playBtnsRef}
-          className='flex md:flex-row flex-col items-center justify-between mt-24 md:w-[50rem] absolute'
+          className='flex md:flex-row flex-col items-center justify-between mt-10 md:w-[50rem] absolute'
         >
-          <div className='button'>
+          <div className='button '>
             <button type='button' className='text-white' onClick={joinMatch}>
               Play Pong
             </button>
@@ -318,7 +371,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
         </div>
       )}
       {users.length !== 0 && (
-        <div className='' id='canvas'>
+        <div className='border-4 border-[lightgrey]'>
           <canvas
             ref={canvasRef}
             width={CANVAS_WIDTH}
@@ -350,22 +403,23 @@ const Pong: React.FC<UserType> = ({ userType }) => {
           </div>
         )}
         {frame.state === 'OVER' && userType === 'player' && (
-          <div className='play-again-btn items-center'>
+          <div className='play-again-btn items-center mt-10 md:m-2'>
             <button onClick={handlePlayAgain}>Play Again</button>
           </div>
         )}
-        {/* //TODO optional */}
-        {/* {frame.state === 'OVER' && userType === 'spectator' && (
-          <div className='play-again-btn items-center'>
-            <button
-              onClick={() => {
-                navigate to live games or game
-              }}
-            >
-              Go Back to Live Games
-            </button>
-          </div>
-        )} */}
+        {frame.state === 'OVER' &&
+          userType === 'spectator' &&
+          location.pathname === '/watch' && (
+            <div className='play-again-btn items-center'>
+              <button
+                onClick={() => {
+                  navigate('/game');
+                }}
+              >
+                Play Now
+              </button>
+            </div>
+          )}
       </div>
     </div>
   );
@@ -382,3 +436,4 @@ export default Pong;
 
 //TODO: play and pause //! makainax f subject
 //TODO: when game is over and userType is spectator: navigate to game or live game
+//TODO: handle the prb of the live game interventing with game

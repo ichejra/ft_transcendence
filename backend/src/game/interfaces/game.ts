@@ -92,9 +92,9 @@ class GameObj {
     this._spectators.forEach((spec) => {
       spec.emit('game_state', { ...current /* send the winner  */ }); //TODO: watcher: send the winner too
     });
-    this._spectators.forEach((spec) => {
-      spec.emit('set_users', [this._player1AsUser, this._player2AsUser]);
-    });
+    // this._spectators.forEach((spec) => {
+    //   spec.emit('set_users', [this._player1AsUser, this._player2AsUser]);
+    // });
   };
 
   //! public resetGame(): void {
@@ -120,6 +120,14 @@ class GameObj {
   }
 
   public hasUser(userId: number): boolean {
+    console.log(
+      'hello id1: ',
+      this._player1AsUser.id,
+      ', id2: ',
+      this._player2AsUser.id,
+    );
+    console.log('==> id: ', userId);
+
     if (userId === this._player1AsUser.id || userId === this._player2AsUser.id)
       return true;
     return false;
@@ -250,8 +258,10 @@ class GameObj {
   public addSpectators(spectator: Socket): void {
     // console.log('watcher added');
 
-    if (this._spectators.length < Consts.MAX_SPECTATORS)
+    if (this._spectators.length < Consts.MAX_SPECTATORS) {
       this._spectators.push(spectator);
+      spectator.emit('set_users', [this._player1AsUser, this._player2AsUser]);
+    }
     //! this.sendData();
   }
 
@@ -263,6 +273,11 @@ class GameObj {
   public removeSpectator(spectator: Socket): void {
     if (this._spectators.includes(spectator))
       this._spectators.splice(this._spectators.indexOf(spectator), 1);
+    console.log('I am removed');
+  }
+
+  public hasSpectator(spec: Socket) {
+    return this._spectators.includes(spec);
   }
 }
 

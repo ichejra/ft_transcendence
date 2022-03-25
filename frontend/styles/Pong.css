@@ -127,3 +127,7 @@
   left:-4px;
   z-index:-1;
 }
+
+.rules-font {
+  font-family: Jost; /*TODO change font */
+}

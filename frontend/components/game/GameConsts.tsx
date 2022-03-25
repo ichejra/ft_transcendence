@@ -91,7 +91,8 @@ export class Text {
   }
   drawText() {
     this._ctx.fillStyle = this._color;
-    this._ctx.font = '45px fantasy';
+    // this._ctx.font = '45px fantasy';
+    this._ctx.font = "32px 'Press Start 2P'";
     this._ctx.fillText(this._text, this._x, this._y);
   }
 }

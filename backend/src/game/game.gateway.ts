@@ -58,7 +58,7 @@ export class GameGateway
     });
     if (gameFound) {
       gameFound.playerLeftGame(socket);
-      gameFound.clearSpectators(); // TODO: watcher
+      gameFound.clearSpectators();
     }
   }
   afterInit(server: any): any {
@@ -76,16 +76,34 @@ export class GameGateway
   }
 
   @SubscribeMessage('liveGames')
-  private getLiveGames(client: Socket){
-    if (this.games.length === 0){
+  private getLiveGames(client: Socket) {
+    if (this.games.length === 0) {
       client.emit('liveGame_state', []);
     }
-   const liveData = this.games.map((game)=>{
+    const liveData = this.games.map((game) => {
       return game.liveGameData();
     });
     client.emit('liveGame_state', liveData);
   }
 
+  @SubscribeMessage('isAlreadyInGame')
+  private isAlreadyInGame(client: Socket) {
+    let gameFound = this.games.find((game) => {
+      return (
+        game.getPlayersSockets()[0] === client ||
+        game.getPlayersSockets()[1] === client
+      );
+    });
+    if (gameFound) {
+      const users = [
+        gameFound.getPlayer1AsUser(),
+        gameFound.getPlayer2AsUser(),
+      ];
+      console.log('users', users);
+
+      client.emit('set_users', users);
+    }
+  }
 
   @SubscribeMessage('join_game')
   private async joinGame(socketsArr: Socket[], payload: any) {
@@ -240,14 +258,21 @@ export class GameGateway
     console.log('hello from watch game');
     const gameFound = this.games.find((game) => {
       console.log('id ======= ', payload);
-      if (game.hasUser(payload))
-        return game;
+      if (game.hasUser(payload)) return game;
     });
-    if (gameFound)
-    {
+    if (gameFound) {
       console.log('watcher has been added');
-      
+
       gameFound.addSpectators(socket);
+    }
+  }
+
+  @SubscribeMessage('spectator_left')
+  private removeSpectator(socket: Socket) {
+    const gameFound = this.games.find((game) => game.hasSpectator(socket));
+    if (gameFound) {
+      console.log('I should be removed here');
+      gameFound.removeSpectator(socket);
     }
   }
 
