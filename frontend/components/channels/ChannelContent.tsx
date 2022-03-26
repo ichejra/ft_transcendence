@@ -9,34 +9,45 @@ import {
   getChannelMembersList,
   Member,
   addNewMessage,
+  getChannelsList,
 } from "../../features/chatSlice";
 interface ContentProps {
   channelName: string;
+  setAddChannel: (state: boolean) => void;
+  addChannel: boolean;
 }
 
-const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
+const ChannelContent: React.FC<ContentProps> = ({
+  channelName,
+  addChannel,
+  setAddChannel,
+}) => {
   const [message, setMessage] = useState("");
   const [isMember, setIsMember] = useState(true);
   const [pass, setPass] = useState("");
   const dispatch = useAppDispatch();
   const msgContainerRef = useRef<HTMLDivElement>(null);
   const { id: channelId } = useParams();
-  const { channelContent, channels, channelMembers } = useAppSelector(
+  const { channelContent, unjoinedChannels, channelMembers } = useAppSelector(
     (state) => state.channels
   );
   const { updateMessages } = useAppSelector((state) => state.globalState);
   const { user } = useAppSelector((state) => state.user);
 
   const JoinChannel = () => {
-    const currentChannel = channels.find((ch) => ch.id === Number(channelId));
+    const currentChannel = unjoinedChannels.find(
+      (ch) => ch.id === Number(channelId)
+    );
     if (currentChannel) {
       if (currentChannel.type === "private") {
         socket.emit("join_channel", { channelId, password: pass });
-        setIsMember(true);
       } else {
         socket.emit("join_channel", { channelId });
-        setIsMember(true);
       }
+      setIsMember(true);
+      dispatch(getChannelsList()).then(() => {
+        setAddChannel(!addChannel);
+      });
     }
     console.log("joined");
   };
@@ -183,10 +194,19 @@ const MessageForm: React.FC<FormProps> = ({
   handleChange,
   sendMessage,
 }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { id: channelId } = useParams();
+
+  useEffect(() => {
+    inputRef.current?.focus();
+    console.log("OK");
+  }, [channelId]);
+
   return (
     <div className="fixed left-[7.42rem] channels-bar-bg bottom-0 right-0">
       <form className="flex relative items-center mx-2 mb-2 px-2 pb-2">
         <input
+          ref={inputRef}
           type="text"
           value={message}
           onChange={(e) => handleChange(e)}
