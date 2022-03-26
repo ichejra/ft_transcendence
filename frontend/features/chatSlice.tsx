@@ -40,6 +40,7 @@ export interface Member {
 
 interface InitialState {
   createNewChannel: boolean;
+  showChannelsList: boolean;
   channels: Channel[];
   channel: Channel;
   channelContent: ChannelMessage[];
@@ -49,6 +50,7 @@ interface InitialState {
 
 const initialState: InitialState = {
   createNewChannel: false,
+  showChannelsList: false,
   channels: [],
   channel: {
     id: 0,
@@ -205,6 +207,12 @@ const channelsManagmentSlice = createSlice({
     ) => {
       state.createNewChannel = action.payload;
     },
+    setChannelsListModal: (
+      state: InitialState = initialState,
+      action: PayloadAction<boolean>
+    ) => {
+      state.showChannelsList = action.payload;
+    },
     addNewMessage: (
       state: InitialState = initialState,
       action: PayloadAction<ChannelMessage>
@@ -235,7 +243,7 @@ const channelsManagmentSlice = createSlice({
   },
 });
 
-export const { setNewChannelModal, addNewMessage } =
+export const { setNewChannelModal, setChannelsListModal, addNewMessage } =
   channelsManagmentSlice.actions;
 
 export default channelsManagmentSlice.reducer;
