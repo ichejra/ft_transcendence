@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { HiViewGridAdd } from "react-icons/hi";
 import { SiPrivateinternetaccess } from "react-icons/si";
+import { MdExplore } from "react-icons/md";
 import NewChannelModal from "../modals/NewChannelModal";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
@@ -8,10 +9,12 @@ import {
   getChannelsList,
   getSingleChannel,
   getChannelContent,
+  setChannelsListModal,
 } from "../../features/chatSlice";
 import { useNavigate, useParams, useLocation } from "react-router";
 import DirectChat from "./DirectChat";
 import ChannelContent from "./ChannelContent";
+import ChannelsListModal from "../modals/ChannelsListModal";
 
 const ChatRooms = () => {
   const [showDirect, setShowDirect] = useState(false);
@@ -21,13 +24,14 @@ const ChatRooms = () => {
   const dispatch = useAppDispatch();
   const { pathname } = useLocation();
   const { id: channelId } = useParams();
-  const { createNewChannel, channels } = useAppSelector(
+  const { createNewChannel, showChannelsList, channels } = useAppSelector(
     (state) => state.channels
   );
 
   const getChannelMessages = (id: number) => {
     setShowDirect(false);
     setShowChannelContent(true);
+    dispatch(setChannelsListModal(false));
     dispatch(getSingleChannel(id)).then(({ payload }: any) => {
       dispatch(getChannelContent(payload.id)).then(() => {
         window.scrollTo({
@@ -49,6 +53,10 @@ const ChatRooms = () => {
 
   const createChannel = () => {
     dispatch(setNewChannelModal(true));
+  };
+
+  const exploreChannels = () => {
+    dispatch(setChannelsListModal(true));
   };
 
   useEffect(() => {
@@ -99,6 +107,12 @@ const ChatRooms = () => {
           >
             <HiViewGridAdd size="3rem" />
           </div>
+          <div
+            onClick={exploreChannels}
+            className="hover:scale-105 cursor-pointer transition duration-300 border border-blue-400 bg-transparent text-gray-200 rounded-lg w-[70px] h-[70px] flex items-center justify-center mx-6 my-3"
+          >
+            <MdExplore size="3rem" />
+          </div>
         </div>
       </div>
       {showChannelContent || showDirect ? (
@@ -116,6 +130,9 @@ const ChatRooms = () => {
         </div>
       )}
       {createNewChannel && <NewChannelModal />}
+      {showChannelsList && (
+        <ChannelsListModal getChannelMessages={getChannelMessages} />
+      )}
     </div>
   );
 };
