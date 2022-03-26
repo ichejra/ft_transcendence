@@ -15,10 +15,12 @@ import { useNavigate, useParams, useLocation } from "react-router";
 import DirectChat from "./DirectChat";
 import ChannelContent from "./ChannelContent";
 import ChannelsListModal from "../modals/ChannelsListModal";
+import { socket } from "../../pages/SocketProvider";
 
 const ChatRooms = () => {
   const [showDirect, setShowDirect] = useState(false);
   const [channelName, setChannelName] = useState("");
+  const [addChannel, setAddChannel] = useState(false);
   const [showChannelContent, setShowChannelContent] = useState(false);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -40,6 +42,7 @@ const ChatRooms = () => {
           behavior: "smooth",
         });
       });
+      socket.emit("update_join", { rooms: channels, room: payload });
       setChannelName(payload.name);
     });
     navigate(`/channels/${id}`);
@@ -61,7 +64,7 @@ const ChatRooms = () => {
 
   useEffect(() => {
     dispatch(getChannelsList());
-  }, []);
+  }, [addChannel]);
 
   return (
     <div className="page-100 h-full w-full pt-20 pb-16 flex about-family channels-bar-bg">
@@ -117,7 +120,13 @@ const ChatRooms = () => {
       </div>
       {showChannelContent || showDirect ? (
         <div>
-          {showChannelContent && <ChannelContent channelName={channelName} />}
+          {showChannelContent && (
+            <ChannelContent
+              setAddChannel={setAddChannel}
+              addChannel={addChannel}
+              channelName={channelName}
+            />
+          )}
           {showDirect && <DirectChat />}
         </div>
       ) : (
@@ -129,7 +138,12 @@ const ChatRooms = () => {
           </div>
         </div>
       )}
-      {createNewChannel && <NewChannelModal />}
+      {createNewChannel && (
+        <NewChannelModal
+          setAddChannel={setAddChannel}
+          addChannel={addChannel}
+        />
+      )}
       {showChannelsList && (
         <ChannelsListModal getChannelMessages={getChannelMessages} />
       )}

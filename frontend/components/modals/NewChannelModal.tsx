@@ -3,9 +3,16 @@ import { FaTimes } from "react-icons/fa";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { setNewChannelModal } from "../../features/chatSlice";
 import { createChannel, getChannelsList } from "../../features/chatSlice";
+import { socket } from "../../pages/SocketProvider";
 
-const UsersModal: React.FC = () => {
+interface Props {
+  setAddChannel: (state: boolean) => void;
+  addChannel: boolean;
+}
+
+const UsersModal: React.FC<Props> = ({ setAddChannel, addChannel }) => {
   const divRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const dispatch = useAppDispatch();
   const [isPrivate, setIsPrivate] = useState(false);
   const [channelName, setChannelName] = useState("");
@@ -15,18 +22,30 @@ const UsersModal: React.FC = () => {
     setIsPrivate(!isPrivate);
   };
 
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
   const submitChannelCreation = (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(
-      createChannel({
-        name: channelName,
-        password: channelPass,
-        type: isPrivate ? "private" : "public",
-      })
-    ).then(() => {
-      dispatch(getChannelsList());
+    // dispatch(
+    //   createChannel({
+    //     name: channelName,
+    //     password: channelPass,
+    //     type: isPrivate ? "private" : "public",
+    //   })
+    // ).then(() => {
+    //   dispatch(getChannelsList());
+    // });
+    socket.emit("create_channel", {
+      name: channelName,
+      password: channelPass,
+      type: isPrivate ? "private" : "public",
     });
     dispatch(setNewChannelModal(false));
+    dispatch(getChannelsList()).then(() => {
+      setAddChannel(!addChannel);
+    });
   };
 
   return (
@@ -51,6 +70,7 @@ const UsersModal: React.FC = () => {
                 className="flex flex-col items-center justify-center"
               >
                 <input
+                  ref={inputRef}
                   type="text"
                   placeholder="name"
                   value={channelName}
