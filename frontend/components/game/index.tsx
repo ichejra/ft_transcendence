@@ -58,7 +58,7 @@ const PongGame: React.FC<UserType> = ({ userType }) => {
   };
 
   return (
-    <div className='bg-gray-200'>
+    <div className=''>
       <div className='page-100 flex items-center justify-center'>
         {/* <h1 className="text-2xl">PING PONG</h1> */}
         <Pong userType={userType} />
