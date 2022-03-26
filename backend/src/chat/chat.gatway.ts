@@ -87,10 +87,11 @@ export class ChatGatway implements OnGatewayInit {
     // ? handling joining after refeshing
     @SubscribeMessage('update_join')
     async handleUpdate(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
-        const { rooms } = payload;
+        const { rooms, room } = payload;
         rooms.forEach((room: any) => {
-            client.join(room.name);
+            client.leave(room.name);
         });
+        client.join(room.name);
     }
 
     @SubscribeMessage('leave_channel')
