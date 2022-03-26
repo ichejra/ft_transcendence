@@ -38,7 +38,7 @@ export class ChannelsController {
     @Get()
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    getChanels(): Promise<Channel[]> {
+    getChannels(): Promise<Channel[]> {
         return this.channelsService.getChannels();
     }
     //

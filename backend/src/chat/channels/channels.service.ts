@@ -371,7 +371,7 @@ export class ChannelsService {
         try {
             return await this.connection.getRepository(Channel).query(
                 `SELECT * FROM channels
-                WHERE "channels"."id" IN (SELECT "channels"."id" FROM user_channel  WHERE "user_channel"."userId" = $1)`,
+                WHERE "channels"."id" IN (SELECT "channelId" FROM user_channel  WHERE "user_channel"."userId" = $1)`,
                 [userId]
             );
         } catch (err) {
@@ -385,7 +385,7 @@ export class ChannelsService {
         try {
             return await this.connection.getRepository(Channel).query(
                 `SELECT * FROM channels
-                WHERE "channels"."id" NOT IN (SELECT "channels"."id" FROM user_channel  WHERE "user_channel"."userId" = $1)`,
+                WHERE "channels"."id" NOT IN (SELECT "channelId" FROM user_channel  WHERE "user_channel"."userId" = $1)`,
                 [userId]
             );
         }catch (err) {
