@@ -73,24 +73,30 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [leftPlayer, setLeftPlayer] = useState<User>(users[0]);
   const [rightPlayer, setRightPlayer] = useState<User>(users[1]);
+  const [joined, setJoined] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const userId = useAppSelector((state) => state.user.user.id);
 
-  // console.log('user type: ', userType);
-  // console.log('location: ', location);
+  console.log('user type: ', userType);
+  console.log('location: ', location);
   useEffect(() => {
     console.log('location: ', location);
     console.log('user type: ', userType);
     console.log('player: ', leftPlayer);
-  }, [location]);
+    if (userType === 'spectator' && location.pathname !== '/watch')
+      socket.emit('spectator_left');
+  }, []);
 
   const joinMatch = () => {
     socket.emit('join_queue', 'default');
+    setJoined(true);
   };
   const joinMatchWithObstacle = () => {
     socket.emit('join_queue', 'obstacle');
+    setJoined(true);
   };
+  
   // const stopMatch = () => {
   //   socket.emit('stop_game', 'default');
   // };
@@ -99,9 +105,11 @@ const Pong: React.FC<UserType> = ({ userType }) => {
     socket.emit('spectator_left');
     setUsers([]);
     setFrame(stateInit);
+    setJoined(false);
     // document.getElementById('canvas')?.remove();
     // playBtnsRef.current?.style.display = 'block';
   };
+  
   const movePaddle = (e: any) => {
     if (e.code === 'ArrowUp') {
       // console.log('------> keydown');
@@ -144,6 +152,27 @@ const Pong: React.FC<UserType> = ({ userType }) => {
       socket.off('set_users');
     };
   }, []);
+
+  useEffect(() => {
+    if (users.length !== 0) return;
+    socket.emit('isJoined');
+    socket.on('joined', (join) => {
+      setJoined(join);
+    });
+    return () => {
+      socket.off('joined');
+    };
+  }, [location]);
+  // useEffect(() => {
+  //   delay(100).then(() => {
+  //     socket.on('joined', () => {
+  //       setJoined(true);
+  //     });
+  //   });
+  //   return () => {
+  //     socket.off('joined');
+  //   };
+  // }, [joined]);
 
   useEffect(() => {
     if (userType !== 'spectator') {
@@ -327,7 +356,6 @@ const Pong: React.FC<UserType> = ({ userType }) => {
     }
   }, [users]);
 
-
   useEffect(() => {
     if (userType === 'spectator') {
       delay(1000).then(() => {
@@ -338,8 +366,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
     }
 
     // return ()=>
-  });
-
+  }, []);
 
   return (
     <div className='flex w-full flex-col items-center relative'>
@@ -348,7 +375,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
           <GameRules />
         </div>
       )}
-      {userType === 'player' && users.length === 0 && (
+      {userType === 'player' && users.length === 0 && joined === false && (
         <div
           ref={playBtnsRef}
           className='flex md:flex-row flex-col items-center justify-between mt-10 md:w-[50rem] absolute'
@@ -369,6 +396,9 @@ const Pong: React.FC<UserType> = ({ userType }) => {
             </button>
           </div>
         </div>
+      )}
+      {joined === true && users.length === 0 && (
+        <div className='text-white'>Waiting For Your Opponent...</div>
       )}
       {users.length !== 0 && (
         <div className='border-4 border-[lightgrey]'>
@@ -433,7 +463,8 @@ export default Pong;
 //* DONE: set winner and looser
 //* DONE: add game over in the end of the game and the winner for the winner and loser for the looser
 //* DONE: add Live Games page and update it every little bit by listening on a socket every 1s or so
+//* DONE: when game is over and userType is spectator: navigate to game or live game
+//* DONE (wa9): handle the prb of the live game interventing with game
 
+//TODO: joined not working if player navigate to other path
 //TODO: play and pause //! makainax f subject
-//TODO: when game is over and userType is spectator: navigate to game or live game
-//TODO: handle the prb of the live game interventing with game
