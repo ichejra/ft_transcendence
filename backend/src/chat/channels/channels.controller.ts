@@ -41,7 +41,26 @@ export class ChannelsController {
     getChanels(): Promise<Channel[]> {
         return this.channelsService.getChannels();
     }
-    
+    //
+    @Get('joined')
+    @HttpCode(200)
+    @UseGuards(JwtAuthGuard)
+    getJoinedChannels(
+        @Req() _req: any
+        ): Promise<Channel[]> {
+        return this.channelsService.getJoinedChannels(Number(_req.user.id));
+    }
+
+    //
+    @Get('unjoined')
+    @HttpCode(200)
+    @UseGuards(JwtAuthGuard)
+    getUnjoinedChannels(
+        @Req() _req: any
+        ): Promise<Channel[]> {
+        return this.channelsService.getUnjoinedChannels(Number(_req.user.id));
+    }
+
     /* Route get channel 
         http://${host}:${port}/api/channels/{channelId}
     */
@@ -49,6 +68,7 @@ export class ChannelsController {
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
     getChannelById(@Param('channelId', ParseIntPipe) channelId: number): Promise<Channel> {
+        console.log("getJoinedChannels");
         return this.channelsService.getChannelById(Number(channelId));
     }
 
@@ -143,4 +163,6 @@ export class ChannelsController {
         @Body('memberId') memberId: number): Promise<any> {
         return this.channelsService.kickUser(Number(_req.user.id), memberId, channelId);
     }
+
+
 };
