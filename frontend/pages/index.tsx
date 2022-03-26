@@ -31,7 +31,7 @@ const Home: NextPage = () => {
   }, []);
 
   if (Cookies.get("accessToken") && !isLoggedIn) {
-    return <div className="loading"></div>;
+    return <div className="loading w-32 h-32"></div>;
   }
 
   return (

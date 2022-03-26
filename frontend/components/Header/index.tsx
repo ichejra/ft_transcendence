@@ -30,20 +30,40 @@ const Header: React.FC = () => {
           <ul
             className={`items-list nav-links flex md:justify-between w-1/2 2xl:w-1/3 about-title-family`}
           >
-            <li className="header-item hover:scale-110 transition duration-300 cursor-pointer text-md font-medium mx-2 px-2">
-              <Link to="/">Home</Link>
+            <li className="mx-2">
+              <Link to="/">
+                <div className="header-item hover:scale-110 transition duration-300 cursor-pointer text-md font-medium px-2">
+                  Home
+                </div>
+              </Link>
             </li>
-            <li className="header-item hover:scale-110 transition duration-300 cursor-pointer text-md font-medium mx-2 px-2">
-              <Link to={`/channels`}>Channels</Link>
+            <li className="mx-2">
+              <Link to={`/channels`}>
+                <div className="header-item hover:scale-110 transition duration-300 cursor-pointer text-md font-medium px-2">
+                  Channels
+                </div>
+              </Link>
             </li>
-            <li className="header-item hover:scale-110 transition duration-300 cursor-pointer text-md font-medium mx-2 px-2">
-              <Link to="/game">Game</Link>
+            <li className="mx-2">
+              <Link to="/game">
+                <div className="header-item hover:scale-110 transition duration-300 cursor-pointer text-md font-medium px-2">
+                  Game
+                </div>
+              </Link>
             </li>
-            <li className="header-item hover:scale-110 transition duration-300 cursor-pointer text-md font-medium mx-2 px-2">
-              <Link to="/users">Users</Link>
+            <li className="mx-2">
+              <Link to="/users">
+                <div className="header-item hover:scale-110 transition duration-300 cursor-pointer text-md font-medium px-2">
+                  Users
+                </div>
+              </Link>
             </li>
-            <li className="header-item hover:scale-110 transition duration-300 cursor-pointer text-md font-medium mx-2 px-2">
-              <Link to="/liveGames">Live Games</Link>
+            <li className="mx-2">
+              <Link to="/liveGames">
+                <div className="header-item hover:scale-110 transition duration-300 cursor-pointer text-md font-medium px-2">
+                  Live Games
+                </div>
+              </Link>
             </li>
           </ul>
         )}

@@ -41,6 +41,7 @@ export interface Member {
 interface InitialState {
   createNewChannel: boolean;
   showChannelsList: boolean;
+  addChannel: boolean;
   channels: Channel[];
   unjoinedChannels: Channel[];
   channel: Channel;
@@ -52,6 +53,7 @@ interface InitialState {
 const initialState: InitialState = {
   createNewChannel: false,
   showChannelsList: false,
+  addChannel: false,
   channels: [],
   unjoinedChannels: [],
   channel: {
@@ -106,11 +108,14 @@ export const getChannelsList = createAsyncThunk(
   "channels/getChannelsList",
   async (_, _api) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/channels/joined`, {
-        headers: {
-          authorization: `Bearer ${Cookies.get("accessToken")}`,
-        },
-      });
+      const response = await axios.get(
+        `http://localhost:3000/api/channels/joined`,
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
       console.log("joined channels", response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error) {
@@ -243,6 +248,10 @@ const channelsManagmentSlice = createSlice({
       state.channelContent.push(action.payload);
       // console.log("CHAT SLICE", current(state.channelContent));
     },
+    addNewChannel: (state: InitialState = initialState) => {
+      state.addChannel = !state.addChannel;
+      // console.log("CHAT SLICE", current(state.channelContent));
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(createChannel.fulfilled, (state, action: any) => {
@@ -269,8 +278,12 @@ const channelsManagmentSlice = createSlice({
   },
 });
 
-export const { setNewChannelModal, setChannelsListModal, addNewMessage } =
-  channelsManagmentSlice.actions;
+export const {
+  setNewChannelModal,
+  setChannelsListModal,
+  addNewMessage,
+  addNewChannel,
+} = channelsManagmentSlice.actions;
 
 export default channelsManagmentSlice.reducer;
 //TODO add join/leave button
