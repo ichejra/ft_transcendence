@@ -81,7 +81,7 @@ export const createChannel = createAsyncThunk(
   ) => {
     try {
       const response = await axios.post(
-        `http://localhost:3000/api/channels/create`,
+        `http://localhost:3001/api/channels/create`,
         {
           name,
           type,
@@ -144,7 +144,7 @@ export const getSingleChannel = createAsyncThunk(
   async (channelId: number, _api) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/channels/${channelId}`,
+        `http://localhost:3001/api/channels/${channelId}`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -163,7 +163,7 @@ export const getChannelMembersList = createAsyncThunk(
   async (channelId: number, _api) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/channels/${channelId}/members`,
+        `http://localhost:3001/api/channels/${channelId}/members`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -182,7 +182,7 @@ export const getChannelContent = createAsyncThunk(
   async (channelId: number, _api) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/messages/channels/${channelId}`,
+        `http://localhost:3001/api/messages/channels/${channelId}`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -204,7 +204,7 @@ export const getDirectContent = createAsyncThunk(
 
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/messages/direct/${userId}`,
+        `http://localhost:3001/api/messages/direct/${userId}`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
