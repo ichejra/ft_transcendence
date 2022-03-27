@@ -10,7 +10,7 @@ export class IntraStrategy extends PassportStrategy(Strategy, '42') {
         super({
             clientID: process.env.CLIENT_ID,
             clientSecret: process.env.SECRET,
-            callbackURL: "http://localhost:3000/auth",
+            callbackURL: "http://localhost:3001/auth",
             profileFields: {
                 'id': function (obj) { return String(obj.id); },
                 'username': 'login',
