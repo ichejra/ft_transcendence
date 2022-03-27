@@ -17,9 +17,9 @@ import { User, UserState } from './entities/user.entity';
 export class UsersService {
   constructor(
     private connection: Connection,
-    ) {}
+  ) { }
 
-  async create(user: UserDto) : Promise<User>{
+  async create(user: UserDto): Promise<User> {
     try {
       return await this.connection.getRepository(User).save(user);
     } catch (e) {
@@ -27,7 +27,7 @@ export class UsersService {
     }
   }
 
-  findAll() : Promise<User[]>{
+  findAll(): Promise<User[]> {
     try {
       return this.connection.getRepository(User).find();
     } catch (err) {
@@ -42,34 +42,34 @@ export class UsersService {
         return null;
       }
       return user;
-    } catch(err) {
+    } catch (err) {
       return null;
     }
   }
 
-  async updateProfile(id: number, user_name: string, file: Express.Multer.File) : Promise<UserDto> {
-    try{
-       if (!file && user_name) {
-        await this.connection.getRepository(User).update(id, {user_name: user_name});
+  async updateProfile(id: number, user_name: string, file: Express.Multer.File): Promise<UserDto> {
+    try {
+      if (!file && user_name) {
+        await this.connection.getRepository(User).update(id, { user_name: user_name });
       } else if (!user_name && file) {
         await this.connection.getRepository(User).update(id,
-          { avatar_url:  `http://${process.env.HOST}:${process.env.PORT}/${file.filename}`}
-          );
+          { avatar_url: `http://${process.env.HOST}:${process.env.PORT}/${file.filename}` }
+        );
       } else if (file && user_name) {
         await this.connection.getRepository(User).update(id,
-          { 
+          {
             user_name: user_name,
-            avatar_url:  `http://${process.env.HOST}:${process.env.PORT}/${file.filename}`
+            avatar_url: `http://${process.env.HOST}:${process.env.PORT}/${file.filename}`
           });
       }
       return await this.connection.getRepository(User).findOne(id);
-    } catch(e) {
+    } catch (e) {
       throw new ForbiddenException('could not update the profile');
     }
   }
 
   // function used for updating user state
-  updateState = async (id: number, state: UserState) : Promise<User> => {
+  updateState = async (id: number, state: UserState): Promise<User> => {
     await this.connection.getRepository(User).update(id, { state: state });
     return await this.connection.getRepository(User).findOne(id);
   }
@@ -78,7 +78,7 @@ export class UsersService {
     try {
       return await this.connection.getRepository(User).delete(id);
     }
-    catch(e) {
+    catch (e) {
       throw new ForbiddenException('cannot delete the profile');
     }
   }
@@ -86,7 +86,7 @@ export class UsersService {
   async logout(_req: any, _res: any): Promise<any> {
     const user = await this.connection.getRepository(User).findOne(Number(_req.user.id));
     if (user) {
-        _res.clearCookie('jwt');
+      _res.clearCookie('jwt');
     }
     _res.redirect(process.env.HOME_PAGE);
   }
@@ -104,14 +104,14 @@ export class UsersService {
         ]
       );
       if (relation.length === 0) {
-        await this.connection.getRepository(UserFriends).save({applicant: userId, recipient: recipientId});
+        await this.connection.getRepository(UserFriends).save({ applicant: userId, recipient: recipientId });
       }
-      return await this.connection.getRepository(User).findOne({where: {id: recipientId}});
+      return await this.connection.getRepository(User).findOne({ where: { id: recipientId } });
     } catch (error) {
       throw error;
     }
   }
-  
+
   // method used for accept the request friend (applicantId) by update status in databases from pending to accepted
   async acceptFriend(userId, applicantId): Promise<User> {
     try {
@@ -125,10 +125,10 @@ export class UsersService {
           userId,
           applicantId
         ]);
-        return await this.connection.getRepository(User).findOne({where: {id: applicantId}}); // return the accpeted friend
-      } catch (error) {
-        throw error;
-      }
+      return await this.connection.getRepository(User).findOne({ where: { id: applicantId } }); // return the accpeted friend
+    } catch (error) {
+      throw error;
+    }
   }
 
   /* method used for block a friend 
@@ -142,67 +142,67 @@ export class UsersService {
         WHERE ("recipientId" = $1 AND "applicantId" = $2)
         OR ("applicantId" = $1 AND "recipientId" = $2)`,
         [
-        userId,
-        blockId
-      ]);
+          userId,
+          blockId
+        ]);
       if (relation.length === 0) {
-        await this.insertToFriends(userId, blockId); 
+        await this.insertToFriends(userId, blockId);
       }
       await this.connection.getRepository(UserFriends).query(
         `UPDATE user_friends
       SET "status" = $1
       WHERE ("recipientId" = $2 AND "applicantId" = $3)
       OR ("applicantId" = $2 AND "recipientId" = $3)`,
-      [
-        UserFriendsRelation.BLOCKED,
-        userId,
-        blockId
-      ]);
-      return await this.connection.getRepository(User).findOne({where: {id: blockId}}); // return the blocked user
+        [
+          UserFriendsRelation.BLOCKED,
+          userId,
+          blockId
+        ]);
+      return await this.connection.getRepository(User).findOne({ where: { id: blockId } }); // return the blocked user
     } catch (error) {
       throw error;
     }
   }
 
   /* method used to unblock a user by update status to accepted or pending */ // this one might get some changes
-                                                                            // delete the relation instead of updating the relation status
+  // delete the relation instead of updating the relation status
   async unblockFriend(userId: number, unblockId: number): Promise<User> {
     try {
       await this.connection.getRepository(UserFriends).query(
         `UPDATE user_friends
         SET "status" = $1
         WHERE ("recipientId" = $2 AND "applicantId" = $3)
-        OR ("applicantId" = $2 AND "recipientId" = $3)`, 
+        OR ("applicantId" = $2 AND "recipientId" = $3)`,
         [
           UserFriendsRelation.ACCEPTED,
           userId,
           unblockId
         ]);
-        return await this.connection.getRepository(User).findOne({ where:{id: unblockId}});
-      } catch (error) {
-        throw error;
-      }
+      return await this.connection.getRepository(User).findOne({ where: { id: unblockId } });
+    } catch (error) {
+      throw error;
+    }
   }
 
   /* used for getting all the pending requests of the users  */
-  async getPendingRequests(userId: number) : Promise<User[]> {
+  async getPendingRequests(userId: number): Promise<User[]> {
     try {
       return await this.connection.getRepository(UserFriends).query(
         `SELECT * FROM users
         WHERE "users"."id"
         IN (SELECT "applicantId" FROM user_friends WHERE "user_friends"."recipientId" = $1 AND "user_friends"."status" = $2)`,
         [
-          userId, 
+          userId,
           UserFriendsRelation.PENDING
         ]);
-      } catch(error) {
-        throw error;
-      }
+    } catch (error) {
+      throw error;
+    }
   }
-    
-    
+
+
   /* used for getting the friends */
-  async getUserFriends(userId: number) : Promise<User[]> {
+  async getUserFriends(userId: number): Promise<User[]> {
     try {
       return await this.connection.getRepository(UserFriends).query(
         `SELECT * FROM users
@@ -211,17 +211,17 @@ export class UsersService {
         OR "users"."id"
         IN (SELECT "applicantId" FROM user_friends WHERE "user_friends"."recipientId" = $1 AND "user_friends"."status" = $2)`,
         [
-          userId, 
+          userId,
           UserFriendsRelation.ACCEPTED
         ]);
-      } catch(error) {
-        throw error;
-      }
+    } catch (error) {
+      throw error;
+    }
   }
 
   /* used for getting the blocked users */
-  async getBlockedFriends(userId: number) : Promise<User[]> {
-    try{
+  async getBlockedFriends(userId: number): Promise<User[]> {
+    try {
       return await this.connection.getRepository(UserFriends).query(
         `SELECT * FROM users
         WHERE "users"."id"
@@ -232,14 +232,14 @@ export class UsersService {
           userId,
           UserFriendsRelation.BLOCKED
         ]);
-      }catch(error) {
-        throw error;
-      }
+    } catch (error) {
+      throw error;
+    }
   }
 
   /* this function used for return all users that have no relations with the logged user*/
-  async getNoRelationUsers(userId: number) : Promise<User[]> {
-    try{
+  async getNoRelationUsers(userId: number): Promise<User[]> {
+    try {
       return await this.connection.getRepository(UserFriends).query(
         `SELECT * FROM users
         WHERE "users"."id"
@@ -251,7 +251,7 @@ export class UsersService {
       WHERE ("user_friends"."applicantId" = $1 OR "user_friends"."recipientId" = $1)
       AND ("user_friends"."status" = $2 OR "user_friends"."status" = $3 OR  "user_friends"."status" = $4))
       `, [
-        userId, 
+        userId,
         UserFriendsRelation.ACCEPTED,
         UserFriendsRelation.PENDING,
         UserFriendsRelation.BLOCKED
@@ -275,7 +275,7 @@ export class UsersService {
 
   /* Turn on the two factor authentication */
   async turnOnOffTwoFactorAuth(userId: number, bool: boolean): Promise<User> {
-    try{
+    try {
       await this.connection.getRepository(User).update(userId, {
         is_2fa_enabled: bool,
       });

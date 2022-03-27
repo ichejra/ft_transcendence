@@ -11,11 +11,11 @@ export class ConnectionsService {
     constructor(
         private readonly usersService: UsersService,
         private readonly authService: AuthService,
-        ){}
+    ) { }
 
     // save the users connections in Map
     private readonly connections: Map<number, Set<Socket>> = new Map<number, Set<Socket>>();
-    
+
     /* function for getting user from socket by access token */
     public async getUserFromSocket(socket: Socket): Promise<User> {
         const accessToken = socket.handshake.auth.token;
@@ -28,13 +28,13 @@ export class ConnectionsService {
         }
         return user;
     }
-    
+
     // save user connections
     public addConnection = async (socket: Socket): Promise<any> => {
         let user: User = null;
         try {
             user = await this.getUserFromSocket(socket);
-        } catch(e) {
+        } catch (e) {
             socket.disconnect();
             throw new WsException('unauthorized: unauthenticated connection');
         }
@@ -53,18 +53,18 @@ export class ConnectionsService {
 
     // this function use for deleting the connection from connections array
     public eraseConnection = async (socket: Socket): Promise<any> => {
-       let user: User;
+        let user: User;
         try {
             user = await this.getUserFromSocket(socket);
-        } catch(e) {
+        } catch (e) {
             socket.disconnect(); // if the socket not authenticated should disconnect it
-            throw new WsException('unauthorized: unauthenticated connection');
+            return;
         }
         try {
 
             const sockets: Set<Socket> = this.connections.get(user.id);
             if (sockets) {
-                if (sockets.size === 0){
+                if (sockets.size === 0) {
                     await this.usersService.updateState(Number(user.id), UserState.OFFLINE);
                     this.connections.delete(user.id);
                 } else {
@@ -75,27 +75,28 @@ export class ConnectionsService {
         } catch {
             socket.disconnect();
             throw new WsException('the user cannot connect');
+
         }
     }
 
     // Getting a all user connections
-    public getUserConnections = async (userId: number) : Promise<Set<Socket>> => {
+    public getUserConnections = async (userId: number): Promise<Set<Socket>> => {
         try {
             const sockets = this.connections.get(userId);
-             if (!sockets) throw new WsException('user had no connection');
+            if (!sockets) throw new WsException('user had no connection');
             return sockets;
-        } catch(err) {
+        } catch (err) {
             throw new WsException('the target user had no connection');
         }
     }
 
     // get receiver by id
-    public getReceiverById = async (id: number) : Promise<User> => {
-        try{
+    public getReceiverById = async (id: number): Promise<User> => {
+        try {
             return await this.usersService.findOne(id);
-        } catch(err){
+        } catch (err) {
             throw new WsException('cannot get the receiver');
         }
-    } 
+    }
 
 }

@@ -10,9 +10,9 @@ dotenv.config();
     MulterModule.register({
       dest: process.env.DESTINATION,
     })
-],
-  controllers: [ UsersController ],
-  providers: [ UsersService ],
-  exports: [ UsersService ]
+  ],
+  controllers: [UsersController],
+  providers: [UsersService],
+  exports: [UsersService]
 })
-export class UsersModule {}
+export class UsersModule { }

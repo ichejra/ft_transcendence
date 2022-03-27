@@ -51,4 +51,4 @@ dotenv.config();
     EventsModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }

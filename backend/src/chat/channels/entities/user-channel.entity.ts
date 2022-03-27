@@ -13,7 +13,7 @@ import { Channel } from "./channel.entity";
 export enum UserRole {
     ADMIN = "admin",
     OWNER = "owner",
-    MEMBER= "member",
+    MEMBER = "member",
 };
 
 export enum MemberStatus {
@@ -22,20 +22,20 @@ export enum MemberStatus {
     MUTED = "muted",
 };
 
-@Entity('user_channel') 
+@Entity('user_channel')
 export class UserChannel {
     @PrimaryGeneratedColumn()
     id?: number;
 
     @ManyToOne(() => User, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
-    @JoinColumn({name: 'userId'})
+    @JoinColumn({ name: 'userId' })
     user?: User;
 
     @ManyToOne(() => Channel, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
-    @JoinColumn({name: 'channelId'})
+    @JoinColumn({ name: 'channelId' })
     channel?: Channel;
 
-    @Column ({
+    @Column({
         type: "enum",
         enum: UserRole,
         default: UserRole.OWNER

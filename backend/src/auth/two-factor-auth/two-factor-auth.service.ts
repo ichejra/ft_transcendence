@@ -13,31 +13,31 @@ export class TwoFactorAuthService {
         private readonly jwtService: JwtService,
         private mailService: MailService,
         private readonly usersService: UsersService
-        ) {}
-    
+    ) { }
+
     /* method used for changing 2fa bool */
     enableDisableTwoFactorAuth = async (userId: number, bool: boolean) => {
         return this.usersService.turnOnOffTwoFactorAuth(userId, bool);
     }
 
     /* method used for email sending */
-    async sendConnectLink(user: User) : Promise<any>{
+    async sendConnectLink(user: User): Promise<any> {
         try {
-            const payload: JwtPayload = { id: user.id, user_name: user.user_name, email: user.email};
+            const payload: JwtPayload = { id: user.id, user_name: user.user_name, email: user.email };
             const token: string = await this.jwtService.sign(payload, {
                 secret: process.env.JWT_SECRET,
                 expiresIn: process.env.JWT_EXPIRESIN
             });
-            
+
             const url: string = `http://${process.env.HOST}:${process.env.PORT}/2fa/verify?token=${token}`;
             const text = `Welcome to ${process.env.APP_NAME} 2FA. To continue, click here: ${url}`;
-            
+
             await this.mailService.sendMail({
                 to: user.email,
                 subject: 'Account login',
                 text
             });
-            return { success: true, message: 'check inbox.'}
+            return { success: true, message: 'check inbox.' }
         } catch (err) {
             throw err;
         }
@@ -45,7 +45,7 @@ export class TwoFactorAuthService {
 
     /* method used for logging verified */
     async verify(token: string, res: any): Promise<any> {
-        const { id, email } =  await this.jwtService.verify(token);
+        const { id, email } = await this.jwtService.verify(token);
         const user = await this.usersService.findOne(Number(id));
         if (user && user.email === email) {
             res.cookie('accessToken', token);

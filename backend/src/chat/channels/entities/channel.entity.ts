@@ -29,7 +29,7 @@ export class Channel extends BaseEntity {
         type: 'varchar',
         length: 255,
         unique: true
-     })
+    })
     name: string;
 
     @Column({
@@ -38,7 +38,7 @@ export class Channel extends BaseEntity {
         nullable: true
     })
     password?: string;
- 
+
     @Column({
         type: "enum",
         enum: ChannelType,

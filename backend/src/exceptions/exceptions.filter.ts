@@ -1,7 +1,7 @@
 import {
-    Catch,
-    ArgumentsHost,
-    HttpException,
+  Catch,
+  ArgumentsHost,
+  HttpException,
 } from '@nestjs/common';
 import {
   BaseExceptionFilter

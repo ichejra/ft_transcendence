@@ -20,7 +20,7 @@ import { MemberStatus, UserChannel } from "./entities/user-channel.entity";
 
 @Controller('channels')
 export class ChannelsController {
-    constructor(private channelsService: ChannelsService) {}
+    constructor(private channelsService: ChannelsService) { }
 
     /* Route for creating a channel
         http://${host}:${port}/api/channels/create
@@ -47,7 +47,7 @@ export class ChannelsController {
     @UseGuards(JwtAuthGuard)
     getJoinedChannels(
         @Req() _req: any
-        ): Promise<Channel[]> {
+    ): Promise<Channel[]> {
         return this.channelsService.getJoinedChannels(Number(_req.user.id));
     }
 
@@ -57,7 +57,7 @@ export class ChannelsController {
     @UseGuards(JwtAuthGuard)
     getUnjoinedChannels(
         @Req() _req: any
-        ): Promise<Channel[]> {
+    ): Promise<Channel[]> {
         return this.channelsService.getUnjoinedChannels(Number(_req.user.id));
     }
 
@@ -97,7 +97,7 @@ export class ChannelsController {
     @Delete('/:channelId')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    deleteChannel(@Req() req: any, @Param('channelId', ParseIntPipe) channelId: number) : Promise<any> {
+    deleteChannel(@Req() req: any, @Param('channelId', ParseIntPipe) channelId: number): Promise<any> {
         return this.channelsService.deleteChannel(Number(req.user.id), Number(channelId));
     }
 
@@ -117,7 +117,7 @@ export class ChannelsController {
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
     removeAdmin(
-        @Req() _req: any, 
+        @Req() _req: any,
         @Param('channelId', ParseIntPipe) channelId: number,
         @Body('memberId') memberId: number): Promise<any> {
         return this.channelsService.removeAdmin(channelId, Number(_req.user.id), memberId);
@@ -150,7 +150,7 @@ export class ChannelsController {
         @Req() _req: any,
         @Param('channelId') channelId: number,
         @Body('password') password: string
-    ) : Promise<any> {
+    ): Promise<any> {
         return this.channelsService.setUpdatePassword(Number(_req.user.id), channelId, password);
     }
 
@@ -163,6 +163,4 @@ export class ChannelsController {
         @Body('memberId') memberId: number): Promise<any> {
         return this.channelsService.kickUser(Number(_req.user.id), memberId, channelId);
     }
-
-
 };

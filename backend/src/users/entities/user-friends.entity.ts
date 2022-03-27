@@ -24,7 +24,7 @@ export class UserFriends {
     applicant: User;
 
     @ManyToOne(() => User, (e: User) => e.recievedFriendRequest, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
-    @JoinColumn({ name: 'recipientId'})
+    @JoinColumn({ name: 'recipientId' })
     recipient: User;
 
     @Column({
