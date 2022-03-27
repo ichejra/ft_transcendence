@@ -58,8 +58,8 @@ const PongGame: React.FC<UserType> = ({ userType }) => {
   };
 
   return (
-    <div className=''>
-      <div className='page-100 flex items-center justify-center'>
+    <div className='page-100 flex w-full items-center justify-center'>
+      <div className='flex items-center justify-center w-full'>
         {/* <h1 className="text-2xl">PING PONG</h1> */}
         <Pong userType={userType} />
         {/* <Pong /> */}
@@ -77,8 +77,6 @@ const PongGame: React.FC<UserType> = ({ userType }) => {
     </div>
   );
 };
-
-
 
 export default PongGame;
 
