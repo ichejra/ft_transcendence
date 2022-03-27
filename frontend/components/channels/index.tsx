@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { HiViewGridAdd } from "react-icons/hi";
 import { SiPrivateinternetaccess } from "react-icons/si";
+import { MdExplore } from "react-icons/md";
 import NewChannelModal from "../modals/NewChannelModal";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
@@ -8,26 +9,31 @@ import {
   getChannelsList,
   getSingleChannel,
   getChannelContent,
+  setChannelsListModal,
 } from "../../features/chatSlice";
 import { useNavigate, useParams, useLocation } from "react-router";
 import DirectChat from "./DirectChat";
 import ChannelContent from "./ChannelContent";
+import ChannelsListModal from "../modals/ChannelsListModal";
+import { socket } from "../../pages/SocketProvider";
 
 const ChatRooms = () => {
   const [showDirect, setShowDirect] = useState(false);
   const [channelName, setChannelName] = useState("");
+  const [addChannel, setAddChannel] = useState(false);
   const [showChannelContent, setShowChannelContent] = useState(false);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { pathname } = useLocation();
   const { id: channelId } = useParams();
-  const { createNewChannel, channels } = useAppSelector(
+  const { createNewChannel, showChannelsList, channels } = useAppSelector(
     (state) => state.channels
   );
 
   const getChannelMessages = (id: number) => {
     setShowDirect(false);
     setShowChannelContent(true);
+    dispatch(setChannelsListModal(false));
     dispatch(getSingleChannel(id)).then(({ payload }: any) => {
       dispatch(getChannelContent(payload.id)).then(() => {
         window.scrollTo({
@@ -36,6 +42,7 @@ const ChatRooms = () => {
           behavior: "smooth",
         });
       });
+      socket.emit("update_join", { rooms: channels, room: payload });
       setChannelName(payload.name);
     });
     navigate(`/channels/${id}`);
@@ -51,9 +58,13 @@ const ChatRooms = () => {
     dispatch(setNewChannelModal(true));
   };
 
+  const exploreChannels = () => {
+    dispatch(setChannelsListModal(true));
+  };
+
   useEffect(() => {
     dispatch(getChannelsList());
-  }, []);
+  }, [addChannel]);
 
   return (
     <div className="page-100 h-full w-full pt-20 pb-16 flex about-family channels-bar-bg">
@@ -99,11 +110,23 @@ const ChatRooms = () => {
           >
             <HiViewGridAdd size="3rem" />
           </div>
+          <div
+            onClick={exploreChannels}
+            className="hover:scale-105 cursor-pointer transition duration-300 border border-blue-400 bg-transparent text-gray-200 rounded-lg w-[70px] h-[70px] flex items-center justify-center mx-6 my-3"
+          >
+            <MdExplore size="3rem" />
+          </div>
         </div>
       </div>
       {showChannelContent || showDirect ? (
         <div>
-          {showChannelContent && <ChannelContent channelName={channelName} />}
+          {showChannelContent && (
+            <ChannelContent
+              setAddChannel={setAddChannel}
+              addChannel={addChannel}
+              channelName={channelName}
+            />
+          )}
           {showDirect && <DirectChat />}
         </div>
       ) : (
@@ -115,7 +138,15 @@ const ChatRooms = () => {
           </div>
         </div>
       )}
-      {createNewChannel && <NewChannelModal />}
+      {createNewChannel && (
+        <NewChannelModal
+          setAddChannel={setAddChannel}
+          addChannel={addChannel}
+        />
+      )}
+      {showChannelsList && (
+        <ChannelsListModal getChannelMessages={getChannelMessages} />
+      )}
     </div>
   );
 };

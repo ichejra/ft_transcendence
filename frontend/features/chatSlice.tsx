@@ -40,7 +40,9 @@ export interface Member {
 
 interface InitialState {
   createNewChannel: boolean;
+  showChannelsList: boolean;
   channels: Channel[];
+  unjoinedChannels: Channel[];
   channel: Channel;
   channelContent: ChannelMessage[];
   channelMembers: Member[];
@@ -49,7 +51,9 @@ interface InitialState {
 
 const initialState: InitialState = {
   createNewChannel: false,
+  showChannelsList: false,
   channels: [],
+  unjoinedChannels: [],
   channel: {
     id: 0,
     name: "",
@@ -102,11 +106,32 @@ export const getChannelsList = createAsyncThunk(
   "channels/getChannelsList",
   async (_, _api) => {
     try {
-      const response = await axios.get(`http://localhost:3001/api/channels`, {
+      const response = await axios.get(`http://localhost:3000/api/channels/joined`, {
         headers: {
           authorization: `Bearer ${Cookies.get("accessToken")}`,
         },
       });
+      console.log("joined channels", response.data);
+      return _api.fulfillWithValue(response.data);
+    } catch (error) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
+
+export const fetchUnjoinedChannels = createAsyncThunk(
+  "channels/fetchUnjoinedChannels",
+  async (_, _api) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/channels/unjoined`,
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      console.log("unjoined channels", response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error) {
       return _api.rejectWithValue(error);
@@ -205,6 +230,12 @@ const channelsManagmentSlice = createSlice({
     ) => {
       state.createNewChannel = action.payload;
     },
+    setChannelsListModal: (
+      state: InitialState = initialState,
+      action: PayloadAction<boolean>
+    ) => {
+      state.showChannelsList = action.payload;
+    },
     addNewMessage: (
       state: InitialState = initialState,
       action: PayloadAction<ChannelMessage>
@@ -219,6 +250,9 @@ const channelsManagmentSlice = createSlice({
     });
     builder.addCase(getChannelsList.fulfilled, (state, action: any) => {
       state.channels = action.payload;
+    });
+    builder.addCase(fetchUnjoinedChannels.fulfilled, (state, action: any) => {
+      state.unjoinedChannels = action.payload;
     });
     builder.addCase(getSingleChannel.fulfilled, (state, action: any) => {
       state.channel = action.payload;
@@ -235,7 +269,7 @@ const channelsManagmentSlice = createSlice({
   },
 });
 
-export const { setNewChannelModal, addNewMessage } =
+export const { setNewChannelModal, setChannelsListModal, addNewMessage } =
   channelsManagmentSlice.actions;
 
 export default channelsManagmentSlice.reducer;

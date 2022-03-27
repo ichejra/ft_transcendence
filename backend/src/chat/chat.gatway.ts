@@ -4,7 +4,8 @@ import {
     OnGatewayInit,
     SubscribeMessage,
     WebSocketGateway,
-    WebSocketServer
+    WebSocketServer,
+    WsException
 } from "@nestjs/websockets";
 import {
     Inject,
@@ -19,7 +20,7 @@ import { Channel } from "./channels/entities/channel.entity";
 import { MessageChannel } from "./messages/entities/message-channel.entity";
 import { DirectChatService } from "./direct-chat/direct-chat.service";
 import { ConnectionsService } from "src/events/connections.service";
-import { ForbiddenException } from "src/exceptions/forbidden.exception";
+import { ChannelDto } from "./channels/dto/channel.dto";
 
 @WebSocketGateway({  
     cors: {
@@ -53,21 +54,44 @@ export class ChatGatway implements OnGatewayInit {
         });
     }
 
+    @SubscribeMessage('create_channel')
+    async handleCreateChannel(@ConnectedSocket() client: Socket, @MessageBody() payload: ChannelDto) {
+        console.log(payload);
+        try {
+            const user = await this.connectionsService.getUserFromSocket(client);
+            await this.channelsService.createChannel(user, payload);
+        } catch (error) {
+            throw new WsException('cannot create channel');
+        }
+        client.join(payload.name);
+    }
+
     // ? handling messages for channels
     @SubscribeMessage('send_message_channel')
     async handleChannelMessage(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
         const channel: Channel = await this.channelsService.getChannelById(payload.channelId);
         const message: MessageChannel = await this.channelsService.saveMessage(client, channel, payload.content);
-        this.server.emit('receive_message_channel', message, channel); 
+        this.server.to(channel.name).emit('receive_message_channel', message); 
     }
-
+    
     @SubscribeMessage('join_channel')
     async handleJoinChannel(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
+        console.log(payload);
         const channel: Channel = await this.channelsService.joinChannel(client, payload);
         if (!channel) {
-            throw new ForbiddenException('Forbidden');
+            throw new WsException('Forbidden');
         }
         client.join(channel.name);
+    }
+
+    // ? handling joining after refeshing
+    @SubscribeMessage('update_join')
+    async handleUpdate(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
+        const { rooms, room } = payload;
+        rooms.forEach((room: any) => {
+            client.leave(room.name);
+        });
+        client.join(room.name);
     }
 
     @SubscribeMessage('leave_channel')

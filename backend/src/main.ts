@@ -18,7 +18,8 @@ async function bootstrap() {
   app.useGlobalFilters(new ExceptionsFilter());
   app.setGlobalPrefix('api', { exclude: ['auth'] });
   app.useGlobalPipes(new ValidationPipe());
-  await app.listen(process.env.PORT || 3000);
-  logger.log(`Running on http://localhost:${process.env.PORT}`);
+  await app.listen(process.env.PORT || 3000, async () => {
+    logger.log(`App listening on ${await app.getUrl()}`)
+  });
 }
 bootstrap();

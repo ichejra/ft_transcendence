@@ -365,4 +365,31 @@ export class ChannelsService {
             throw err;
         }
     }
+
+    // getting the joined channels
+    getJoinedChannels = async (userId: Number): Promise<Channel[]> => {
+        try {
+            return await this.connection.getRepository(Channel).query(
+                `SELECT * FROM channels
+                WHERE "channels"."id" IN (SELECT "channelId" FROM user_channel  WHERE "user_channel"."userId" = $1)`,
+                [userId]
+            );
+        } catch (err) {
+            console.log(err);
+            throw err;
+        }
+    }
+
+    // getting the unjoined channels
+    getUnjoinedChannels = async (userId: Number): Promise<Channel[]> => {
+        try {
+            return await this.connection.getRepository(Channel).query(
+                `SELECT * FROM channels
+                WHERE "channels"."id" NOT IN (SELECT "channelId" FROM user_channel  WHERE "user_channel"."userId" = $1)`,
+                [userId]
+            );
+        }catch (err) {
+            throw err;
+        }
+    }
 }
