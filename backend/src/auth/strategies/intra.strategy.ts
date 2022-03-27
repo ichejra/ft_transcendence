@@ -10,7 +10,7 @@ export class IntraStrategy extends PassportStrategy(Strategy, '42') {
         super({
             clientID: process.env.CLIENT_ID,
             clientSecret: process.env.SECRET,
-            callbackURL: "http://localhost:3000/auth",
+            callbackURL: "http://localhost:3001/auth",
             profileFields: {
                 'id': function (obj) { return String(obj.id); },
                 'username': 'login',
@@ -21,13 +21,13 @@ export class IntraStrategy extends PassportStrategy(Strategy, '42') {
                 'emails.0.value': 'email',
                 'phoneNumbers.0.value': 'phone',
                 'photos.0.value': 'image_url'
-              }
+            }
         }); // Config
     }
-    
-    async validate(accessToken: string, refreshToken: string, profile: any, done: Function) : Promise<any> {
-        const { id ,username, emails, photos, displayName } = profile;
-        const user: UserDto =  {
+
+    async validate(accessToken: string, refreshToken: string, profile: any, done: Function): Promise<any> {
+        const { id, username, emails, photos, displayName } = profile;
+        const user: UserDto = {
             id: id,
             email: emails[0].value,
             display_name: displayName,

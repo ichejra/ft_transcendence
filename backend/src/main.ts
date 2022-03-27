@@ -18,7 +18,7 @@ async function bootstrap() {
   app.useGlobalFilters(new ExceptionsFilter());
   app.setGlobalPrefix('api', { exclude: ['auth'] });
   app.useGlobalPipes(new ValidationPipe());
-  await app.listen(process.env.PORT || 3000, async () => {
+  await app.listen(process.env.PORT || 3001, async () => {
     logger.log(`App listening on ${await app.getUrl()}`)
   });
 }

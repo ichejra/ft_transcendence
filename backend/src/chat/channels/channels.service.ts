@@ -22,6 +22,7 @@ import { ConnectionsService } from "src/events/connections.service";
 import { MessageChannel } from "../messages/entities/message-channel.entity";
 import * as bcrypt from "bcrypt";
 import { ForbiddenException } from "src/exceptions/forbidden.exception";
+import { WsException } from "@nestjs/websockets";
 
 @Injectable()
 export class ChannelsService {
@@ -29,10 +30,10 @@ export class ChannelsService {
         private connection: Connection,
         private messagesService: MessagesService,
         private connectionsService: ConnectionsService
-        ) {}
+    ) { }
     /* Channels */
     /* Method: create a new channel in database */
-    async createChannel(user: User, channel: ChannelDto) : Promise<Channel> {
+    async createChannel(user: User, channel: ChannelDto): Promise<Channel> {
         let newChannel: Channel;
         try {
             // password hashing§
@@ -78,7 +79,7 @@ export class ChannelsService {
     getChannelsMembers = async (channelId: number): Promise<UserChannel[]> => {
         try {
             const members = await this.connection.getRepository(UserChannel).find({
-                relations: [ 'user' ],
+                relations: ['user'],
                 where: {
                     channel: channelId
                 }
@@ -90,8 +91,8 @@ export class ChannelsService {
     }
 
     /* update channel */
-    async updateChannel(userID:number, channelId: number, data: UpdateChannelDto): Promise<Channel> {
-        try {   
+    async updateChannel(userID: number, channelId: number, data: UpdateChannelDto): Promise<Channel> {
+        try {
             if (data.type === ChannelType.PRIVATE) {
                 await this.setUpdatePassword(userID, channelId, data.password);
             }
@@ -103,7 +104,7 @@ export class ChannelsService {
     }
 
     /* delete channel */
-    async deleteChannel(userId:number, channelId: number): Promise<any> {
+    async deleteChannel(userId: number, channelId: number): Promise<any> {
         // the user that will remove a channel from the database should be channel owner
         // check the user if he's the owner
         try {
@@ -119,44 +120,45 @@ export class ChannelsService {
             }
             await this.connection.getRepository(UserChannel).query(
                 `DELETE FROM user_channel
-                WHERE "user_channel"."channelId" = $1`, [ channelId,  ]
-                );
-                await this.connection.getRepository(Channel).delete(channelId);
-                return { success: true, message: 'channel has been removed.' };
-            } catch (err) {
-                throw new ForbiddenException("Forbidden: permission denied");
-            }
+                WHERE "user_channel"."channelId" = $1`, [channelId,]
+            );
+            await this.connection.getRepository(Channel).delete(channelId);
+            return { success: true, message: 'channel has been removed.' };
+        } catch (err) {
+            throw new ForbiddenException("Forbidden: permission denied");
+        }
     }
 
     /* joining channel -> user_channel table updating */
-    joinChannel = async (socket: Socket, payload: any) : Promise<Channel> => {
+    joinChannel = async (socket: Socket, payload: any): Promise<Channel> => {
+        // get user and channel
         try {
-            // get user and channel
             const channel = await this.getChannelById(payload.channelId);
             // check for channel type
             if (channel.type === ChannelType.PRIVATE) {
-            // require a password
-            const hashPwd = await bcrypt.compare(payload.password, channel.password);
-            if (hashPwd === false) {
-                return null;
+                // require a password
+                const hashPwd = await bcrypt.compare(payload.password, channel.password);
+                if (hashPwd === false) {
+                    throw new WsException('Forbidden: incorrect password');
+                }
             }
+            // get the user§
+            const user = await this.connectionsService.getUserFromSocket(socket);
+            // update user channel relation add the user
+            await this.connection.getRepository(UserChannel).save({
+                user: user,
+                channel: channel,
+                userRole: UserRole.MEMBER
+            })
+            return channel;
+        } catch (err) {
+            throw err;
         }
-        // get the user§
-        const user = await this.connectionsService.getUserFromSocket(socket);
-        // update user channel relation add the user
-        await this.connection.getRepository(UserChannel).save({
-            user: user,
-            channel: channel,
-            userRole: UserRole.MEMBER
-        })
-        return channel;
-        }catch (err) {
-            throw new ForbiddenException('Forbidden: cannot join the channel.')
-        }
+
     }
 
     /* leave channel -> delete relation channel _ user */
-    leaveChannel = async (socket: Socket, payload: any) : Promise<Channel> => {
+    leaveChannel = async (socket: Socket, payload: any): Promise<Channel> => {
         // get user_channel relation
         const user = await this.connectionsService.getUserFromSocket(socket);
         const channel = await this.getChannelById(payload.channelId);
@@ -171,22 +173,22 @@ export class ChannelsService {
             `DELETE FROM user_channel
             WHERE "user_channel"."channelId" = $1
             AND "user_channel"."userId" = $2`,
-            [ channel.id, user.id ]
+            [channel.id, user.id]
         );
         if (relation.userRole === UserRole.OWNER) {
             const admins = await this.connection.getRepository(UserChannel).query(
                 `SELECT * FROM user_channel
                 WHERE "user_channel"."channelId" = $1
                 AND "user_channel"."userRole" = $2`,
-                [ channel.id, UserRole.ADMIN ]
+                [channel.id, UserRole.ADMIN]
             );
-            if (admins.length === 0){
+            if (admins.length === 0) {
                 await this.deleteChannel(user.id, channel.id);
             } else {
                 await this.connection.getRepository(UserChannel).update({
-                        user: admins[0],
-                        channel: channel
-                    }, { userRole: UserRole.OWNER });
+                    user: admins[0],
+                    channel: channel
+                }, { userRole: UserRole.OWNER });
             }
         }
         return channel;
@@ -205,21 +207,21 @@ export class ChannelsService {
         if (!role) {
             throw new ForbiddenException('Forbidden: permission denied: you are not the channel owner.');
         }
-            // update the userRole of the new admin to the admin
-            try {
-                await this.connection.getRepository(UserChannel).query(
-                    `UPDATE user_channel
+        // update the userRole of the new admin to the admin
+        try {
+            await this.connection.getRepository(UserChannel).query(
+                `UPDATE user_channel
                     SET "userRole" = $1
                     WHERE "channelId" = $2
                     AND "userId" = $3`,
-                    [ UserRole.ADMIN, channelId, userId ]  
-                );
-            } catch (err) {
-                throw err;
-            }
-            return { success: true };
-
+                [UserRole.ADMIN, channelId, userId]
+            );
+        } catch (err) {
+            throw err;
         }
+        return { success: true };
+
+    }
 
     /* Remove admin */
     removeAdmin = async (channelId: number, adminId: number, userId: number): Promise<any> => {
@@ -235,14 +237,14 @@ export class ChannelsService {
             throw new ForbiddenException('Forbidden: permission denied: you are not the channel owner.');
         }
         // update the userRole of the new admin to the admin
-            await this.connection.getRepository(UserChannel).query(
-                `UPDATE user_channel
+        await this.connection.getRepository(UserChannel).query(
+            `UPDATE user_channel
                 SET "userRole" = $1
                 WHERE "channelId" = $2
                 AND "userId" = $3`,
-                [ UserRole.MEMBER, channelId, userId ]  
-            );
-            return { success: true };
+            [UserRole.MEMBER, channelId, userId]
+        );
+        return { success: true };
     }
 
     /* change user status at the channel */
@@ -275,15 +277,15 @@ export class ChannelsService {
             SET "userStatus" = $1
             WHERE "channelId" = $2
             AND "userId" = $3`,
-            [ status, channelId, memberId ]
+            [status, channelId, memberId]
         );
         return { success: true };
     }
 
     // Set or update password
-    setUpdatePassword = async (userId: number, channelId :number, newPwd: string): Promise<any> => {
+    setUpdatePassword = async (userId: number, channelId: number, newPwd: string): Promise<any> => {
         const role = await this.connection.getRepository(UserChannel).findOne({
-            where:{
+            where: {
                 user: userId,
                 channel: channelId,
                 userRole: UserRole.OWNER
@@ -305,7 +307,7 @@ export class ChannelsService {
         const channel = await this.connection.getRepository(Channel).findOne(channelId);
         if (channel.type === ChannelType.PRIVATE) {
             const role = await this.connection.getRepository(UserChannel).findOne({
-                where:{
+                where: {
                     userId: userId,
                     channelId: channelId,
                     userRole: UserRole.OWNER
@@ -318,7 +320,7 @@ export class ChannelsService {
                 password: null,
                 type: ChannelType.PUBLIC
             });
-            return {success: true, message: 'Password removed'};
+            return { success: true, message: 'Password removed' };
         }
     }
 
@@ -358,7 +360,7 @@ export class ChannelsService {
                 `DELETE FROM user_channel
                 WHERE "user_channel"."channelId" = $1
                 AND "user_channel"."userId" = $2`,
-                [ channelId, userId ]
+                [channelId, userId]
             );
             return { success: true };
         } catch (err) {
@@ -388,7 +390,7 @@ export class ChannelsService {
                 WHERE "channels"."id" NOT IN (SELECT "channelId" FROM user_channel  WHERE "user_channel"."userId" = $1)`,
                 [userId]
             );
-        }catch (err) {
+        } catch (err) {
             throw err;
         }
     }

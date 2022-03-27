@@ -1,13 +1,14 @@
 import {
     Catch,
     ArgumentsHost,
+    HttpException,
 } from '@nestjs/common';
 import {
   BaseExceptionFilter
 } from '@nestjs/core';
 
 
-@Catch()
+@Catch(HttpException)
 export class ExceptionsFilter extends BaseExceptionFilter {
 
   catch(exception: any, host: ArgumentsHost): void {
@@ -15,13 +16,13 @@ export class ExceptionsFilter extends BaseExceptionFilter {
     const response = ctx.getResponse();
 
     const message = (exception instanceof Error) ? exception.message : exception.error;
-    let status = exception.status || 400;
+    let status: any = exception.status || 404;
     response
       .status(status)
       .json({
         status,
         success: false,
-        error: (!exception.status) ? 'Resource not found' : message,
+        error: (!exception.status) ? 'Not Found' : message,
       });
   }
 }
