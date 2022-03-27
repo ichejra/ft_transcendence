@@ -93,6 +93,7 @@ export class ChatGatway implements OnGatewayInit {
         try {
             const channel: Channel = await this.channelsService.joinChannel(client, payload);
             client.join(channel.name);
+            client.emit('succes',  { message: "success", status: 200 });
         } catch (error) {
             throw error;
         }

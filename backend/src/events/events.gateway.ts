@@ -21,12 +21,12 @@ import {
 import { WsExceptionsFilter } from "src/exceptions/ws-exceptions.filter";
 import { ConnectionsService } from "./connections.service";
 
-@UseFilters(WsExceptionsFilter)
+@UseFilters(new WsExceptionsFilter)
 @WebSocketGateway({
     cors: true,
 })
 export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-    
+
     @WebSocketServer()
     private server: Server;
 
@@ -43,7 +43,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         this.logger.log(`Client connected: ${client.id}`);
     }
 
-    public async handleDisconnect(client: Socket) : Promise<void> {
+    public async handleDisconnect(client: Socket): Promise<void> {
         this.logger.log(`Client disconnected: ${client.id}`);
         try {
             await this.connectionsService.eraseConnection(client);
@@ -57,7 +57,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     async handleNewConnection(@ConnectedSocket() client: Socket) {
         try {
             await this.connectionsService.addConnection(client);
-        } catch(err) {
+        } catch (err) {
             throw new WsException('unauthorized: unauthenticated connection');
         }
     }

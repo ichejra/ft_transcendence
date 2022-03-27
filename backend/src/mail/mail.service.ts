@@ -1,5 +1,5 @@
 import {
-    ISendMailOptions, 
+    ISendMailOptions,
     MailerService
 } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
@@ -7,7 +7,7 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class MailService {
 
-    constructor(private mailerService: MailerService ) {}
+    constructor(private mailerService: MailerService) { }
 
     // method use for sending validition email
     async sendMail(options: ISendMailOptions): Promise<any> {

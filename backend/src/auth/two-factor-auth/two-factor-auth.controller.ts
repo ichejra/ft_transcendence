@@ -7,7 +7,7 @@ import { TwoFactorAuthService } from "./two-factor-auth.service";
 export class TwoFactorAuthController {
     constructor(
         private readonly twoFactorAuthService: TwoFactorAuthService,
-        ) {}
+    ) { }
 
     @Get('enable')
     @HttpCode(200)
@@ -23,17 +23,17 @@ export class TwoFactorAuthController {
         return this.twoFactorAuthService.enableDisableTwoFactorAuth(Number(_req.user.id), false);
 
     }
-    
+
     @Get('send-email')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    sendEmail(@Req()_req: any) {
+    sendEmail(@Req() _req: any) {
         return this.twoFactorAuthService.sendConnectLink(_req.user);
     }
-    
+
     @Get('verify')
     @HttpCode(200)
     verifyLogin(@Res() res: Response, @Query('token') token: string): Promise<any> {
-      return this.twoFactorAuthService.verify(token, res);
+        return this.twoFactorAuthService.verify(token, res);
     }
 } 

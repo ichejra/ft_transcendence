@@ -9,16 +9,16 @@ import { JwtModule } from "@nestjs/jwt";
 import { MessagesModule } from "../messages/messages.module";
 
 @Module({
-    imports: [ 
+    imports: [
         UsersModule,
         AuthModule,
         MessagesModule,
     ],
-    controllers: [ ChannelsController ],
+    controllers: [ChannelsController],
     providers: [
         ChannelsService,
         MessagesService,
         ConnectionsService,
     ]
 })
-export class ChannelsModule {}
+export class ChannelsModule { }
