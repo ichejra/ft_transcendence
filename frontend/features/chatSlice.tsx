@@ -42,6 +42,7 @@ interface InitialState {
   createNewChannel: boolean;
   showChannelsList: boolean;
   addChannel: boolean;
+  newChannelId?: number;
   channels: Channel[];
   unjoinedChannels: Channel[];
   channel: Channel;
@@ -83,7 +84,7 @@ export const createChannel = createAsyncThunk(
   ) => {
     try {
       const response = await axios.post(
-        `http://localhost:3000/api/channels/create`,
+        `http://localhost:3001/api/channels/create`,
         {
           name,
           type,
@@ -109,7 +110,7 @@ export const getChannelsList = createAsyncThunk(
   async (_, _api) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/channels/joined`,
+        `http://localhost:3001/api/channels/joined`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -129,7 +130,7 @@ export const fetchUnjoinedChannels = createAsyncThunk(
   async (_, _api) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/channels/unjoined`,
+        `http://localhost:3001/api/channels/unjoined`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -149,7 +150,7 @@ export const getSingleChannel = createAsyncThunk(
   async (channelId: number, _api) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/channels/${channelId}`,
+        `http://localhost:3001/api/channels/${channelId}`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -168,13 +169,15 @@ export const getChannelMembersList = createAsyncThunk(
   async (channelId: number, _api) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/channels/${channelId}/members`,
+        `http://localhost:3001/api/channels/${channelId}/members`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
           },
         }
       );
+      console.log("channel %d members: ", channelId, response.data);
+
       return _api.fulfillWithValue(response.data);
     } catch (error) {
       return _api.rejectWithValue(error);
@@ -187,7 +190,7 @@ export const getChannelContent = createAsyncThunk(
   async (channelId: number, _api) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/messages/channels/${channelId}`,
+        `http://localhost:3001/api/messages/channels/${channelId}`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -209,7 +212,7 @@ export const getDirectContent = createAsyncThunk(
 
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/messages/direct/${userId}`,
+        `http://localhost:3001/api/messages/direct/${userId}`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -252,6 +255,17 @@ const channelsManagmentSlice = createSlice({
       state.addChannel = !state.addChannel;
       // console.log("CHAT SLICE", current(state.channelContent));
     },
+    getNewChannelId: (
+      state: InitialState = initialState,
+      action: { payload: number | undefined; type: string }
+    ) => {
+      if (action.payload) {
+        state.newChannelId = action.payload;
+      } else {
+        state.newChannelId = undefined;
+      }
+      // console.log("CHAT SLICE", current(state.channelContent));
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(createChannel.fulfilled, (state, action: any) => {
@@ -283,9 +297,9 @@ export const {
   setChannelsListModal,
   addNewMessage,
   addNewChannel,
+  getNewChannelId,
 } = channelsManagmentSlice.actions;
 
 export default channelsManagmentSlice.reducer;
 //TODO add join/leave button
-//TODO protect private channels
 //TODO update channel (name, password, owners)

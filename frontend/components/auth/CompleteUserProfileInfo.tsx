@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   completeProfileInfo,
   editUserProfile,
+  completeUserInfo,
 } from "../../features/userProfileSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useNavigate } from "react-router";
@@ -49,11 +50,12 @@ export const CompleteProfileInfo: React.FC = () => {
     ).then(() => {
       navigate(`/profile/${user.id}`);
     });
-    // dispatch(editUserProfile(false));
+    dispatch(completeUserInfo(false));
   };
 
   useEffect(() => {
     inputRef.current?.focus();
+    dispatch(completeUserInfo(true));
   }, []);
 
   useEffect(() => {
@@ -231,7 +233,7 @@ export const UpdateProfileForm: React.FC = () => {
       </div>
       <div className="md:absolute flex justify-center items-end bottom-10 md:bottom-4 right-4 mt-5 md:mt-0">
         <button
-          type="submit"
+          type="button"
           onClick={() => dispatch(editUserProfile(false))}
           className={`about-family transition duration-300 border-2 bg-transparent hover:opacity-70 border-gray-300 rounded-md  m-2 p-1 w-[200px] md:w-28 tracking-wider`}
         >

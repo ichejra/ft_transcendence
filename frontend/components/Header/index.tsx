@@ -19,7 +19,10 @@ const Header: React.FC = () => {
             dispatch(openSidebar());
           }}
         >
-          <GoThreeBars size="2rem" className="txt-cyan" />
+          <GoThreeBars
+            size="2rem"
+            className="txt-cyan hover:scale-110 transition duration-300"
+          />
         </button>
         <div className="nav-links cursor-pointer text-2xl text-yellow-500 font-bold">
           <Link to="/">
@@ -28,7 +31,7 @@ const Header: React.FC = () => {
         </div>
         {isLoggedIn && completeInfo && (
           <ul
-            className={`items-list nav-links flex md:justify-between w-1/2 2xl:w-1/3 about-title-family`}
+            className={`items-list nav-links flex md:justify-between w-1/2 md:w-[45rem] xl:w-[50rem] about-title-family`}
           >
             <li className="mx-2">
               <Link to="/">

@@ -10,6 +10,7 @@ import {
   getSingleChannel,
   getChannelContent,
   setChannelsListModal,
+  getNewChannelId,
 } from "../../features/chatSlice";
 import { useNavigate, useParams, useLocation } from "react-router";
 import DirectChat from "./DirectChat";
@@ -26,13 +27,16 @@ const ChatRooms = () => {
   const dispatch = useAppDispatch();
   const { pathname } = useLocation();
   const { id: channelId } = useParams();
-  const { createNewChannel, showChannelsList, channels, addChannel } =
-    useAppSelector((state) => state.channels);
+  const {
+    createNewChannel,
+    showChannelsList,
+    channels,
+    addChannel,
+    newChannelId,
+  } = useAppSelector((state) => state.channels);
 
-  const getChannelMessages = (id: number) => {
-    setShowDirect(false);
+  const getChannel = (id: number) => {
     setShowChannelContent(true);
-    dispatch(setChannelsListModal(false));
     dispatch(getSingleChannel(id)).then(({ payload }: any) => {
       dispatch(getChannelContent(payload.id)).then(() => {
         window.scrollTo({
@@ -45,6 +49,12 @@ const ChatRooms = () => {
       setChannelName(payload.name);
     });
     navigate(`/channels/${id}`);
+  };
+
+  const getChannelMessages = (id: number) => {
+    setShowDirect(false);
+    dispatch(setChannelsListModal(false));
+    getChannel(id);
   };
 
   const getDirectMessages = () => {
@@ -62,14 +72,23 @@ const ChatRooms = () => {
   };
 
   useEffect(() => {
-    setIsLoading(true);
-    dispatch(getChannelsList()).then(() => {
+    const chId = newChannelId || Number(channelId);
+    console.log("--------------------->", newChannelId);
+    const timer = setTimeout(() => {
+      setIsLoading(true);
+      setShowChannelContent(false);
+      dispatch(getChannelsList()).then(() => {
+        if (chId) {
+          getChannel(chId);
+          dispatch(getNewChannelId());
+        }
+      });
       setIsLoading(false);
-      console.log("--->>>>>> ID:", channelId);
-    });
-
-    console.log("===>>>.>>>>> ....>>>>>   get chlst");
-  }, [addChannel]);
+    }, 100);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [addChannel, newChannelId]);
 
   return (
     <div className="page-100 h-full w-full pt-20 pb-16 flex about-family channels-bar-bg">

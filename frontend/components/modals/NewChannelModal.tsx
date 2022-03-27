@@ -25,15 +25,6 @@ const UsersModal: React.FC = () => {
   const submitChannelCreation = (e: React.FormEvent) => {
     e.preventDefault();
     if (isValid !== 1) return;
-    // dispatch(
-    //   createChannel({
-    //     name: channelName,
-    //     password: channelPass,
-    //     type: isPrivate ? "private" : "public",
-    //   })
-    // ).then(() => {
-    //   dispatch(getChannelsList());
-    // });
     socket.emit("create_channel", {
       name: channelName,
       password: channelPass,

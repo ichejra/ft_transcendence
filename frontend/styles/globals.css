@@ -167,6 +167,13 @@ canvas {
   }
 }
 
+.loading-2 {
+  margin: 0 auto;
+  border-radius: 50%;
+  border-top-color: rgb(32, 51, 73);
+  animation: spinner 0.5s linear infinite;
+}
+
 .loading {
   margin: 0 auto;
   margin-top: 10rem;

@@ -57,7 +57,7 @@ export const fetchNoRelationUsers = createAsyncThunk(
   async (_, _api) => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/users/no_relation",
+        "http://localhost:3001/api/users/no_relation",
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -78,7 +78,7 @@ export const fetchAllUsers = createAsyncThunk(
   async (_, _api) => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/users/all_users",
+        "http://localhost:3001/api/users/all_users",
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -98,7 +98,7 @@ export const fetchCurrentUser = createAsyncThunk(
   "users/fetchUserStatus",
   async (_, _api) => {
     try {
-      const response = await axios.get("http://localhost:3000/api/users/me", {
+      const response = await axios.get("http://localhost:3001/api/users/me", {
         headers: {
           authorization: `Bearer ${Cookies.get("accessToken")}`,
         },
@@ -115,7 +115,7 @@ export const fetchUserFriends = createAsyncThunk(
   async (_, _api) => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/users/friends",
+        "http://localhost:3001/api/users/friends",
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -136,7 +136,7 @@ export const completeProfileInfo = createAsyncThunk(
   async ({ data }: { data: FormData }, _api) => {
     try {
       const response = await axios.patch(
-        `http://localhost:3000/api/users/update-profile`,
+        `http://localhost:3001/api/users/update-profile`,
         data,
         {
           headers: {
@@ -162,6 +162,12 @@ export const userProfileSlice = createSlice({
     },
     editUserProfile: (state = initialState, action: PayloadAction<boolean>) => {
       state.editProfile = action.payload;
+    },
+    completeUserInfo: (
+      state = initialState,
+      action: PayloadAction<boolean>
+    ) => {
+      state.completeInfo = action.payload;
     },
     showNotificationsList: (
       state = initialState,
@@ -213,7 +219,11 @@ export const userProfileSlice = createSlice({
   },
 });
 
-export const { showNotificationsList, editUserProfile, logOutUser } =
-  userProfileSlice.actions;
+export const {
+  showNotificationsList,
+  editUserProfile,
+  completeUserInfo,
+  logOutUser,
+} = userProfileSlice.actions;
 
 export default userProfileSlice.reducer;

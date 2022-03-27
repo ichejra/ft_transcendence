@@ -1,13 +1,12 @@
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { SiPrivateinternetaccess } from "react-icons/si";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
 import {
   setChannelsListModal,
   fetchUnjoinedChannels,
   getChannelsList,
-  getChannelContent,
   addNewChannel,
+  getNewChannelId,
 } from "../../features/chatSlice";
 import { socket } from "../../pages/SocketProvider";
 
@@ -59,9 +58,9 @@ const ChannelsListModal = () => {
         ref={divRef}
         className="flex flex-col justify-center items-center h-full"
       >
-        <div className="profile-card-bg-color w-full h-full md:w-[700px] md:h-[500px] border-[1px] border-gray-700">
-          <div className="h-full">
-            <div className="relative text-gray-300 w-full flex flex-wrap">
+        <div className="profile-card-bg-color overflow-auto w-full h-full md:w-[720px] md:h-[500px] border-[1px] border-gray-700 rounded-lg">
+          <div className="relative h-full">
+            <div className="text-gray-300 w-full flex flex-wrap">
               {unjoinedChannels.map((channel) => {
                 return <UnjoinedChannel key={channel.id} {...channel} />;
               })}
@@ -79,42 +78,78 @@ interface UCProps {
   type: string;
 }
 
+interface passError {
+  message?: string;
+  status?: number;
+}
+
 const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
   const inputPassRef = useRef<HTMLInputElement>(null);
   const [password, setPassword] = useState("");
+  const [isBtnLoading, setIsBtnLoading] = useState(true);
+  const [isValid, setIsValid] = useState(0);
   const [isPrivate, setIsPrivate] = useState(false);
   const [passwordForm, setPasswordForm] = useState(false);
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
   const { unjoinedChannels } = useAppSelector((state) => state.channels);
 
   const joinChannel = (id: number) => {
     const currentChannel = unjoinedChannels.find((ch) => ch.id === id);
     if (currentChannel) {
       if (currentChannel.type === "private") {
+        setIsBtnLoading(false);
         setPasswordForm(true);
         setIsPrivate(true);
-        inputPassRef.current?.focus();
       } else {
         socket.emit("join_channel", { channelId: id });
         dispatch(getChannelsList()).then(() => {
-          dispatch(addNewChannel());
-          navigate(`/channels/${id}`);
+          dispatch(getNewChannelId(id));
           dispatch(setChannelsListModal(false));
-          //   dispatch(getChannelContent(id)).then(() => {
-          //   });
         });
         console.log("joined");
       }
     }
   };
 
-  const joinPrivateChannel = (id: number) => {
-    console.log("joined");
-    if (password) {
+  const joinPrivateChannel = async (id: number) => {
+    if (!password) return;
+    const promise = new Promise<passError>((resolve, reject) => {
+      setIsBtnLoading(true);
       socket.emit("join_channel", { channelId: id, password });
-    }
+      socket.on("error", (data) => {
+        console.log("data: ", data);
+        reject(data);
+      });
+      socket.on("success", (data) => {
+        resolve(data);
+      });
+    });
+    await promise
+      .then((response) => {
+        console.log("---------> ", response, isBtnLoading);
+        setIsBtnLoading(false);
+        if (!response.status) {
+          setIsValid(1);
+          dispatch(getChannelsList()).then(() => {
+            dispatch(addNewChannel());
+            dispatch(getNewChannelId(id));
+            dispatch(setChannelsListModal(false));
+          });
+          socket.off("success");
+          console.log("%c %d private joined", "color:green", response.status);
+        }
+      })
+      .catch((err) => {
+        setIsBtnLoading(false);
+        setIsValid(2);
+        console.log("%c %d not allowed", "color:red", err.status);
+        socket.off("error");
+      });
   };
+
+  useEffect(() => {
+    inputPassRef.current?.focus();
+  }, [passwordForm]);
 
   return (
     <div>
@@ -131,17 +166,28 @@ const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
             <input
               ref={inputPassRef}
               type="password"
-              className={`about-family px-4 py-2 focus:outline-none bg-transparent rounded-md m-2 border-gray-400 opacity-70 tracking-wider border-[1px]`}
-              maxLength={12}
+              className={`${
+                isValid === 1
+                  ? "focus:outline-none border-green-400"
+                  : isValid === 2
+                  ? "focus:outline-none border-red-400"
+                  : "focus:outline-none border-blue-400"
+              } about-family px-3 py-1 bg-transparent rounded-md mx-2 opacity-70 tracking-wider border-[1px]`}
               value={password}
+              placeholder="Enter Password"
               onChange={(e) => setPassword(e.target.value)}
             />
             <button
               type="submit"
+              disabled={isBtnLoading}
               onClick={() => joinPrivateChannel(id)}
-              className="hover:scale-105 mx-1 px-3 w-[60px] bg-blue-500 flex items-center justify-center h-[2.5rem] rounded-md hover:bg-blue-400 transition duration-300"
+              className={`hover:scale-105 mx-1 px-3 w-[60px] bg-blue-500 flex items-center justify-center py-1 border rounded-md hover:bg-blue-400 transition duration-300`}
             >
-              Join
+              {isBtnLoading ? (
+                <div className="loading-2 border w-6 h-6"></div>
+              ) : (
+                <p>Join</p>
+              )}
             </button>
           </div>
         ) : (

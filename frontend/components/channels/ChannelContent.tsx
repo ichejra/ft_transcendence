@@ -1,15 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import { IoMdSend } from "react-icons/io";
+import { RiListSettingsLine } from "react-icons/ri";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { useParams } from "react-router";
 import { socket } from "../../pages/SocketProvider";
+import { useNavigate } from "react-router";
 import { updateChannelContent } from "../../features/globalSlice";
 import {
-  ChannelMessage,
   getChannelMembersList,
   Member,
   addNewMessage,
-  getChannelsList,
+  addNewChannel,
 } from "../../features/chatSlice";
 interface ContentProps {
   channelName: string;
@@ -17,8 +18,9 @@ interface ContentProps {
 
 const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
   const [message, setMessage] = useState("");
-  const [isMember, setIsMember] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const msgContainerRef = useRef<HTMLDivElement>(null);
   const { id: channelId } = useParams();
   const { channelContent } = useAppSelector((state) => state.channels);
@@ -69,22 +71,31 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
 
   useEffect(() => {
     console.log("-->", channelId);
-
-    dispatch(getChannelMembersList(Number(channelId))).then(
-      ({ payload }: any) => {
-        const checkMember = [...payload].find(
-          (member: Member) => member.user.id === user.id
-        );
-        console.log("checkmember", checkMember);
-        if (checkMember !== undefined) {
-          console.log(" ------------------------------------------ member");
-          setIsMember(true);
-        } else {
-          console.log(" ------------------------------------------ Not member");
-          setIsMember(false);
+    if (channelId) {
+      dispatch(getChannelMembersList(Number(channelId))).then(
+        ({ payload }: any) => {
+          const checkMember = [...payload].find(
+            (member: Member) => member.user.id === user.id
+          );
+          console.log("checkmember", checkMember);
+          if (checkMember !== undefined) {
+            if (
+              checkMember.userRole === "owner" ||
+              checkMember.userRole === "admin"
+            ) {
+              setIsAdmin(true);
+            } else {
+              setIsAdmin(false);
+            }
+            console.log(" --------------------- member");
+          } else {
+            console.log(" --------------------- Not member");
+            navigate("/channels");
+            dispatch(addNewChannel());
+          }
         }
-      }
-    );
+      );
+    }
   }, [channelName]);
 
   return (
@@ -92,8 +103,14 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
       className="relative text-white ml-6 left-[7.4rem]"
       ref={msgContainerRef}
     >
-      <div className="fixed user-card-bg border-b border-l border-gray-700 shadow-gray-700 shadow-sm left-[7.4rem] text-white p-2 w-full">
+      <div className="fixed user-card-bg border-b border-l border-gray-700 shadow-gray-700 shadow-sm left-[7.4rem] text-white p-2 right-0 flex items-center justify-between">
         <h1 className="text-xl">#{channelName.split(" ").join("-")}</h1>
+        {isAdmin && (
+          <RiListSettingsLine
+            size="2rem"
+            className="mr-2 hover:scale-110 transition duration-300 hover:text-blue-400 cursor-pointer"
+          />
+        )}
       </div>
       <div className="pt-10">
         {channelContent.map((message) => {
