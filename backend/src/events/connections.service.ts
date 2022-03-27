@@ -37,7 +37,6 @@ export class ConnectionsService {
         } catch(e) {
             socket.disconnect();
             throw new WsException('unauthorized: unauthenticated connection');
-
         }
 
         let sockets: Set<Socket> = this.connections.get(user.id);
@@ -59,10 +58,7 @@ export class ConnectionsService {
             user = await this.getUserFromSocket(socket);
         } catch(e) {
             socket.disconnect(); // if the socket not authenticated should disconnect it
-
-            // throw new WsException('unauthorized: unauthenticated connection');
-
-            return { success: false };
+            throw new WsException('unauthorized: unauthenticated connection');
         }
         try {
 
