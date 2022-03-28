@@ -12,18 +12,6 @@ interface Props {
 
 const ProfileInfo: React.FC<Props> = ({ user_me, users }) => {
   const [openModal, setOpenModal] = useState(false);
-  const [userProfile, setUserProfile] = useState(user_me);
-
-  const { id: profileID } = useParams();
-
-  useEffect(() => {
-    console.log(6);
-    setUserProfile((userprofile) => {
-      let newUserprofile = users.find((user) => user.id === Number(profileID));
-      userprofile = newUserprofile !== undefined ? newUserprofile : user_me;
-      return userprofile;
-    });
-  }, [profileID]);
 
   return (
     <div className="md:relative left-[26rem] xl:left-[30rem] md:w-[22rem] lg:w-[24rem] xl:w-[28rem]">
@@ -39,7 +27,7 @@ const ProfileInfo: React.FC<Props> = ({ user_me, users }) => {
           <AiOutlineRight />
         </button>
         {openModal && (
-          <HistoryModal user={userProfile} setOpenModal={setOpenModal} />
+          <HistoryModal user={user_me} setOpenModal={setOpenModal} />
         )}
       </div>
       <hr className="h-[1px] border-0 mx-4 bg-gray-700" />
@@ -55,11 +43,11 @@ const ProfileInfo: React.FC<Props> = ({ user_me, users }) => {
                 <div className="flex items-center space-x-10">
                   <div className="flex flex-col items-center">
                     <img
-                      src={userProfile.avatar_url}
+                      src={user_me.avatar_url}
                       className="w-12 h-12 lg:w-14 lg:h-14 rounded-full"
                     />
                     <h1 className="about-family text-[14px] mt-1">
-                      {userProfile.user_name}
+                      {user_me.user_name}
                     </h1>
                   </div>
                 </div>

@@ -11,13 +11,17 @@ const Sidebar = () => {
 
   return (
     <aside
-      className={`about-title-family z-10 px-2 h-screen py-4 w-full bg-black bg-opacity-80 txt-cyan ${
+      className={`about-title-family z-50 px-2 h-screen py-4 w-full bg-black bg-opacity-80 txt-cyan ${
         isSidebarOpen ? "show-sidebar sidebar" : "sidebar"
       }`}
     >
       <div className="text-2xl ml-4 font-bold">
         <Link to="/">
-          <img src="./images/logo-ft-transcendence.png" className="w-24" />
+          <img
+            onClick={() => dispatch(closeSidebar())}
+            src="./images/logo-ft-transcendence.png"
+            className="w-24"
+          />
         </Link>
       </div>
       <button

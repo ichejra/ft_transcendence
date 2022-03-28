@@ -14,7 +14,7 @@ export interface User {
   email?: string;
   avatar_url: string;
   is_active: boolean;
-  state: boolean;
+  state: string;
   createdAt: string;
 }
 interface UserState {
@@ -41,7 +41,7 @@ const initialState: UserState = {
     email: "",
     avatar_url: "",
     is_active: false,
-    state: false,
+    state: "",
     createdAt: "",
   },
   friends: [],
@@ -163,6 +163,12 @@ export const userProfileSlice = createSlice({
     editUserProfile: (state = initialState, action: PayloadAction<boolean>) => {
       state.editProfile = action.payload;
     },
+    completeUserInfo: (
+      state = initialState,
+      action: PayloadAction<boolean>
+    ) => {
+      state.completeInfo = action.payload;
+    },
     showNotificationsList: (
       state = initialState,
       action: PayloadAction<boolean>
@@ -213,7 +219,11 @@ export const userProfileSlice = createSlice({
   },
 });
 
-export const { showNotificationsList, editUserProfile, logOutUser } =
-  userProfileSlice.actions;
+export const {
+  showNotificationsList,
+  editUserProfile,
+  completeUserInfo,
+  logOutUser,
+} = userProfileSlice.actions;
 
 export default userProfileSlice.reducer;

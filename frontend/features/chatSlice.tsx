@@ -30,7 +30,7 @@ interface DirectMessage {
   content: string;
   createdAt: string;
 }
-export interface Member {
+export interface ChannelMember {
   id: number;
   userRole: string;
   userStatus: string;
@@ -41,17 +41,21 @@ export interface Member {
 interface InitialState {
   createNewChannel: boolean;
   showChannelsList: boolean;
+  addChannel: boolean;
+  newChannelId?: number;
   channels: Channel[];
   unjoinedChannels: Channel[];
   channel: Channel;
   channelContent: ChannelMessage[];
-  channelMembers: Member[];
+  channelMembers: ChannelMember[];
   directMessage: DirectMessage[];
+  memberStatus: string;
 }
 
 const initialState: InitialState = {
   createNewChannel: false,
   showChannelsList: false,
+  addChannel: false,
   channels: [],
   unjoinedChannels: [],
   channel: {
@@ -63,6 +67,7 @@ const initialState: InitialState = {
   channelContent: [],
   channelMembers: [],
   directMessage: [],
+  memberStatus: "",
 };
 
 export const createChannel = createAsyncThunk(
@@ -106,11 +111,14 @@ export const getChannelsList = createAsyncThunk(
   "channels/getChannelsList",
   async (_, _api) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/channels/joined`, {
-        headers: {
-          authorization: `Bearer ${Cookies.get("accessToken")}`,
-        },
-      });
+      const response = await axios.get(
+        `http://localhost:3001/api/channels/joined`,
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
       console.log("joined channels", response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error) {
@@ -124,7 +132,7 @@ export const fetchUnjoinedChannels = createAsyncThunk(
   async (_, _api) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/channels/unjoined`,
+        `http://localhost:3001/api/channels/unjoined`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -170,6 +178,80 @@ export const getChannelMembersList = createAsyncThunk(
           },
         }
       );
+      console.log("channel %d members: ", channelId, response.data);
+
+      return _api.fulfillWithValue(response.data);
+    } catch (error) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
+
+export const muteChannelMember = createAsyncThunk(
+  "channels/muteChannelMember",
+  async (
+    { channelId, memberId }: { channelId: number; memberId: number },
+    _api
+  ) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:3001/api/channels/${channelId}/mute-user`,
+        { memberId },
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      console.log("mute %d: ", memberId, response.data);
+      return _api.fulfillWithValue(response.data);
+    } catch (error) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
+
+export const banChannelMember = createAsyncThunk(
+  "channels/banChannelMember",
+  async (
+    { channelId, memberId }: { channelId: number; memberId: number },
+    _api
+  ) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:3001/api/channels/${channelId}/ban-user`,
+        { memberId },
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      console.log("ban %d: ", memberId, response.data);
+      return _api.fulfillWithValue(response.data);
+    } catch (error) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
+
+export const kickChannelMember = createAsyncThunk(
+  "channels/kickChannelMember",
+  async (
+    { channelId, memberId }: { channelId: number; memberId: number },
+    _api
+  ) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:3001/api/channels/${channelId}/kick-user`,
+        { memberId },
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      console.log("kick %d: ", memberId, response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error) {
       return _api.rejectWithValue(error);
@@ -243,6 +325,21 @@ const channelsManagmentSlice = createSlice({
       state.channelContent.push(action.payload);
       // console.log("CHAT SLICE", current(state.channelContent));
     },
+    addNewChannel: (state: InitialState = initialState) => {
+      state.addChannel = !state.addChannel;
+      // console.log("CHAT SLICE", current(state.channelContent));
+    },
+    getNewChannelId: (
+      state: InitialState = initialState,
+      action: { payload: number | undefined; type: string }
+    ) => {
+      if (action.payload) {
+        state.newChannelId = action.payload;
+      } else {
+        state.newChannelId = undefined;
+      }
+      // console.log("CHAT SLICE", current(state.channelContent));
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(createChannel.fulfilled, (state, action: any) => {
@@ -266,13 +363,30 @@ const channelsManagmentSlice = createSlice({
     builder.addCase(getChannelMembersList.fulfilled, (state, action: any) => {
       state.channelMembers = action.payload;
     });
+    builder.addCase(muteChannelMember.fulfilled, (state, action: any) => {
+      state.memberStatus = "muted";
+    });
+    builder.addCase(banChannelMember.fulfilled, (state, action: any) => {
+      state.memberStatus = "banned";
+    });
+    builder.addCase(kickChannelMember.fulfilled, (state, action: any) => {
+      state.memberStatus = "kicked";
+    });
   },
 });
 
-export const { setNewChannelModal, setChannelsListModal, addNewMessage } =
-  channelsManagmentSlice.actions;
+export const {
+  setNewChannelModal,
+  setChannelsListModal,
+  addNewMessage,
+  addNewChannel,
+  getNewChannelId,
+} = channelsManagmentSlice.actions;
 
 export default channelsManagmentSlice.reducer;
-//TODO add join/leave button
-//TODO protect private channels
+
 //TODO update channel (name, password, owners)
+//TODO add an openedLock icon for private joined channels
+//TODO online/offline status (profile, friends list)
+//TODO set sockets for update_member_status
+//TODO set sockets for leave_channel

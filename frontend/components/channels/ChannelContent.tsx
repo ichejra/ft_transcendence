@@ -1,56 +1,34 @@
 import React, { useEffect, useRef, useState } from "react";
-import { IoMdSend } from "react-icons/io";
+import { IoMdSend, IoMdExit } from "react-icons/io";
+import { RiListSettingsLine } from "react-icons/ri";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { useParams } from "react-router";
 import { socket } from "../../pages/SocketProvider";
+import { useNavigate } from "react-router";
 import { updateChannelContent } from "../../features/globalSlice";
 import {
-  ChannelMessage,
   getChannelMembersList,
-  Member,
+  ChannelMember,
   addNewMessage,
-  getChannelsList,
+  addNewChannel,
 } from "../../features/chatSlice";
+import Member from "./Member";
 interface ContentProps {
   channelName: string;
-  setAddChannel: (state: boolean) => void;
-  addChannel: boolean;
 }
 
-const ChannelContent: React.FC<ContentProps> = ({
-  channelName,
-  addChannel,
-  setAddChannel,
-}) => {
+const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
   const [message, setMessage] = useState("");
-  const [isMember, setIsMember] = useState(true);
-  const [pass, setPass] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const msgContainerRef = useRef<HTMLDivElement>(null);
   const { id: channelId } = useParams();
-  const { channelContent, unjoinedChannels, channelMembers } = useAppSelector(
+  const { channelContent, channelMembers } = useAppSelector(
     (state) => state.channels
   );
   const { updateMessages } = useAppSelector((state) => state.globalState);
   const { user } = useAppSelector((state) => state.user);
-
-  const JoinChannel = () => {
-    const currentChannel = unjoinedChannels.find(
-      (ch) => ch.id === Number(channelId)
-    );
-    if (currentChannel) {
-      if (currentChannel.type === "private") {
-        socket.emit("join_channel", { channelId, password: pass });
-      } else {
-        socket.emit("join_channel", { channelId });
-      }
-      setIsMember(true);
-      dispatch(getChannelsList()).then(() => {
-        setAddChannel(!addChannel);
-      });
-    }
-    console.log("joined");
-  };
 
   const sendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,6 +44,10 @@ const ChannelContent: React.FC<ContentProps> = ({
       top: document.body.scrollHeight,
       behavior: "smooth",
     });
+  };
+
+  const handleChange = (e: any) => {
+    setMessage(e.target.value);
   };
 
   useEffect(() => {
@@ -90,41 +72,65 @@ const ChannelContent: React.FC<ContentProps> = ({
     };
   }, []);
 
-  const handleChange = (e: any) => {
-    setMessage(e.target.value);
+  //!------------------******------++++++++++++++++++>>>>>>>>>>>>>>>..
+  const leaveChannel = async () => {
+    socket.emit("leave_channel", { channelId });
   };
+  //!------------------******------++++++++++++++++++>>>>>>>>>>>>>>>..
 
   useEffect(() => {
     console.log("-->", channelId);
-
-    dispatch(getChannelMembersList(Number(channelId))).then(
-      ({ payload }: any) => {
-        const checkMember = [...payload].find(
-          (member: Member) => member.user.id === user.id
-        );
-        console.log("checkmember", checkMember);
-        if (checkMember !== undefined) {
-          console.log(" ------------------------------------------ member");
-          setIsMember(true);
-        } else {
-          console.log(" ------------------------------------------ Not member");
-          setIsMember(false);
+    if (channelId) {
+      dispatch(getChannelMembersList(Number(channelId))).then(
+        ({ payload }: any) => {
+          const checkMember = [...payload].find(
+            (member: ChannelMember) => member.user.id === user.id
+          );
+          console.log("checkmember", checkMember);
+          if (checkMember !== undefined) {
+            if (
+              checkMember.userRole === "owner" ||
+              checkMember.userRole === "admin"
+            ) {
+              setIsAdmin(true);
+            } else {
+              setIsAdmin(false);
+            }
+            console.log(" --------------------- member");
+          } else {
+            console.log(" --------------------- Not member");
+            navigate("/channels");
+            dispatch(addNewChannel());
+          }
         }
-      }
-    );
+      );
+    }
   }, [channelName]);
 
   return (
     <div
-      className="relative text-white ml-6 left-[7.4rem]"
+      className="relative text-white right-0 flex h-full w-full"
       ref={msgContainerRef}
     >
-      <div className="fixed user-card-bg border-b border-l border-gray-700 shadow-gray-700 shadow-sm left-[7.4rem] text-white p-2 w-full">
-        <h1 className="text-xl">#{channelName.split(" ").join("-")}</h1>
-      </div>
-      <div className="pt-10">
-        {isMember &&
-          channelContent.map((message) => {
+      <div className="relative w-full">
+        <div className="fixed user-card-bg border-b border-l border-gray-700 shadow-gray-700  shadow-sm left-[7.4rem] text-white p-2 right-0 flex items-center justify-between">
+          <h1 className="text-xl">#{channelName.split(" ").join("-")}</h1>
+          {isAdmin ? (
+            <RiListSettingsLine
+              size="2rem"
+              className="mr-2 hover:scale-110 transition duration-300 hover:text-blue-400 cursor-pointer"
+            />
+          ) : (
+            <button
+              onClick={leaveChannel}
+              className="flex items-center hover:text-blue-400 cursor-pointer hover:scale-110 transition duration-300"
+            >
+              leave <IoMdExit size="2rem" className="ml-2" />
+            </button>
+          )}
+        </div>
+        <div className="ml-6 pt-10 h-full channels-bar-bg">
+          {channelContent.map((message) => {
             const { id, createdAt, content, author } = message;
             return (
               <div
@@ -149,36 +155,31 @@ const ChannelContent: React.FC<ContentProps> = ({
                       })}
                     </span>
                   </p>
-                  <p className="text-xs">{content}</p>
+                  <p className="text-xs font-sans font-bold">{content}</p>
                 </div>
               </div>
             );
           })}
-      </div>
-      {!isMember && (
-        <div className="fixed left-[7.42rem] flex itmes-center justify-center h-16 channels-bar-bg bottom-0 right-0">
-          <button
-            onClick={JoinChannel}
-            className="mx-2 mb-2 px-2 bg-blue-500 w-full h-[2.5rem] rounded-md hover:bg-blue-400 transition duration-300"
-          >
-            Join
-          </button>
-          <form>
-            <input
-              type="password"
-              value={pass}
-              onChange={(e) => setPass(e.target.value)}
-            />
-          </form>
         </div>
-      )}{" "}
-      {isMember && (
         <MessageForm
           message={message}
           handleChange={handleChange}
           sendMessage={sendMessage}
         />
-      )}
+      </div>
+      <div className="h-full pt-12 px-4 my-2 w-[400px] border-l border-gray-700 user-card-bg">
+        <h1 className="text-gray-300 pb-2">Members</h1>
+        {channelMembers.map((member) => {
+          return (
+            <Member
+              key={member.id}
+              chId={Number(channelId)}
+              {...member}
+              isAdmin={isAdmin}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 };
@@ -203,7 +204,7 @@ const MessageForm: React.FC<FormProps> = ({
   }, [channelId]);
 
   return (
-    <div className="fixed left-[7.42rem] channels-bar-bg bottom-0 right-0">
+    <div className="absolute bottom-20 w-full">
       <form className="flex relative items-center mx-2 mb-2 px-2 pb-2">
         <input
           ref={inputRef}
@@ -211,7 +212,7 @@ const MessageForm: React.FC<FormProps> = ({
           value={message}
           onChange={(e) => handleChange(e)}
           placeholder="new message"
-          className="w-full p-3 rounded-md user-card-bg border border-gray-700 text-gray-200 text-sm"
+          className="w-full p-3 pr-12 rounded-md user-card-bg border border-gray-700 text-gray-200 text-sm"
         />
         <button
           onClick={sendMessage}

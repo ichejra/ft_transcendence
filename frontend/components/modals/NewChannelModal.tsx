@@ -1,20 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { setNewChannelModal } from "../../features/chatSlice";
+import { addNewChannel, setNewChannelModal } from "../../features/chatSlice";
 import { createChannel, getChannelsList } from "../../features/chatSlice";
 import { socket } from "../../pages/SocketProvider";
 
-interface Props {
-  setAddChannel: (state: boolean) => void;
-  addChannel: boolean;
-}
-
-const UsersModal: React.FC<Props> = ({ setAddChannel, addChannel }) => {
+const UsersModal: React.FC = () => {
   const divRef = useRef(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dispatch = useAppDispatch();
   const [isPrivate, setIsPrivate] = useState(false);
+  const [isValid, setIsValid] = useState(0);
   const [channelName, setChannelName] = useState("");
   const [channelPass, setChannelPass] = useState("");
 
@@ -28,15 +24,7 @@ const UsersModal: React.FC<Props> = ({ setAddChannel, addChannel }) => {
 
   const submitChannelCreation = (e: React.FormEvent) => {
     e.preventDefault();
-    // dispatch(
-    //   createChannel({
-    //     name: channelName,
-    //     password: channelPass,
-    //     type: isPrivate ? "private" : "public",
-    //   })
-    // ).then(() => {
-    //   dispatch(getChannelsList());
-    // });
+    if (isValid !== 1) return;
     socket.emit("create_channel", {
       name: channelName,
       password: channelPass,
@@ -44,9 +32,23 @@ const UsersModal: React.FC<Props> = ({ setAddChannel, addChannel }) => {
     });
     dispatch(setNewChannelModal(false));
     dispatch(getChannelsList()).then(() => {
-      setAddChannel(!addChannel);
+      dispatch(addNewChannel());
     });
   };
+
+  useEffect(() => {
+    const channelNameRegex = /^[a-zA-Z0-9 ]{6,}$/i;
+    const channelPassRegex = /^.{6,}$/i;
+    setIsValid(() => {
+      if (!channelName || (isPrivate && !channelPass)) {
+        return 0;
+      }
+      return !channelNameRegex.test(channelName) ||
+        (isPrivate && !channelPassRegex.test(channelPass))
+        ? 0
+        : 1;
+    });
+  }, [channelName, channelPass, isPrivate]);
 
   return (
     <div
@@ -101,7 +103,11 @@ const UsersModal: React.FC<Props> = ({ setAddChannel, addChannel }) => {
                 <input
                   type="submit"
                   placeholder="Channel name"
-                  className="text-sm cursor-pointer m-2 p-2 w-[300px] border border-gray-300 text-blue-900 bg-gray-300 hover:bg-white transition duration-300"
+                  className={`${
+                    isValid === 1
+                      ? "cursor-pointer hover:bg-white transition duration-300"
+                      : "opacity-40 cursor-not-allowed"
+                  } text-sm m-2 p-2 w-[300px] border border-gray-300 text-blue-900 bg-gray-300 `}
                 />
               </form>
             </div>
