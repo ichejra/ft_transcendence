@@ -92,7 +92,7 @@ export class ChatGatway implements OnGatewayInit {
         try {
             const channel: Channel = await this.channelsService.joinChannel(client, payload);
             client.join(channel.name);
-            client.emit('succes',  { message: "success", status: 200 });
+            client.emit('join_success', { message: "success", status: 200 });
         } catch (error) {
             throw error;
         }
@@ -108,14 +108,22 @@ export class ChatGatway implements OnGatewayInit {
         client.join(room.name);
     }
 
+    // ? leaving channel handle
     @SubscribeMessage('leave_channel')
     async handleLeaveChannel(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
         try {
             const channel: Channel = await this.channelsService.leaveChannel(client, payload);
             client.leave(channel.name);
+            client.emit('leave_success', { message: "success", status: 200 });
         } catch (error) {
-            throw new WsException('cannot leave the channel');
+            throw new WsException('leave the channel unsuccessfully.');
         }
+    }
+
+    // ? handling member status changing 
+    @SubscribeMessage('member_status_changed')
+    async handleChangeStatus(@ConnectedSocket() client: Socket, @MessageBody('room') room: string) {
+        this.server.to(room).emit('member_status_changed');
     }
 
 }
