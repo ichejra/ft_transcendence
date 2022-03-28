@@ -38,7 +38,6 @@ export class ConnectionsService {
             socket.disconnect();
             throw new WsException('unauthorized: unauthenticated connection');
         }
-
         let sockets: Set<Socket> = this.connections.get(user.id);
         if (!sockets) {
             await this.usersService.updateState(Number(user.id), UserState.ONLINE);
@@ -75,7 +74,6 @@ export class ConnectionsService {
         } catch {
             socket.disconnect();
             throw new WsException('the user cannot connect');
-
         }
     }
 
@@ -105,7 +103,9 @@ export class ConnectionsService {
         const sockets: Set<Socket> = this.connections.get(user.id);
         if (sockets) {
             sockets.forEach((sock) => {
-                sock.disconnect();
+                if (socket.handshake.headers["user-agent"] === sock.handshake.headers["user-agent"]) {
+                    sock.disconnect();
+                }
             });
         }
     }
