@@ -20,12 +20,12 @@ dotenv.config()
         UsersModule,
         PassportModule,
         JwtModule.register({
-            secret: process.env.JWT_SECRET ,
+            secret: process.env.JWT_SECRET,
             signOptions: { expiresIn: process.env.JWT_EXPIRESIN }
         }),
         TwoFactorAuthModule,
     ],
-    controllers: [ AuthController ],
+    controllers: [AuthController],
     providers: [
         AuthService,
         IntraStrategy,
@@ -33,6 +33,6 @@ dotenv.config()
         TwoFactorAuthService,
         MailService
     ],
-    exports: [ AuthService ]
+    exports: [AuthService]
 })
-export class AuthModule {}
+export class AuthModule { }

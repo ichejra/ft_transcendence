@@ -15,14 +15,14 @@ import { MessagesService } from "./messages.service";
 @Controller('/messages')
 export class MessagesController {
 
-    constructor(private messagesService: MessagesService) {}
-    
+    constructor(private messagesService: MessagesService) { }
+
     // http://${host}:${port}/api/messages/channels/:channelId
     // return  all the message belong to this channel
     @Get('/channels/:channelId')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    async getMessagesChannel(@Param('channelId') channelId: string | number) : Promise<MessageChannel[]>  {
+    async getMessagesChannel(@Param('channelId') channelId: string | number): Promise<MessageChannel[]> {
         return await this.messagesService.getMessagesByChannelId(Number(channelId));
     }
 
@@ -34,7 +34,7 @@ export class MessagesController {
     async getDirectMessages(@Req() _req: any, @Param('userId') userId: string | number): Promise<DirectMessage[]> {
         return await this.messagesService.getAllDirectMessages(Number(_req.user.id), Number(userId));
     }
-    
+
     // http://${host}:${port}/api/direct-chat
     // return all the direct message of  the logged user
     @Get('direct-chat')

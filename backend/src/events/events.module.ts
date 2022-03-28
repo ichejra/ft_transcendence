@@ -15,4 +15,4 @@ import { EventsGateway } from "./events.gateway";
         ConnectionsService
     ]
 })
-export class EventsModule {}
+export class EventsModule { }

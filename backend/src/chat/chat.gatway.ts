@@ -9,7 +9,10 @@ import {
 } from "@nestjs/websockets";
 import {
     Inject,
-    Logger
+    Logger,
+    UseFilters,
+    UsePipes,
+    ValidationPipe
 } from "@nestjs/common";
 import {
     Server,
@@ -21,13 +24,16 @@ import { MessageChannel } from "./messages/entities/message-channel.entity";
 import { DirectChatService } from "./direct-chat/direct-chat.service";
 import { ConnectionsService } from "src/events/connections.service";
 import { ChannelDto } from "./channels/dto/channel.dto";
+import { WsExceptionsFilter } from "src/exceptions/ws-exceptions.filter";
 
-@WebSocketGateway({  
+@UseFilters(WsExceptionsFilter)
+@UsePipes(new ValidationPipe())
+@WebSocketGateway({
     cors: {
         origin: '*', // http://frontend:port
     },
 })
-export class ChatGatway implements OnGatewayInit {    
+export class ChatGatway implements OnGatewayInit {
     @WebSocketServer()
     private server: Server;
 
@@ -40,18 +46,22 @@ export class ChatGatway implements OnGatewayInit {
 
     private logger: Logger = new Logger('ChatGateway');
 
-    public async afterInit(server: Server) : Promise<void> {
+    public async afterInit(server: Server): Promise<void> {
         this.logger.log('Initialized');
     }
 
     // ? handling messages for direct chat
     @SubscribeMessage('send_message')
     async handleDirectMessage(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
-        const message = await this.directChatService.saveMessage(client, payload);
-        const receiverSockets = await this.connectionsService.getUserConnections(payload.receiverId);
-        receiverSockets.forEach((sock) => {
-            this.server.to(sock.id).emit('receive_message', message);
-        });
+        try {
+            const message = await this.directChatService.saveMessage(client, payload);
+            const receiverSockets = await this.connectionsService.getUserConnections(payload.receiverId);
+            receiverSockets.forEach((sock) => {
+                this.server.to(sock.id).emit('receive_message', message);
+            });
+        } catch (error) {
+            throw new WsException('forbidden');
+        }
     }
 
     @SubscribeMessage('create_channel')
@@ -69,19 +79,24 @@ export class ChatGatway implements OnGatewayInit {
     // ? handling messages for channels
     @SubscribeMessage('send_message_channel')
     async handleChannelMessage(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
-        const channel: Channel = await this.channelsService.getChannelById(payload.channelId);
-        const message: MessageChannel = await this.channelsService.saveMessage(client, channel, payload.content);
-        this.server.to(channel.name).emit('receive_message_channel', message); 
+        try {
+            const channel: Channel = await this.channelsService.getChannelById(payload.channelId);
+            const message: MessageChannel = await this.channelsService.saveMessage(client, channel, payload.content);
+            this.server.to(channel.name).emit('receive_message_channel', message);
+        } catch (error) {
+            throw new WsException('forbidden');
+        }
     }
-    
+
     @SubscribeMessage('join_channel')
     async handleJoinChannel(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
-        console.log(payload);
-        const channel: Channel = await this.channelsService.joinChannel(client, payload);
-        if (!channel) {
-            throw new WsException('Forbidden');
+        try {
+            const channel: Channel = await this.channelsService.joinChannel(client, payload);
+            client.join(channel.name);
+            client.emit('succes',  { message: "success", status: 200 });
+        } catch (error) {
+            throw error;
         }
-        client.join(channel.name);
     }
 
     // ? handling joining after refeshing
@@ -96,8 +111,12 @@ export class ChatGatway implements OnGatewayInit {
 
     @SubscribeMessage('leave_channel')
     async handleLeaveChannel(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
-        const channel: Channel = await this.channelsService.leaveChannel(client, payload);
-        client.leave(channel.name);
+        try {
+            const channel: Channel = await this.channelsService.leaveChannel(client, payload);
+            client.leave(channel.name);
+        } catch (error) {
+            throw new WsException('cannot leave the channel');
+        }
     }
 
 }

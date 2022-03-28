@@ -7,7 +7,7 @@ import { AuthModule } from "../auth.module";
 import { TwoFactorAuthController } from "./two-factor-auth.controller";
 import { TwoFactorAuthService } from "./two-factor-auth.service";
 
-@Module({ 
+@Module({
     imports: [
         JwtModule.register({
             secret: process.env.JWT_SECRET,
@@ -16,10 +16,10 @@ import { TwoFactorAuthService } from "./two-factor-auth.service";
         UsersModule,
         MailModule,
     ],
-    controllers: [ TwoFactorAuthController ],
+    controllers: [TwoFactorAuthController],
     providers: [
         TwoFactorAuthService,
         MailService
     ],
 })
-export class TwoFactorAuthModule {}
+export class TwoFactorAuthModule { }

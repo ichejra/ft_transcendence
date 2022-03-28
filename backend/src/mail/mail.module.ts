@@ -17,6 +17,6 @@ dotenv.config();
       },
     })
   ],
-  providers: [ MailService ],
+  providers: [MailService],
 })
-export class MailModule {}
+export class MailModule { }

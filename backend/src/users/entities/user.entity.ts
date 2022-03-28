@@ -11,7 +11,7 @@ export enum UserState {
     ONLINE = "online",
     OFFLINE = "offline",
     IN_GAME = "in_game"
-} 
+}
 
 @Entity('users')
 export class User {
@@ -42,10 +42,10 @@ export class User {
     })
     display_name: string;
 
-    @Column({default: ''})
+    @Column({ default: '' })
     avatar_url: string;
 
-    @Column({ default:false })
+    @Column({ default: false })
     is_2fa_enabled: boolean;
 
     @Column({
@@ -65,5 +65,5 @@ export class User {
         type: 'timestamp',
         default: () => 'CURRENT_TIMESTAMP',
     })
-    createdAt: Date; 
+    createdAt: Date;
 }

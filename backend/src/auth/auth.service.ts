@@ -11,13 +11,13 @@ export class AuthService {
         private usersService: UsersService,
         private jwtService: JwtService,
         private twoFactorAuthService: TwoFactorAuthService
-        ) {}
-    
+    ) { }
+
     /* an async function  used for validate the user if exist in database */
     async validateUser(payload: JwtPayload): Promise<User> {
         const { id } = payload;
         try {
-            const user = await this.usersService.findOne( Number(id) );
+            const user = await this.usersService.findOne(Number(id));
             if (!user) {
                 return null;
             }
@@ -29,7 +29,7 @@ export class AuthService {
 
     /* function used for creating the user if not exist and sign it */
     async login(_req: any, _res: any): Promise<any> {
-        let user : User = null;
+        let user: User = null;
         let url: string;
         try {
             user = await this.usersService.findOne(Number(_req.user.id));
@@ -48,11 +48,11 @@ export class AuthService {
             } else {
                 url = process.env.HOME_PAGE; // redirect to Home page
             }
-            const payload: JwtPayload = { id: user.id ,user_name: user.user_name, email: user.email};
+            const payload: JwtPayload = { id: user.id, user_name: user.user_name, email: user.email };
             const jwtToken = this.jwtService.sign(payload);
             _res.cookie('accessToken', jwtToken);
-            return  _res.redirect(url);
-        } catch(err) {
+            return _res.redirect(url);
+        } catch (err) {
             throw new ForbiddenException('user cannot log in');
         }
     }
@@ -67,7 +67,7 @@ export class AuthService {
 
     getUserFromToken = async (token: string): Promise<User> => {
         try {
-            const payload: JwtPayload = this.jwtService.verify(token, { 
+            const payload: JwtPayload = this.jwtService.verify(token, {
                 secret: process.env.JWT_SECRET,
             });
             if (payload.id) {

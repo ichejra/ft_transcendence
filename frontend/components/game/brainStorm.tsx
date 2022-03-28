@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:3000', {
+const socket = io('http://localhost:3001', {
   reconnectionDelayMax: 10000,
   auth: {
     token: '123',

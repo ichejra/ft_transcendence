@@ -27,4 +27,4 @@ import { DirectChatService } from "./direct-chat/direct-chat.service";
         DirectChatService
     ]
 })
-export class ChatModule {}
+export class ChatModule { }

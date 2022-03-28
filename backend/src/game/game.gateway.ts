@@ -17,7 +17,6 @@ import { GameDto } from './dto/game.dto';
 import { Inject } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { ConnectionsService } from 'src/events/connections.service';
-import { LOADIPHLPAPI } from 'dns';
 // import { Consts, GameState } from './game_consts';
 
 @WebSocketGateway({
@@ -29,7 +28,7 @@ export class GameGateway
   implements OnGatewayConnection, OnGatewayInit, OnGatewayDisconnect
 {
   private games: GameObj[] = [];
-  private queue: Set<Socket> = new Set<Socket>(); // players in queue
+  private queue: Set<Socket> = new Set<Socket>();
   private defaultGameQueue: Socket[] = [];
   private obstacleGameQueue: Socket[] = [];
 
@@ -128,12 +127,22 @@ export class GameGateway
     this.clearMatchFromQueue(game);
   }
 
+  @SubscribeMessage('isJoined')
+  private isJoined(client : Socket) {
+    if (this.queue.has(client) === true) {
+      client.emit('joined', true);
+      return ;
+    }
+  }
+  
   @SubscribeMessage('join_queue')
-  private async joinQueue(client: Socket, payload: any): Promise<void> {
-    console.log('join queue: am here');
+  private async joinQueue(client: Socket, payload: string): Promise<void> {
+    console.log('join queue: am here ', payload);
+    // client.emit('joined');
     if (this.queue.has(client) === true) return;
     this.queue.add(client);
     if (payload === 'obstacle') {
+      console.log('obstacleGameQueue: am here');
       this.obstacleGameQueue.push(client);
       if (this.obstacleGameQueue.length > 1) {
         console.log(this.obstacleGameQueue.length);
@@ -163,9 +172,10 @@ export class GameGateway
         this.joinGame([first, second], payload);
       }
     } else if (payload === 'default') {
+      console.log('defaultGameQueue: am here');
       this.defaultGameQueue.push(client);
+      console.log(this.defaultGameQueue.length);
       if (this.defaultGameQueue.length > 1) {
-        console.log(this.defaultGameQueue.length);
         const [first, second] = this.defaultGameQueue;
         const user1 = await this.getPlayerAsUser(first);
         const user2 = await this.getPlayerAsUser(second);
@@ -186,7 +196,6 @@ export class GameGateway
           UserState.IN_GAME,
         );
         this.defaultGameQueue.splice(0, this.defaultGameQueue.length);
-        // this.queue.clear();
         this.joinGame([first, second], payload);
       }
     }
