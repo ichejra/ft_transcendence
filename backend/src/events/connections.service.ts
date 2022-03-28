@@ -61,9 +61,9 @@ export class ConnectionsService {
             return;
         }
         try {
-
             const sockets: Set<Socket> = this.connections.get(user.id);
             if (sockets) {
+                sockets.delete(socket);
                 if (sockets.size === 0) {
                     await this.usersService.updateState(Number(user.id), UserState.OFFLINE);
                     this.connections.delete(user.id);
@@ -96,6 +96,17 @@ export class ConnectionsService {
             return await this.usersService.findOne(id);
         } catch (err) {
             throw new WsException('cannot get the receiver');
+        }
+    }
+
+    // disconnect the user sockets at logout
+    async handleLogout(socket: Socket) {
+        const user = await this.getUserFromSocket(socket);
+        const sockets: Set<Socket> = this.connections.get(user.id);
+        if (sockets) {
+            sockets.forEach((sock) => {
+                sock.disconnect();
+            });
         }
     }
 

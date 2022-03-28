@@ -377,7 +377,6 @@ export class ChannelsService {
                 [userId]
             );
         } catch (err) {
-            console.log(err);
             throw err;
         }
     }
