@@ -40,7 +40,7 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
   const dispatch = useAppDispatch();
 
   //! useAppSelector
-  const { editProfile } = useAppSelector((state) => state.user);
+  const { editProfile, user } = useAppSelector((state) => state.user);
 
   const addFriend = (id: number) => {
     if (Cookies.get("accessToken")) {
@@ -168,7 +168,7 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
             </div>
           </div> */}
           <div className="flex justify-center md:justify-start">
-            {user_me.id !== Number(profileID) ? (
+            {user.id !== Number(profileID) ? (
               <div>
                 {!isFriend && !isPending && (
                   <PButton

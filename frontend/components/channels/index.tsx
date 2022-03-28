@@ -91,7 +91,7 @@ const ChatRooms = () => {
   }, [addChannel, newChannelId]);
 
   return (
-    <div className="page-100 h-full w-full pt-20 pb-16 flex about-family channels-bar-bg">
+    <div className="relative page-100 h-full w-full pt-20 pb-16 about-family channels-bar-bg">
       <div className="fixed h-full overflow-auto no-scrollbar pb-20 user-card-bg border-r border-r-gray-600">
         <div>
           <div
@@ -147,13 +147,13 @@ const ChatRooms = () => {
         </div>
       </div>
       {showChannelContent || showDirect ? (
-        <div>
+        <div className='fixed h-full left-[7.5rem] right-0'>
           {showChannelContent && <ChannelContent channelName={channelName} />}
           {showDirect && <DirectChat />}
         </div>
       ) : (
         <div className="relative text-white left-[7.5rem]">
-          <div className="fixed w-full h-full bottom-0 channels-bar-bg text-white flex items-center justify-center">
+          <div className="fixed left-[7.5rem] right-0 h-full bottom-0 channels-bar-bg text-white flex items-center justify-center">
             <h1 className="text-[1.3rem] w-[25rem] text-center text-white opacity-40 about-title-family">
               Join a channel and start chatting
             </h1>

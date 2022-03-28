@@ -14,7 +14,7 @@ export interface User {
   email?: string;
   avatar_url: string;
   is_active: boolean;
-  state: boolean;
+  state: string;
   createdAt: string;
 }
 interface UserState {
@@ -41,7 +41,7 @@ const initialState: UserState = {
     email: "",
     avatar_url: "",
     is_active: false,
-    state: false,
+    state: "",
     createdAt: "",
   },
   friends: [],

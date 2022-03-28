@@ -15,6 +15,7 @@ import {
   showNotificationsList,
 } from "../../features/userProfileSlice";
 import { fetchPendingStatus } from "../../features/friendsManagmentSlice";
+import { socket } from "../../pages/SocketProvider";
 // import { socket } from "../../pages/SocketProvider";
 
 const ProfileDropdown = () => {
@@ -63,6 +64,7 @@ const ProfileDropdown = () => {
     console.log(1);
     if (logout) {
       dispatch(logOutUser());
+      socket.emit("logout");
     }
   }, [logout]);
 

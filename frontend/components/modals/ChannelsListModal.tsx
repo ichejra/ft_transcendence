@@ -1,5 +1,6 @@
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { SiPrivateinternetaccess } from "react-icons/si";
+import { BsEmojiFrown } from "react-icons/bs";
 import { useEffect, useRef, useState } from "react";
 import {
   setChannelsListModal,
@@ -58,14 +59,26 @@ const ChannelsListModal = () => {
         ref={divRef}
         className="flex flex-col justify-center items-center h-full"
       >
-        <div className="profile-card-bg-color overflow-auto w-full h-full md:w-[720px] md:h-[500px] border-[1px] border-gray-700 rounded-lg">
-          <div className="relative h-full">
-            <div className="text-gray-300 w-full flex flex-wrap">
-              {unjoinedChannels.map((channel) => {
-                return <UnjoinedChannel key={channel.id} {...channel} />;
-              })}
+        <div className="profile-card-bg-color w-full h-full md:w-[720px] md:h-[500px] border-[1px] border-gray-700 rounded-lg">
+          {unjoinedChannels.length ? (
+            <div className="relative h-full overflow-auto">
+              <h1 className="text-center text-white m-2 p-2 font-bold about-title-family">
+                Discover new channels
+              </h1>
+              <div className="text-gray-300 w-full flex flex-wrap justify-center">
+                {unjoinedChannels.map((channel) => {
+                  return <UnjoinedChannel key={channel.id} {...channel} />;
+                })}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex flex-col justify-center items-center h-full text-white opacity-20">
+              <BsEmojiFrown size="10rem" />
+              <h1 className="text-center text-white m-2 p-2 font-bold about-title-family">
+                No Availabe Channels
+              </h1>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -120,7 +133,7 @@ const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
         console.log("data: ", data);
         reject(data);
       });
-      socket.on("success", (data) => {
+      socket.on("join_success", (data) => {
         resolve(data);
       });
     });
@@ -128,7 +141,7 @@ const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
       .then((response) => {
         console.log("---------> ", response, isBtnLoading);
         setIsBtnLoading(false);
-        if (!response.status) {
+        if (response.status === 200) {
           setIsValid(1);
           dispatch(getChannelsList()).then(() => {
             dispatch(addNewChannel());
@@ -162,7 +175,7 @@ const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
           </div>
         )}
         {passwordForm && isPrivate ? (
-          <div className="flex items-center justify-center w-full">
+          <form className="flex items-center justify-center w-full">
             <input
               ref={inputPassRef}
               type="password"
@@ -180,7 +193,10 @@ const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
             <button
               type="submit"
               disabled={isBtnLoading}
-              onClick={() => joinPrivateChannel(id)}
+              onClick={(e) => {
+                e.preventDefault();
+                joinPrivateChannel(id);
+              }}
               className={`hover:scale-105 mx-1 px-3 w-[60px] bg-blue-500 flex items-center justify-center py-1 border rounded-md hover:bg-blue-400 transition duration-300`}
             >
               {isBtnLoading ? (
@@ -189,7 +205,7 @@ const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
                 <p>Join</p>
               )}
             </button>
-          </div>
+          </form>
         ) : (
           <div className="flex items-center justify-between w-full px-6">
             <h1>{name}</h1>

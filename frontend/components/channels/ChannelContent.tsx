@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { IoMdSend } from "react-icons/io";
+import { IoMdSend, IoMdExit } from "react-icons/io";
 import { RiListSettingsLine } from "react-icons/ri";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { useParams } from "react-router";
@@ -8,10 +8,11 @@ import { useNavigate } from "react-router";
 import { updateChannelContent } from "../../features/globalSlice";
 import {
   getChannelMembersList,
-  Member,
+  ChannelMember,
   addNewMessage,
   addNewChannel,
 } from "../../features/chatSlice";
+import Member from "./Member";
 interface ContentProps {
   channelName: string;
 }
@@ -23,7 +24,9 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
   const navigate = useNavigate();
   const msgContainerRef = useRef<HTMLDivElement>(null);
   const { id: channelId } = useParams();
-  const { channelContent } = useAppSelector((state) => state.channels);
+  const { channelContent, channelMembers } = useAppSelector(
+    (state) => state.channels
+  );
   const { updateMessages } = useAppSelector((state) => state.globalState);
   const { user } = useAppSelector((state) => state.user);
 
@@ -41,6 +44,10 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
       top: document.body.scrollHeight,
       behavior: "smooth",
     });
+  };
+
+  const handleChange = (e: any) => {
+    setMessage(e.target.value);
   };
 
   useEffect(() => {
@@ -65,9 +72,11 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
     };
   }, []);
 
-  const handleChange = (e: any) => {
-    setMessage(e.target.value);
+  //!------------------******------++++++++++++++++++>>>>>>>>>>>>>>>..
+  const leaveChannel = async () => {
+    socket.emit("leave_channel", { channelId });
   };
+  //!------------------******------++++++++++++++++++>>>>>>>>>>>>>>>..
 
   useEffect(() => {
     console.log("-->", channelId);
@@ -75,7 +84,7 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
       dispatch(getChannelMembersList(Number(channelId))).then(
         ({ payload }: any) => {
           const checkMember = [...payload].find(
-            (member: Member) => member.user.id === user.id
+            (member: ChannelMember) => member.user.id === user.id
           );
           console.log("checkmember", checkMember);
           if (checkMember !== undefined) {
@@ -100,52 +109,77 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
 
   return (
     <div
-      className="relative text-white ml-6 left-[7.4rem]"
+      className="relative text-white right-0 flex h-full w-full"
       ref={msgContainerRef}
     >
-      <div className="fixed user-card-bg border-b border-l border-gray-700 shadow-gray-700 shadow-sm left-[7.4rem] text-white p-2 right-0 flex items-center justify-between">
-        <h1 className="text-xl">#{channelName.split(" ").join("-")}</h1>
-        {isAdmin && (
-          <RiListSettingsLine
-            size="2rem"
-            className="mr-2 hover:scale-110 transition duration-300 hover:text-blue-400 cursor-pointer"
-          />
-        )}
-      </div>
-      <div className="pt-10">
-        {channelContent.map((message) => {
-          const { id, createdAt, content, author } = message;
-          return (
-            <div key={id} className="my-6 mr-2 flex about-family items-center">
-              <img
-                src={author?.avatar_url}
-                className="w-10 h-10 rounded-full mr-2"
-              />
-              <div>
-                <p className="text-gray-300 text-lg">
-                  {author?.user_name}
-                  <span className="text-gray-500 text-xs mx-1">
-                    {new Date(createdAt).toLocaleString("default", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      second: "2-digit",
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                    })}
-                  </span>
-                </p>
-                <p className="text-xs">{content}</p>
+      <div className="relative w-full">
+        <div className="fixed user-card-bg border-b border-l border-gray-700 shadow-gray-700  shadow-sm left-[7.4rem] text-white p-2 right-0 flex items-center justify-between">
+          <h1 className="text-xl">#{channelName.split(" ").join("-")}</h1>
+          {isAdmin ? (
+            <RiListSettingsLine
+              size="2rem"
+              className="mr-2 hover:scale-110 transition duration-300 hover:text-blue-400 cursor-pointer"
+            />
+          ) : (
+            <button
+              onClick={leaveChannel}
+              className="flex items-center hover:text-blue-400 cursor-pointer hover:scale-110 transition duration-300"
+            >
+              leave <IoMdExit size="2rem" className="ml-2" />
+            </button>
+          )}
+        </div>
+        <div className="ml-6 pt-10 h-full channels-bar-bg">
+          {channelContent.map((message) => {
+            const { id, createdAt, content, author } = message;
+            return (
+              <div
+                key={id}
+                className="my-6 mr-2 flex about-family items-center"
+              >
+                <img
+                  src={author?.avatar_url}
+                  className="w-10 h-10 rounded-full mr-2"
+                />
+                <div>
+                  <p className="text-gray-300 text-lg">
+                    {author?.user_name}
+                    <span className="text-gray-500 text-xs mx-1">
+                      {new Date(createdAt).toLocaleString("default", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </p>
+                  <p className="text-xs font-sans font-bold">{content}</p>
+                </div>
               </div>
-            </div>
+            );
+          })}
+        </div>
+        <MessageForm
+          message={message}
+          handleChange={handleChange}
+          sendMessage={sendMessage}
+        />
+      </div>
+      <div className="h-full pt-12 px-4 my-2 w-[400px] border-l border-gray-700 user-card-bg">
+        <h1 className="text-gray-300 pb-2">Members</h1>
+        {channelMembers.map((member) => {
+          return (
+            <Member
+              key={member.id}
+              chId={Number(channelId)}
+              {...member}
+              isAdmin={isAdmin}
+            />
           );
         })}
       </div>
-      <MessageForm
-        message={message}
-        handleChange={handleChange}
-        sendMessage={sendMessage}
-      />
     </div>
   );
 };
@@ -170,7 +204,7 @@ const MessageForm: React.FC<FormProps> = ({
   }, [channelId]);
 
   return (
-    <div className="fixed left-[7.42rem] channels-bar-bg bottom-0 right-0">
+    <div className="absolute bottom-20 w-full">
       <form className="flex relative items-center mx-2 mb-2 px-2 pb-2">
         <input
           ref={inputRef}
@@ -178,7 +212,7 @@ const MessageForm: React.FC<FormProps> = ({
           value={message}
           onChange={(e) => handleChange(e)}
           placeholder="new message"
-          className="w-full p-3 rounded-md user-card-bg border border-gray-700 text-gray-200 text-sm"
+          className="w-full p-3 pr-12 rounded-md user-card-bg border border-gray-700 text-gray-200 text-sm"
         />
         <button
           onClick={sendMessage}
