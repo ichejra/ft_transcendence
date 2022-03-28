@@ -47,7 +47,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         this.logger.log(`Client disconnected: ${client.id}`);
         try {
             await this.connectionsService.eraseConnection(client);
-            client.disconnect();
         } catch (err) {
             throw new WsException('unauthorized connection');
         }
@@ -72,5 +71,10 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         } catch (err) {
             throw err;
         }
+    }
+
+    @SubscribeMessage('logout')
+    async handleLogout(@ConnectedSocket() client: Socket) {
+        await this.connectionsService.handleLogout(client);
     }
 }

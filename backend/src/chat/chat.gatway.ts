@@ -66,7 +66,6 @@ export class ChatGatway implements OnGatewayInit {
 
     @SubscribeMessage('create_channel')
     async handleCreateChannel(@ConnectedSocket() client: Socket, @MessageBody() payload: ChannelDto) {
-        console.log(payload);
         try {
             const user = await this.connectionsService.getUserFromSocket(client);
             await this.channelsService.createChannel(user, payload);
