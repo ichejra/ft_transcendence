@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards, Req, ParseIntPipe, UseInterceptors, UploadedFile, HttpCode, Res } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { UpdateResult, DeleteResult } from 'typeorm';
+import { DeleteResult } from 'typeorm';
 
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UserDto } from "src/users/dto/user.dto";
@@ -9,6 +9,7 @@ import { UsersService } from './users.service';
 import * as dotenv from 'dotenv';
 import { editFileName, fileFilter } from './utils/file-upload.utils';
 import { User } from './entities/user.entity';
+import { ReqUser } from './decorators/req-user.decorator'
 
 dotenv.config()
 @Controller('users')
@@ -37,8 +38,8 @@ export class UsersController {
   @Get('me')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  getProfile(@Req() _req: any) {
-    return this.usersService.findOne(Number(_req.user.id));
+  getProfile(@ReqUser() user: User /*@Req() _req: any*/) {
+    return this.usersService.findOne(Number(user.id));
   }
 
   @Patch('update-profile')
@@ -52,8 +53,8 @@ export class UsersController {
     fileFilter: fileFilter,
   }),
   )
-  update(@Req() _req: any, @UploadedFile() file: Express.Multer.File): Promise<UserDto> {
-    return this.usersService.updateProfile(Number(_req.user.id), _req.body.user_name, file);
+  update(@ReqUser() user: User, @Body('user_name') user_name: string, @UploadedFile() file: Express.Multer.File): Promise<User> {
+    return this.usersService.updateProfile(Number(user.id), user_name, file);
   }
 
   /* Route delete user 
@@ -74,8 +75,8 @@ export class UsersController {
   @Patch('/friend-request/')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  sendReqFriend(@Req() _req: any, @Body('recipientId') recipientId: number | string): Promise<User> {
-    return this.usersService.insertToFriends(Number(_req.user.id), Number(recipientId))
+  sendReqFriend(@ReqUser() user: User, @Body('recipientId') recipientId: number | string): Promise<User> {
+    return this.usersService.insertToFriends(Number(user.id), Number(recipientId))
   }
 
   /* Route: accept friend
@@ -85,8 +86,8 @@ export class UsersController {
   @Patch('/friend-accept/')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  acceptReqFriend(@Req() _req: any, @Body('applicantId') applicantId: number | string): Promise<User> {
-    return this.usersService.acceptFriend(Number(_req.user.id), Number(applicantId));
+  acceptReqFriend(@ReqUser() user: User, @Body('applicantId') applicantId: number | string): Promise<User> {
+    return this.usersService.acceptFriend(Number(user.id), Number(applicantId));
   }
 
   /* Route: block friend
@@ -95,8 +96,8 @@ export class UsersController {
   @Patch('/friend-block/')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  blockFriend(@Req() _req: any, @Body('blockId') blockId: number | string): Promise<User> {
-    return this.usersService.blockFriend(Number(_req.user.id), Number(blockId));
+  blockFriend(@ReqUser() user: User, @Body('blockId') blockId: number | string): Promise<User> {
+    return this.usersService.blockFriend(Number(user.id), Number(blockId));
   }
 
   /* Route: unblock friend
@@ -105,8 +106,8 @@ export class UsersController {
   @Patch('/friend-unblock/')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  unblockFriend(@Req() _req: any, @Body('unblockId') unblockId: number | string): Promise<User> {
-    return this.usersService.unblockFriend(Number(_req.user.id), Number(unblockId));
+  unblockFriend(@ReqUser() user: User, @Body('unblockId') unblockId: number | string): Promise<User> {
+    return this.usersService.unblockFriend(Number(user.id), Number(unblockId));
   }
 
   /* Route: get pending requests 
@@ -115,8 +116,8 @@ export class UsersController {
   @Get('/pending-friends')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  pendingFriends(@Req() _req: any): Promise<User[]> {
-    return this.usersService.getPendingRequests(_req.user.id);
+  pendingFriends(@ReqUser() user: User): Promise<User[]> {
+    return this.usersService.getPendingRequests(user.id);
   }
 
   /* Route friends:
@@ -126,8 +127,8 @@ export class UsersController {
   @Get('/friends')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  getFriends(@Req() _req: any): Promise<User[]> {
-    return this.usersService.getUserFriends(Number(_req.user.id))
+  getFriends(@ReqUser() user: User): Promise<User[]> {
+    return this.usersService.getUserFriends(Number(user.id))
   }
 
   /* Route blocked friends 
@@ -137,8 +138,8 @@ export class UsersController {
   @Get('/blocked-friends')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  getBlockedFriends(@Req() _req: any): Promise<User[]> {
-    return this.usersService.getBlockedFriends(Number(_req.user.id));
+  getBlockedFriends(@ReqUser() user: User): Promise<User[]> {
+    return this.usersService.getBlockedFriends(Number(user.id));
   }
 
   /* Route no relation users
@@ -148,8 +149,8 @@ export class UsersController {
   @Get('/no_relation')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  getNoRelationUsers(@Req() _req: any): Promise<User[]> {
-    return this.usersService.getNoRelationUsers(Number(_req.user.id));
+  getNoRelationUsers(@ReqUser() user: User): Promise<User[]> {
+    return this.usersService.getNoRelationUsers(Number(user.id));
   }
 
   /* Route for cancelling, rejecting and removing a friend 
@@ -158,7 +159,7 @@ export class UsersController {
   @Patch('remove-relation')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  removeRelation(@Req() _req: any, @Body('rejectedId') rejectedId: number | string): Promise<User> {
-    return this.usersService.removeRelation(Number(_req.user.id), Number(rejectedId));
+  removeRelation(@ReqUser() user: User, @Body('rejectedId') rejectedId: number | string): Promise<User> {
+    return this.usersService.removeRelation(Number(user.id), Number(rejectedId));
   }
 }

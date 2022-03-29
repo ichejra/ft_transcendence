@@ -8,7 +8,7 @@ export class WsExceptionsFilter extends BaseWsExceptionFilter {
         const client = host.switchToWs().getClient() as Socket;
         const err = exception instanceof WsException ? exception.getError() : exception.getResponse();
         const message = err.error;
-        const status = err.status || 403;
+        const status = err.status ?? 403;
         client.emit("error", {
             status,
             message,

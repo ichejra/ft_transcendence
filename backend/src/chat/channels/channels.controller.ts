@@ -8,10 +8,11 @@ import {
     ParseIntPipe,
     Patch,
     Post,
-    Req,
     UseGuards
 } from "@nestjs/common";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
+import { ReqUser } from "src/users/decorators/req-user.decorator";
+import { User } from "src/users/entities/user.entity";
 import { ChannelsService } from "./channels.service";
 import { ChannelDto } from "./dto/channel.dto";
 import { UpdateChannelDto } from "./dto/update-channel.dto";
@@ -28,8 +29,8 @@ export class ChannelsController {
     @Post('create')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    createChannel(@Req() _req: any, @Body() data: ChannelDto): Promise<Channel> {
-        return this.channelsService.createChannel(_req.user, data);
+    createChannel(@ReqUser() user: User, @Body() data: ChannelDto): Promise<Channel> {
+        return this.channelsService.createChannel(user, data);
     }
 
     /* Route for getting all channels 
@@ -46,9 +47,9 @@ export class ChannelsController {
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
     getJoinedChannels(
-        @Req() _req: any
+        @ReqUser() user: User
     ): Promise<Channel[]> {
-        return this.channelsService.getJoinedChannels(Number(_req.user.id));
+        return this.channelsService.getJoinedChannels(Number(user.id));
     }
 
     //
@@ -56,9 +57,9 @@ export class ChannelsController {
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
     getUnjoinedChannels(
-        @Req() _req: any
+        @ReqUser() user: User
     ): Promise<Channel[]> {
-        return this.channelsService.getUnjoinedChannels(Number(_req.user.id));
+        return this.channelsService.getUnjoinedChannels(Number(user.id));
     }
 
     /* Route get channel 
@@ -86,18 +87,18 @@ export class ChannelsController {
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
     updateChannel(
-        @Req() _req: any,
+        @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,
         @Body() data: UpdateChannelDto): Promise<Channel> {
-        return this.channelsService.updateChannel(Number(_req.user.id), channelId, data);
+        return this.channelsService.updateChannel(Number(user.id), channelId, data);
     }
 
     /* Route delete channel */
     @Delete('/:channelId')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    deleteChannel(@Req() req: any, @Param('channelId', ParseIntPipe) channelId: number): Promise<any> {
-        return this.channelsService.deleteChannel(Number(req.user.id), Number(channelId));
+    deleteChannel(@ReqUser() user: User, @Param('channelId', ParseIntPipe) channelId: number): Promise<any> {
+        return this.channelsService.deleteChannel(Number(user.id), Number(channelId));
     }
 
     /* Route add admin -> set a member as admin */
@@ -105,10 +106,10 @@ export class ChannelsController {
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
     addNewAdmin(
-        @Req() _req: any,
+        @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,
         @Body('memberId') memberId: number): Promise<any> {
-        return this.channelsService.addAdmin(channelId, Number(_req.user.id), memberId);
+        return this.channelsService.addAdmin(channelId, Number(user.id), memberId);
     }
 
     /* Route remove admin -> change the status user to member */
@@ -116,50 +117,50 @@ export class ChannelsController {
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
     removeAdmin(
-        @Req() _req: any,
+        @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,
         @Body('memberId') memberId: number): Promise<any> {
-        return this.channelsService.removeAdmin(channelId, Number(_req.user.id), memberId);
+        return this.channelsService.removeAdmin(channelId, Number(user.id), memberId);
     }
     /* Route mute member ()-> set the user as mutant */
     @Patch('/:channelId/mute-user')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
     muteUser(
-        @Req() _req: any,
+        @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,
         @Body('memberId') memberId: number): Promise<any> {
-        return this.channelsService.changeStatus(channelId, Number(_req.user.id), memberId, MemberStatus.MUTED);
+        return this.channelsService.changeStatus(channelId, Number(user.id), memberId, MemberStatus.MUTED);
     }
 
     @Patch('/:channelId/ban-user')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
     banUser(
-        @Req() _req: any,
+        @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,
         @Body('memberId') memberId: number): Promise<any> {
-        return this.channelsService.changeStatus(channelId, Number(_req.user.id), memberId, MemberStatus.BANNED);
+        return this.channelsService.changeStatus(channelId, Number(user.id), memberId, MemberStatus.BANNED);
     }
 
     @Patch('/:channelId/set-update-password')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
     setUpdatePwd(
-        @Req() _req: any,
+        @ReqUser() user: User,
         @Param('channelId') channelId: number,
         @Body('password') password: string
     ): Promise<any> {
-        return this.channelsService.setUpdatePassword(Number(_req.user.id), channelId, password);
+        return this.channelsService.setUpdatePassword(Number(user.id), channelId, password);
     }
 
     @Patch('/:channelId/kick-user')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
     kickUser(
-        @Req() _req: any,
+        @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,
         @Body('memberId') memberId: number): Promise<any> {
-        return this.channelsService.kickUser(Number(_req.user.id), memberId, channelId);
+        return this.channelsService.kickUser(Number(user.id), memberId, channelId);
     }
 };

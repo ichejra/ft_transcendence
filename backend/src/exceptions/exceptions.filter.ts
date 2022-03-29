@@ -16,7 +16,7 @@ export class ExceptionsFilter extends BaseExceptionFilter {
     const response = ctx.getResponse();
 
     const message = (exception instanceof Error) ? exception.message : exception.error;
-    let status: any = exception.status || 404;
+    let status: any = exception.status ?? 404;
     response
       .status(status)
       .json({

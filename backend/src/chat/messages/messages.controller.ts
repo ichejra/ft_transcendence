@@ -7,6 +7,7 @@ import {
     UseGuards
 } from "@nestjs/common";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
+import { ReqUser } from "src/users/decorators/req-user.decorator";
 import { User } from "src/users/entities/user.entity";
 import { DirectMessage } from "./entities/direct-messages.entity";
 import { MessageChannel } from "./entities/message-channel.entity";
@@ -31,8 +32,8 @@ export class MessagesController {
     @Get('/direct/:userId')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    async getDirectMessages(@Req() _req: any, @Param('userId') userId: string | number): Promise<DirectMessage[]> {
-        return await this.messagesService.getAllDirectMessages(Number(_req.user.id), Number(userId));
+    async getDirectMessages(@ReqUser() user: User, @Param('userId') userId: string | number): Promise<DirectMessage[]> {
+        return await this.messagesService.getAllDirectMessages(Number(user.id), Number(userId));
     }
 
     // http://${host}:${port}/api/direct-chat
@@ -40,7 +41,7 @@ export class MessagesController {
     @Get('direct-chat')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    async getDirectChat(@Req() _req: any): Promise<User[]> {
-        return await this.messagesService.getDirectChat(Number(_req.user.id));
+    async getDirectChat(@ReqUser() user: User): Promise<User[]> {
+        return await this.messagesService.getDirectChat(Number(user.id));
     }
 }
