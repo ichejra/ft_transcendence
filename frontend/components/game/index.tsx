@@ -58,25 +58,16 @@ const PongGame: React.FC<UserType> = ({ userType }) => {
   };
 
   return (
-    <div className='page-100 flex w-full items-center justify-center'>
-      <div className='flex items-center justify-center w-full'>
-        {/* <h1 className="text-2xl">PING PONG</h1> */}
-        <Pong userType={userType} />
-        {/* <Pong /> */}
-        <ul id='messages'></ul>
-      </div>
-      {/* <div>
-        <input id="message" type="text" onChange={(e) => setMsg(e.target.value)}/>
-        <button onClick={handleSubmitNewMessage}>submit</button>
-      </div> */}
-      <div>
-        {/* <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
-          Change Color
-        </button> */}
-      </div>
+    // <div className=''>
+    <div className='page-100 w-full h-full relative'>
+      {/* <div className='flex  items-center justify-center'> */}
+      {/* <div className=' page-100 flex items-center justify-center h-full w-full'> */}
+      {/* <h1 className="text-2xl">PING PONG</h1> */}
+      <Pong userType={userType} />
+      {/* <Pong /> */}
+      {/* </div> */}
     </div>
   );
 };
 
 export default PongGame;
-
