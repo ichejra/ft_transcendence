@@ -14,6 +14,7 @@ import {
   banChannelMember,
   kickChannelMember,
 } from "../../features/chatSlice";
+import { socket } from "../../pages/SocketProvider";
 
 interface MemberProps {
   id: number;
@@ -22,6 +23,7 @@ interface MemberProps {
   userStatus: string;
   isAdmin: boolean;
   chId: number;
+  channelName: string;
 }
 
 const Member: React.FC<MemberProps> = ({
@@ -30,34 +32,43 @@ const Member: React.FC<MemberProps> = ({
   userStatus,
   isAdmin,
   chId,
+  channelName,
 }) => {
+  const { memberStatus } = useAppSelector((state) => state.channels);
   const [toggleMenu, setToggleMenu] = useState(false);
   const menuRef = useRef<any>(null);
   const dispatch = useAppDispatch();
 
   const muteUser = (id: number) => {
-    dispatch(muteChannelMember({ channelId: chId, memberId: user.id })).then(
-      () => {
-        setToggleMenu(false);
-      }
-    );
+    dispatch(muteChannelMember({ channelId: chId, memberId: id })).then(() => {
+      socket.emit("member_status_changed", {
+        room: channelName,
+        status: "mute",
+      });
+      dispatch(getChannelMembersList(chId));
+      setToggleMenu(false);
+    });
   };
   const banUser = (id: number) => {
-    dispatch(banChannelMember({ channelId: chId, memberId: user.id })).then(
-      () => {
-        setToggleMenu(false);
-      }
-    );
+    dispatch(banChannelMember({ channelId: chId, memberId: id })).then(() => {
+      socket.emit("member_status_changed", {
+        room: channelName,
+        status: "ban",
+      });
+      dispatch(getChannelMembersList(chId));
+      setToggleMenu(false);
+    });
   };
   const kickUser = (id: number) => {
-    dispatch(kickChannelMember({ channelId: chId, memberId: user.id })).then(
-      () => {
-        setToggleMenu(false);
-      }
-    );
+    dispatch(kickChannelMember({ channelId: chId, memberId: id })).then(() => {
+      socket.emit("member_status_changed", {
+        room: channelName,
+        status: "kick",
+      });
+      dispatch(getChannelMembersList(chId));
+      setToggleMenu(false);
+    });
   };
-
-  const { memberStatus } = useAppSelector((state) => state.channels);
 
   useEffect(() => {
     const updateUserMenu = (e: Event) => {
@@ -76,7 +87,10 @@ const Member: React.FC<MemberProps> = ({
   }, [toggleMenu]);
 
   useEffect(() => {
-    dispatch(getChannelMembersList(chId));
+    console.log("chId --------->", chId);
+    if (chId) {
+      dispatch(getChannelMembersList(chId));
+    }
   }, [memberStatus]);
 
   return (

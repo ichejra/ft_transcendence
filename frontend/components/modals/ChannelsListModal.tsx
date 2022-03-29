@@ -9,6 +9,7 @@ import {
   addNewChannel,
   getNewChannelId,
 } from "../../features/chatSlice";
+import { updateMemmbersList } from "../../features/globalSlice";
 import { socket } from "../../pages/SocketProvider";
 
 const ChannelsListModal = () => {
@@ -21,6 +22,17 @@ const ChannelsListModal = () => {
     dispatch(fetchUnjoinedChannels()).then(() => {
       setIsLoading(false);
     });
+  }, []);
+
+  useEffect(() => {
+    console.log("}}}}}}}}}}}}}}}}}}}}}}} socket seted");
+    socket.on("join_success", () => {
+      console.log("%c a new member joined the channel", "color:green");
+      dispatch(updateMemmbersList());
+    });
+    return () => {
+      socket.off("join_success");
+    };
   }, []);
 
   if (isLoading) {
@@ -134,6 +146,7 @@ const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
         reject(data);
       });
       socket.on("join_success", (data) => {
+        console.log("%c************", "color:orange");
         resolve(data);
       });
     });
@@ -148,7 +161,7 @@ const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
             dispatch(getNewChannelId(id));
             dispatch(setChannelsListModal(false));
           });
-          socket.off("success");
+          socket.off("join_success");
           console.log("%c %d private joined", "color:green", response.status);
         }
       })
@@ -188,6 +201,7 @@ const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
               } about-family px-3 py-1 bg-transparent rounded-md mx-2 opacity-70 tracking-wider border-[1px]`}
               value={password}
               placeholder="Enter Password"
+              autoComplete="new-password"
               onChange={(e) => setPassword(e.target.value)}
             />
             <button

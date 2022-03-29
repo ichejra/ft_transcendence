@@ -37,13 +37,6 @@ const UserProfile: React.FC = () => {
     });
   }, [profileID]);
 
-  if (!userProfile.user_name) {
-    return (
-      <div className="page-100 mt-20 flex justify-center profile-card-bg-color">
-        <div className="loading w-32 h-32"></div>;
-      </div>
-    );
-  }
   return (
     <div className="page-100 mt-20 flex justify-center profile-card-bg-color">
       <div className="flex flex-col w-full 2xl:w-[80rem] items-center shadow-xl rounded-none lg:rounded-xl bg-black">
