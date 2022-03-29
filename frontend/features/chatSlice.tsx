@@ -50,6 +50,7 @@ interface InitialState {
   channelMembers: ChannelMember[];
   directMessage: DirectMessage[];
   memberStatus: string;
+  muteMember: boolean;
 }
 
 const initialState: InitialState = {
@@ -68,6 +69,7 @@ const initialState: InitialState = {
   channelMembers: [],
   directMessage: [],
   memberStatus: "",
+  muteMember: false,
 };
 
 export const createChannel = createAsyncThunk(
@@ -340,6 +342,18 @@ const channelsManagmentSlice = createSlice({
       }
       // console.log("CHAT SLICE", current(state.channelContent));
     },
+    setMuteCountDown: (state: InitialState = initialState) => {
+      state.muteMember = true;
+    },
+    endMuteCountDown: (
+      state: InitialState = initialState,
+      action: { payload: string | undefined }
+    ) => {
+      state.muteMember = false;
+      if (action.payload) {
+        state.memberStatus = action.payload;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(createChannel.fulfilled, (state, action: any) => {
@@ -381,6 +395,8 @@ export const {
   addNewMessage,
   addNewChannel,
   getNewChannelId,
+  setMuteCountDown,
+  endMuteCountDown,
 } = channelsManagmentSlice.actions;
 
 export default channelsManagmentSlice.reducer;

@@ -72,7 +72,7 @@ const ChatRooms = () => {
   };
 
   useEffect(() => {
-    const chId = newChannelId || Number(channelId);
+    const chId = newChannelId ?? Number(channelId);
     console.log("--------------------->", newChannelId);
     const timer = setTimeout(() => {
       setIsLoading(true);
