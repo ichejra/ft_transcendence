@@ -369,16 +369,16 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   }, []);
 
   return (
-    <div className='flex w-full flex-col items-center relative'>
+    <div className='flex w-full flex-col items-center justify-center'>
       {users.length === 0 && userType === 'player' && (
-        <div className='absolute  -mt-[26rem] items-center flex justify-center p-22 md:w-[62rem] lg:w-[74rem]'>
+        <div className='items-center flex justify-center p-22 md:mt-64 mt-52 w-full'>
           <GameRules />
         </div>
       )}
       {userType === 'player' && users.length === 0 && joined === false && (
         <div
           ref={playBtnsRef}
-          className='flex md:flex-row flex-col items-center justify-between mt-10 md:w-[50rem] absolute'
+          className='flex md:flex-row flex-col items-center justify-between md:w-[50rem] m-20'
         >
           <div className='button '>
             <button type='button' className='text-white' onClick={joinMatch}>
@@ -398,10 +398,10 @@ const Pong: React.FC<UserType> = ({ userType }) => {
         </div>
       )}
       {joined === true && users.length === 0 && (
-        <div className='text-white'>Waiting For Your Opponent...</div>
+        <div className='text-white m-20'>Waiting For Your Opponent...</div>
       )}
       {users.length !== 0 && (
-        <div className='border-4 border-[lightgrey]'>
+        <div className='border-4 border-[lightgrey] mt-52'>
           <canvas
             ref={canvasRef}
             width={CANVAS_WIDTH}
@@ -411,7 +411,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
       )}
       <div className=''>
         {users.length !== 0 && (
-          <div className='w-[24rem] md:w-[50rem] flex items-center justify-between'>
+          <div className='w-[24rem] md:w-[50rem] flex items-center justify-between m-16 md:mb-2'>
             <div className=' flex flex-col items-center'>
               <img
                 src={leftPlayer?.avatar_url}
@@ -433,7 +433,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
           </div>
         )}
         {frame.state === 'OVER' && userType === 'player' && (
-          <div className='play-again-btn items-center mt-10 md:m-2'>
+          <div className='play-again-btn items-center mb-20'>
             <button onClick={handlePlayAgain}>Play Again</button>
           </div>
         )}
