@@ -47,7 +47,7 @@ export class UsersService {
     }
   }
 
-  async updateProfile(id: number, user_name: string, file: Express.Multer.File): Promise<UserDto> {
+  async updateProfile(id: number, user_name: string, file: Express.Multer.File): Promise<User> {
     try {
       if (!file && user_name) {
         await this.connection.getRepository(User).update(id, { user_name: user_name });
