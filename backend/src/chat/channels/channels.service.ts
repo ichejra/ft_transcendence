@@ -89,10 +89,10 @@ export class ChannelsService {
     }
 
     /* update channel */
-    async updateChannel(userID: number, channelId: number, data: UpdateChannelDto): Promise<Channel> {
+    async updateChannel(channelId: number, data: UpdateChannelDto): Promise<Channel> {
         try {
             if (data.type === ChannelType.PRIVATE) {
-                await this.setUpdatePassword(userID, channelId, data.password);
+                await this.setUpdatePassword(channelId, data.password);
             }
             await this.connection.getRepository(Channel).update(channelId, { name: data.name });
             return await this.connection.getRepository(Channel).findOne(channelId);
@@ -102,7 +102,7 @@ export class ChannelsService {
     }
 
     /* delete channel */
-    async deleteChannel(userId: number, channelId: number): Promise<any> {
+    async deleteChannel(channelId: number): Promise<any> {
         // the user that will remove a channel from the database should be channel owner
         // check the user if he's the owner
         try {
@@ -171,7 +171,7 @@ export class ChannelsService {
                 [channel.id, UserRole.ADMIN]
             );
             if (admins.length === 0) {
-                await this.deleteChannel(user.id, channel.id);
+                await this.deleteChannel(channel.id);
             } else {
                 await this.connection.getRepository(UserChannel).update({
                     user: admins[0],
@@ -183,7 +183,7 @@ export class ChannelsService {
     }
 
     /* Add admin to a channel */
-    addAdmin = async (channelId: number, ownerId: number, userId: number): Promise<any> => {
+    addAdmin = async (channelId: number, userId: number): Promise<any> => {
         // update the userRole of the new admin to the admin
         try {
             await this.connection.getRepository(UserChannel).query(
@@ -201,7 +201,7 @@ export class ChannelsService {
     }
 
     /* Remove admin */
-    removeAdmin = async (channelId: number, adminId: number, userId: number): Promise<any> => {
+    removeAdmin = async (channelId: number, userId: number): Promise<any> => {
         // update the userRole of the new admin to the admin
         await this.connection.getRepository(UserChannel).query(
             `UPDATE user_channel
@@ -216,7 +216,6 @@ export class ChannelsService {
     /* change user status at the channel */
     changeStatus = async (
         channelId: number,
-        adminId: number,
         memberId: number,
         status: MemberStatus): Promise<any> => {
         const isOwner = await this.connection.getRepository(UserChannel).findOne({
@@ -240,7 +239,7 @@ export class ChannelsService {
     }
 
     // Set or update password
-    setUpdatePassword = async (userId: number, channelId: number, newPwd: string): Promise<any> => {
+    setUpdatePassword = async (channelId: number, newPwd: string): Promise<any> => {
         const hashPwd = await bcrypt.hash(newPwd, 10);
         await this.connection.getRepository(Channel).update(channelId, {
             password: hashPwd,
@@ -250,7 +249,7 @@ export class ChannelsService {
     }
 
     // Remove password
-    removePassword = async (userId: number, channelId: number): Promise<any> => {
+    removePassword = async (channelId: number): Promise<any> => {
         const channel = await this.connection.getRepository(Channel).findOne(channelId);
         if (channel.type === ChannelType.PRIVATE) {
             await this.connection.getRepository(Channel).update(channelId, {
@@ -272,7 +271,7 @@ export class ChannelsService {
     }
 
     // kicking the user
-    kickUser = async (adminId: number, userId: number, channelId: number): Promise<any> => {
+    kickUser = async (userId: number, channelId: number): Promise<any> => {
         try {
             const isOwner = await this.connection.getRepository(UserChannel).findOne({
                 where: {
@@ -326,7 +325,7 @@ export class ChannelsService {
     }
 
     // unban user
-    unbanUser = async (userId: Number, channelId: number, memberId: number): Promise<any> => {
+    unbanUser = async (channelId: number, memberId: number): Promise<any> => {
         // get the role of the user
          await this.connection.getRepository(UserChannel).query(
              `DELETE FROM user_channel
@@ -335,5 +334,18 @@ export class ChannelsService {
              [ channelId, memberId ]
          )
          return { status: 200, success: true, message: 'the member has been unbaned' };
+    }
+
+    // check input
+    checkChannelInput = async (name: string) : Promise<boolean> => {
+        const exist: Channel = await this.connection.getRepository(Channel).findOne({
+            where: {
+                name,
+            }
+        });
+        if (!exist) {
+            return true;
+        }
+        return false;
     }
 }

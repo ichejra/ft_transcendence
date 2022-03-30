@@ -113,8 +113,8 @@ export class ChatGatway implements OnGatewayInit {
     async handleLeaveChannel(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
         try {
             const channel: Channel = await this.channelsService.leaveChannel(client, payload);
-            this.server.to(channel.name).emit('leave_success', { message: "success", status: 200 });
             client.leave(channel.name);
+            this.server.to(channel.name).emit('leave_success', { message: "success", status: 200, channelId: channel.id });
         } catch (error) {
             throw new WsException('leave the channel unsuccessfully.');
         }
@@ -122,8 +122,23 @@ export class ChatGatway implements OnGatewayInit {
 
     // ? handling member status changing 
     @SubscribeMessage('member_status_changed')
-    async handleChangeStatus(@ConnectedSocket() client: Socket, @MessageBody('room') room: string) {
-        this.server.to(room).emit('member_status_changed');
+    async handleChangeStatus(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
+        client.to(payload.room).emit('member_status_changed', { status: payload.status, time: payload.time});
+    }
+
+    //? check gateway
+    @SubscribeMessage('check_input_channel')
+    async handleCheckInput(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
+        try {
+            const check: boolean = await this.channelsService.checkChannelInput(payload.name);
+            if (check) {
+                client.emit('check_input_channel', { success: true });
+            } else {
+                client.emit('check_input_channel', { success: false });
+            }
+        } catch (error) {
+            throw error;
+        }
     }
 
 }
