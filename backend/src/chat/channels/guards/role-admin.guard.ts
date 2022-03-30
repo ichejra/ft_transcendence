@@ -18,7 +18,7 @@ export class RoleAdminGuard implements CanActivate {
         });
         
         if (role.userRole !== UserRole.OWNER && role.userRole !== UserRole.ADMIN) {
-            throw new HttpException('Forbidden: you are not a channel admin', 403)
+            throw new HttpException('Forbidden: you are not a channel admin', 403);
         }
         return true;
     }
