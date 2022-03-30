@@ -1,13 +1,28 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards, Req, ParseIntPipe, UseInterceptors, UploadedFile, HttpCode, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  ParseIntPipe,
+  UseInterceptors,
+  UploadedFile,
+  HttpCode
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { DeleteResult } from 'typeorm';
 
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UserDto } from "src/users/dto/user.dto";
 import { UsersService } from './users.service';
 import * as dotenv from 'dotenv';
-import { editFileName, fileFilter } from './utils/file-upload.utils';
+import {
+  editFileName,
+  fileFilter
+} from './utils/file-upload.utils';
 import { User } from './entities/user.entity';
 import { ReqUser } from './decorators/req-user.decorator'
 
@@ -55,7 +70,7 @@ export class UsersController {
   )
   update(
     @ReqUser() user: User,
-    @Body('user_name', ParseIntPipe) user_name: string,
+    @Body('user_name') user_name: string,
     @UploadedFile() file: Express.Multer.File): Promise<User> {
     return this.usersService.updateProfile(Number(user.id), user_name, file);
   }
@@ -79,7 +94,7 @@ export class UsersController {
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   sendReqFriend(
-    @ReqUser() user: User, 
+    @ReqUser() user: User,
     @Body('recipientId', ParseIntPipe) recipientId: number): Promise<User> {
     return this.usersService.insertToFriends(Number(user.id), Number(recipientId))
   }

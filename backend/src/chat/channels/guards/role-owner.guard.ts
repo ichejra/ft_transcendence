@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
+import { CanActivate, ExecutionContext, HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { Connection } from "typeorm";
 import { UserChannel, UserRole } from "../entities/user-channel.entity";
 
@@ -17,9 +17,9 @@ export class RoleOwnerGuard implements CanActivate {
                 userRole: UserRole.OWNER
             }
         });
-        if (role !== undefined) {
-            return true;
+        if (role === undefined) {
+            throw new HttpException("Forbidden: permission denied: you should be channel owner", HttpStatus.FORBIDDEN);
         }
-        return false;
+        return true;
     }
 }
