@@ -396,4 +396,25 @@ export class ChannelsService {
             throw err;
         }
     }
+
+    // unban user
+    unbanUser = async (userId: Number, channelId: number, memberId: number): Promise<any> => {
+        // get the role of the user
+         const role = await this.connection.getRepository(UserChannel).findOne({
+             where: {
+                 channel: channelId,
+                 user: userId,
+             }
+         });
+         if (role.userRole !== UserRole.OWNER && role.userRole !== UserRole.ADMIN) {
+            throw new ForbiddenException('Forbidden: permission denied: you do not have permission to kick user.');
+         }
+         await this.connection.getRepository(UserChannel).query(
+             `DELETE FROM user_channel
+             WHERE "user_channel"."channelId" = $1
+             AND "user_channel"."userId" = $2`,
+             [ channelId, memberId ]
+         )
+         return { success: true, message: 'the member has been unbaned' };
+    }
 }
