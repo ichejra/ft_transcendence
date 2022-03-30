@@ -18,7 +18,7 @@ export class UsersController {
 
   @Post('create')
   @HttpCode(200)
-  create(@Body() data: UserDto): Promise<UserDto> {
+  create(@Body() data: UserDto): Promise<User> {
     return this.usersService.create(data);
   }
 
@@ -38,7 +38,7 @@ export class UsersController {
   @Get('me')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  getProfile(@ReqUser() user: User /*@Req() _req: any*/) {
+  getProfile(@ReqUser() user: User) {
     return this.usersService.findOne(Number(user.id));
   }
 
@@ -53,7 +53,10 @@ export class UsersController {
     fileFilter: fileFilter,
   }),
   )
-  update(@ReqUser() user: User, @Body('user_name') user_name: string, @UploadedFile() file: Express.Multer.File): Promise<User> {
+  update(
+    @ReqUser() user: User,
+    @Body('user_name', ParseIntPipe) user_name: string,
+    @UploadedFile() file: Express.Multer.File): Promise<User> {
     return this.usersService.updateProfile(Number(user.id), user_name, file);
   }
 
@@ -63,7 +66,7 @@ export class UsersController {
   @Delete('/remove-user/:userId')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  remove(@Param('userId', ParseIntPipe) userId: string): Promise<DeleteResult> {
+  remove(@Param('userId', ParseIntPipe) userId: string): Promise<any> {
     return this.usersService.remove(Number(userId));
   }
 
@@ -75,7 +78,9 @@ export class UsersController {
   @Patch('/friend-request/')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  sendReqFriend(@ReqUser() user: User, @Body('recipientId') recipientId: number | string): Promise<User> {
+  sendReqFriend(
+    @ReqUser() user: User, 
+    @Body('recipientId', ParseIntPipe) recipientId: number): Promise<User> {
     return this.usersService.insertToFriends(Number(user.id), Number(recipientId))
   }
 
@@ -86,7 +91,9 @@ export class UsersController {
   @Patch('/friend-accept/')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  acceptReqFriend(@ReqUser() user: User, @Body('applicantId') applicantId: number | string): Promise<User> {
+  acceptReqFriend(
+    @ReqUser() user: User,
+    @Body('applicantId', ParseIntPipe) applicantId: number): Promise<User> {
     return this.usersService.acceptFriend(Number(user.id), Number(applicantId));
   }
 
@@ -96,7 +103,9 @@ export class UsersController {
   @Patch('/friend-block/')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  blockFriend(@ReqUser() user: User, @Body('blockId') blockId: number | string): Promise<User> {
+  blockFriend(
+    @ReqUser() user: User,
+    @Body('blockId', ParseIntPipe) blockId: number): Promise<User> {
     return this.usersService.blockFriend(Number(user.id), Number(blockId));
   }
 
@@ -106,7 +115,9 @@ export class UsersController {
   @Patch('/friend-unblock/')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  unblockFriend(@ReqUser() user: User, @Body('unblockId') unblockId: number | string): Promise<User> {
+  unblockFriend(
+    @ReqUser() user: User,
+    @Body('unblockId', ParseIntPipe) unblockId: number): Promise<User> {
     return this.usersService.unblockFriend(Number(user.id), Number(unblockId));
   }
 
@@ -159,7 +170,9 @@ export class UsersController {
   @Patch('remove-relation')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  removeRelation(@ReqUser() user: User, @Body('rejectedId') rejectedId: number | string): Promise<User> {
+  removeRelation(
+    @ReqUser() user: User,
+    @Body('rejectedId', ParseIntPipe) rejectedId: number): Promise<User> {
     return this.usersService.removeRelation(Number(user.id), Number(rejectedId));
   }
 }

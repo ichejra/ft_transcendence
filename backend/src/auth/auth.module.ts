@@ -10,7 +10,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import * as dotenv from 'dotenv';
 import { TwoFactorAuthModule } from './two-factor-auth/two-factor-auth.module';
 import { TwoFactorAuthService } from './two-factor-auth/two-factor-auth.service';
-import { MailModule } from 'src/mail/mail.module';
 import { MailService } from 'src/mail/mail.service';
 
 dotenv.config()

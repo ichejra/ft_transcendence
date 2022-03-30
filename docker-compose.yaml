@@ -10,8 +10,6 @@ services:
     POSTGRES_PASSWORD: postgres
   networks:
    - backend
-  # volumes:
-  #  - ./db:/var/lib/postgresql/data
   ports:
    - "5432:5432"
 
@@ -26,6 +24,7 @@ services:
    - 8080:8080
   depends_on:
    - db
+
 
 networks:
  backend:
