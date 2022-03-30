@@ -87,8 +87,8 @@ export class ChannelsController {
     */
     @Patch('/:channelId')
     @HttpCode(200)
-    @UseGuards(JwtAuthGuard)
     @UseGuards(RoleOwnerGuard)
+    @UseGuards(JwtAuthGuard)
     // Owner role
     updateChannel(
         @ReqUser() user: User,
@@ -100,8 +100,8 @@ export class ChannelsController {
     /* Route delete channel */
     @Delete('/:channelId')
     @HttpCode(200)
-    @UseGuards(JwtAuthGuard)
     @UseGuards(RoleOwnerGuard)
+    @UseGuards(JwtAuthGuard)
     // Owner Role
     deleteChannel(
         @ReqUser() user: User,
@@ -112,9 +112,8 @@ export class ChannelsController {
     /* Route add admin -> set a member as admin */
     @Patch('/:channelId/add-new-admin')
     @HttpCode(200)
-    @UseGuards(JwtAuthGuard)
     @UseGuards(RoleOwnerGuard)
-    // Owner role
+    @UseGuards(JwtAuthGuard)
     addNewAdmin(
         @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,
@@ -125,9 +124,8 @@ export class ChannelsController {
     /* Route remove admin -> change the status user to member */
     @Patch('/:channelId/remove-admin')
     @HttpCode(200)
-    @UseGuards(JwtAuthGuard)
     @UseGuards(RoleOwnerGuard)
-    // Owner role
+    @UseGuards(JwtAuthGuard)
     removeAdmin(
         @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,
@@ -137,9 +135,8 @@ export class ChannelsController {
     /* Route mute member ()-> set the user as mutant */
     @Patch('/:channelId/mute-user')
     @HttpCode(200)
-    @UseGuards(JwtAuthGuard)
     @UseGuards(RoleAdminGuard)
-    // admin role
+    @UseGuards(JwtAuthGuard)
     muteUser(
         @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,
@@ -149,9 +146,8 @@ export class ChannelsController {
 
     @Patch('/:channelId/ban-user')
     @HttpCode(200)
-    @UseGuards(JwtAuthGuard)
     @UseGuards(RoleAdminGuard)
-    // admin role
+    @UseGuards(JwtAuthGuard)
     banUser(
         @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,
@@ -161,9 +157,8 @@ export class ChannelsController {
 
     @Patch('/:channelId/set-update-password')
     @HttpCode(200)
-    @UseGuards(JwtAuthGuard)
     @UseGuards(RoleOwnerGuard)
-    // Owner role
+    @UseGuards(JwtAuthGuard)
     setUpdatePwd(
         @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,
@@ -174,9 +169,8 @@ export class ChannelsController {
 
     @Patch('/:channelId/kick-user')
     @HttpCode(200)
-    @UseGuards(JwtAuthGuard)
     @UseGuards(RoleAdminGuard)
-    // admin role
+    @UseGuards(JwtAuthGuard)
     kickUser(
         @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,
@@ -186,9 +180,8 @@ export class ChannelsController {
 
     @Patch('/:channelId/unban-user')
     @HttpCode(200)
-    @UseGuards(JwtAuthGuard)
-    // admin role
     @UseGuards(RoleAdminGuard)
+    @UseGuards(JwtAuthGuard)
     unbanUser(
         @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,
@@ -198,9 +191,8 @@ export class ChannelsController {
     
     @Patch('/:channelId/unmute-user')
     @HttpCode(200)
-    @UseGuards(JwtAuthGuard)
-    // admin role
     @UseGuards(RoleAdminGuard)
+    @UseGuards(JwtAuthGuard)
     unmuteUser(
         @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,

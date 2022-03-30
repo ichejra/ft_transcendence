@@ -1,6 +1,4 @@
 import {
-    HttpException,
-    HttpStatus,
     Injectable
 } from "@nestjs/common";
 import { User } from "src/users/entities/user.entity";
@@ -108,24 +106,14 @@ export class ChannelsService {
         // the user that will remove a channel from the database should be channel owner
         // check the user if he's the owner
         try {
-            const role = await this.connection.getRepository(UserChannel).findOne({
-                where: {
-                    user: userId,
-                    channel: channelId,
-                    userRole: UserRole.OWNER,
-                }
-            });
-            if (!role) {
-                throw new HttpException("Forbidden: permission denied: you should be channel owner", HttpStatus.FORBIDDEN);
-            }
             await this.connection.getRepository(UserChannel).query(
                 `DELETE FROM user_channel
                 WHERE "user_channel"."channelId" = $1`, [channelId,]
             );
             await this.connection.getRepository(Channel).delete(channelId);
-            return { success: true, message: 'channel has been removed.' };
+            return { status: 200, success: true, message: 'channel has been removed.' };
         } catch (err) {
-            throw new ForbiddenException("Forbidden: permission denied");
+            throw new ForbiddenException("Forbidden: cannot delete the channel");
         }
     }
 
@@ -196,17 +184,6 @@ export class ChannelsService {
 
     /* Add admin to a channel */
     addAdmin = async (channelId: number, ownerId: number, userId: number): Promise<any> => {
-        // check that the user is owner
-        const role = await this.connection.getRepository(UserChannel).findOne({
-            where: {
-                user: ownerId,
-                channel: channelId,
-                userRole: UserRole.OWNER
-            }
-        });
-        if (!role) {
-            throw new ForbiddenException('Forbidden: permission denied: you are not the channel owner.');
-        }
         // update the userRole of the new admin to the admin
         try {
             await this.connection.getRepository(UserChannel).query(
@@ -219,23 +196,12 @@ export class ChannelsService {
         } catch (err) {
             throw err;
         }
-        return { success: true };
+        return { status: 200, success: true };
 
     }
 
     /* Remove admin */
     removeAdmin = async (channelId: number, adminId: number, userId: number): Promise<any> => {
-        // check that the user is owner
-        const role = await this.connection.getRepository(UserChannel).findOne({
-            where: {
-                user: adminId,
-                channel: channelId,
-                userRole: (UserRole.OWNER || UserRole.ADMIN)
-            }
-        });
-        if (!role) {
-            throw new ForbiddenException('Forbidden: permission denied: you are not the channel owner.');
-        }
         // update the userRole of the new admin to the admin
         await this.connection.getRepository(UserChannel).query(
             `UPDATE user_channel
@@ -244,7 +210,7 @@ export class ChannelsService {
                 AND "userId" = $3`,
             [UserRole.MEMBER, channelId, userId]
         );
-        return { success: true };
+        return { status: 200, success: true };
     }
 
     /* change user status at the channel */
@@ -253,15 +219,6 @@ export class ChannelsService {
         adminId: number,
         memberId: number,
         status: MemberStatus): Promise<any> => {
-        const role = await this.connection.getRepository(UserChannel).findOne({
-            where: {
-                user: adminId,
-                channel: channelId,
-            }
-        });
-        if (role.userRole !== UserRole.ADMIN && role.userRole !== UserRole.OWNER) {
-            throw new ForbiddenException('Forbidden: permission denied: you are not an admin of that channel.');
-        }
         const isOwner = await this.connection.getRepository(UserChannel).findOne({
             where: {
                 user: memberId,
@@ -279,48 +236,28 @@ export class ChannelsService {
             AND "userId" = $3`,
             [status, channelId, memberId]
         );
-        return { success: true };
+        return { status: 200, success: true};
     }
 
     // Set or update password
     setUpdatePassword = async (userId: number, channelId: number, newPwd: string): Promise<any> => {
-        const role = await this.connection.getRepository(UserChannel).findOne({
-            where: {
-                user: userId,
-                channel: channelId,
-                userRole: UserRole.OWNER
-            }
-        });
-        if (!role) {
-            throw new ForbiddenException('Forbidden: permission denied: you are not the channel owner');
-        }
         const hashPwd = await bcrypt.hash(newPwd, 10);
         await this.connection.getRepository(Channel).update(channelId, {
             password: hashPwd,
             type: ChannelType.PRIVATE
         });
-        return { success: true, message: 'Password changed' };
+        return { status: 200, success: true, message: 'Password changed' };
     }
 
     // Remove password
     removePassword = async (userId: number, channelId: number): Promise<any> => {
         const channel = await this.connection.getRepository(Channel).findOne(channelId);
         if (channel.type === ChannelType.PRIVATE) {
-            const role = await this.connection.getRepository(UserChannel).findOne({
-                where: {
-                    userId: userId,
-                    channelId: channelId,
-                    userRole: UserRole.OWNER
-                }
-            });
-            if (role === undefined) {
-                throw new ForbiddenException('Forbidden: permission denied: you are not the channel owner.');
-            }
             await this.connection.getRepository(Channel).update(channelId, {
                 password: null,
                 type: ChannelType.PUBLIC
             });
-            return { success: true, message: 'Password removed' };
+            return { status: 200, success: true, message: 'Password removed' };
         }
     }
 
@@ -337,15 +274,6 @@ export class ChannelsService {
     // kicking the user
     kickUser = async (adminId: number, userId: number, channelId: number): Promise<any> => {
         try {
-            const role = await this.connection.getRepository(UserChannel).findOne({
-                where: {
-                    user: adminId,
-                    channel: channelId,
-                }
-            });
-            if (role.userRole !== UserRole.OWNER && role.userRole !== UserRole.ADMIN) {
-                throw new ForbiddenException('Forbidden: permission denied: you do not have permission to kick user.');
-            }
             const isOwner = await this.connection.getRepository(UserChannel).findOne({
                 where: {
                     channel: channelId,
@@ -362,7 +290,7 @@ export class ChannelsService {
                 AND "user_channel"."userId" = $2`,
                 [channelId, userId]
             );
-            return { success: true };
+            return { status: 200, success: true };
         } catch (err) {
             throw err;
         }
@@ -400,21 +328,12 @@ export class ChannelsService {
     // unban user
     unbanUser = async (userId: Number, channelId: number, memberId: number): Promise<any> => {
         // get the role of the user
-         const role = await this.connection.getRepository(UserChannel).findOne({
-             where: {
-                 channel: channelId,
-                 user: userId,
-             }
-         });
-         if (role.userRole !== UserRole.OWNER && role.userRole !== UserRole.ADMIN) {
-            throw new ForbiddenException('Forbidden: permission denied: you do not have permission to kick user.');
-         }
          await this.connection.getRepository(UserChannel).query(
              `DELETE FROM user_channel
              WHERE "user_channel"."channelId" = $1
              AND "user_channel"."userId" = $2`,
              [ channelId, memberId ]
          )
-         return { success: true, message: 'the member has been unbaned' };
+         return { status: 200, success: true, message: 'the member has been unbaned' };
     }
 }
