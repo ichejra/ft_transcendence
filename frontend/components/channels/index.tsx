@@ -17,6 +17,7 @@ import DirectChat from "./DirectChat";
 import ChannelContent from "./ChannelContent";
 import ChannelsListModal from "../modals/ChannelsListModal";
 import { socket } from "../../pages/SocketProvider";
+import { updateMemmbersList } from "../../features/globalSlice";
 
 const ChatRooms = () => {
   const [showDirect, setShowDirect] = useState(false);
@@ -70,6 +71,17 @@ const ChatRooms = () => {
   const exploreChannels = () => {
     dispatch(setChannelsListModal(true));
   };
+
+  useEffect(() => {
+    console.log("}}}}}}}}}}}}}}}}}}}}}}} socket seted");
+    socket.on("join_success", () => {
+      console.log("%c a new member joined the channel", "color:green");
+      dispatch(updateMemmbersList());
+    });
+    return () => {
+      socket.off("join_success");
+    };
+  }, []);
 
   useEffect(() => {
     const chId = newChannelId ?? Number(channelId);
@@ -147,7 +159,7 @@ const ChatRooms = () => {
         </div>
       </div>
       {showChannelContent || showDirect ? (
-        <div className='fixed h-full left-[7.5rem] right-0'>
+        <div className="fixed h-full left-[7.5rem] right-0">
           {showChannelContent && <ChannelContent channelName={channelName} />}
           {showDirect && <DirectChat />}
         </div>

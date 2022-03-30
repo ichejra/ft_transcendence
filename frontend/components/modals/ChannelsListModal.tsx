@@ -24,17 +24,6 @@ const ChannelsListModal = () => {
     });
   }, []);
 
-  useEffect(() => {
-    console.log("}}}}}}}}}}}}}}}}}}}}}}} socket seted");
-    socket.on("join_success", () => {
-      console.log("%c a new member joined the channel", "color:green");
-      dispatch(updateMemmbersList());
-    });
-    return () => {
-      socket.off("join_success");
-    };
-  }, []);
-
   if (isLoading) {
     return (
       <div>
