@@ -125,20 +125,4 @@ export class ChatGatway implements OnGatewayInit {
     async handleChangeStatus(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
         client.to(payload.room).emit('member_status_changed', { status: payload.status, time: payload.time});
     }
-
-    //? check gateway
-    @SubscribeMessage('check_input_channel')
-    async handleCheckInput(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
-        try {
-            const check: boolean = await this.channelsService.checkChannelInput(payload.name);
-            if (check) {
-                client.emit('check_input_channel', { success: true });
-            } else {
-                client.emit('check_input_channel', { success: false });
-            }
-        } catch (error) {
-            throw error;
-        }
-    }
-
 }

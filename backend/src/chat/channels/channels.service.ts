@@ -335,17 +335,4 @@ export class ChannelsService {
          )
          return { status: 200, success: true, message: 'the member has been unbaned' };
     }
-
-    // check input
-    checkChannelInput = async (name: string) : Promise<boolean> => {
-        const exist: Channel = await this.connection.getRepository(Channel).findOne({
-            where: {
-                name,
-            }
-        });
-        if (!exist) {
-            return true;
-        }
-        return false;
-    }
 }

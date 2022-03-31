@@ -1,9 +1,9 @@
+import { IsAlphanumeric } from "class-validator";
 import {
     BaseEntity,
     Column,
     CreateDateColumn,
     Entity,
-    PrimaryColumn,
     PrimaryGeneratedColumn
 } from "typeorm";
 
@@ -27,7 +27,7 @@ export class Channel extends BaseEntity {
 
     @Column({
         type: 'varchar',
-        length: 255,
+        length: 12,
         unique: true
     })
     name: string;

@@ -6,7 +6,6 @@ import { Channel } from "../channels/entities/channel.entity";
 import { DirectMessage } from './entities/direct-messages.entity';
 import { MessageChannel } from './entities/message-channel.entity';
 
-
 @Injectable()
 export class MessagesService {
     constructor(

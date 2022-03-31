@@ -90,7 +90,6 @@ export class ChannelsController {
     @UseGuards(RoleOwnerGuard)
     @UseGuards(JwtAuthGuard)
     updateChannel(
-        @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,
         @Body() data: UpdateChannelDto): Promise<Channel> {
         return this.channelsService.updateChannel(channelId, data);
@@ -102,7 +101,6 @@ export class ChannelsController {
     @UseGuards(RoleOwnerGuard)
     @UseGuards(JwtAuthGuard)
     deleteChannel(
-        @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number): Promise<any> {
         return this.channelsService.deleteChannel(Number(channelId));
     }
@@ -113,7 +111,6 @@ export class ChannelsController {
     @UseGuards(RoleOwnerGuard)
     @UseGuards(JwtAuthGuard)
     addNewAdmin(
-        @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,
         @Body('memberId', ParseIntPipe) memberId: number): Promise<any> {
         return this.channelsService.addAdmin(channelId, memberId);
@@ -125,7 +122,6 @@ export class ChannelsController {
     @UseGuards(RoleOwnerGuard)
     @UseGuards(JwtAuthGuard)
     removeAdmin(
-        @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,
         @Body('memberId', ParseIntPipe) memberId: number): Promise<any> {
         return this.channelsService.removeAdmin(channelId, memberId);
@@ -149,7 +145,6 @@ export class ChannelsController {
     @UseGuards(RoleAdminGuard)
     @UseGuards(JwtAuthGuard)
     banUser(
-        @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,
         @Body('memberId', ParseIntPipe) memberId: number): Promise<any> {
         return this.channelsService.changeStatus(channelId, memberId, MemberStatus.BANNED);
@@ -161,7 +156,6 @@ export class ChannelsController {
     @UseGuards(RoleOwnerGuard)
     @UseGuards(JwtAuthGuard)
     setUpdatePwd(
-        @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,
         @Body('password') password: string
     ): Promise<any> {
@@ -174,7 +168,6 @@ export class ChannelsController {
     @UseGuards(RoleAdminGuard)
     @UseGuards(JwtAuthGuard)
     kickUser(
-        @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,
         @Body('memberId', ParseIntPipe) memberId: number): Promise<any> {
         return this.channelsService.kickUser(memberId, channelId);
@@ -186,7 +179,6 @@ export class ChannelsController {
     @UseGuards(RoleAdminGuard)
     @UseGuards(JwtAuthGuard)
     unbanUser(
-        @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,
         @Body('memberId', ParseIntPipe) memberId: number) : Promise<any> {
         return this.channelsService.unbanUser(channelId, memberId);  
@@ -198,7 +190,6 @@ export class ChannelsController {
     @UseGuards(RoleAdminGuard)
     @UseGuards(JwtAuthGuard)
     unmuteUser(
-        @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number,
         @Body('memberId', ParseIntPipe) memberId: number): Promise<any> {
         return this.channelsService.changeStatus(channelId, memberId, MemberStatus.ACTIVED);
