@@ -33,6 +33,7 @@ export class MessageChannel extends BaseEntity {
 
     @Column({
         type: 'varchar',
+        length: '200',
         nullable: false
     })
     content: string;

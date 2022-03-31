@@ -30,6 +30,7 @@ export class DirectMessage extends BaseEntity {
 
     @Column({
         type: 'varchar',
+        length: '200',
         nullable: false
     })
     content: string;
