@@ -39,6 +39,8 @@ export const fetchRequestStatus = createAsyncThunk(
           },
         }
       );
+      console.log("[FRIENDS] Request => ", response.data);
+
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error);
@@ -58,7 +60,7 @@ export const fetchPendingStatus = createAsyncThunk(
           },
         }
       );
-      // console.log("pending friends >> ", response.data);
+      console.log("[FRIENDS] Pending >> ", response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error);

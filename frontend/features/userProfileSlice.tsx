@@ -28,10 +28,12 @@ interface UserState {
   editProfile: boolean;
   completeInfo: boolean;
   showNotifList: boolean;
+  isPending: boolean;
+  isFriend: boolean;
 }
 
 const initialState: UserState = {
-  isLoading: true,
+  isLoading: false,
   isError: { isError: false, message: "" },
   isLoggedIn: false,
   user: {
@@ -50,6 +52,8 @@ const initialState: UserState = {
   editProfile: false,
   completeInfo: false,
   showNotifList: false,
+  isPending: false,
+  isFriend: false,
 };
 
 export const fetchNoRelationUsers = createAsyncThunk(
@@ -175,6 +179,15 @@ export const userProfileSlice = createSlice({
     ) => {
       state.showNotifList = action.payload;
     },
+    setIsPending: (state = initialState, action: PayloadAction<boolean>) => {
+      state.isPending = action.payload;
+    },
+    setIsFriend: (state = initialState, action: PayloadAction<boolean>) => {
+      state.isFriend = action.payload;
+    },
+    setIsLoading: (state = initialState, action: PayloadAction<boolean>) => {
+      state.isLoading = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchNoRelationUsers.fulfilled, (state, action: any) => {
@@ -224,6 +237,9 @@ export const {
   editUserProfile,
   completeUserInfo,
   logOutUser,
+  setIsPending,
+  setIsFriend,
+  setIsLoading,
 } = userProfileSlice.actions;
 
 export default userProfileSlice.reducer;

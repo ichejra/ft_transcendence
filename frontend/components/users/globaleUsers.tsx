@@ -97,9 +97,9 @@ const User: React.FC<UserProps> = ({
       dispatch(fetchRequestStatus(id.toString())).then(() => {
         dispatch(fetchPendingStatus()).then(() => {
           dispatch(fetchNoRelationUsers());
+          socket.emit("send_notification", { userId: id });
         });
       });
-      socket.emit("send_notification", { userId: id });
     }
   };
 
@@ -143,11 +143,11 @@ const User: React.FC<UserProps> = ({
   //   }
   // }, []);
 
-  useEffect(() => {
-    if (Cookies.get("accessToken")) {
-      dispatch(fetchBlockedUsers());
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (Cookies.get("accessToken")) {
+  //     dispatch(fetchBlockedUsers());
+  //   }
+  // }, []);
 
   return (
     <div className="text-gray-200 flex flex-col border border-gray-700 items-center user-card-bg p-2 m-3 w-[200px] about-family tracking-wide">

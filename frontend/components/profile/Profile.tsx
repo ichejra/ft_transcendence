@@ -9,42 +9,43 @@ import {
 
 const UserProfile: React.FC = () => {
   const dispatch = useAppDispatch();
-  const {
-    users,
-    user: user_me,
-    friends,
-    editProfile,
-    completeInfo,
-  } = useAppSelector((state) => state.user);
-  const [userProfile, setUserProfile] = useState(user_me);
-  const { id: profileID } = useParams();
-
-  // const { rejectUser } = useAppSelector((state) => state.friends);
+  const { users, user, friends, editProfile, completeInfo } = useAppSelector(
+    (state) => state.user
+  );
+  const [userProfile, setUserProfile] = useState(user);
   const { id } = useParams();
 
   useEffect(() => {
-    console.log(4);
-    dispatch(fetchUserFriends());
+    if (editProfile === false) {
+      console.log("4. Profile updated");
+      dispatch(fetchUserFriends());
+    }
     dispatch(fetchCurrentUser());
   }, [editProfile, completeInfo]);
 
   useEffect(() => {
-    console.log(6);
-    setUserProfile((userprofile) => {
-      let newUserprofile = users.find((user) => user.id === Number(profileID));
-      userprofile = newUserprofile !== undefined ? newUserprofile : user_me;
-      return userprofile;
+    if (Number(id) === user.id) {
+      setUserProfile(user);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    console.log(8);
+    setUserProfile(() => {
+      let newUserprofile = users.find((newUser) => newUser.id === Number(id));
+      return newUserprofile !== undefined ? newUserprofile : user;
     });
-  }, [profileID]);
+    console.log("%cRENDER PROFILE", "color:green; font-weight: bold");
+  }, [id]);
 
   return (
-    <div className="page-100 mt-20 flex justify-center profile-card-bg-color">
-      <div className="flex flex-col w-full 2xl:w-[80rem] items-center shadow-xl rounded-none lg:rounded-xl bg-black">
+    <div className="page-100 mt-20 flex justify-center bg-black">
+      <div className="flex flex-col w-full 2xl:w-[80rem] items-center shadow-xl rounded-none lg:rounded-xl">
         <ProfileHeader user_me={userProfile} users={users} friends={friends} />
         <div className="w-full mt-4">
           <ProfileInfo user_me={userProfile} users={users} />
           {/* <div className='w-96 h-80 bg-yellow-400'></div> */}
-          {user_me.id === Number(id) && <FriendsList friends={friends} />}
+          {user.id === Number(id) && <FriendsList friends={friends} />}
         </div>
       </div>
     </div>

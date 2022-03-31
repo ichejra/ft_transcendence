@@ -22,6 +22,7 @@ interface ContentProps {
 const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
   const [message, setMessage] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const messagesDivRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const msgContainerRef = useRef<HTMLDivElement>(null);
@@ -46,9 +47,9 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
       room: channelName,
     });
     setMessage("");
-    window.scrollTo({
+    messagesDivRef.current?.scrollTo({
       left: 0,
-      top: document.body.scrollHeight,
+      top: messagesDivRef.current.scrollHeight,
       behavior: "smooth",
     });
   };
@@ -58,22 +59,13 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
   };
 
   useEffect(() => {
-    window.scrollTo({
+    console.log("%cscroll down", "font-size: 20px; color: cyan");
+    messagesDivRef.current?.scrollTo({
       left: 0,
-      top: document.body.scrollHeight,
+      top: messagesDivRef.current.scrollHeight,
       behavior: "smooth",
     });
   }, [updateMessages]);
-
-  useEffect(() => {
-    socket.on("receive_message_channel", (data: any) => {
-      dispatch(updateChannelContent());
-      dispatch(addNewMessage(data));
-    });
-    return () => {
-      socket.off("receive_message_channel");
-    };
-  }, []);
 
   const leaveChannel = async () => {
     socket.emit("leave_channel", { channelId });
@@ -82,6 +74,13 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
   };
 
   useEffect(() => {
+    //? ************** sed message socket
+    socket.on("receive_message_channel", (data: any) => {
+      dispatch(updateChannelContent());
+      dispatch(addNewMessage(data));
+    });
+
+    //? ************** leave socket
     socket.on(
       "leave_success",
       (data: { message: string; status: number; channelId: number }) => {
@@ -89,9 +88,7 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
         console.log("%cleaved the channel", "color:red");
       }
     );
-    //! **********************************************
-    //! **********************************************
-    //! **********************************************
+    //? *************** member status socket
     socket.on(
       "member_status_changed",
       (data: { status: string; time: number }) => {
@@ -114,6 +111,7 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
       }
     );
     return () => {
+      socket.off("receive_message_channel");
       socket.off("member_status_changed");
       socket.off("leave_success");
     };
@@ -175,13 +173,16 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
             </button>
           )}
         </div>
-        <div className="ml-6 pt-10 h-full channels-bar-bg">
+        <div
+          ref={messagesDivRef}
+          className="mx-6 pt-10 pb-52 h-full channels-bar-bg overflow-auto no-scrollbar"
+        >
           {channelContent.map((message) => {
             const { id, createdAt, content, author } = message;
             return (
               <div
                 key={id}
-                className="my-6 mr-2 flex about-family items-center"
+                className="my-6 mr-2 flex about-family items-start"
               >
                 <img
                   src={author?.avatar_url}
@@ -201,7 +202,7 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
                       })}
                     </span>
                   </p>
-                  <p className="text-xs font-sans font-bold">{content}</p>
+                  <p className="text-xs font-sans font-bold max-w-screen break-all">{content}</p>
                 </div>
               </div>
             );
@@ -254,7 +255,7 @@ const MessageForm: React.FC<FormProps> = ({
   }, [channelId]);
 
   return (
-    <div className="absolute bottom-20 w-full">
+    <div className="absolute channels-bar-bg bottom-20 w-full">
       <form className="flex relative items-center mx-2 mb-2 px-2 pb-2">
         <input
           ref={inputRef}

@@ -14,12 +14,12 @@ const AllUsers: React.FC = () => {
     user: { id: userID },
   } = useAppSelector((state) => state.user);
 
-  useEffect(() => {
-    if (Cookies.get("accessToken")) {
-      dispatch(fetchNoRelationUsers());
-      dispatch(fetchAllUsers());
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (Cookies.get("accessToken")) {
+  //     dispatch(fetchNoRelationUsers());
+  //     dispatch(fetchAllUsers());
+  //   }
+  // }, []);
 
   return <GlobalUsers users={nrusers.filter((user) => user.id !== userID)} />;
 };
