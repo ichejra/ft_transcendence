@@ -8,6 +8,9 @@ import {
   fetchAllUsers,
   fetchNoRelationUsers,
   fetchUserFriends,
+  setIsPending,
+  setIsFriend,
+  setIsLoading,
 } from "../../features/userProfileSlice";
 import { useParams } from "react-router";
 import { PButton } from "../utils/Button";
@@ -29,8 +32,6 @@ interface Props {
 
 const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
   //! useState
-  const [isPending, setIsPending] = useState(false);
-  const [isFriend, setIsFriend] = useState(false);
   const [userProfile, setUserProfile] = useState(user_me);
 
   //! useParams
@@ -40,22 +41,28 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
   const dispatch = useAppDispatch();
 
   //! useAppSelector
-  const { editProfile, user } = useAppSelector((state) => state.user);
+  const { editProfile, user, isPending, isFriend } = useAppSelector(
+    (state) => state.user
+  );
+  const { refresh } = useAppSelector((state) => state.globalState);
 
   const addFriend = (id: number) => {
     if (Cookies.get("accessToken")) {
+      dispatch(setIsLoading(true));
       dispatch(fetchRequestStatus(id.toString())).then(() => {
         dispatch(fetchPendingStatus()).then(() => {
           dispatch(fetchNoRelationUsers());
           socket.emit("send_notification", { userId: id });
+          dispatch(setIsLoading(false));
         });
       });
-      setIsPending(true);
+      dispatch(setIsPending(true));
     }
   };
 
   const removeFriend = (id: number) => {
     if (Cookies.get("accessToken")) {
+      dispatch(setIsLoading(true));
       dispatch(removeFriendRelation(id))
         .then(() => {
           dispatch(fetchUserFriends());
@@ -63,13 +70,15 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
           socket.emit("send_notification", { userId: id });
         })
         .then(() => {
-          setIsFriend(false);
+          dispatch(setIsFriend(false));
+          dispatch(setIsLoading(false));
         });
     }
   };
 
   const cancelRequest = (id: number) => {
     if (Cookies.get("accessToken")) {
+      dispatch(setIsLoading(true));
       dispatch(removeFriendRelation(id))
         .then(() => {
           dispatch(fetchUserFriends());
@@ -77,44 +86,42 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
           socket.emit("send_notification", { userId: id });
         })
         .then(() => {
-          setIsFriend(false);
-          setIsPending(false);
+          dispatch(setIsFriend(false));
+          dispatch(setIsPending(false));
+          dispatch(setIsLoading(false));
         });
     }
   };
 
   const editMyProfile = () => {
     dispatch(editUserProfile(true));
-    console.log("profile updated");
   };
 
   useEffect(() => {
-    console.log(5);
-    setUserProfile(user_me);
-  }, [user_me]);
-
-  useEffect(() => {
-    console.log(6);
-    setUserProfile((userprofile) => {
-      let newUserprofile = users.find((user) => user.id === Number(profileID));
-      userprofile = newUserprofile !== undefined ? newUserprofile : user_me;
-      return userprofile;
-    });
-
-    setIsFriend((state) => {
-      state =
-        friends.find((user) => user.id === Number(profileID)) === undefined
-          ? false
-          : true;
-      return state;
+    console.log(7);
+    setUserProfile(() => {
+      let newUserprofile = users.find(
+        (newUser) => newUser.id === Number(profileID)
+      );
+      return newUserprofile !== undefined ? newUserprofile : user;
     });
   }, [profileID]);
 
   useEffect(() => {
-    if (Cookies.get("accessToken")) {
-      dispatch(fetchAllUsers());
-    }
-  }, []);
+    dispatch(setIsLoading(true));
+    dispatch(fetchUserFriends()).then((data: any) => {
+      const userFriends: User[] = data.payload;
+      dispatch(
+        setIsFriend(
+          userFriends.find((user) => user.id === Number(profileID)) !==
+            undefined
+            ? true
+            : false
+        )
+      );
+      dispatch(setIsLoading(false));
+    });
+  }, [profileID, refresh]);
 
   return (
     <div className="relative w-full">
@@ -145,24 +152,24 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
                 })}
               </p>
             </div>
-            {user_me.id === Number(profileID) && (
+            {user.id === Number(profileID) && (
               <div className="flex font-normal text-sm">
                 <FaUserFriends size="1.1rem" className="mr-2" />
                 <p className="text-[10px]">{friends.length} friends</p>
               </div>
             )}
           </div>
-          {/* <div className="h-full w-full text-center">
-            <div className="rounded-full border border-gray-600 h-full w-full mb-2 flex">
+          {/* <div className="h-full pb-6 w-full text-center">
+             <div className="rounded-full border border-gray-600 h-full w-full mb-2 flex">
               <div className="rounded-l-full about-family text-sm w-2/3 txt-cyan bg-blue-400">
                 7.5
               </div>
-            </div>
-            <div className="rounded-full h-full w-full mb-2 flex">
-              <div className="rounded-l-full about-family text-sm w-2/3 bg-green-400">
+            </div> 
+            <div className="font-sans h-full w-full mb-2 flex">
+              <div className="rounded-l-full font-bold text-sm w-2/3 bg-green-600">
                 10 wins
               </div>
-              <div className="rounded-r-full about-family text-sm w-1/3 bg-red-400">
+              <div className="rounded-r-full font-bold text-sm w-1/3 bg-red-500">
                 5 loses
               </div>
             </div>

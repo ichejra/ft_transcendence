@@ -30,6 +30,7 @@ const ProfileDropdown = () => {
     (state) => state.user
   );
   const { pendingUsers, pendingReq } = useAppSelector((state) => state.friends);
+  const { refresh } = useAppSelector((state) => state.globalState);
 
   useEffect(() => {
     //* a mousedown event that listen on the dropdown element to hide it when the click is outside it
@@ -68,18 +69,11 @@ const ProfileDropdown = () => {
     }
   }, [logout]);
 
-  useEffect(() => {
-    if (Cookies.get("accessToken")) {
-      dispatch(fetchPendingStatus());
-    }
-  }, []);
-
   // useEffect(() => {
   //   if (Cookies.get("accessToken")) {
-  //     console.log("OK SOCKET TRIGGERED");
   //     dispatch(fetchPendingStatus());
   //   }
-  // }, [refresh]);
+  // }, []);
 
   return (
     <div className="flex">

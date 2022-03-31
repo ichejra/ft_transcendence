@@ -8,8 +8,6 @@ interface Props {
 }
 
 const Member: React.FC<Props> = ({ img, color, coords }) => {
-  console.log(color);
-
   return (
     <div className={`w-[204px] h-[261px] ${color} relative`}>
       <div

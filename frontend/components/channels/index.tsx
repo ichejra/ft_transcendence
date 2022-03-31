@@ -39,13 +39,7 @@ const ChatRooms = () => {
   const getChannel = (id: number) => {
     setShowChannelContent(true);
     dispatch(getSingleChannel(id)).then(({ payload }: any) => {
-      dispatch(getChannelContent(payload.id)).then(() => {
-        window.scrollTo({
-          left: 0,
-          top: document.body.scrollHeight,
-          behavior: "smooth",
-        });
-      });
+      dispatch(getChannelContent(payload.id));
       socket.emit("update_join", { rooms: channels, room: payload });
       setChannelName(payload.name);
     });

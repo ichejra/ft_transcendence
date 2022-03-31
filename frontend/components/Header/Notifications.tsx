@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   fetchNoRelationUsers,
   fetchUserFriends,
+  setIsPending,
   showNotificationsList,
 } from "../../features/userProfileSlice";
 import Cookies from "js-cookie";
@@ -55,11 +56,8 @@ const Notifications = () => {
     console.log(2);
     if (Cookies.get("accessToken")) {
       dispatch(fetchPendingStatus());
-      // socket.emit("refresh", {});
     }
   }, [pendingReq]);
-
-  console.log("pending users =>>", pendingUsers);
 
   return (
     <ul className="user-card-bg about-family tracking-wider rounded-xl p-2">

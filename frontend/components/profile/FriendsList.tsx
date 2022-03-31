@@ -15,8 +15,12 @@ const FriendsList: React.FC<Props> = ({ friends }) => {
   const dispatch = useAppDispatch();
   const { friends: userFriends } = useAppSelector((state) => state.friends);
 
+  // useEffect(() => {
+  //   dispatch(fetchUserFriends());
+  // }, []);
+
   useEffect(() => {
-    dispatch(fetchUserFriends());
+    console.log("%cRENDER USER FRIENDS", "color:green; font-weight: bold");
   }, []);
 
   useEffect(() => {
