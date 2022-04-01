@@ -9,6 +9,7 @@ import {
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { ReqUser } from "src/users/decorators/req-user.decorator";
 import { User } from "src/users/entities/user.entity";
+import { IsBlockedGuard } from "src/users/guards/is-blocked.guard";
 import { DirectMessage } from "./entities/direct-messages.entity";
 import { MessageChannel } from "./entities/message-channel.entity";
 import { MessagesService } from "./messages.service";
@@ -23,16 +24,21 @@ export class MessagesController {
     @Get('/channels/:channelId')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    async getMessagesChannel(@Param('channelId') channelId: string | number): Promise<MessageChannel[]> {
-        return await this.messagesService.getMessagesByChannelId(Number(channelId));
+    async getMessagesChannel(
+        @ReqUser() user: User,
+        @Param('channelId') channelId: string | number): Promise<MessageChannel[]> {
+        return await this.messagesService.getMessagesByChannelId(Number(user.id), Number(channelId));
     }
 
     // http://${host}:${port}/api/messages/direct/:userId
     // return all the messages between the logged user and the user with userId
     @Get('/direct/:userId')
     @HttpCode(200)
+    @UseGuards(IsBlockedGuard)
     @UseGuards(JwtAuthGuard)
-    async getDirectMessages(@ReqUser() user: User, @Param('userId') userId: string | number): Promise<DirectMessage[]> {
+    async getDirectMessages(
+        @ReqUser() user: User,
+        @Param('userId') userId: string | number): Promise<DirectMessage[]> {
         return await this.messagesService.getAllDirectMessages(Number(user.id), Number(userId));
     }
 

@@ -6,19 +6,21 @@ import { UserFriends, UserFriendsRelation } from "../entities/user-friends.entit
 
 @Injectable()
 export class IsBlockedGuard implements CanActivate {
-    constructor(private connection: Connection) {}
+    constructor(private connection: Connection) { }
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const _req = context.switchToHttp().getRequest();
         const relation = await this.connection.getRepository(UserFriends).findOne({
-            where: [ {
+            where: [{
                 applicant: Number(_req.user.id),
                 recipient: Number(_req.params.userId),
+                status: UserFriendsRelation.BLOCKED
             }, {
                 applicant: Number(_req.params.userId),
-                recipient: Number(_req.user.id)
-            }]
+                recipient: Number(_req.user.id),
+                status: UserFriendsRelation.BLOCKED
+            },]
         });
-        if (relation !== undefined && relation.status === UserFriendsRelation.BLOCKED){
+        if (relation) {
             throw new ForbiddenException('Forbidden: cannot reach the resouce');
         }
         return true;
