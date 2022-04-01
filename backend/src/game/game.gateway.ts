@@ -7,7 +7,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
+import { Socket, Server } from 'socket.io';
 import { User, UserState } from 'src/users/entities/user.entity';
 import GameObj from 'src/game/interfaces/game';
 import Player from 'src/game/interfaces/player';
@@ -35,7 +35,7 @@ export class GameGateway
   private challenges: gameChallenge[] = [];
 
   @WebSocketServer()
-  server; //https://docs.nestjs.com/websockets/gateways#server
+  server: Server; //https://docs.nestjs.com/websockets/gateways#server
 
   @Inject()
   private gameService: GameService;
@@ -380,32 +380,44 @@ export class GameGateway
     // payload: { inviter: User; invitee: User },
   ) {
     //! payload: inviter id and invitee id
-    console.log(payload);
+    try {
+      console.log(payload);
 
-    const gameFound = this.games.find((game) => {
-      return (
-        game.getPlayersSockets()[0] === client ||
-        game.getPlayersSockets()[1] === client
+      const gameFound = this.games.find((game) => {
+        return (
+          game.getPlayersSockets()[0] === client ||
+          game.getPlayersSockets()[1] === client
+        );
+      });
+      //TODO: what to do here
+      if (gameFound) return;
+      const challengeId = this.generateId();
+      const challenge = new gameChallenge(
+        challengeId,
+        payload.inviter,
+        payload.invitee,
+        client,
       );
-    });
-    //TODO: what to do here
-    if (gameFound) return;
-    const challengeId = this.generateId();
-    const challenge = new gameChallenge(
-      challengeId,
-      payload.inviter,
-      payload.invitee,
-      client,
-    );
-    console.log('heloooooooo');
-    const sockets = await this.clientsService.getUserConnections(
-      payload.invitee,
-    ); //TODO: check this with anouar
-    console.log(sockets.size);
-    sockets.forEach((socket) => {
-      socket.emit('game_invitation', { inviter: payload.inviter, challengeId });
-    });
-    this.challenges.push(challenge);
+      console.log('paylaod.invitee ', payload.invitee);
+      const inviteeSockets: Set<Socket> =
+        await this.clientsService.getUserConnections(Number(payload.invitee)); //TODO: check this with anouar
+      inviteeSockets.size &&
+        inviteeSockets.forEach((sock) => {
+          this.server
+            .to(sock.id)
+            .emit('game_invitation', { inviter: payload.inviter, challengeId });
+          console.log('|', inviteeSockets.size, '| helloo');
+        });
+      console.log('|', inviteeSockets.size, '| helloo');
+      this.challenges.push(challenge);
+    } catch (error) {
+      //   // console.log('|', 'thrown', '| helloo');
+      console.log(error);
+      throw error;
+    }
+    // sockets.forEach((socket) => {
+    //   socket.emit('game_invitation', { inviter: payload.inviter, challengeId });
+    // });
   }
   //* /////////////////////////////////////////////////////////////////////////////////////
   @SubscribeMessage('accept_challenge')

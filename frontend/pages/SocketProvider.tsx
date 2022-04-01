@@ -58,8 +58,8 @@ const SocketProvider: React.FC = ({ children }) => {
   }, [refresh]);
 
   useEffect(() => {
-    socket.on('game_invitation', ({ inviter , challengeId }) => {
-      // console.log('invit recieved from ', inviter.display_name);
+    socket.on('game_invitation', ({ inviter, challengeId }) => {
+      console.log('invit recieved from ', inviter.display_name);
       swal('Good job!', 'You clicked the button!', 'success');
       //TODO show Modal
       //* if (accept) {socket.emit('accept_challenge', challngeId), navigate('/game')} else socket.emit('reject_challenge', challngeId);
