@@ -4,23 +4,23 @@ import {
   fetchAllUsers,
   fetchUserFriends,
   fetchNoRelationUsers,
+  setIsPending,
+  setIsFriend,
 } from "../features/userProfileSlice";
 import {
   fetchPendingStatus,
   fetchBlockedUsers,
 } from "../features/friendsManagmentSlice";
-import { getChannelsList } from "../features/chatSlice";
-
-import {
-  updateChannelContent,
-  updateGlobalState,
-} from "../features/globalSlice";
+import { updateGlobalState } from "../features/globalSlice";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import Cookies from "js-cookie";
 import { User } from '../features/userProfileSlice';
 import swal from 'sweetalert';
 import { useNavigate } from "react-router";
 
+
+
+import { useLocation } from "react-router";
 
 
 export const socket = io("http://localhost:3001", {
@@ -32,7 +32,11 @@ export const socket = io("http://localhost:3001", {
 const SocketProvider: React.FC = ({ children }) => {
   const dispatch = useAppDispatch();
   const { refresh } = useAppSelector((state) => state.globalState);
+
   const navigate = useNavigate();
+
+
+  const { pathname } = useLocation();
 
   useEffect(() => {
     socket.on("receive_notification", () => {
@@ -47,12 +51,18 @@ const SocketProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     if (Cookies.get("accessToken")) {
-      dispatch(fetchUserFriends());
+      console.log("General Render");
       dispatch(fetchAllUsers());
-      dispatch(fetchNoRelationUsers());
-      dispatch(fetchPendingStatus());
-      dispatch(fetchBlockedUsers());
-      dispatch(getChannelsList());
+      dispatch(fetchNoRelationUsers()).then(() => {
+        dispatch(fetchPendingStatus());
+        if (pathname.includes("profile")) {
+          dispatch(fetchUserFriends());
+        }
+        dispatch(fetchBlockedUsers());
+      });
+      if (pathname.includes("profile")) {
+        dispatch(setIsPending(false));
+      }
       console.log("--------------------> refershhhhhh");
     }
   }, [refresh]);

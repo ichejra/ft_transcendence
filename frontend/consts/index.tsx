@@ -25,4 +25,4 @@ export const frameData = [
   },
 ];
 
-export const friendsPosition = ["left-[1rem]", "left-[3rem]", "left-[5rem]"];
+export const friendsPosition = ["friend-pos-1", "friend-pos-2", "friend-pos-3"];

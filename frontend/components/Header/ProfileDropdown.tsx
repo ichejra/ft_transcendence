@@ -26,10 +26,11 @@ const ProfileDropdown = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   // const { refresh } = useAppSelector((state) => state.globalState);
-  const { user, isLoggedIn, completeInfo, showNotifList } = useAppSelector(
+  const { loggedUser, isLoggedIn, completeInfo, showNotifList } = useAppSelector(
     (state) => state.user
   );
   const { pendingUsers, pendingReq } = useAppSelector((state) => state.friends);
+  const { refresh } = useAppSelector((state) => state.globalState);
 
   useEffect(() => {
     //* a mousedown event that listen on the dropdown element to hide it when the click is outside it
@@ -68,18 +69,11 @@ const ProfileDropdown = () => {
     }
   }, [logout]);
 
-  useEffect(() => {
-    if (Cookies.get("accessToken")) {
-      dispatch(fetchPendingStatus());
-    }
-  }, []);
-
   // useEffect(() => {
   //   if (Cookies.get("accessToken")) {
-  //     console.log("OK SOCKET TRIGGERED");
   //     dispatch(fetchPendingStatus());
   //   }
-  // }, [refresh]);
+  // }, []);
 
   return (
     <div className="flex">
@@ -103,7 +97,7 @@ const ProfileDropdown = () => {
                 className="nav-container mr-4"
               >
                 {pendingUsers.length > 0 &&
-                pendingUsers.filter((puser) => puser.id !== user.id) ? (
+                pendingUsers.filter((puser) => puser.id !== loggedUser.id) ? (
                   <IoMdNotifications size="2rem" className="txt-cyan" />
                 ) : (
                   <IoMdNotificationsOutline size="2rem" />
@@ -134,10 +128,10 @@ const ProfileDropdown = () => {
                 className="flex items-center px-2 "
               >
                 <p className="hidden md:block mr-4 text-sm header-item transition duration-300 about-title-family">
-                  {user.user_name}
+                  {loggedUser.user_name}
                 </p>
                 <img
-                  src={user.avatar_url}
+                  src={loggedUser.avatar_url}
                   className="bg-gray-300 h-12 w-12 rounded-full"
                 />
               </button>
@@ -152,7 +146,7 @@ const ProfileDropdown = () => {
                 className="user-card-bg rounded-xl p-2 about-family tracking-wider"
               >
                 <li className="py-2 pl-2 rounded-t-xl hover:bg-gray-800 header-item transition duration-300">
-                  <Link to={`/profile/${user.id}`}>
+                  <Link to={`/profile/${loggedUser.id}`}>
                     <span className="flex items-center pr-16">
                       <CgProfile size="1.5rem" />
                       <p className="ml-3">Profile</p>
@@ -162,7 +156,7 @@ const ProfileDropdown = () => {
                 <li className="py-2 pl-2 hover:bg-gray-800 header-item transition duration-300">
                   <button
                     onClick={() => {
-                      navigate(`/profile/${user.id}`);
+                      navigate(`/profile/${loggedUser.id}`);
                       dispatch(editUserProfile(true));
                     }}
                   >

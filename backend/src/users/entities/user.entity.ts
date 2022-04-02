@@ -20,7 +20,7 @@ export class User {
 
     @Column({
         type: 'varchar',
-        length: 255,
+        length: 12,
         default: '',
         unique: true
     })
@@ -28,7 +28,7 @@ export class User {
 
     @Column({
         type: 'varchar',
-        length: 255,
+        length: 100,
         default: '',
         unique: true
     })
@@ -36,7 +36,7 @@ export class User {
 
     @Column({
         type: 'varchar',
-        length: 255,
+        length: 20,
         default: '',
         unique: true
     })

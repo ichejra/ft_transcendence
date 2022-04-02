@@ -25,6 +25,7 @@ import {
 } from './utils/file-upload.utils';
 import { User } from './entities/user.entity';
 import { ReqUser } from './decorators/req-user.decorator'
+import { IsBlockedGuard } from './guards/is-blocked.guard';
 
 dotenv.config()
 @Controller('users')
@@ -189,5 +190,15 @@ export class UsersController {
     @ReqUser() user: User,
     @Body('rejectedId', ParseIntPipe) rejectedId: number): Promise<User> {
     return this.usersService.removeRelation(Number(user.id), Number(rejectedId));
+  }
+
+  /* route for return the user */
+  @Get('/:userId')
+  @HttpCode(200)
+  @UseGuards(IsBlockedGuard)
+  @UseGuards(JwtAuthGuard)
+  getUserProfile(
+    @Param('userId', ParseIntPipe) userId: number) : Promise<User> {
+    return this.usersService.getUserProfileById(userId);
   }
 }

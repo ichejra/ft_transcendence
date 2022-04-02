@@ -2,12 +2,16 @@ import React from "react";
 import { FaUserEdit } from "react-icons/fa";
 import { HiUserAdd } from "react-icons/hi";
 import { MdPersonRemove } from "react-icons/md";
+import { CgUnblock, CgBlock } from "react-icons/cg";
+import { useAppSelector } from "../../app/hooks";
 
 const icons = [
   ,
   <FaUserEdit size="1.5rem" className="mr-2" />,
   <HiUserAdd size="1.5rem" className="mr-2" />,
   <MdPersonRemove size="1.5rem" className="mr-2" />,
+  <CgBlock size="2rem" className="mr-2" />,
+  <CgUnblock size="1.5rem" className="mr-2" />,
 ];
 
 interface Props {
@@ -19,13 +23,20 @@ interface Props {
 }
 
 const ProfileButton: React.FC<Props> = ({ func, type, id, style, icon }) => {
+  const { isLoading } = useAppSelector((state) => state.user);
   return (
     <button
       onClick={() => func(id)}
-      className={`hover:scale-105 transition duration-300 w-[214px] h-[37px] flex items-center justify-center rounded-md about-family ${style}`}
+      className={`hover:scale-105 transition duration-300 w-[214px] h-[37px] rounded-md about-family ${style}`}
     >
-      {icon && icons[icon]}
-      {type}
+      {isLoading ? (
+        <div className="loading-2 border border-cyan-200 w-6 h-6"></div>
+      ) : (
+        <span className="flex items-center justify-center">
+          {icon && icons[icon]}
+          {type}
+        </span>
+      )}
     </button>
   );
 };

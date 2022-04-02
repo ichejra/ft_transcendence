@@ -17,39 +17,61 @@ export interface User {
   state: string;
   createdAt: string;
 }
+
+interface History {
+  id: number;
+  score: string;
+  playedAt: string;
+  winnerId: number;
+  loserId: number;
+}
 interface UserState {
   isLoading: boolean;
+  isPageLoading: boolean;
   isError: Err;
+  loggedUser: User;
   user: User;
   users: User[];
   nrusers: User[];
   friends: User[];
+  gameHistory: History[];
   isLoggedIn: boolean;
   editProfile: boolean;
   completeInfo: boolean;
   showNotifList: boolean;
+  isPending: boolean;
+  isFriend: boolean;
+  isBlocked: boolean;
 }
 
+const user: User = {
+  id: NaN,
+  display_name: "",
+  user_name: "",
+  email: "",
+  avatar_url: "",
+  is_active: false,
+  state: "",
+  createdAt: "",
+};
+
 const initialState: UserState = {
-  isLoading: true,
+  isLoading: false,
+  isPageLoading: false,
   isError: { isError: false, message: "" },
   isLoggedIn: false,
-  user: {
-    id: NaN,
-    display_name: "",
-    user_name: "",
-    email: "",
-    avatar_url: "",
-    is_active: false,
-    state: "",
-    createdAt: "",
-  },
+  loggedUser: user,
+  user: user,
   friends: [],
+  gameHistory: [],
   users: [],
   nrusers: [],
   editProfile: false,
   completeInfo: false,
   showNotifList: false,
+  isPending: false,
+  isFriend: false,
+  isBlocked: false,
 };
 
 export const fetchNoRelationUsers = createAsyncThunk(
@@ -103,6 +125,27 @@ export const fetchCurrentUser = createAsyncThunk(
           authorization: `Bearer ${Cookies.get("accessToken")}`,
         },
       });
+      return _api.fulfillWithValue(response.data);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const fetchSingleUser = createAsyncThunk(
+  "users/fetchSingleUser",
+  async (userId: number, _api) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/api/users/${userId}`,
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      console.log("[US] Single user => ", response.data);
+
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error.message);
@@ -175,8 +218,27 @@ export const userProfileSlice = createSlice({
     ) => {
       state.showNotifList = action.payload;
     },
+    setIsPending: (state = initialState, action: PayloadAction<boolean>) => {
+      state.isPending = action.payload;
+    },
+    setIsFriend: (state = initialState, action: PayloadAction<boolean>) => {
+      state.isFriend = action.payload;
+    },
+    setIsBlocked: (state = initialState, action: PayloadAction<boolean>) => {
+      state.isBlocked = action.payload;
+    },
+    setIsLoading: (state = initialState, action: PayloadAction<boolean>) => {
+      state.isLoading = action.payload;
+    },
+    setIsPageLoading: (
+      state = initialState,
+      action: PayloadAction<boolean>
+    ) => {
+      state.isPageLoading = action.payload;
+    },
   },
   extraReducers: (builder) => {
+    // No relation users
     builder.addCase(fetchNoRelationUsers.fulfilled, (state, action: any) => {
       state.nrusers = action.payload;
     });
@@ -184,6 +246,7 @@ export const userProfileSlice = createSlice({
       state.isError = { isError: true, message: action.payload };
     });
 
+    // All users
     builder.addCase(fetchAllUsers.fulfilled, (state, action: any) => {
       state.users = action.payload;
     });
@@ -191,9 +254,10 @@ export const userProfileSlice = createSlice({
       state.isError = { isError: true, message: action.payload };
     });
 
+    // Logged user
     builder.addCase(fetchCurrentUser.fulfilled, (state, action: any) => {
-      state.user = action.payload;
-      if (state.user.user_name) {
+      state.loggedUser = action.payload;
+      if (state.loggedUser.user_name) {
         state.completeInfo = true;
       }
       state.isLoggedIn = true;
@@ -202,14 +266,24 @@ export const userProfileSlice = createSlice({
       state.isError = { isError: true, message: action.payload };
     });
 
-    builder.addCase(completeProfileInfo.fulfilled, (state, action: any) => {
+    // Single user
+    builder.addCase(fetchSingleUser.fulfilled, (state, action: any) => {
       state.user = action.payload;
+    });
+    builder.addCase(fetchSingleUser.rejected, (state, action: any) => {
+      state.isError = { isError: true, message: action.payload };
+    });
+
+    // Set logged user username
+    builder.addCase(completeProfileInfo.fulfilled, (state, action: any) => {
+      state.loggedUser = action.payload;
       state.completeInfo = true;
     });
     builder.addCase(completeProfileInfo.rejected, (state, action: any) => {
       state.isError = { isError: true, message: action.payload };
     });
 
+    // User friends
     builder.addCase(fetchUserFriends.fulfilled, (state, action: any) => {
       state.friends = action.payload;
     });
@@ -224,6 +298,11 @@ export const {
   editUserProfile,
   completeUserInfo,
   logOutUser,
+  setIsPending,
+  setIsFriend,
+  setIsBlocked,
+  setIsLoading,
+  setIsPageLoading,
 } = userProfileSlice.actions;
 
 export default userProfileSlice.reducer;

@@ -1,11 +1,11 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ForbiddenException } from 'src/exceptions/forbidden.exception';
+import { UserFriends, UserFriendsRelation } from 'src/users/entities/user-friends.entity';
 import { User } from "src/users/entities/user.entity";
 import { Connection } from "typeorm";
 import { Channel } from "../channels/entities/channel.entity";
 import { DirectMessage } from './entities/direct-messages.entity';
 import { MessageChannel } from './entities/message-channel.entity';
-
 
 @Injectable()
 export class MessagesService {
@@ -20,7 +20,6 @@ export class MessagesService {
         channel: Channel,
         content: string): Promise<MessageChannel> => {
         try {
-
             return await this.connection.getRepository(MessageChannel).save({
                 author,
                 channel,
@@ -32,7 +31,7 @@ export class MessagesService {
     }
 
     /* function return all the messages that's among to a given channel */
-    getMessagesByChannelId = async (channelId: number): Promise<MessageChannel[]> => {
+    getMessagesByChannelId = async (userId: number, channelId: number): Promise<MessageChannel[]> => {
         try {
             const messages: MessageChannel[] = await this
                 .connection
@@ -77,7 +76,7 @@ export class MessagesService {
                     sender: receiverId,
                     receiver: senderId
                 }],
-            })
+            });
             return messages;
         } catch (err) {
             throw err;
@@ -86,8 +85,8 @@ export class MessagesService {
 
     getDirectChat = async (userId: number): Promise<User[]> => {
         try {
-            const users: User[] = await this.connection.getRepository(User).query(
-                `SELECT id FROM users
+            let users: User[] = await this.connection.getRepository(User).query(
+                `SELECT * FROM users
                 WHERE "users"."id"
                 IN (SELECT DISTINCT "senderId" FROM direct_messages
                 WHERE "direct_messages"."receiverId" = $1)
@@ -98,7 +97,7 @@ export class MessagesService {
             );
             return users;
         } catch (err) {
-            throw new HttpException('entity error!', 400);
+            throw new HttpException('connot get the direct chat!', 403);
         }
     }
 }

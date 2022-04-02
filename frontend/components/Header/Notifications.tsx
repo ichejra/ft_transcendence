@@ -6,6 +6,7 @@ import {
   fetchNoRelationUsers,
   fetchUserFriends,
   showNotificationsList,
+  setIsFriend,
 } from "../../features/userProfileSlice";
 import Cookies from "js-cookie";
 import { socket } from "../../pages/SocketProvider";
@@ -14,19 +15,22 @@ import {
   acceptFriendRequest,
   removeFriendRelation,
 } from "../../features/friendsManagmentSlice";
+import { useParams } from "react-router";
 
 const Notifications = () => {
   const dispatch = useAppDispatch();
   const { pendingUsers, pendingReq } = useAppSelector((state) => state.friends);
   const { users } = useAppSelector((state) => state.user);
-
   const acceptFriend = (id: number) => {
     if (Cookies.get("accessToken")) {
       dispatch(acceptFriendRequest(id)).then(() => {
-        dispatch(fetchUserFriends());
-        dispatch(fetchPendingStatus());
-        dispatch(fetchNoRelationUsers());
-        socket.emit("send_notification", { userId: id });
+        dispatch(fetchUserFriends()).then(() => {
+          dispatch(setIsFriend(true));
+        });
+        dispatch(fetchPendingStatus()).then(() => {
+          dispatch(fetchNoRelationUsers());
+          socket.emit("send_notification", { userId: id });
+        });
       });
     }
     dispatch(showNotificationsList(false));
@@ -55,11 +59,8 @@ const Notifications = () => {
     console.log(2);
     if (Cookies.get("accessToken")) {
       dispatch(fetchPendingStatus());
-      // socket.emit("refresh", {});
     }
   }, [pendingReq]);
-
-  console.log("pending users =>>", pendingUsers);
 
   return (
     <ul className="user-card-bg about-family tracking-wider rounded-xl p-2">

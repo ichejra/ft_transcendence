@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { FaUsersSlash } from "react-icons/fa";
 import Cookies from "js-cookie";
@@ -9,6 +10,7 @@ import {
   fetchAllUsers,
   fetchUserFriends,
   User,
+  fetchSingleUser,
 } from "../../features/userProfileSlice";
 import {
   fetchRequestStatus,
@@ -16,6 +18,7 @@ import {
   blockUserRequest,
   fetchBlockedUsers,
   removeFriendRelation,
+  unblockUserRequest,
 } from "../../features/friendsManagmentSlice";
 import { UButton } from "../utils/Button";
 
@@ -27,7 +30,7 @@ interface UsersProps {
 const GlobalUsers: React.FC<UsersProps> = ({ users, type }) => {
   const dispatch = useAppDispatch();
   const {
-    user: { id: userID },
+    loggedUser: { id: userID },
   } = useAppSelector((state) => state.user);
 
   useEffect(() => {
@@ -45,28 +48,20 @@ const GlobalUsers: React.FC<UsersProps> = ({ users, type }) => {
 
   if (users.length < 1) {
     return (
-      <div className="page-100 mt-20 flex justify-center user-card-bg">
-        <div className="w-full 2xl:w-[80rem] items-center bg-black">
-          <div className="flex h-full justify-center items-center">
-            <FaUsersSlash className="w-48 h-48 text-gray-600" />
-          </div>
-        </div>
+      <div className="flex h-full justify-center items-center">
+        <FaUsersSlash className="w-48 h-48 text-gray-600" />
       </div>
     );
   }
 
   return (
-    <div className="page-100 mt-20 flex justify-center user-card-bg">
-      <div className="w-full 2xl:w-[80rem] items-center  bg-black">
-        <div className="flex flex-col py-4">
-          <div className="flex flex-wrap justify-center">
-            {users
-              .filter((user) => user.id !== userID)
-              .map((user) => {
-                return <User key={user.id} type={type} {...user} />;
-              })}
-          </div>
-        </div>
+    <div className="flex flex-col py-4">
+      <div className="flex flex-wrap justify-center">
+        {users
+          .filter((user) => user.id !== userID)
+          .map((user) => {
+            return <User key={user.id} type={type} {...user} />;
+          })}
       </div>
     </div>
   );
@@ -90,24 +85,28 @@ const User: React.FC<UserProps> = ({
   type,
 }) => {
   const dispatch = useAppDispatch();
-  const { pendingUsers } = useAppSelector((state) => state.friends);
+  const navigate = useNavigate();
 
   const sendFriendRequest = (id: number) => {
     if (Cookies.get("accessToken")) {
       dispatch(fetchRequestStatus(id.toString())).then(() => {
         dispatch(fetchPendingStatus()).then(() => {
           dispatch(fetchNoRelationUsers());
+          socket.emit("send_notification", { userId: id });
         });
       });
-      socket.emit("send_notification", { userId: id });
     }
   };
 
   const unblockUser = (id: number) => {
     if (Cookies.get("accessToken")) {
-      // dispatch(unblockBlockedUsers(id));
-      dispatch(fetchBlockedUsers());
-      dispatch(fetchUserFriends());
+      dispatch(unblockUserRequest(id)).then(() => {
+        dispatch(fetchBlockedUsers()).then(() => {
+          dispatch(fetchUserFriends()).then(() => {
+            socket.emit("send_notification", { userId: id });
+          });
+        });
+      });
     }
   };
 
@@ -123,16 +122,24 @@ const User: React.FC<UserProps> = ({
 
   const blockUser = (id: number) => {
     if (Cookies.get("accessToken")) {
-      dispatch(blockUserRequest(id))
-        .then(() => {
-          type !== "friends"
-            ? dispatch(fetchNoRelationUsers())
-            : dispatch(fetchUserFriends());
-        })
-        .then(() => {
-          dispatch(fetchBlockedUsers());
+      dispatch(blockUserRequest(id)).then(() => {
+        dispatch(fetchBlockedUsers()).then(() => {
+          dispatch(fetchUserFriends()).then(() => {
+            socket.emit("send_notification", { userId: id });
+          });
         });
+      });
+
       // socket.emit("refresh", id);
+    }
+  };
+
+  const getUserProfile = (id: number) => {
+    if (Cookies.get("accessToken")) {
+      dispatch(fetchSingleUser(id)).then((data: any) => {
+        const singleUser: User = data.payload;
+        navigate(`/profile/${singleUser.id}`);
+      });
     }
   };
 
@@ -143,31 +150,42 @@ const User: React.FC<UserProps> = ({
   //   }
   // }, []);
 
-  useEffect(() => {
-    if (Cookies.get("accessToken")) {
-      dispatch(fetchBlockedUsers());
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (Cookies.get("accessToken")) {
+  //     dispatch(fetchBlockedUsers());
+  //   }
+  // }, []);
 
   return (
     <div className="text-gray-200 flex flex-col border border-gray-700 items-center user-card-bg p-2 m-3 w-[200px] about-family tracking-wide">
       <div className="flex flex-col items-center">
-        <img
-          src={avatar_url}
-          alt={display_name}
-          className="w-32 h-32 rounded-full p-3"
-        />
+        {type !== "blocked" ? (
+          <img
+            src={avatar_url}
+            alt={display_name}
+            className="w-32 h-32 rounded-full p-3"
+          />
+        ) : (
+          <img
+            src="/images/blank-profile-picture.svg"
+            alt={display_name}
+            className="w-32 h-32 rounded-full p-3"
+          />
+        )}
         <div className="flex flex-col items-center">
-          <Link to={`/profile/${id}`}>
-            <h1 className="hover:underline transition duration-300">
-              {display_name}
-            </h1>
-          </Link>
-          <Link to={`/profile/${id}`}>
-            <p className="hover:underline transition duration-300 text-xs">
-              @{user_name}
-            </p>
-          </Link>
+          <h1
+            onClick={() => getUserProfile(id)}
+            className="hover:underline cursor-pointer transition duration-300"
+          >
+            {display_name}
+          </h1>
+
+          <p
+            onClick={() => getUserProfile(id)}
+            className="hover:underline cursor-pointer transition duration-300 text-xs"
+          >
+            @{user_name}
+          </p>
         </div>
       </div>
       <div className="flex flex-col items-center mt-3">
@@ -195,12 +213,14 @@ const User: React.FC<UserProps> = ({
             style="text-gray-900  bg-gray-300 hover:bg-white"
           />
         )}
-        <UButton
-          type="Block"
-          func={blockUser}
-          id={id}
-          style="bg-transparent hover:opacity-80 opacity-60 border-white"
-        />
+        {type !== "blocked" && (
+          <UButton
+            type="Block"
+            func={blockUser}
+            id={id}
+            style="bg-transparent hover:opacity-80 opacity-60 border-white"
+          />
+        )}
       </div>
     </div>
   );

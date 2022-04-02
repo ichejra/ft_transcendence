@@ -41,6 +41,11 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     public async handleConnection(client: Socket, ...args: any[]): Promise<void> {
         this.logger.log(`Client connected: ${client.id}`);
+        try {
+            await this.connectionsService.addConnection(client);
+        } catch (err) {
+            throw new WsException('unauthorized: unauthenticated connection');
+        }
     }
 
     public async handleDisconnect(client: Socket): Promise<void> {
@@ -49,15 +54,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
             await this.connectionsService.eraseConnection(client);
         } catch (err) {
             throw new WsException('unauthorized connection');
-        }
-    }
-
-    @SubscribeMessage('connection')
-    async handleNewConnection(@ConnectedSocket() client: Socket) {
-        try {
-            await this.connectionsService.addConnection(client);
-        } catch (err) {
-            throw new WsException('unauthorized: unauthenticated connection');
         }
     }
 

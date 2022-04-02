@@ -8,7 +8,7 @@ import {
 } from '@nestjs/core';
 
 
-@Catch(HttpException)
+@Catch()
 export class ExceptionsFilter extends BaseExceptionFilter {
 
   catch(exception: any, host: ArgumentsHost): void {
