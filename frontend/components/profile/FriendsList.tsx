@@ -19,7 +19,7 @@ const FriendsList: React.FC<Props> = ({ friends }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { friends: userFriends } = useAppSelector((state) => state.friends);
-  const { isPageLoading } = useAppSelector((state) => state.user);
+  const { isPageLoading, loggedUser } = useAppSelector((state) => state.user);
 
   // useEffect(() => {
   //   dispatch(fetchUserFriends());
@@ -48,7 +48,7 @@ const FriendsList: React.FC<Props> = ({ friends }) => {
           Friends
         </h1>
         <div className="flex items-center">
-          <Link to="/profile/list">
+          <Link to={`/users/${loggedUser.id}/friends`}>
             <div className="about-family flex items-center mr-3 text-sm text-gray-500 header-item transition duration-300">
               See All
               <AiOutlineRight />

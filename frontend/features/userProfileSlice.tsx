@@ -4,7 +4,7 @@ import axios from "axios";
 
 interface Err {
   isError: boolean;
-  message: string;
+  status: number;
 }
 
 export interface User {
@@ -58,7 +58,7 @@ const user: User = {
 const initialState: UserState = {
   isLoading: false,
   isPageLoading: false,
-  isError: { isError: false, message: "" },
+  isError: { isError: false, status: 0 },
   isLoggedIn: false,
   loggedUser: user,
   user: user,
@@ -144,8 +144,6 @@ export const fetchSingleUser = createAsyncThunk(
           },
         }
       );
-      console.log("[US] Single user => ", response.data);
-
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error.message);
@@ -241,17 +239,31 @@ export const userProfileSlice = createSlice({
     // No relation users
     builder.addCase(fetchNoRelationUsers.fulfilled, (state, action: any) => {
       state.nrusers = action.payload;
+      state.isError = {
+        isError: false,
+        status: 0,
+      };
     });
     builder.addCase(fetchNoRelationUsers.rejected, (state, action: any) => {
-      state.isError = { isError: true, message: action.payload };
+      state.isError = {
+        isError: true,
+        status: Number(action.payload.match(/(\d+)/)[0]),
+      };
     });
 
     // All users
     builder.addCase(fetchAllUsers.fulfilled, (state, action: any) => {
       state.users = action.payload;
+      state.isError = {
+        isError: false,
+        status: 0,
+      };
     });
     builder.addCase(fetchAllUsers.rejected, (state, action: any) => {
-      state.isError = { isError: true, message: action.payload };
+      state.isError = {
+        isError: true,
+        status: Number(action.payload.match(/(\d+)/)[0]),
+      };
     });
 
     // Logged user
@@ -261,34 +273,66 @@ export const userProfileSlice = createSlice({
         state.completeInfo = true;
       }
       state.isLoggedIn = true;
+      state.isError = {
+        isError: false,
+        status: 0,
+      };
     });
     builder.addCase(fetchCurrentUser.rejected, (state, action: any) => {
-      state.isError = { isError: true, message: action.payload };
+      state.isError = {
+        isError: true,
+        status: Number(action.payload.match(/(\d+)/)[0]),
+      };
     });
 
     // Single user
     builder.addCase(fetchSingleUser.fulfilled, (state, action: any) => {
       state.user = action.payload;
+      state.isError = {
+        isError: false,
+        status: 0,
+      };
     });
     builder.addCase(fetchSingleUser.rejected, (state, action: any) => {
-      state.isError = { isError: true, message: action.payload };
+      console.log(
+        "888888888888888888888->",
+        Number(action.payload.match(/(\d+)/)[0])
+      );
+      state.isError = {
+        isError: true,
+        status: Number(action.payload.match(/(\d+)/)[0]),
+      };
     });
 
     // Set logged user username
     builder.addCase(completeProfileInfo.fulfilled, (state, action: any) => {
       state.loggedUser = action.payload;
       state.completeInfo = true;
+      state.isError = {
+        isError: false,
+        status: 0,
+      };
     });
     builder.addCase(completeProfileInfo.rejected, (state, action: any) => {
-      state.isError = { isError: true, message: action.payload };
+      state.isError = {
+        isError: true,
+        status: Number(action.payload.match(/(\d+)/)[0]),
+      };
     });
 
     // User friends
     builder.addCase(fetchUserFriends.fulfilled, (state, action: any) => {
       state.friends = action.payload;
+      state.isError = {
+        isError: false,
+        status: 0,
+      };
     });
     builder.addCase(fetchUserFriends.rejected, (state, action: any) => {
-      state.isError = { isError: true, message: action.payload };
+      state.isError = {
+        isError: true,
+        status: Number(action.payload.match(/(\d+)/)[0]),
+      };
     });
   },
 });

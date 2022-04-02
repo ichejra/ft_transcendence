@@ -12,7 +12,7 @@ import {
   setIsLoading,
   setIsBlocked,
 } from "../../features/userProfileSlice";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { PButton } from "../utils/Button";
 import { useEffect } from "react";
 import Cookies from "js-cookie";
@@ -22,7 +22,6 @@ import {
   fetchRequestStatus,
   removeFriendRelation,
   blockUserRequest,
-  unblockUserRequest,
 } from "../../features/friendsManagmentSlice";
 import { socket } from "../../pages/SocketProvider";
 
@@ -33,6 +32,9 @@ interface Props {
 }
 
 const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
+  //!useNavigate
+  const navigate = useNavigate();
+
   //! useParams
   const { id: profileID } = useParams();
 
@@ -108,6 +110,7 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
             dispatch(fetchNoRelationUsers());
             dispatch(setIsBlocked(true));
             dispatch(setIsLoading(false));
+            navigate(`/users/${loggedUser.id}/blocked`);
             socket.emit("send_notification", { userId: id });
           });
         });
@@ -134,9 +137,6 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
       );
       dispatch(setIsLoading(false));
     });
-    if (loggedUser.id !== Number(profileID)) {
-      dispatch(fetchBlockedUsers());
-    }
   }, [profileID, refresh, isFriend, isBlocked]);
 
   return (
@@ -197,18 +197,15 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
               <div className="flex justify-center md:justify-start">
                 {loggedUser.id !== Number(profileID) ? (
                   <div>
-                    {!isFriend &&
-                      !isPending &&
-                      !isBlocked &&
-                      !pendingUsers.length && (
-                        <PButton
-                          type={"Add Friend"}
-                          func={addFriend}
-                          id={user_me.id}
-                          style="bg-blue txt-cyan"
-                          icon={2}
-                        />
-                      )}
+                    {!isFriend && !isPending && !pendingUsers.length && (
+                      <PButton
+                        type={"Add Friend"}
+                        func={addFriend}
+                        id={user_me.id}
+                        style="bg-blue txt-cyan"
+                        icon={2}
+                      />
+                    )}
                     {isFriend && (
                       <div className="space-y-2">
                         <PButton
@@ -236,15 +233,6 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
                         icon={3}
                       />
                     )}
-                    {/* {isBlocked && (
-                      <PButton
-                        func={unblockUser}
-                        type="Unblock"
-                        id={user_me.id}
-                        style="bg-green-400 text-cyan-200"
-                        icon={5}
-                      />
-                    )} */}
                   </div>
                 ) : (
                   <PButton
