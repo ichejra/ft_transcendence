@@ -3,20 +3,21 @@ import Member from '../utils/TeamMember';
 import { frameData } from '../../consts';
 import { socket } from '../../pages/SocketProvider';
 import { useAppSelector } from '../../app/hooks';
+import { User } from '../../features/userProfileSlice';
 
 socket.emit('connection', () => {
   console.log('connected');
 });
 
 const HomePage: React.FC = () => {
-  const { users, user: user_me } = useAppSelector((state) => state.user);
+  const { users, loggedUser } = useAppSelector((state) => state.user);
 
-  const handleInvite = (id: number) => {
-    console.log('invit sent to: ', id);
+  const handleInvite = (user: User) => {
+    console.log(loggedUser.id, ' sent invit to: ', user.id);
 
     socket.emit('invite_to_game', {
-      inviter: user_me.id,
-      invitee: id,
+      inviter: loggedUser,
+      invitee: user,
     });
   };
   
@@ -80,14 +81,14 @@ const HomePage: React.FC = () => {
           </h3>
 
           {users
-            .filter((user) => user.id != user_me.id)
+            .filter((user) => user.id != loggedUser.id)
             .map((user) => {
               const { id, user_name } = user;
               return (
                 <button
                   key={id}
                   className='hover:scale-110 transition duration-300 play-button-bottom'
-                  onClick={() => handleInvite(id)}
+                  onClick={() => handleInvite(user)}
                 >
                   Invite {user_name}
                 </button>
