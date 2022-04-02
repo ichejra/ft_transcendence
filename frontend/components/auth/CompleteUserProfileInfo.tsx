@@ -22,7 +22,7 @@ const CompleteUserProfileInfo: React.FC = () => {
 };
 
 export const CompleteProfileInfo: React.FC = () => {
-  const { user } = useAppSelector((state) => state.user);
+  const { loggedUser } = useAppSelector((state) => state.user);
   const [avatar, setAvatar] = useState("");
   const [username, setUsername] = useState("");
   const [isValid, setIsValid] = useState(0);
@@ -49,7 +49,7 @@ export const CompleteProfileInfo: React.FC = () => {
         data: formData,
       })
     ).then(() => {
-      navigate(`/profile/${user.id}`);
+      navigate(`/profile/${loggedUser.id}`);
     });
     dispatch(completeUserInfo(false));
   };
@@ -74,7 +74,7 @@ export const CompleteProfileInfo: React.FC = () => {
       <div className="absolute flex justify-center md:left-[14.8rem] m-2">
         <img
           className="w-32 h-32 rounded-full border border-white bg-center bg-cover"
-          src={user.avatar_url}
+          src={loggedUser.avatar_url}
           id="profile-picture"
         ></img>
         <label className="bg-red-200 cursor-pointer" htmlFor="avatar">

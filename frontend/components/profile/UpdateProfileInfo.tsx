@@ -7,9 +7,9 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { BiEditAlt } from "react-icons/bi";
 
 export const UpdateProfileForm: React.FC = () => {
-  const { user } = useAppSelector((state) => state.user);
+  const { loggedUser } = useAppSelector((state) => state.user);
   const [avatar, setAvatar] = useState("");
-  const [username, setUsername] = useState(user.user_name);
+  const [username, setUsername] = useState(loggedUser.user_name);
   const [isValid, setIsValid] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const dispatch = useAppDispatch();
@@ -55,7 +55,7 @@ export const UpdateProfileForm: React.FC = () => {
       <div className="absolute flex justify-center -top-[4rem] md:left-[18.2rem]">
         <img
           className="w-32 h-32 rounded-full border border-white bg-center bg-cover"
-          src={user.avatar_url}
+          src={loggedUser.avatar_url}
           id="profile-picture"
         />
         <label className="bg-red-200 cursor-pointer" htmlFor="avatar">

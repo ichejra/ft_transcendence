@@ -14,7 +14,7 @@ export const AuthRoute: React.FC = ({ children }) => {
 
 export const CompleteProfile: React.FC = ({ children }) => {
   const {
-    user: { user_name },
+    loggedUser: { user_name },
   } = useAppSelector((state) => state.user);
 
   if (!user_name) {

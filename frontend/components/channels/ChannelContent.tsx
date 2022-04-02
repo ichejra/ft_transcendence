@@ -33,7 +33,7 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
   const { updateMessages, membersList } = useAppSelector(
     (state) => state.globalState
   );
-  const { user } = useAppSelector((state) => state.user);
+  const { loggedUser } = useAppSelector((state) => state.user);
   const { muteMember, memberStatus } = useAppSelector(
     (state) => state.channels
   );
@@ -129,7 +129,7 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
       dispatch(getChannelMembersList(Number(channelId))).then(
         ({ payload }: any) => {
           const checkMember = [...payload].find(
-            (member: ChannelMember) => member.user.id === user.id
+            (member: ChannelMember) => member.user.id === loggedUser.id
           );
           if (checkMember !== undefined) {
             if (

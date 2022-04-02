@@ -110,6 +110,26 @@ export const blockUserRequest = createAsyncThunk(
   }
 );
 
+export const unblockUserRequest = createAsyncThunk(
+  "user/blockUserRequest",
+  async (id: number, _api) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:3001/api/users/friend-unblock`,
+        { unblockId: id },
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      return _api.fulfillWithValue(response.data);
+    } catch (error: any) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
+
 export const fetchBlockedUsers = createAsyncThunk(
   "user/fetchBlockedUsers",
   async (_, _api) => {
@@ -122,6 +142,7 @@ export const fetchBlockedUsers = createAsyncThunk(
           },
         }
       );
+      console.log("[FMS] Blocked users ==> ", response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error);
