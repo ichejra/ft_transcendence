@@ -7,7 +7,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
+import { Socket, Server } from 'socket.io';
 import { User, UserState } from 'src/users/entities/user.entity';
 import GameObj from 'src/game/interfaces/game';
 import Player from 'src/game/interfaces/player';
@@ -17,6 +17,7 @@ import { GameDto } from './dto/game.dto';
 import { Inject } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { ConnectionsService } from 'src/events/connections.service';
+import { gameChallenge } from './interfaces/gameChallenge';
 // import { Consts, GameState } from './game_consts';
 
 @WebSocketGateway({
@@ -31,15 +32,17 @@ export class GameGateway
   private queue: Set<Socket> = new Set<Socket>();
   private defaultGameQueue: Socket[] = [];
   private obstacleGameQueue: Socket[] = [];
+  private challenges: gameChallenge[] = [];
 
   @WebSocketServer()
-  server; //https://docs.nestjs.com/websockets/gateways#server
+  server: Server; //https://docs.nestjs.com/websockets/gateways#server
 
   @Inject()
   private gameService: GameService;
 
   @Inject()
   private clientsService: ConnectionsService;
+
   @Inject()
   private usersService: UsersService;
 
@@ -128,13 +131,13 @@ export class GameGateway
   }
 
   @SubscribeMessage('isJoined')
-  private isJoined(client : Socket) {
+  private isJoined(client: Socket) {
     if (this.queue.has(client) === true) {
       client.emit('joined', true);
-      return ;
+      return;
     }
   }
-  
+
   @SubscribeMessage('join_queue')
   private async joinQueue(client: Socket, payload: string): Promise<void> {
     console.log('join queue: am here ', payload);
@@ -158,6 +161,8 @@ export class GameGateway
           // this.queue.delete(first);
           return;
         }
+        // check the relation status between user1 and user2 blocked
+        // isBlocked true : false
         //* DONE: change players state to inGame
         await this.usersService.updateState(
           Number(user1.id),
@@ -350,4 +355,99 @@ export class GameGateway
       }
     }
   }
+  //* game request
+
+  private generateId(): string {
+    // Math.random should be unique because of its seeding algorithm.
+    // Convert it to base 36 (numbers + letters), and grab the first 9 characters
+    // after the decimal.
+    return '_' + Math.random().toString(36).substr(2, 9);
+  }
+  private generateId2(): string {
+    let id: string = '';
+    let characters: string =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let charactersLength: number = characters.length;
+    for (let i: number = 0; i < 25; i++) {
+      id += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return id;
+  }
+  @SubscribeMessage('invite_to_game')
+  async inviteToGame(
+    client: Socket,
+    payload: { inviter: number; invitee: number },
+    // payload: { inviter: User; invitee: User },
+  ) {
+    //! payload: inviter id and invitee id
+    try {
+      console.log(payload);
+
+      const gameFound = this.games.find((game) => {
+        return (
+          game.getPlayersSockets()[0] === client ||
+          game.getPlayersSockets()[1] === client
+        );
+      });
+      //TODO: what to do here
+      if (gameFound) return;
+      const challengeId = this.generateId();
+      const challenge = new gameChallenge(
+        challengeId,
+        payload.inviter,
+        payload.invitee,
+        client,
+      );
+      console.log('paylaod.invitee ', payload.invitee);
+      const inviteeSockets: Set<Socket> =
+        await this.clientsService.getUserConnections(Number(payload.invitee)); //TODO: check this with anouar
+      inviteeSockets.size &&
+        inviteeSockets.forEach((sock) => {
+          this.server
+            .to(sock.id)
+            .emit('game_invitation', { inviter: payload.inviter, challengeId });
+          console.log('|', inviteeSockets.size, '| helloo');
+        });
+      console.log('|', inviteeSockets.size, '| helloo');
+      this.challenges.push(challenge);
+    } catch (error) {
+      //   // console.log('|', 'thrown', '| helloo');
+      console.log(error);
+      throw error;
+    }
+    // sockets.forEach((socket) => {
+    //   socket.emit('game_invitation', { inviter: payload.inviter, challengeId });
+    // });
+  }
+  //* /////////////////////////////////////////////////////////////////////////////////////
+  @SubscribeMessage('accept_challenge')
+  accpetChallenge(client: Socket, payload: { challenge_id: string }) {
+    //TODO : remove players from all queues
+    const challenge = this.challenges.find((challenge) => {
+      return challenge.getChallengeId() === payload.challenge_id;
+    });
+    if (challenge) {
+      challenge
+        .getInviterSocket()
+        .emit('challenge_accepted', challenge.getChallengeId());
+      this.joinGame([challenge.getInviterSocket(), client], 'default'); //TODO: change game type
+    }
+  }
+  //* /////////////////////////////////////////////////////////////////////////////////////
+  @SubscribeMessage('reject_challenge')
+  rejectChallenge(client: Socket, payload: { challenge_id: string }) {
+    const challenge = this.challenges.find((challenge) => {
+      return challenge.getChallengeId() === payload.challenge_id;
+    });
+    if (challenge) {
+      challenge
+        .getInviterSocket()
+        .emit('challenge_rejected', challenge.getChallengeId());
+      this.challenges.splice(this.challenges.indexOf(challenge), 1);
+    }
+  }
+  //* /////////////////////////////////////////////////////////////////////////////////////
 }
+
+//TODO: check if blocked users can play with each other
+//TODO: send game type when invite to game
