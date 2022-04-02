@@ -62,6 +62,19 @@ canvas {
 }
 /* !---------------------- */
 
+/* ****** */
+.friend-pos-1 {
+  left: 1rem;
+}
+.friend-pos-2 {
+  left: 3rem;
+}
+.friend-pos-3 {
+  left: 5rem;
+}
+
+/* ****** */
+
 .notifications-list {
   position: fixed;
   opacity: 1;

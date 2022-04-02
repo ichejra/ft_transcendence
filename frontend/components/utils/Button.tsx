@@ -2,6 +2,7 @@ import React from "react";
 import { FaUserEdit } from "react-icons/fa";
 import { HiUserAdd } from "react-icons/hi";
 import { MdPersonRemove } from "react-icons/md";
+import { CgUnblock, CgBlock } from "react-icons/cg";
 import { useAppSelector } from "../../app/hooks";
 
 const icons = [
@@ -9,6 +10,8 @@ const icons = [
   <FaUserEdit size="1.5rem" className="mr-2" />,
   <HiUserAdd size="1.5rem" className="mr-2" />,
   <MdPersonRemove size="1.5rem" className="mr-2" />,
+  <CgBlock size="2rem" className="mr-2" />,
+  <CgUnblock size="1.5rem" className="mr-2" />,
 ];
 
 interface Props {
