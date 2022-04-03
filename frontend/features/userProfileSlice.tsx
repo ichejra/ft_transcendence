@@ -1,12 +1,6 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
 import axios from "axios";
-
-interface Err {
-  isError: boolean;
-  status: number;
-}
-
 export interface User {
   id: number;
   display_name: string;
@@ -16,6 +10,7 @@ export interface User {
   is_active: boolean;
   state: string;
   createdAt: string;
+  is_2fa_enabled: boolean;
 }
 
 interface History {
@@ -28,7 +23,7 @@ interface History {
 interface UserState {
   isLoading: boolean;
   isPageLoading: boolean;
-  isError: Err;
+
   loggedUser: User;
   user: User;
   users: User[];
@@ -53,12 +48,13 @@ const user: User = {
   is_active: false,
   state: "",
   createdAt: "",
+  is_2fa_enabled: false,
 };
 
 const initialState: UserState = {
   isLoading: false,
   isPageLoading: false,
-  isError: { isError: false, status: 0 },
+
   isLoggedIn: false,
   loggedUser: user,
   user: user,
@@ -125,6 +121,41 @@ export const fetchCurrentUser = createAsyncThunk(
           authorization: `Bearer ${Cookies.get("accessToken")}`,
         },
       });
+      return _api.fulfillWithValue(response.data);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const enableTwoFactorAuth = createAsyncThunk(
+  "users/enableTwoFactorAuth",
+  async (_, _api) => {
+    try {
+      const response = await axios.get("http://localhost:3001/api/2fa/enable", {
+        headers: {
+          authorization: `Bearer ${Cookies.get("accessToken")}`,
+        },
+      });
+      return _api.fulfillWithValue(response.data);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const disableTwoFactorAuth = createAsyncThunk(
+  "users/disableTwoFactorAuth",
+  async (_, _api) => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3001/api/2fa/disable",
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error.message);
@@ -236,104 +267,58 @@ export const userProfileSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // No relation users
+    //* No relation users
     builder.addCase(fetchNoRelationUsers.fulfilled, (state, action: any) => {
       state.nrusers = action.payload;
-      state.isError = {
-        isError: false,
-        status: 0,
-      };
     });
-    builder.addCase(fetchNoRelationUsers.rejected, (state, action: any) => {
-      state.isError = {
-        isError: true,
-        status: Number(action.payload.match(/(\d+)/)[0]),
-      };
-    });
+    builder.addCase(fetchNoRelationUsers.rejected, (state, action: any) => {});
 
-    // All users
+    //* All users
     builder.addCase(fetchAllUsers.fulfilled, (state, action: any) => {
       state.users = action.payload;
-      state.isError = {
-        isError: false,
-        status: 0,
-      };
     });
-    builder.addCase(fetchAllUsers.rejected, (state, action: any) => {
-      state.isError = {
-        isError: true,
-        status: Number(action.payload.match(/(\d+)/)[0]),
-      };
-    });
+    builder.addCase(fetchAllUsers.rejected, (state, action: any) => {});
 
-    // Logged user
+    //* Logged user
     builder.addCase(fetchCurrentUser.fulfilled, (state, action: any) => {
       state.loggedUser = action.payload;
       if (state.loggedUser.user_name) {
         state.completeInfo = true;
       }
       state.isLoggedIn = true;
-      state.isError = {
-        isError: false,
-        status: 0,
-      };
     });
-    builder.addCase(fetchCurrentUser.rejected, (state, action: any) => {
-      state.isError = {
-        isError: true,
-        status: Number(action.payload.match(/(\d+)/)[0]),
-      };
-    });
+    builder.addCase(fetchCurrentUser.rejected, (state, action: any) => {});
 
-    // Single user
+    //* enable 2fa
+    builder.addCase(enableTwoFactorAuth.fulfilled, (state) => {
+      state.loggedUser.is_2fa_enabled = true;
+    });
+    builder.addCase(enableTwoFactorAuth.rejected, (state, action: any) => {});
+
+    //* disable 2fa
+    builder.addCase(disableTwoFactorAuth.fulfilled, (state) => {
+      state.loggedUser.is_2fa_enabled = false;
+    });
+    builder.addCase(disableTwoFactorAuth.rejected, (state, action: any) => {});
+
+    //* Single user
     builder.addCase(fetchSingleUser.fulfilled, (state, action: any) => {
       state.user = action.payload;
-      state.isError = {
-        isError: false,
-        status: 0,
-      };
     });
-    builder.addCase(fetchSingleUser.rejected, (state, action: any) => {
-      console.log(
-        "888888888888888888888->",
-        Number(action.payload.match(/(\d+)/)[0])
-      );
-      state.isError = {
-        isError: true,
-        status: Number(action.payload.match(/(\d+)/)[0]),
-      };
-    });
+    builder.addCase(fetchSingleUser.rejected, (state, action: any) => {});
 
-    // Set logged user username
+    //* Set logged user username
     builder.addCase(completeProfileInfo.fulfilled, (state, action: any) => {
       state.loggedUser = action.payload;
       state.completeInfo = true;
-      state.isError = {
-        isError: false,
-        status: 0,
-      };
     });
-    builder.addCase(completeProfileInfo.rejected, (state, action: any) => {
-      state.isError = {
-        isError: true,
-        status: Number(action.payload.match(/(\d+)/)[0]),
-      };
-    });
+    builder.addCase(completeProfileInfo.rejected, (state, action: any) => {});
 
-    // User friends
+    //* User friends
     builder.addCase(fetchUserFriends.fulfilled, (state, action: any) => {
       state.friends = action.payload;
-      state.isError = {
-        isError: false,
-        status: 0,
-      };
     });
-    builder.addCase(fetchUserFriends.rejected, (state, action: any) => {
-      state.isError = {
-        isError: true,
-        status: Number(action.payload.match(/(\d+)/)[0]),
-      };
-    });
+    builder.addCase(fetchUserFriends.rejected, (state, action: any) => {});
   },
 });
 

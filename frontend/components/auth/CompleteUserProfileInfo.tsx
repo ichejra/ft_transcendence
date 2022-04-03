@@ -110,8 +110,8 @@ export const CompleteProfileInfo: React.FC = () => {
         />
         {isValid === 1 ? (
           <p className={`pl-2 md:pl-0 w-72 text-xs text-red-400 font-thin`}>
-            Username must be lowercase including numbers and contain 4 -
-            12 characters
+            Username must be lowercase including numbers and contain 4 - 12
+            characters
           </p>
         ) : isValid === 2 ? (
           <p className={`w-72 text-sm pl-2 text-green-400 font-thin`}>

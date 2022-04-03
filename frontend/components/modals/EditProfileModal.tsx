@@ -20,9 +20,9 @@ const UsersModal: React.FC = () => {
         ref={divRef}
         className="flex flex-col justify-center items-center h-full"
       >
-        <div className="profile-card-bg-color w-full h-full md:w-[700px] md:h-[500px] border-[1px] border-gray-700">
+        <div className="profile-card-bg-color w-full h-full md:w-[700px] md:h-[516px] border-[1px] border-gray-700">
           <div className="h-[14rem] bg-red-200 profile-cover-bg"></div>
-          <div className="h-[17rem]">
+          <div className="h-[18rem]">
             <div className="relative h-full">
               <UpdateProfileForm />
             </div>
