@@ -1,5 +1,6 @@
 import { FaUserFriends } from "react-icons/fa";
 import { AiFillCalendar } from "react-icons/ai";
+import { RiPingPongFill } from "react-icons/ri";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import EditProfileModal from "../modals/EditProfileModal";
 import {
@@ -24,6 +25,7 @@ import {
   blockUserRequest,
 } from "../../features/friendsManagmentSlice";
 import { socket } from "../../pages/SocketProvider";
+import swal from "sweetalert";
 
 interface Props {
   user_me: User;
@@ -52,6 +54,7 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
   } = useAppSelector((state) => state.user);
   const { pendingUsers } = useAppSelector((state) => state.friends);
   const { refresh } = useAppSelector((state) => state.globalState);
+  const { isLoading } = useAppSelector((state) => state.user);
 
   const addFriend = (id: number) => {
     if (Cookies.get("accessToken")) {
@@ -119,11 +122,37 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
   };
   //! #######################
 
+  const handleInviteToGame = (user: User) => {
+    console.log(loggedUser.id, " sent invit to: ", user.id);
+    swal("Choose the game type", {
+      buttons: {
+        Default: true,
+        Obstacle: true,
+      },
+    }).then((value) => {
+      console.log(value);
+      if (value === "Default") {
+        socket.emit("invite_to_game", {
+          inviter: loggedUser,
+          invitee: user,
+          gameType: "default",
+        });
+      } else if (value === "Obstacle") {
+        socket.emit("invite_to_game", {
+          inviter: loggedUser,
+          invitee: user,
+          gameType: "obstacle",
+        });
+      }
+    });
+  };
+
   const editMyProfile = () => {
     dispatch(editUserProfile(true));
   };
 
   useEffect(() => {
+    console.log("0001");
     dispatch(setIsLoading(true));
     dispatch(fetchUserFriends()).then((data: any) => {
       const userFriends: User[] = data.payload;
@@ -202,12 +231,12 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
                         type={"Add Friend"}
                         func={addFriend}
                         id={user_me.id}
-                        style="bg-blue txt-cyan"
+                        style="bg-blue txt-cyan mb-1"
                         icon={2}
                       />
                     )}
                     {isFriend && (
-                      <div className="space-y-2">
+                      <div>
                         <PButton
                           func={removeFriend}
                           type="Unfriend"
@@ -219,7 +248,7 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
                           func={blockUser}
                           type="Block"
                           id={user_me.id}
-                          style="bg-red-500 text-cyan-200"
+                          style="bg-red-500 text-cyan-200 mt-2"
                           icon={4}
                         />
                       </div>
@@ -233,6 +262,19 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
                         icon={3}
                       />
                     )}
+                    <button
+                      onClick={() => handleInviteToGame(user_me)}
+                      className={`hover:scale-105 mt-1 transition duration-300 w-[214px] h-[37px] rounded-md about-family bg-green-600`}
+                    >
+                      {isLoading ? (
+                        <div className="loading-2 border border-cyan-200 w-6 h-6"></div>
+                      ) : (
+                        <span className="flex items-center justify-center">
+                          <RiPingPongFill size="1.5rem" className="mr-2" />
+                          Challenge
+                        </span>
+                      )}
+                    </button>
                   </div>
                 ) : (
                   <PButton
