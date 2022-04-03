@@ -1,25 +1,21 @@
 import {
-  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  WsException,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { User, UserState } from 'src/users/entities/user.entity';
 import GameObj from 'src/game/interfaces/game';
 import Player from 'src/game/interfaces/player';
-import { Game } from './entities/game.entity';
 import { GameService } from './game.service';
 import { GameDto } from './dto/game.dto';
 import { Inject } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { ConnectionsService } from 'src/events/connections.service';
 import { gameChallenge } from './interfaces/gameChallenge';
-// import { Consts, GameState } from './game_consts';
 
 @WebSocketGateway({
   cors: {
@@ -419,3 +415,10 @@ export class GameGateway
 
 //TODO: check if blocked users can play with each other
 //TODO: send game type when invite to game
+//TODO: add game invit in profile
+//TODO: add game types on a modal when inviting someone
+//TODO: make the game responsive waaaaaaaaaaaaaaaaaaaaaaaaaa3
+//TODO: refactor the shit
+
+
+
