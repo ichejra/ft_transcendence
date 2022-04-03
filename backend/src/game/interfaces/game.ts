@@ -90,18 +90,18 @@ class GameObj {
       .getSocket()
       .emit('game_state', { ...current, isWinner: this._player2.isWinner() });
     this._spectators.forEach((spec) => {
-      spec.emit('game_state', { ...current /* send the winner  */ }); //TODO: watcher: send the winner too
+      spec.emit('game_state', { ...current });
     });
     // this._spectators.forEach((spec) => {
     //   spec.emit('set_users', [this._player1AsUser, this._player2AsUser]);
     // });
   };
 
-  //! public resetGame(): void {
-  //   this._ball.resetBall();
-  //   this._player1.reset();
-  //   this._player2.reset();
-  // }
+  public resetGame(): void {
+    this._ball.resetBall();
+    this._player1.getPaddle().resetPaddle();
+    this._player2.getPaddle().resetPaddle();
+  }
 
   public getId(): string {
     return this._id;
@@ -120,18 +120,11 @@ class GameObj {
   }
 
   public hasUser(userId: number): boolean {
-    console.log(
-      'hello id1: ',
-      this._player1AsUser.id,
-      ', id2: ',
-      this._player2AsUser.id,
-    );
-    console.log('==> id: ', userId);
-
     if (userId === this._player1AsUser.id || userId === this._player2AsUser.id)
       return true;
     return false;
   }
+
   public getGamePlayer(playerSocket: Socket): Player {
     return this._player1.getSocket() === playerSocket
       ? this._player1
@@ -146,6 +139,7 @@ class GameObj {
     if (this._player1.isWinner()) return this._player1.getSocket();
     else return this._player2.getSocket();
   }
+
   public getLoserSocket(): Socket {
     if (!this._player1.isWinner()) return this._player1.getSocket();
     else return this._player2.getSocket();
@@ -167,71 +161,84 @@ class GameObj {
   public stopGame(): void {
     clearInterval(this._interval);
     this.clearSpectators();
-    // console.log('user1: ', this._player1AsUser);
-    // console.log('user2: ', this._player2AsUser);
     this._player1.clearPlayer();
     this._player2.clearPlayer();
     this._remove(this);
-    // console.log('stopGame user1 online: ', this._player1AsUser.state);
-    // console.log('stopGame user2 online: ', this._player2AsUser.state);
+  }
+
+  private handleCollision(player: Player): void {
+    let collidePoint =
+      this._ball.getY() - (player.getPaddle().getY() + Consts.PADDLE_H / 2);
+    collidePoint = collidePoint / (Consts.PADDLE_H / 2);
+    let angleRad = (Math.PI / 4) * collidePoint;
+    let direction =
+      this._ball.getX() + Consts.BALL_RADIUS < Consts.CANVAS_W / 2 ? 1 : -1;
+    this._ball.setVelocityX(
+      direction * this._ball.getSpeed() * Math.cos(angleRad),
+    );
+    this._ball.setVelocityY(this._ball.getSpeed() * Math.sin(angleRad));
+    this._ball.setSpeed(this._ball.getSpeed() + 0.3);
+    //! incremented the ball speed too 0.2=>0.3
+    //! changed the paddle min height and the increment ammount 40=>30 and 2=>3
+    if (!this._isDefault) {
+      if (player.getPaddle().getHeight() > 30)
+        player.getPaddle().setHeight(player.getPaddle().getHeight() - 3);
+    }
   }
 
   public playGame(): void {
     this._ball.ballHorizontalBounce();
     if (this._ball.PaddleBallCollision(this._player1.getPaddle())) {
-      let collidePoint =
-        this._ball.getY() -
-        (this._player1.getPaddle().getY() + Consts.PADDLE_H / 2);
-      collidePoint = collidePoint / (Consts.PADDLE_H / 2);
-      let angleRad = (Math.PI / 4) * collidePoint;
-      let direction =
-        this._ball.getX() + Consts.BALL_RADIUS < Consts.CANVAS_W / 2 ? 1 : -1;
-      this._ball.setVelocityX(
-        direction * this._ball.getSpeed() * Math.cos(angleRad),
-      );
-      this._ball.setVelocityY(this._ball.getSpeed() * Math.sin(angleRad));
-      this._ball.setSpeed(this._ball.getSpeed() + 0.2);
-      if (!this._isDefault) {
-        if (this._player1.getPaddle().getHeight() > 40)
-          this._player1
-            .getPaddle()
-            .setHeight(this._player1.getPaddle().getHeight() - 2);
-      }
+      this.handleCollision(this._player1);
+      // let collidePoint =
+      //   this._ball.getY() -
+      //   (this._player1.getPaddle().getY() + Consts.PADDLE_H / 2);
+      // collidePoint = collidePoint / (Consts.PADDLE_H / 2);
+      // let angleRad = (Math.PI / 4) * collidePoint;
+      // let direction =
+      //   this._ball.getX() + Consts.BALL_RADIUS < Consts.CANVAS_W / 2 ? 1 : -1;
+      // this._ball.setVelocityX(
+      //   direction * this._ball.getSpeed() * Math.cos(angleRad),
+      // );
+      // this._ball.setVelocityY(this._ball.getSpeed() * Math.sin(angleRad));
+      // this._ball.setSpeed(this._ball.getSpeed() + 0.3);
+      // //! incremented the ball speed too 0.2=>0.3
+      // //! changed the paddle min height and the increment ammount 40=>30 and 2=>3
+      // if (!this._isDefault) {
+      //   if (this._player1.getPaddle().getHeight() > 30)
+      //     this._player1
+      //       .getPaddle()
+      //       .setHeight(this._player1.getPaddle().getHeight() - 3);
+      // }
     }
-
     if (this._ball.PaddleBallCollision(this._player2.getPaddle())) {
-      let collidePoint =
-        this._ball.getY() -
-        (this._player2.getPaddle().getY() + Consts.PADDLE_H / 2);
-      collidePoint = collidePoint / (Consts.PADDLE_H / 2);
-      let angleRad = (Math.PI / 4) * collidePoint;
-      let direction =
-        this._ball.getX() + Consts.BALL_RADIUS < Consts.CANVAS_W / 2 ? 1 : -1;
-      this._ball.setVelocityX(
-        direction * this._ball.getSpeed() * Math.cos(angleRad),
-      );
-      this._ball.setVelocityY(this._ball.getSpeed() * Math.sin(angleRad));
-      this._ball.setSpeed(this._ball.getSpeed() + 0.2);
-      //TODO: with obstacle
-      if (!this._isDefault) {
-        // * if this paddle height > 50, paddle.height--;
-        if (this._player2.getPaddle().getHeight() > 40)
-          this._player2
-            .getPaddle()
-            .setHeight(this._player2.getPaddle().getHeight() - 2);
-      }
+      this.handleCollision(this._player2);
+      // let collidePoint =
+      //   this._ball.getY() -
+      //   (this._player2.getPaddle().getY() + Consts.PADDLE_H / 2);
+      // collidePoint = collidePoint / (Consts.PADDLE_H / 2);
+      // let angleRad = (Math.PI / 4) * collidePoint;
+      // let direction =
+      //   this._ball.getX() + Consts.BALL_RADIUS < Consts.CANVAS_W / 2 ? 1 : -1;
+      // this._ball.setVelocityX(
+      //   direction * this._ball.getSpeed() * Math.cos(angleRad),
+      // );
+      // this._ball.setVelocityY(this._ball.getSpeed() * Math.sin(angleRad));
+      // this._ball.setSpeed(this._ball.getSpeed() + 0.3);
+      // if (!this._isDefault) {
+      //   if (this._player2.getPaddle().getHeight() > 30)
+      //     this._player2
+      //       .getPaddle()
+      //       .setHeight(this._player2.getPaddle().getHeight() - 3);
+      // }
     }
 
     if (this._ball.getX() - Consts.BALL_RADIUS <= 0) {
       this._player2.incScore();
-      this._ball.resetBall();
-      this._player1.getPaddle().resetPaddle();
-      this._player2.getPaddle().resetPaddle();
+      this.resetGame();
     } else if (this._ball.getX() + Consts.BALL_RADIUS >= Consts.CANVAS_W) {
       this._player1.incScore();
-      this._ball.resetBall();
-      this._player1.getPaddle().resetPaddle();
-      this._player2.getPaddle().resetPaddle();
+      this.resetGame();
     }
     this._ball.moveBall();
 
@@ -268,6 +275,7 @@ class GameObj {
   public clearSpectators(): void {
     if (this._spectators.length > 0)
       this._spectators.splice(0, this._spectators.length);
+    console.log('Spectators removed');
   }
 
   public removeSpectator(spectator: Socket): void {

@@ -59,4 +59,3 @@ class Player {
 
 export default Player;
 
-//* DONE: do the winner
