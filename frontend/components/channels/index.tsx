@@ -10,7 +10,7 @@ import {
   getSingleChannel,
   getChannelContent,
   setChannelsListModal,
-  getNewChannelId,
+  setNewChannelId,
 } from "../../features/chatSlice";
 import { useNavigate, useParams, useLocation } from "react-router";
 import DirectChat from "./DirectChat";
@@ -28,20 +28,16 @@ const ChatRooms = () => {
   const dispatch = useAppDispatch();
   const { pathname } = useLocation();
   const { id: channelId } = useParams();
-  const {
-    createNewChannel,
-    showChannelsList,
-    channels,
-    addChannel,
-    newChannelId,
-  } = useAppSelector((state) => state.channels);
+  const { createNewChannel, showChannelsList, channels, newChannelId } =
+    useAppSelector((state) => state.channels);
 
   const getChannel = (id: number) => {
-    setShowChannelContent(true);
     dispatch(getSingleChannel(id)).then(({ payload }: any) => {
       dispatch(getChannelContent(payload.id));
       socket.emit("update_join", { rooms: channels, room: payload });
       setChannelName(payload.name);
+      setShowChannelContent(true);
+      dispatch(setNewChannelId(-1));
     });
     navigate(`/channels/${id}`);
   };
@@ -67,9 +63,8 @@ const ChatRooms = () => {
   };
 
   useEffect(() => {
-    console.log("}}}}}}}}}}}}}}}}}}}}}}} socket seted");
+    dispatch(getChannelsList());
     socket.on("join_success", () => {
-      console.log("%c a new member joined the channel", "color:green");
       dispatch(updateMemmbersList());
     });
     return () => {
@@ -78,23 +73,11 @@ const ChatRooms = () => {
   }, []);
 
   useEffect(() => {
-    const chId = newChannelId ?? Number(channelId);
-    console.log("--------------------->", newChannelId);
-    const timer = setTimeout(() => {
-      setIsLoading(true);
-      setShowChannelContent(false);
-      dispatch(getChannelsList()).then(() => {
-        if (chId) {
-          getChannel(chId);
-          dispatch(getNewChannelId());
-        }
-      });
-      setIsLoading(false);
-    }, 100);
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [addChannel, newChannelId]);
+    console.log("NEW CHANNEL ID ==>==>==>==>>>>>", newChannelId);
+    if (newChannelId !== -1) {
+      getChannel(newChannelId);
+    }
+  }, [newChannelId]);
 
   return (
     <div className="relative page-100 h-full w-full pt-20 pb-16 about-family channels-bar-bg">

@@ -1,15 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
+import { FaUserSlash } from "react-icons/fa";
 import { HiOutlineBan } from "react-icons/hi";
 import { GiBootKick } from "react-icons/gi";
 import { BiVolumeMute } from "react-icons/bi";
 import { GoPrimitiveDot } from "react-icons/go";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { RiVolumeMuteLine } from "react-icons/ri";
+import { RiVolumeMuteLine, RiShieldUserFill } from "react-icons/ri";
+import { MdOutlineAdminPanelSettings } from "react-icons/md";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { Link } from "react-router-dom";
 import { User } from "../../features/userProfileSlice";
 import {
   getChannelMembersList,
+  setMemberAsAdmin,
+  setAdminAsMember,
   muteChannelMember,
   banChannelMember,
   kickChannelMember,
@@ -39,6 +43,28 @@ const Member: React.FC<MemberProps> = ({
   const menuRef = useRef<any>(null);
   const dispatch = useAppDispatch();
 
+  const setAdmin = (id: number) => {
+    dispatch(setMemberAsAdmin({ channelId: chId, memberId: id })).then(() => {
+      socket.emit("member_status_changed", {
+        room: channelName,
+        status: "set_admin",
+      });
+      dispatch(getChannelMembersList(chId));
+      setToggleMenu(false);
+    });
+  };
+
+  const removeAdmin = (id: number) => {
+    dispatch(setAdminAsMember({ channelId: chId, memberId: id })).then(() => {
+      socket.emit("member_status_changed", {
+        room: channelName,
+        status: "remove_admin",
+      });
+      dispatch(getChannelMembersList(chId));
+      setToggleMenu(false);
+    });
+  };
+
   const muteUser = (id: number) => {
     dispatch(muteChannelMember({ channelId: chId, memberId: id })).then(() => {
       socket.emit("member_status_changed", {
@@ -49,6 +75,7 @@ const Member: React.FC<MemberProps> = ({
       setToggleMenu(false);
     });
   };
+
   const banUser = (id: number) => {
     dispatch(banChannelMember({ channelId: chId, memberId: id })).then(() => {
       socket.emit("member_status_changed", {
@@ -59,6 +86,7 @@ const Member: React.FC<MemberProps> = ({
       setToggleMenu(false);
     });
   };
+
   const kickUser = (id: number) => {
     dispatch(kickChannelMember({ channelId: chId, memberId: id })).then(() => {
       socket.emit("member_status_changed", {
@@ -140,8 +168,34 @@ const Member: React.FC<MemberProps> = ({
           />
         )}
         {toggleMenu && (
-          <div className="absolute z-10 top-2 border-gray-500 w-[200px] user-card-bg border user-menu">
+          <div className="absolute z-10 top-2 border-gray-500 w-[230px] user-card-bg border user-menu">
             <ul className="">
+              {userRole === "admin" ? (
+                <li
+                  onClick={() => removeAdmin(user.id)}
+                  className="flex items-center p-1 m-1 font-mono text-sm font-bold hover:bg-opacity-40 hover:bg-gray-400 transition duration-300 cursor-pointer"
+                >
+                  <FaUserSlash size="1.5rem" className="mr-2  text-red-500" />
+                  Remove admin
+                  <span className="ml-1 font-mono font-normal">
+                    {user.user_name}
+                  </span>
+                </li>
+              ) : (
+                <li
+                  onClick={() => setAdmin(user.id)}
+                  className="flex items-center p-1 m-1 font-mono text-sm font-bold hover:bg-opacity-40 hover:bg-gray-400 transition duration-300 cursor-pointer"
+                >
+                  <RiShieldUserFill
+                    size="1.5rem"
+                    className="mr-2  text-red-500"
+                  />
+                  Set admin
+                  <span className="ml-1 font-mono font-normal">
+                    {user.user_name}
+                  </span>
+                </li>
+              )}
               <li
                 onClick={() => muteUser(user.id)}
                 className="flex items-center p-1 m-1 font-mono text-sm font-bold hover:bg-opacity-40 hover:bg-gray-400 transition duration-300 cursor-pointer"
