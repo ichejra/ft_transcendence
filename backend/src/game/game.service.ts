@@ -65,4 +65,16 @@ export class GameService {
         score: data.score
       });
     }
+
+    async getGamesHistory(playerId: number): Promise<Game[]> {
+      const games: Game[] = await this.gameRepository.find({
+        relations: [ 'winner', 'loser' ],
+        where: [{
+          winner: playerId,
+        },{
+          loser: playerId,
+        }]
+      });
+      return games;
+    }
 }
