@@ -21,7 +21,7 @@ export class IsBlockedGuard implements CanActivate {
             },]
         });
         if (relation) {
-            throw new ForbiddenException('Forbidden: cannot reach the resouce');
+            throw new ForbiddenException('Forbidden: cannot reach the resource');
         }
         return true;
     }
