@@ -76,14 +76,14 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   const [joined, setJoined] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const userId = useAppSelector((state) => state.user.user.id);
+  const { loggedUser } = useAppSelector((state) => state.user);
 
-  console.log('user type: ', userType);
-  console.log('location: ', location);
+  // console.log('user type: ', userType);
+  // console.log('location: ', location);
   useEffect(() => {
-    console.log('location: ', location);
-    console.log('user type: ', userType);
-    console.log('player: ', leftPlayer);
+    // console.log('location: ', location);
+    // console.log('user type: ', userType);
+    // console.log('player: ', leftPlayer);
     if (userType === 'spectator' && location.pathname !== '/watch')
       socket.emit('spectator_left');
   }, []);
@@ -96,7 +96,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
     socket.emit('join_queue', 'obstacle');
     setJoined(true);
   };
-  
+
   // const stopMatch = () => {
   //   socket.emit('stop_game', 'default');
   // };
@@ -109,7 +109,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
     // document.getElementById('canvas')?.remove();
     // playBtnsRef.current?.style.display = 'block';
   };
-  
+
   const movePaddle = (e: any) => {
     if (e.code === 'ArrowUp') {
       // console.log('------> keydown');
@@ -129,24 +129,30 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   if (
     userType === 'player' &&
     users.length > 1 &&
-    users[0].id !== userId &&
-    users[1].id !== userId
+    users[0].id !== loggedUser.id &&
+    users[1].id !== loggedUser.id
   ) {
     handlePlayAgain();
     // return;
   }
+
   if (userType === 'player' && !leftPlayer) {
     socket.emit('spectator_left');
   }
 
   useEffect(() => {
     if (users.length !== 0) return;
-    console.log('users length: ', users.length);
     socket.emit('isAlreadyInGame');
     socket.on('set_users', (players) => {
       console.log('players', players);
       isRefresh = true;
       setUsers(players);
+      console.log(
+        'after setting users : players: ',
+        players,
+        'users length: ',
+        users.length
+      );
     });
     return () => {
       socket.off('set_users');
@@ -163,6 +169,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
       socket.off('joined');
     };
   }, [location]);
+
   // useEffect(() => {
   //   delay(100).then(() => {
   //     socket.on('joined', () => {
@@ -201,10 +208,11 @@ const Pong: React.FC<UserType> = ({ userType }) => {
       // if (canvas) {
       //   canvas.style.display = 'block';
       // }
-      if (playBtnsRef != null)
+      if (playBtnsRef != null) {
         if (playBtnsRef.current != null) {
           playBtnsRef.current.style.display = 'none';
         }
+      }
       //! /////////
       const table = new Rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, 'black', ctx);
       table.drawRect();
@@ -433,7 +441,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
           </div>
         )}
         {frame.state === 'OVER' && userType === 'player' && (
-          <div className='play-again-btn items-center mb-20'>
+          <div className='play-again-btn items-center mb-44'>
             <button onClick={handlePlayAgain}>Play Again</button>
           </div>
         )}

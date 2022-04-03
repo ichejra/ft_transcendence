@@ -1,31 +1,28 @@
-import { useEffect, useState } from "react";
-import { io } from "socket.io-client";
+import { useEffect, useState } from 'react';
+import { io } from 'socket.io-client';
 import {
   fetchAllUsers,
   fetchUserFriends,
   fetchNoRelationUsers,
   setIsPending,
   setIsFriend,
-} from "../features/userProfileSlice";
+} from '../features/userProfileSlice';
 import {
   fetchPendingStatus,
   fetchBlockedUsers,
-} from "../features/friendsManagmentSlice";
-import { updateGlobalState } from "../features/globalSlice";
-import { useAppDispatch, useAppSelector } from "../app/hooks";
-import Cookies from "js-cookie";
+} from '../features/friendsManagmentSlice';
+import { updateGlobalState } from '../features/globalSlice';
+import { useAppDispatch, useAppSelector } from '../app/hooks';
+import Cookies from 'js-cookie';
 import { User } from '../features/userProfileSlice';
 import swal from 'sweetalert';
-import { useNavigate } from "react-router";
+import { useNavigate } from 'react-router';
 
+import { useLocation } from 'react-router';
 
-
-import { useLocation } from "react-router";
-
-
-export const socket = io("http://localhost:3001", {
+export const socket = io('http://localhost:3001', {
   auth: {
-    token: Cookies.get("accessToken"),
+    token: Cookies.get('accessToken'),
   },
 });
 
@@ -36,24 +33,25 @@ const SocketProvider: React.FC = ({ children }) => {
 
   const navigate = useNavigate();
 
-
   const { pathname } = useLocation();
 
   useEffect(() => {
-    socket.on("receive_notification", () => {
+    socket.on('receive_notification', () => {
       dispatch(updateGlobalState());
-      console.log("trigger the refresh");
+      console.log('trigger the refresh');
     });
 
     return () => {
-      socket.off("receive_notification");
+      socket.off('receive_notification');
     };
   }, [socket]);
 
   useEffect(() => {
+
     console.log("emmm : ", pathname);
     if (Cookies.get("accessToken")) {
       console.log("General Render");
+
       dispatch(fetchAllUsers());
       dispatch(fetchNoRelationUsers()).then(() => {
         dispatch(fetchPendingStatus());
@@ -65,24 +63,35 @@ const SocketProvider: React.FC = ({ children }) => {
         }
         dispatch(fetchBlockedUsers());
       });
-      if (pathname.includes("profile")) {
+      if (pathname.includes('profile')) {
         dispatch(setIsPending(false));
       }
-      console.log("--------------------> refershhhhhh");
+      console.log('--------------------> refershhhhhh');
     }
   }, [refresh]);
 
   useEffect(() => {
     socket.on('game_invitation', ({ inviter, challengeId }) => {
       console.log('invit recieved from ', inviter.display_name);
-      swal('Good job!', 'You clicked the button!', 'success');
-      //TODO show Modal
-      //* if (accept) {socket.emit('accept_challenge', challngeId), navigate('/game')} else socket.emit('reject_challenge', challngeId);
+      // swal('Good job!', 'You clicked the button!', 'success');
+      swal(`You have been invited to a game by ${inviter.display_name}.`).then(
+        (value) => {
+          // swal(`The returned value is: ${value}`);
+          if (value) {
+            console.log(`The returned value is: ${value}`);
+            socket.emit('accept_challenge', {challengeId});
+            navigate('/game');
+          } else {
+            console.log(`The returned value is: ${value}`);
+            socket.emit('reject_challenge', {challengeId});
+          }
+        }
+      );
+      
     });
     return () => {
       socket.off('game_invitation');
-    }
-
+    };
   }, []);
 
   useEffect(() => {
@@ -96,9 +105,9 @@ const SocketProvider: React.FC = ({ children }) => {
     });
   }, []);
 
-
-
   return <>{children}</>;
 };
 
 export default SocketProvider;
+
+//*DONE show game request Modal

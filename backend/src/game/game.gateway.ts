@@ -1,5 +1,4 @@
 import {
-  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
@@ -11,14 +10,12 @@ import { Socket, Server } from 'socket.io';
 import { User, UserState } from 'src/users/entities/user.entity';
 import GameObj from 'src/game/interfaces/game';
 import Player from 'src/game/interfaces/player';
-import { Game } from './entities/game.entity';
 import { GameService } from './game.service';
 import { GameDto } from './dto/game.dto';
 import { Inject } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { ConnectionsService } from 'src/events/connections.service';
 import { gameChallenge } from './interfaces/gameChallenge';
-// import { Consts, GameState } from './game_consts';
 
 @WebSocketGateway({
   cors: {
@@ -46,9 +43,20 @@ export class GameGateway
   @Inject()
   private usersService: UsersService;
 
-  handleConnection(client: Socket): void {
-    // TODO: handle connection
+  // handleConnection(client: Socket): void {
+  //   // TODO: handle connection
+  // }
+
+  //! ***************************************************
+  public async handleConnection(client: Socket, ...args: any[]): Promise<void> {
+    try {
+      await this.clientsService.addConnection(client);
+    } catch (err) {
+      // throw new WsException('unauthorized: unauthenticated connection'); // TODO check this with anouar
+      return;
+    }
   }
+  //! ***************************************************
 
   handleDisconnect(socket: Socket): void {
     // TODO: handle disconnection
@@ -66,7 +74,6 @@ export class GameGateway
   afterInit(server: any): any {
     // ?
   }
-
   private async getPlayerAsUser(client: Socket): Promise<User> {
     let user: User = null;
     try {
@@ -204,54 +211,8 @@ export class GameGateway
         this.joinGame([first, second], payload);
       }
     }
-    // if (this.queue.size > 1) {
-    //   console.log(this.queue.size);
-    //   const [first, second] = this.queue;
-    //   const user1 = await this.getPlayerAsUser(first);
-    //   const user2 = await this.getPlayerAsUser(second);
-    //   //* DONE (wa9): check the same user
-    //   if (user1.id === user2.id) {
-    //     console.log('hi');
-    //     this.queue.delete(first);
-    //     return ;
-    //   }
-    //   //* DONE: change players state to inGame
-    //   await this.usersService.updateState(Number(user1.id), UserState.IN_GAME);
-    //   await this.usersService.updateState(Number(user2.id), UserState.IN_GAME);
-    //   this.queue.clear();
-    //   this.joinGame([first, second], '');
-    // }
   }
-  // @SubscribeMessage('join_queue')
-  // private async joinQueue(client: Socket, payload: any): Promise<void> {
-  //   console.log('join queue: am here');
-  //   if (this.queue.has(client) === true) return;
-  //   this.queue.add(client);
-  //   // if (payload === 'obstacle') {
-  //   //   this.obstacleGameQueue.push(client);
-  //   //   if (this.obstacleGameQueue.length > 1)
-  //   //   {
 
-  //   //   }
-  //   // }
-  //   if (this.queue.size > 1) {
-  //     console.log(this.queue.size);
-  //     const [first, second] = this.queue;
-  //     const user1 = await this.getPlayerAsUser(first);
-  //     const user2 = await this.getPlayerAsUser(second);
-  //     //* DONE (wa9): check the same user
-  //     if (user1.id === user2.id) {
-  //       console.log('hi');
-  //       this.queue.delete(first);
-  //       return ;
-  //     }
-  //     //* DONE: change players state to inGame
-  //     await this.usersService.updateState(Number(user1.id), UserState.IN_GAME);
-  //     await this.usersService.updateState(Number(user2.id), UserState.IN_GAME);
-  //     this.queue.clear();
-  //     this.joinGame([first, second], '');
-  //   }
-  // }
   //! ////////////////////////
   @SubscribeMessage('stop_game')
   private stopGame(socket: Socket, payload: any): void {
@@ -355,7 +316,7 @@ export class GameGateway
       }
     }
   }
-  //* game request
+  //*************************************************** */ game request
 
   private generateId(): string {
     // Math.random should be unique because of its seeding algorithm.
@@ -376,42 +337,42 @@ export class GameGateway
   @SubscribeMessage('invite_to_game')
   async inviteToGame(
     client: Socket,
-    payload: { inviter: number; invitee: number },
+    payload: { inviter: User; invitee: User },
     // payload: { inviter: User; invitee: User },
   ) {
     //! payload: inviter id and invitee id
-    try {
-      console.log(payload);
+    // console.log(payload);
 
-      const gameFound = this.games.find((game) => {
-        return (
-          game.getPlayersSockets()[0] === client ||
-          game.getPlayersSockets()[1] === client
-        );
-      });
-      //TODO: what to do here
-      if (gameFound) return;
-      const challengeId = this.generateId();
-      const challenge = new gameChallenge(
-        challengeId,
-        payload.inviter,
-        payload.invitee,
-        client,
+    const gameFound = this.games.find((game) => {
+      return (
+        game.getPlayersSockets()[0] === client ||
+        game.getPlayersSockets()[1] === client
       );
-      console.log('paylaod.invitee ', payload.invitee);
+    });
+    //TODO: what to do here
+    if (gameFound) return;
+    const challengeId = this.generateId();
+    const challenge = new gameChallenge(
+      challengeId,
+      payload.inviter.id,
+      payload.invitee.id,
+      client,
+    );
+    // console.log('paylaod.invitee ', payload.invitee);
+    try {
       const inviteeSockets: Set<Socket> =
-        await this.clientsService.getUserConnections(Number(payload.invitee)); //TODO: check this with anouar
-      inviteeSockets.size &&
-        inviteeSockets.forEach((sock) => {
-          this.server
-            .to(sock.id)
-            .emit('game_invitation', { inviter: payload.inviter, challengeId });
-          console.log('|', inviteeSockets.size, '| helloo');
-        });
-      console.log('|', inviteeSockets.size, '| helloo');
+        await this.clientsService.getUserConnections(
+          Number(payload.invitee.id),
+        );
+      inviteeSockets.forEach((sock) => {
+        this.server
+          .to(sock.id)
+          .emit('game_invitation', { inviter: payload.inviter, challengeId: challengeId });
+          console.log('cha id =======> ',challengeId);
+          
+      });
       this.challenges.push(challenge);
     } catch (error) {
-      //   // console.log('|', 'thrown', '| helloo');
       console.log(error);
       throw error;
     }
@@ -421,10 +382,12 @@ export class GameGateway
   }
   //* /////////////////////////////////////////////////////////////////////////////////////
   @SubscribeMessage('accept_challenge')
-  accpetChallenge(client: Socket, payload: { challenge_id: string }) {
+  accpetChallenge(client: Socket, payload: { challengeId: string }) {
+    console.log('%cCHALLENGE ACCEPTED', 'color: yellow', payload.challengeId);
+    
     //TODO : remove players from all queues
     const challenge = this.challenges.find((challenge) => {
-      return challenge.getChallengeId() === payload.challenge_id;
+      return challenge.getChallengeId() === payload.challengeId;
     });
     if (challenge) {
       challenge
@@ -435,9 +398,10 @@ export class GameGateway
   }
   //* /////////////////////////////////////////////////////////////////////////////////////
   @SubscribeMessage('reject_challenge')
-  rejectChallenge(client: Socket, payload: { challenge_id: string }) {
+  rejectChallenge(client: Socket, payload: { challengeId: string }) {
+    console.log('%cCHALLENGE REJECTED', 'color: yellow', payload.challengeId);
     const challenge = this.challenges.find((challenge) => {
-      return challenge.getChallengeId() === payload.challenge_id;
+      return challenge.getChallengeId() === payload.challengeId;
     });
     if (challenge) {
       challenge
@@ -451,3 +415,10 @@ export class GameGateway
 
 //TODO: check if blocked users can play with each other
 //TODO: send game type when invite to game
+//TODO: add game invit in profile
+//TODO: add game types on a modal when inviting someone
+//TODO: make the game responsive waaaaaaaaaaaaaaaaaaaaaaaaaa3
+//TODO: refactor the shit
+
+
+
