@@ -23,7 +23,6 @@ import { Channel } from "./channels/entities/channel.entity";
 import { MessageChannel } from "./messages/entities/message-channel.entity";
 import { DirectChatService } from "./direct-chat/direct-chat.service";
 import { ConnectionsService } from "src/events/connections.service";
-import { ChannelDto } from "./channels/dto/channel.dto";
 import { WsExceptionsFilter } from "src/exceptions/ws-exceptions.filter";
 
 @UseFilters(WsExceptionsFilter)
@@ -65,14 +64,8 @@ export class ChatGatway implements OnGatewayInit {
     }
 
     @SubscribeMessage('create_channel')
-    async handleCreateChannel(@ConnectedSocket() client: Socket, @MessageBody() payload: ChannelDto) {
-        try {
-            const user = await this.connectionsService.getUserFromSocket(client);
-            await this.channelsService.createChannel(user, payload);
-        } catch (error) {
-            throw new WsException('cannot create channel');
-        }
-        client.join(payload.name);
+    async handleCreateChannel(@ConnectedSocket() client: Socket, @MessageBody() room: string) {
+        client.join(room);
     }
 
     // ? handling messages for channels
