@@ -49,14 +49,14 @@ const GlobalUsers: React.FC<UsersProps> = ({ users, type }) => {
   if (users.length < 1) {
     return (
       <div className="flex h-full justify-center items-center">
-        <FaUsersSlash className="w-48 h-48 text-gray-600" />
+        <FaUsersSlash className="w-32 sm:w-48 h-32 sm:h-48 text-gray-600" />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col py-4">
-      <div className="flex flex-wrap justify-center">
+    <div className="flex flex-col p-4">
+      <div className="flex flex-wrap">
         {users
           .filter((user) => user.id !== userID)
           .map((user) => {
@@ -102,9 +102,7 @@ const User: React.FC<UserProps> = ({
     if (Cookies.get("accessToken")) {
       dispatch(unblockUserRequest(id)).then(() => {
         dispatch(fetchBlockedUsers()).then(() => {
-          dispatch(fetchUserFriends()).then(() => {
-            socket.emit("send_notification", { userId: id });
-          });
+          removeFriend(id);
         });
       });
     }
@@ -125,6 +123,7 @@ const User: React.FC<UserProps> = ({
       dispatch(blockUserRequest(id)).then(() => {
         dispatch(fetchBlockedUsers()).then(() => {
           dispatch(fetchUserFriends()).then(() => {
+            dispatch(fetchNoRelationUsers());
             socket.emit("send_notification", { userId: id });
           });
         });
@@ -135,6 +134,7 @@ const User: React.FC<UserProps> = ({
   };
 
   const getUserProfile = (id: number) => {
+    if (type === "blocked") return;
     if (Cookies.get("accessToken")) {
       dispatch(fetchSingleUser(id)).then((data: any) => {
         const singleUser: User = data.payload;
@@ -142,19 +142,6 @@ const User: React.FC<UserProps> = ({
       });
     }
   };
-
-  // useEffect(() => {
-  //   if (Cookies.get("accessToken")) {
-  //     dispatch(fetchNoRelationUsers());
-  //     dispatch(fetchUserFriends());
-  //   }
-  // }, []);
-
-  // useEffect(() => {
-  //   if (Cookies.get("accessToken")) {
-  //     dispatch(fetchBlockedUsers());
-  //   }
-  // }, []);
 
   return (
     <div className="text-gray-200 flex flex-col border border-gray-700 items-center user-card-bg p-2 m-3 w-[200px] about-family tracking-wide">

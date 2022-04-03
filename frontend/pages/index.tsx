@@ -8,7 +8,6 @@ import UserProfile from "../components/profile/Profile";
 import Login from "../components/auth/Login";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import FullFriendsList from "../components/profile/FullFriendsList";
 import NotFound from "../components/NotFound";
 import { AuthRoute, CompleteProfile } from "../components/privateRoutes";
 import CompleteUserProfileInfo from "../components/auth/CompleteUserProfileInfo";
@@ -101,7 +100,27 @@ const Home: NextPage = () => {
           element={
             <AuthRoute>
               <CompleteProfile>
-                <AllUsers />
+                <AllUsers type="users" />
+              </CompleteProfile>
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/users/:id/friends"
+          element={
+            <AuthRoute>
+              <CompleteProfile>
+                <AllUsers type="friends" />
+              </CompleteProfile>
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/users/:id/blocked"
+          element={
+            <AuthRoute>
+              <CompleteProfile>
+                <AllUsers type="blockedUsers" />
               </CompleteProfile>
             </AuthRoute>
           }
@@ -112,16 +131,6 @@ const Home: NextPage = () => {
             <AuthRoute>
               <CompleteProfile>
                 <LiveGames />
-              </CompleteProfile>
-            </AuthRoute>
-          }
-        />
-        <Route
-          path="/profile/list"
-          element={
-            <AuthRoute>
-              <CompleteProfile>
-                <FullFriendsList />
               </CompleteProfile>
             </AuthRoute>
           }

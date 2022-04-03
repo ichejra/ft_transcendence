@@ -51,7 +51,7 @@ const SocketProvider: React.FC = ({ children }) => {
       dispatch(fetchAllUsers());
       dispatch(fetchNoRelationUsers()).then(() => {
         dispatch(fetchPendingStatus());
-        if (pathname.includes('profile')) {
+        if (pathname.includes("profile") || pathname.includes("friends")) {
           dispatch(fetchUserFriends());
         }
         dispatch(fetchBlockedUsers());
