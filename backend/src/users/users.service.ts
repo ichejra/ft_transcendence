@@ -31,7 +31,7 @@ export class UsersService {
     try {
       return this.connection.getRepository(User).find();
     } catch (err) {
-      throw new HttpException(err.message, err.status);
+      throw err;
     }
   }
 
