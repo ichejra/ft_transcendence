@@ -73,4 +73,16 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     async handleLogout(@ConnectedSocket() client: Socket) {
         await this.connectionsService.handleLogout(client);
     }
+
+    @SubscribeMessage('block_status')
+    async handleBlocking(@ConnectedSocket() client: Socket, @MessageBody() userId: number) {
+        try {
+            const targets: Set<Socket> = await this.connectionsService.getUserConnections(Number(userId));
+            targets.forEach((target) => {
+                this.server.to(target.id).emit('block_status');
+            });
+        } catch (err) {
+            throw err;
+        }
+    }
 }
