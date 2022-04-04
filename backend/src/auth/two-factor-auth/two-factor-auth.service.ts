@@ -24,12 +24,12 @@ export class TwoFactorAuthService {
     async sendConnectLink(user: User): Promise<any> {
         try {
             const payload: JwtPayload = { id: user.id, user_name: user.user_name, email: user.email };
-            const token: string = await this.jwtService.sign(payload, {
+            const token: string = this.jwtService.sign(payload, {
                 secret: process.env.JWT_SECRET,
                 expiresIn: process.env.JWT_EXPIRESIN
             });
 
-            const url: string = `http://${process.env.HOST}:${process.env.PORT}/2fa/verify?token=${token}`;
+            const url: string = `${process.env.SERVER_HOST}/api/2fa/verify?token=${token}`;
             const text = `Welcome to ${process.env.APP_NAME} 2FA. To continue, click here: ${url}`;
 
             await this.mailService.sendMail({

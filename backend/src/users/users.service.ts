@@ -1,5 +1,4 @@
 import {
-  HttpException,
   Injectable,
 } from '@nestjs/common';
 import { ForbiddenException } from 'src/exceptions/forbidden.exception';
@@ -53,17 +52,17 @@ export class UsersService {
         await this.connection.getRepository(User).update(id, { user_name: user_name });
       } else if (!user_name && file) {
         await this.connection.getRepository(User).update(id,
-          { avatar_url: `http://${process.env.HOST}:${process.env.PORT}/${file.filename}` }
+          { avatar_url: `${process.env.SERVER_HOST}/${file.filename}` }
         );
       } else if (file && user_name) {
         await this.connection.getRepository(User).update(id,
           {
             user_name: user_name,
-            avatar_url: `http://${process.env.HOST}:${process.env.PORT}/${file.filename}`
+            avatar_url: `${process.env.SERVER_HOST}/${file.filename}`
           });
       }
       const user = await this.connection.getRepository(User).findOne(id);
-      if (!user) {
+      if (typeof user === 'undefined') {
         throw new NotFoundException();
       }
       return user;
@@ -111,7 +110,7 @@ export class UsersService {
         await this.connection.getRepository(UserFriends).save({ applicant: userId, recipient: recipientId });
       }
       const user = await this.connection.getRepository(User).findOne({ where: { id: recipientId } });
-      if (!user) {
+      if (typeof user === 'undefined') {
         throw new NotFoundException();
       }
       return user;
@@ -134,7 +133,7 @@ export class UsersService {
           applicantId
         ]);
       const user = await this.connection.getRepository(User).findOne({ where: { id: applicantId } }); // return the accpeted friend
-      if (!user) {
+      if (typeof user === 'undefined') {
         throw new NotFoundException();
       }
       return user;
@@ -150,11 +149,11 @@ export class UsersService {
   async blockFriend(userId: number, blockId: number): Promise<User> {
     try {
       const blocker = await this.connection.getRepository(User).findOne(userId);
-      if (!blocker) {
+      if (typeof blocker === 'undefined') {
         throw new NotFoundException();
       }
       const blocked = await this.connection.getRepository(User).findOne(blockId);
-      if (!blocked) {
+      if (typeof blocked === 'undefined') {
         throw new NotFoundException();
       }
       let relation = await this.connection.getRepository(UserFriends).findOne({
@@ -167,7 +166,7 @@ export class UsersService {
           recipient: userId
         }]
       });
-      if (!relation) {
+      if (typeof relation === 'undefined') {
         await this.connection.getRepository(UserFriends).save({
           applicant: blocker,
           recipient: blocked,
@@ -309,12 +308,12 @@ export class UsersService {
         is_2fa_enabled: bool,
       });
       const user = await this.connection.getRepository(User).findOne(userId);
-      if (!user) {
+      if (typeof user === 'undefined') {
         throw new NotFoundException();
       }
       return user;
-    } catch (e) {
-      throw e;
+    } catch (err) {
+      throw err;
     }
   }
 
@@ -323,7 +322,7 @@ export class UsersService {
   getUserProfileById = async (userId: number): Promise<User> => {
     try {
       const user = await this.connection.getRepository(User).findOne(userId);
-      if (!user) {
+      if (typeof user === 'undefined') {
         throw new NotFoundException();
       }
       return user;
