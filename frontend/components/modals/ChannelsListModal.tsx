@@ -9,6 +9,7 @@ import {
   setNewChannelId,
 } from "../../features/chatSlice";
 import { socket } from "../../pages/SocketProvider";
+import { useNavigate } from "react-router";
 
 const ChannelsListModal = () => {
   const divRef = useRef(null);
@@ -103,6 +104,7 @@ const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
   const [isPrivate, setIsPrivate] = useState(false);
   const [passwordForm, setPasswordForm] = useState(false);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { unjoinedChannels } = useAppSelector((state) => state.channels);
 
   const joinChannel = (id: number) => {
@@ -115,7 +117,8 @@ const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
       } else {
         socket.emit("join_channel", { channelId: id });
         dispatch(getChannelsList()).then(() => {
-          dispatch(setNewChannelId(id));
+          dispatch(setNewChannelId({ id, render: true }));
+          navigate(`/channels/${id}`);
           dispatch(setChannelsListModal(false));
         });
         console.log("joined");
@@ -140,7 +143,8 @@ const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
         if (response.status === 200) {
           setIsValid(1);
           dispatch(getChannelsList()).then(() => {
-            dispatch(setNewChannelId(id));
+            dispatch(setNewChannelId({ id, render: true }));
+            navigate(`/channels/${id}`);
             dispatch(setChannelsListModal(false));
           });
           socket.off("join_success");

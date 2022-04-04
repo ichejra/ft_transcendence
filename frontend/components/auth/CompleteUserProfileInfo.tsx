@@ -7,7 +7,6 @@ import {
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useNavigate } from "react-router";
 import { BiEditAlt } from "react-icons/bi";
-//TODO refactor update info and complete info Componenet
 
 const CompleteUserProfileInfo: React.FC = () => {
   return (

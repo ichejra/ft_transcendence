@@ -39,11 +39,10 @@ const UsersModal: React.FC = () => {
       const newChannel: Channel = data.payload;
       socket.emit("create_channel", { room: newChannel.name });
       dispatch(getChannelsList()).then(() => {
-        dispatch(setNewChannelId(newChannel.id));
+        dispatch(setNewChannelId({ id: newChannel.id, render: false }));
         dispatch(setNewChannelModal(false));
       });
     });
-    //   dispatch(addNewChannel());
   };
 
   useEffect(() => {
