@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io';
-import { Consts, GameStates } from '../game_consts';
+import { Consts } from '../constants/gameConsts';
 import Paddle from './paddle';
 
 class Player {
@@ -19,9 +19,37 @@ class Player {
     this._interval = setInterval(
       () => this._paddle.movePaddle(),
       1000 / Consts.framePerSec,
-    ); //TODO  consider this : 1000 / Consts.framePerSec / 2 && increasing the ball speed of course
+    );
   }
 
+  //* check if score reaches the max score
+  public checkScore(): boolean {
+    if (this._score === Consts.MAX_SCORE) return true;
+    return false;
+  }
+
+  //* increment score
+  public incScore() {
+    if (this.checkScore()) return;
+    this._score++;
+  }
+
+  //* set the winner
+  public isWinner(): boolean {
+    return this.checkScore();
+  }
+
+  //* reset
+  public reset(): void {
+    this._score = 0;
+  }
+
+  //* clear interval for player
+  public clearPlayer = () => {
+    clearInterval(this._interval);
+  };
+
+  //* getters and setters
   public getSocket(): Socket {
     return this._socket;
   }
@@ -37,25 +65,6 @@ class Player {
   public getPaddle(): Paddle {
     return this._paddle;
   }
-  public checkScore(): boolean {
-    if (this._score === Consts.MAX_SCORE) return true;
-    return false;
-  }
-  public incScore() {
-    if (this.checkScore()) return;
-    this._score++;
-  }
-  public isWinner(): boolean {
-    return this.checkScore();
-  }
-  public reset(): void {
-    this._score = 0;
-  }
-
-  public clearPlayer = () => {
-    clearInterval(this._interval);
-  }
 }
 
 export default Player;
-

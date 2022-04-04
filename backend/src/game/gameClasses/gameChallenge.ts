@@ -3,12 +3,10 @@ import { User } from 'src/users/entities/user.entity';
 
 export class gameChallenge {
   private _challenge_id: string;
-  // private _inviter: User;
-  // private _invitee: User;
   private _inviter: number;
   private _invitee: number;
   private _inviter_socket: Socket;
-  private _gameType : string;
+  private _gameType: string;
 
   constructor(
     id: string,
@@ -24,6 +22,7 @@ export class gameChallenge {
     this._gameType = gametype;
   }
 
+  //* getters
   public getChallengeId(): string {
     return this._challenge_id;
   }
@@ -44,5 +43,3 @@ export class gameChallenge {
     return this._gameType;
   }
 }
-
-

@@ -1,13 +1,10 @@
 import { Socket } from 'socket.io';
-import { Consts, GameStates, BroadcastObject } from '../game_consts';
-import Paddle from './paddle';
+import { Consts } from '../constants/gameConsts';
+import { GameStates } from '../constants/gameState';
+import { BroadcastObject } from '../constants/brodcastObject';
+import { User } from 'src/users/entities/user.entity';
 import Ball from './ball';
 import Player from './player';
-import { Game } from '../entities/game.entity';
-import { User } from 'src/users/entities/user.entity';
-import { GameService } from '../game.service';
-import { GameDto } from '../dto/game.dto';
-import { isDecimal } from 'class-validator';
 
 class GameObj {
   private _id: string;
@@ -20,7 +17,6 @@ class GameObj {
   private _spectators: Socket[] = []; // TODO: Set instead of array
   private _interval: NodeJS.Timer;
   private _isDefault: boolean;
-  private gameService: GameService;
 
   constructor(
     player1: Player,
@@ -43,86 +39,29 @@ class GameObj {
     this._isDefault = isDefault;
   }
 
+  //* getters
   public getIsDefault(): boolean {
     return this._isDefault;
-  }
-
-  private dataToBeSent = (): BroadcastObject => {
-    return {
-      ball: {
-        x: this._ball.getX(),
-        y: this._ball.getY(),
-      },
-      paddles: {
-        leftPad: this._player1.getPaddle().getY(),
-        rightPad: this._player2.getPaddle().getY(),
-        leftPadH: this._player1.getPaddle().getHeight(),
-        rightPadH: this._player2.getPaddle().getHeight(),
-      },
-      score: {
-        score1: this._player1.getScore(),
-        score2: this._player2.getScore(),
-      },
-      state: this.gameState(),
-    };
-  };
-
-  public liveGameData = () => {
-    return {
-      players: {
-        player1: this._player1AsUser,
-        player2: this._player2AsUser,
-      },
-      score: {
-        score1: this._player1.getScore(),
-        score2: this._player2.getScore(),
-      },
-    };
-  };
-
-  public sendData = () => {
-    const current = this.dataToBeSent();
-
-    this._player1
-      .getSocket()
-      .emit('game_state', { ...current, isWinner: this._player1.isWinner() });
-    this._player2
-      .getSocket()
-      .emit('game_state', { ...current, isWinner: this._player2.isWinner() });
-    this._spectators.forEach((spec) => {
-      spec.emit('game_state', { ...current });
-    });
-    // this._spectators.forEach((spec) => {
-    //   spec.emit('set_users', [this._player1AsUser, this._player2AsUser]);
-    // });
-  };
-
-  public resetGame(): void {
-    this._ball.resetBall();
-    this._player1.getPaddle().resetPaddle();
-    this._player2.getPaddle().resetPaddle();
   }
 
   public getId(): string {
     return this._id;
   }
+
   public getPlayer1(): Player {
     return this._player1;
   }
+
   public getPlayer2(): Player {
     return this._player2;
   }
+
   public getPlayer1AsUser(): User {
     return this._player1AsUser;
   }
+
   public getPlayer2AsUser(): User {
     return this._player2AsUser;
-  }
-
-  public hasUser(userId: number): boolean {
-    if (userId === this._player1AsUser.id || userId === this._player2AsUser.id)
-      return true;
-    return false;
   }
 
   public getGamePlayer(playerSocket: Socket): Player {
@@ -149,6 +88,54 @@ class GameObj {
     return [this._player1.getSocket(), this._player2.getSocket()];
   };
 
+  private dataToBeSent = (): BroadcastObject => {
+    return {
+      ball: {
+        x: this._ball.getX(),
+        y: this._ball.getY(),
+      },
+      paddles: {
+        leftPad: this._player1.getPaddle().getY(),
+        rightPad: this._player2.getPaddle().getY(),
+        leftPadH: this._player1.getPaddle().getHeight(),
+        rightPadH: this._player2.getPaddle().getHeight(),
+      },
+      score: {
+        score1: this._player1.getScore(),
+        score2: this._player2.getScore(),
+      },
+      state: this.gameState(),
+    };
+  };
+
+  //* send game frames
+  public sendData = () => {
+    const current = this.dataToBeSent();
+
+    this._player1
+      .getSocket()
+      .emit('game_state', { ...current, isWinner: this._player1.isWinner() });
+    this._player2
+      .getSocket()
+      .emit('game_state', { ...current, isWinner: this._player2.isWinner() });
+    this._spectators.forEach((spec) => {
+      spec.emit('game_state', { ...current });
+    });
+  };
+
+  public resetGame(): void {
+    this._ball.resetBall();
+    this._player1.getPaddle().resetPaddle();
+    this._player2.getPaddle().resetPaddle();
+  }
+
+  public hasUser(userId: number): boolean {
+    if (userId === this._player1AsUser.id || userId === this._player2AsUser.id)
+      return true;
+    return false;
+  }
+
+  //* get game state
   public gameState = (): GameStates => {
     if (
       this._player1.getScore() === Consts.MAX_SCORE ||
@@ -186,53 +173,15 @@ class GameObj {
     }
   }
 
+  //* handle all game componnents movements
   public playGame(): void {
     this._ball.ballHorizontalBounce();
     if (this._ball.PaddleBallCollision(this._player1.getPaddle())) {
       this.handleCollision(this._player1);
-      // let collidePoint =
-      //   this._ball.getY() -
-      //   (this._player1.getPaddle().getY() + Consts.PADDLE_H / 2);
-      // collidePoint = collidePoint / (Consts.PADDLE_H / 2);
-      // let angleRad = (Math.PI / 4) * collidePoint;
-      // let direction =
-      //   this._ball.getX() + Consts.BALL_RADIUS < Consts.CANVAS_W / 2 ? 1 : -1;
-      // this._ball.setVelocityX(
-      //   direction * this._ball.getSpeed() * Math.cos(angleRad),
-      // );
-      // this._ball.setVelocityY(this._ball.getSpeed() * Math.sin(angleRad));
-      // this._ball.setSpeed(this._ball.getSpeed() + 0.3);
-      // //! incremented the ball speed too 0.2=>0.3
-      // //! changed the paddle min height and the increment ammount 40=>30 and 2=>3
-      // if (!this._isDefault) {
-      //   if (this._player1.getPaddle().getHeight() > 30)
-      //     this._player1
-      //       .getPaddle()
-      //       .setHeight(this._player1.getPaddle().getHeight() - 3);
-      // }
     }
     if (this._ball.PaddleBallCollision(this._player2.getPaddle())) {
       this.handleCollision(this._player2);
-      // let collidePoint =
-      //   this._ball.getY() -
-      //   (this._player2.getPaddle().getY() + Consts.PADDLE_H / 2);
-      // collidePoint = collidePoint / (Consts.PADDLE_H / 2);
-      // let angleRad = (Math.PI / 4) * collidePoint;
-      // let direction =
-      //   this._ball.getX() + Consts.BALL_RADIUS < Consts.CANVAS_W / 2 ? 1 : -1;
-      // this._ball.setVelocityX(
-      //   direction * this._ball.getSpeed() * Math.cos(angleRad),
-      // );
-      // this._ball.setVelocityY(this._ball.getSpeed() * Math.sin(angleRad));
-      // this._ball.setSpeed(this._ball.getSpeed() + 0.3);
-      // if (!this._isDefault) {
-      //   if (this._player2.getPaddle().getHeight() > 30)
-      //     this._player2
-      //       .getPaddle()
-      //       .setHeight(this._player2.getPaddle().getHeight() - 3);
-      // }
     }
-
     if (this._ball.getX() - Consts.BALL_RADIUS <= 0) {
       this._player2.incScore();
       this.resetGame();
@@ -241,15 +190,14 @@ class GameObj {
       this.resetGame();
     }
     this._ball.moveBall();
-
     this.sendData();
     if (this.gameState() === GameStates.OVER) {
       this.stopGame();
     }
   }
 
+  //* end game and penalize the player if they left the game
   public playerLeftGame = (client: Socket): void => {
-    //* DONE: change players status to online
     if (this._player1.getSocket() === client) {
       this._player1.setScore(0);
       this._player2.setScore(Consts.MAX_SCORE);
@@ -261,42 +209,49 @@ class GameObj {
     this.stopGame();
   };
 
-  // * add specs
+  // * add spectators
   public addSpectators(spectator: Socket): void {
-    // console.log('watcher added');
-
     if (this._spectators.length < Consts.MAX_SPECTATORS) {
       this._spectators.push(spectator);
       spectator.emit('set_users', [this._player1AsUser, this._player2AsUser]);
     }
-    //! this.sendData();
   }
 
+  //* clear spectators
   public clearSpectators(): void {
     if (this._spectators.length > 0)
       this._spectators.splice(0, this._spectators.length);
     console.log('Spectators removed');
   }
 
+  //* remove a spectator
   public removeSpectator(spectator: Socket): void {
     if (this._spectators.includes(spectator))
       this._spectators.splice(this._spectators.indexOf(spectator), 1);
     console.log('I am removed');
   }
 
+  //* check if the game has spectator
   public hasSpectator(spec: Socket) {
     return this._spectators.includes(spec);
+  }
+
+  //* data for live games page
+  public liveGameData = () => {
+    return {
+      players: {
+        player1: this._player1AsUser,
+        player2: this._player2AsUser,
+      },
+      score: {
+        score1: this._player1.getScore(),
+        score2: this._player2.getScore(),
+      },
+    };
   }
 }
 
 export default GameObj;
 
-//* DONE: handle players disconnection
-//* DONE: Refactor playGame
-//* DONE: add data to database
 //TODO: arrow func
-//TODO: set spectators
 //TODO: check unused func
-//TODO: deal with ball speed after finding someone to play with
-//TODO: payload
-//TODO: pause

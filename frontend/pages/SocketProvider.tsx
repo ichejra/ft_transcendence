@@ -107,6 +107,12 @@ const SocketProvider: React.FC = ({ children }) => {
     socket.on("challenge_rejected", ({ user }) => {
       swal(`Your request has been rejected by ${user.display_name}!`);
     });
+    socket.on("inviter_in_game", () => {
+      swal("FINISH YOUR CURRENT GAME FIRST... 😡😡😡");
+    });
+    socket.on("invitee_in_game", ({ user }) => {
+      swal(`${user.display_name} is in game right now!`);
+    });
   }, []);
 
   return <>{children}</>;

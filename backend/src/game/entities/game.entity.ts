@@ -1,4 +1,12 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
 @Entity('game')
@@ -32,5 +40,4 @@ export class Game {
     default: () => 'CURRENT_TIMESTAMP',
   })
   playedAt?: Date;
-};
-//* create a table in our database
+}
