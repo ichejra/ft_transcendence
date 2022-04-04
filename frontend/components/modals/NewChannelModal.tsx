@@ -1,8 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import { FaTimes } from "react-icons/fa";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { addNewChannel, setNewChannelModal } from "../../features/chatSlice";
-import { createChannel, getChannelsList } from "../../features/chatSlice";
+import {
+  createChannel,
+  getChannelsList,
+  setNewChannelModal,
+  Channel,
+  setNewChannelId,
+} from "../../features/chatSlice";
 import { socket } from "../../pages/SocketProvider";
 
 const UsersModal: React.FC = () => {
@@ -25,15 +29,21 @@ const UsersModal: React.FC = () => {
   const submitChannelCreation = (e: React.FormEvent) => {
     e.preventDefault();
     if (isValid !== 1) return;
-    socket.emit("create_channel", {
-      name: channelName,
-      password: channelPass,
-      type: isPrivate ? "private" : "public",
+    dispatch(
+      createChannel({
+        name: channelName,
+        password: channelPass,
+        type: isPrivate ? "private" : "public",
+      })
+    ).then((data: any) => {
+      const newChannel: Channel = data.payload;
+      socket.emit("create_channel", { room: newChannel.name });
+      dispatch(getChannelsList()).then(() => {
+        dispatch(setNewChannelId(newChannel.id));
+        dispatch(setNewChannelModal(false));
+      });
     });
-    dispatch(setNewChannelModal(false));
-    dispatch(getChannelsList()).then(() => {
-      dispatch(addNewChannel());
-    });
+    //   dispatch(addNewChannel());
   };
 
   useEffect(() => {
@@ -66,7 +76,7 @@ const UsersModal: React.FC = () => {
         <div className="profile-card-bg-color w-full h-full md:w-[700px] md:h-[500px] border-[1px] border-gray-700">
           <div className="h-full">
             <div className="relative text-gray-300 h-full w-full flex flex-col items-center justify-center space-y-[2rem]">
-              <h1 className=" text-xl about-title-family">Channel Info</h1>
+              <h1 className=" text-xl about-title-family">New Channel</h1>
               <form
                 onSubmit={submitChannelCreation}
                 className="flex flex-col items-center justify-center"

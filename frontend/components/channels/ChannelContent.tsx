@@ -13,6 +13,7 @@ import {
   addNewChannel,
   setMuteCountDown,
   endMuteCountDown,
+  getChannelsList,
 } from "../../features/chatSlice";
 import Member from "./Member";
 interface ContentProps {
@@ -59,7 +60,6 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
   };
 
   useEffect(() => {
-    console.log("%cscroll down", "font-size: 20px; color: cyan");
     messagesDivRef.current?.scrollTo({
       left: 0,
       top: messagesDivRef.current.scrollHeight,
@@ -67,10 +67,12 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
     });
   }, [updateMessages]);
 
+  //TODO render leave channel
   const leaveChannel = async () => {
     socket.emit("leave_channel", { channelId });
-    navigate("/channels");
-    dispatch(addNewChannel());
+    dispatch(getChannelsList()).then(() => {
+      navigate("/channels");
+    });
   };
 
   useEffect(() => {
@@ -93,8 +95,6 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
       "member_status_changed",
       (data: { status: string; time: number }) => {
         console.log("%cmember status changed >>>>>>>>>", "color:pink");
-        console.log("--->", data.status);
-
         dispatch(getChannelMembersList(Number(channelId)));
         if (data.status === "kick") {
           navigate("/channels");
@@ -123,7 +123,7 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
       dispatch(getChannelMembersList(Number(channelId)));
     }
   }, [membersList]);
-
+  //TODO ADD isOwner state
   useEffect(() => {
     if (channelId) {
       dispatch(getChannelMembersList(Number(channelId))).then(
@@ -180,10 +180,7 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
           {channelContent.map((message) => {
             const { id, createdAt, content, author } = message;
             return (
-              <div
-                key={id}
-                className="my-6 mr-2 flex about-family items-start"
-              >
+              <div key={id} className="my-6 mr-2 flex about-family items-start">
                 <img
                   src={author?.avatar_url}
                   className="w-10 h-10 rounded-full mr-2"
@@ -202,7 +199,9 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName }) => {
                       })}
                     </span>
                   </p>
-                  <p className="text-xs font-sans font-bold max-w-screen break-all">{content}</p>
+                  <p className="text-xs font-sans font-bold max-w-screen break-all">
+                    {content}
+                  </p>
                 </div>
               </div>
             );
