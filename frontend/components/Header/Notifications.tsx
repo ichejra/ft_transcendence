@@ -41,7 +41,7 @@ const Notifications = () => {
     );
   };
 
-  //TODO add notifications-friends sockets
+
   const rejectFriend = (id: number) => {
     if (Cookies.get("accessToken")) {
       dispatch(removeFriendRelation(id)).then(() => {
