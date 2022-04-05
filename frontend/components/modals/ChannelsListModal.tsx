@@ -118,10 +118,8 @@ const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
         socket.emit("join_channel", { channelId: id });
         dispatch(getChannelsList()).then(() => {
           dispatch(setNewChannelId({ id, render: true }));
-          navigate(`/channels/${id}`);
           dispatch(setChannelsListModal(false));
         });
-        console.log("joined");
       }
     }
   };
@@ -144,7 +142,6 @@ const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
           setIsValid(1);
           dispatch(getChannelsList()).then(() => {
             dispatch(setNewChannelId({ id, render: true }));
-            navigate(`/channels/${id}`);
             dispatch(setChannelsListModal(false));
           });
           socket.off("join_success");

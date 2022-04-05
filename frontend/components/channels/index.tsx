@@ -1,90 +1,141 @@
 import React, { useEffect, useState } from "react";
-
-import NewChannelModal from "../modals/NewChannelModal";
+import { HiViewGridAdd } from "react-icons/hi";
+import { SiPrivateinternetaccess } from "react-icons/si";
+import { MdExplore } from "react-icons/md";
+import { useParams, useNavigate, useLocation } from "react-router";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { socket } from "../../pages/SocketProvider";
+import ChannelsList from "./ChannelsList";
 import {
+  updateMemmbersList,
+  updateChannelContent,
+} from "../../features/globalSlice";
+import ChannelContent from "./ChannelContent";
+import NewChannelModal from "../modals/NewChannelModal";
+import ChannelsListModal from "../modals/ChannelsListModal";
+import {
+  Channel,
+  getChannelContent,
+  getChannelMembersList,
   getChannelsList,
   getSingleChannel,
-  getChannelContent,
   setNewChannelId,
-  getChannelMembersList,
+  addNewMessage,
+  updateChannelState,
 } from "../../features/chatSlice";
-import { useNavigate, useLocation } from "react-router";
-import DirectChat from "./DirectChat";
-import ChannelContent from "./ChannelContent";
-import ChannelsListModal from "../modals/ChannelsListModal";
-import { socket } from "../../pages/SocketProvider";
-import { updateMemmbersList } from "../../features/globalSlice";
-import ChannelsList from "./ChannelsList";
 
 const ChatRooms = () => {
   const [showDirect, setShowDirect] = useState(false);
-  const [channelName, setChannelName] = useState("");
-  const [channelID, setChannelID] = useState(-1);
   const [showChannelContent, setShowChannelContent] = useState(false);
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
+  const [channelName, setChannelName] = useState("");
+  const [channelId, setChannelId] = useState(-1);
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const params = useParams();
+  const dispatch = useAppDispatch();
+  const { loggedUser } = useAppSelector((state) => state.user);
   const {
+    channels,
     createNewChannel,
     showChannelsList,
-    channels,
     newChannel,
     channelState,
+    channelMembers,
   } = useAppSelector((state) => state.channels);
 
-  const getSelectedChannel = (id: number) => {
-    dispatch(getSingleChannel(id)).then(({ payload }: any) => {
-      dispatch(getChannelContent(payload.id)).then(() => {
-        socket.emit("update_join", { rooms: channels, room: payload });
-        dispatch(getChannelMembersList(payload.id));
-        setChannelName(payload.name);
-        setChannelID(payload.id);
-        setShowChannelContent(true);
-        dispatch(setNewChannelId(payload.id));
-        navigate(`/channels/${id}`);
+  //* Functions_________
+  //? Get selected channel content
+  const getCurrentChannelContent = (id: number) => {
+    dispatch(getSingleChannel(id)).then((data: any) => {
+      const channel: Channel = data.payload;
+      dispatch(getChannelContent(id)).then(() => {
+        socket.emit("update_join", { rooms: channels, room: channel });
+        dispatch(setNewChannelId({ id: newChannel.id, render: false }));
+        setChannelName(channel.name);
+        setChannelId(channel.id);
+        dispatch(getChannelMembersList(channel.id)).then(() => {
+          setShowDirect(false);
+          setShowChannelContent(true);
+        });
       });
     });
+    navigate(`/channels/${id}`);
   };
 
+  //* Effects__________
   useEffect(() => {
-    socket.on("join_success", () => {
-      dispatch(updateMemmbersList());
-    });
-    return () => {
-      socket.off("join_success");
-    };
+    console.log("%c[Index] get channels list", "color:blue");
+    if (Number(params.id)) {
+      getCurrentChannelContent(Number(params.id));
+    } else {
+      dispatch(getChannelsList());
+    }
   }, []);
 
   useEffect(() => {
-    console.log("NEW CHANNEL ID ==>==>==>==>>>>>", pathname, newChannel);
-    if (newChannel.id !== -1 && newChannel.render) {
-      getSelectedChannel(newChannel.id);
+    console.log(
+      "%c[Index] get new joined channel content",
+      "color:green",
+      newChannel.id
+    );
+    if (newChannel.render) {
+      getCurrentChannelContent(newChannel.id);
     }
-  }, [newChannel]);
+  }, [newChannel.id]);
 
   useEffect(() => {
-    console.log("Update channel state");
     dispatch(getChannelsList()).then(() => {
       setShowChannelContent(false);
     });
   }, [channelState]);
 
+  useEffect(() => {
+    const loggedMember = channelMembers.find(
+      (member) => member.user.id === loggedUser.id
+    );
+    socket.on("leave_success", (data) => {
+      //TODO send the userRole of the user left the channel
+      /* if (data.userRole === 'owner') {
+        navigate("/channels");
+        dispatch(getChannelsList()).then(() => {
+          setShowChannelContent(false);
+        });
+      } */
+      dispatch(getChannelMembersList(data.channelId));
+      console.log("%cleaved the channel", "color:red");
+    });
+    socket.on("join_success", () => {
+      dispatch(updateMemmbersList());
+      dispatch(getChannelsList()).then(() => {
+        dispatch(getChannelMembersList(channelId));
+      });
+    });
+    socket.on("receive_message_channel", (data: any) => {
+      dispatch(updateChannelContent());
+      dispatch(addNewMessage(data));
+    });
+    return () => {
+      socket.off("join_success");
+      socket.off("leave_success");
+      socket.off("receive_message_channel");
+    };
+  }, []);
+
   return (
     <div className="relative page-100 h-full w-full pt-20 pb-16 about-family channels-bar-bg">
       <div className="fixed h-full overflow-auto no-scrollbar pb-20 user-card-bg border-r border-r-gray-600">
         <ChannelsList
-          getSelectedChannel={getSelectedChannel}
-          setShowChannelContent={setShowChannelContent}
           setShowDirect={setShowDirect}
+          setShowChannelContent={setShowChannelContent}
+          getCurrentChannelContent={getCurrentChannelContent}
         />
       </div>
       {showChannelContent || showDirect ? (
         <div className="fixed h-full left-[7.5rem] right-0">
           {showChannelContent && (
-            <ChannelContent channelName={channelName} channelID={channelID} />
+            <ChannelContent channelName={channelName} channelID={channelId} />
           )}
-          {showDirect && <DirectChat />}
+          {showDirect && <div>Direct Direct Direct</div>}
         </div>
       ) : (
         <div className="relative text-white left-[7.5rem]">

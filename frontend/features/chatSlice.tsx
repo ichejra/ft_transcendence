@@ -41,6 +41,7 @@ export interface ChannelMember {
 interface InitialState {
   createNewChannel: boolean;
   showChannelsList: boolean;
+  updateChannelModal: boolean;
   channelState: boolean;
   newChannel: { id: number; render: boolean };
   channels: Channel[];
@@ -55,11 +56,13 @@ interface InitialState {
   isBan: boolean;
   isAdmin: boolean;
   isOwner: boolean;
+  isMember: boolean;
 }
 
 const initialState: InitialState = {
   createNewChannel: false,
   showChannelsList: false,
+  updateChannelModal: false,
   channelState: false,
   newChannel: { id: -1, render: false },
   channels: [],
@@ -79,6 +82,7 @@ const initialState: InitialState = {
   isBan: false,
   isAdmin: true,
   isOwner: true,
+  isMember: false,
 };
 
 export const createChannel = createAsyncThunk(
@@ -430,6 +434,12 @@ const channelsManagmentSlice = createSlice({
     ) => {
       state.showChannelsList = action.payload;
     },
+    setUpdateChannelModal: (
+      state: InitialState = initialState,
+      action: PayloadAction<boolean>
+    ) => {
+      state.updateChannelModal = action.payload;
+    },
     addNewMessage: (
       state: InitialState = initialState,
       action: PayloadAction<ChannelMessage>
@@ -462,17 +472,21 @@ const channelsManagmentSlice = createSlice({
       state.isBan = action.payload;
     },
 
-    setIsAdmin: (
-      state: InitialState = initialState,
-      action: { payload: boolean; type: string }
-    ) => {
-      state.isAdmin = action.payload;
+    setIsAdmin: (state: InitialState = initialState) => {
+      state.isAdmin = true;
+      state.isOwner = false;
+      state.isMember = false;
     },
-    setIsOwner: (
-      state: InitialState = initialState,
-      action: { payload: boolean; type: string }
-    ) => {
-      state.isOwner = action.payload;
+    setIsOwner: (state: InitialState = initialState) => {
+      state.isOwner = true;
+      state.isAdmin = false;
+      state.isMember = false;
+    },
+
+    setIsMember: (state: InitialState = initialState) => {
+      state.isMember = true;
+      state.isAdmin = false;
+      state.isOwner = false;
     },
 
     setMuteCountDown: (state: InitialState = initialState) => {
@@ -537,6 +551,7 @@ const channelsManagmentSlice = createSlice({
 export const {
   setNewChannelModal,
   setChannelsListModal,
+  setUpdateChannelModal,
   addNewMessage,
   updateChannelState,
   setNewChannelId,
@@ -546,6 +561,7 @@ export const {
   setIsBan,
   setIsAdmin,
   setIsOwner,
+  setIsMember,
 } = channelsManagmentSlice.actions;
 
 export default channelsManagmentSlice.reducer;
