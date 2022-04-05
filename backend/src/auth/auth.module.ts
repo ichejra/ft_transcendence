@@ -13,7 +13,6 @@ import { TwoFactorAuthService } from './two-factor-auth/two-factor-auth.service'
 import { MailService } from 'src/mail/mail.service';
 
 dotenv.config()
-
 @Module({
     imports: [
         UsersModule,

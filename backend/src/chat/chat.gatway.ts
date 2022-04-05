@@ -1,6 +1,8 @@
 import {
     ConnectedSocket,
     MessageBody,
+    OnGatewayConnection,
+    OnGatewayDisconnect,
     OnGatewayInit,
     SubscribeMessage,
     WebSocketGateway,
@@ -29,24 +31,40 @@ import { WsExceptionsFilter } from "src/exceptions/ws-exceptions.filter";
 @UsePipes(new ValidationPipe())
 @WebSocketGateway({
     cors: {
-        origin: '*', // http://frontend:port
+        origin: '*', // http://${frontend}:${port}
     },
 })
-export class ChatGatway implements OnGatewayInit {
+export class ChatGatway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer()
     private server: Server;
 
-    @Inject()
+    @Inject(ChannelsService)
     private channelsService: ChannelsService;
-    @Inject()
+    @Inject(DirectChatService)
     private directChatService: DirectChatService;
-    @Inject()
+    @Inject(ConnectionsService)
     private connectionsService: ConnectionsService;
 
     private logger: Logger = new Logger('ChatGateway');
 
     public async afterInit(server: Server): Promise<void> {
         this.logger.log('Initialized');
+    }
+
+    public async handleConnection(client: Socket, ...args: any[]): Promise<void> {
+        try {
+            await this.connectionsService.addConnection(client);
+        } catch (err) {
+            throw new WsException('unauthorized: unauthenticated connection');
+        }
+    }
+
+    public async handleDisconnect(client: Socket): Promise<void> {
+        try {
+            await this.connectionsService.eraseConnection(client);
+        } catch (err) {
+            throw new WsException('unauthorized connection');
+        }
     }
 
     // ? handling messages for direct chat
@@ -74,7 +92,10 @@ export class ChatGatway implements OnGatewayInit {
         try {
             const channel: Channel = await this.channelsService.getChannelById(payload.channelId);
             const message: MessageChannel = await this.channelsService.saveMessage(client, channel, payload.content);
-            this.server.to(channel.name).emit('receive_message_channel', message);
+            const sockets = await this.server.in(channel.name).fetchSockets();
+            const blockedRoom: string = await this.channelsService.getBlockedRoom(message.author, sockets);
+            this.server.to(channel.name).except(blockedRoom).emit('receive_message_channel', message);
+            sockets.map((sock) => sock.leave(blockedRoom));
         } catch (error) {
             throw new WsException('forbidden');
         }
@@ -115,7 +136,17 @@ export class ChatGatway implements OnGatewayInit {
 
     // ? handling member status changing 
     @SubscribeMessage('member_status_changed')
-    async handleChangeStatus(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
-        client.to(payload.room).emit('member_status_changed', { status: payload.status, time: payload.time});
+    async handleChangeStatus(@ConnectedSocket() client: Socket, @MessageBody() room: string) {
+        client.to(room).emit('member_status_changed');
+    }
+
+    @SubscribeMessage('update_member_status')
+    async handleMemberStatus(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
+        const sockets = await this.connectionsService.getUserConnections(payload.userId);
+        if (sockets) {
+            sockets.forEach((socket) => {
+                client.to(socket.id).emit('update_member_status', { status: payload.status, time: payload.time });
+            })
+        }
     }
 }

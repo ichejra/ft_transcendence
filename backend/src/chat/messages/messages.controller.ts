@@ -43,7 +43,7 @@ export class MessagesController {
     }
 
     // http://${host}:${port}/api/direct-chat
-    // return all the direct message of  the logged user
+    // return all the direct chat of  the logged user
     @Get('direct-chat')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)

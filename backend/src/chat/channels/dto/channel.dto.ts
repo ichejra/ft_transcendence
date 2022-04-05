@@ -10,7 +10,6 @@ export class ChannelDto {
 
     @IsString()
     @IsNotEmpty()
-    @IsAlphanumeric()
     name?: string;
 
     password?: string;
