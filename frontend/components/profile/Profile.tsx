@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { Navigate } from "react-router";
 import { ProfileHeader, ProfileInfo, FriendsList } from ".";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { SiAdblock } from "react-icons/si";
@@ -11,11 +12,10 @@ import {
 } from "../../features/userProfileSlice";
 
 const UserProfile: React.FC = () => {
-  const [errorMsg, setErrorMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState({ status: 200, message: "OK" });
   const dispatch = useAppDispatch();
   const {
     users,
-    isError,
     loggedUser,
     user,
     friends,
@@ -39,25 +39,26 @@ const UserProfile: React.FC = () => {
   }, [editProfile, completeInfo]);
 
   useEffect(() => {
-    console.log("-->", user);
-
     if (Number(id) !== loggedUser.id) {
       dispatch(setIsPageLoading(true));
       dispatch(fetchSingleUser(Number(id))).then((response: any) => {
         console.log("-->", response);
         if (response.error) {
-          setErrorMsg(response.error.message);
+          setErrorMsg({
+            status: Number(response.payload.match(/(\d+)/)[0]),
+            message: response.error.message,
+          });
         } else {
-          setErrorMsg("");
+          setErrorMsg({ status: 200, message: "OK" });
         }
         dispatch(setIsPageLoading(false));
       });
     } else {
-      setErrorMsg("");
+      setErrorMsg({ status: 200, message: "OK" });
     }
   }, [id]);
 
-  console.log(id);
+  // console.log("Error:", errorMsg);
 
   if (isPageLoading) {
     return (
@@ -68,7 +69,10 @@ const UserProfile: React.FC = () => {
       </div>
     );
   }
-  if (errorMsg === "Rejected") {
+  if (errorMsg.message === "Rejected" && errorMsg.status === 404) {
+    return <Navigate to="/404" replace={true} />;
+  }
+  if (errorMsg.message === "Rejected" && errorMsg.status === 403) {
     return (
       <div className="page-100 mt-20 flex justify-center bg-black">
         <div className="flex flex-col w-full text-gray-300 2xl:w-[80rem] items-center justify-center shadow-xl rounded-none lg:rounded-xl">
@@ -106,7 +110,3 @@ const UserProfile: React.FC = () => {
 };
 
 export default UserProfile;
-
-//TODO add blocked users list
-//TODO add unblock button to blocked users in blokeduserslist
-//TODO fix profile buttons state

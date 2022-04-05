@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   completeProfileInfo,
   editUserProfile,
+  enableTwoFactorAuth,
+  disableTwoFactorAuth,
 } from "../../features/userProfileSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { BiEditAlt } from "react-icons/bi";
@@ -34,6 +36,19 @@ export const UpdateProfileForm: React.FC = () => {
       })
     );
     dispatch(editUserProfile(false));
+  };
+
+  const handleTwoFactorAuth = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    if (checked) {
+      dispatch(enableTwoFactorAuth()).then(() => {
+        console.log("2FA enabled: ", checked, loggedUser);
+      });
+    } else {
+      dispatch(disableTwoFactorAuth()).then(() => {
+        console.log("2FA disabled: ", checked, loggedUser);
+      });
+    }
   };
 
   useEffect(() => {
@@ -90,17 +105,34 @@ export const UpdateProfileForm: React.FC = () => {
           onChange={(e) => setUsername(e.target.value)}
         />
         {isValid === 1 ? (
-          <p className={`pl-2 md:pl-0 w-72 text-xs text-red-400 font-thin`}>
+          <p
+            className={`pl-2 font-sans md:pl-0 w-72 text-[.6rem] text-red-400 font-thin`}
+          >
             Username must be lowercase including numbers and contain 4 - 12
             characters
           </p>
         ) : isValid === 2 ? (
-          <p className={`w-72 text-sm pl-2 text-green-400 font-thin`}>
+          <p
+            className={`w-72 font-sans text-[.8rem] pl-2 text-green-400 font-thin`}
+          >
             <span className="font-bold">{username}</span> is valid..
           </p>
         ) : (
           <></>
         )}
+      </div>
+      <div className="flex about-family tracking-wider items-center justify-center mt-2">
+        <div className="flex items-center md:w-72">
+          <label className="switch mr-2">
+            <input
+              type="checkbox"
+              checked={loggedUser.is_2fa_enabled}
+              onChange={handleTwoFactorAuth}
+            />
+            <span className="slider round"></span>
+          </label>
+          <p className="text-[1rem]">Enable 2FA</p>
+        </div>
       </div>
       <div className="md:absolute flex justify-center items-end bottom-10 md:bottom-4 right-4 mt-5 md:mt-0">
         <button

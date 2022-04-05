@@ -6,11 +6,10 @@ import {
   setChannelsListModal,
   fetchUnjoinedChannels,
   getChannelsList,
-  addNewChannel,
-  getNewChannelId,
+  setNewChannelId,
 } from "../../features/chatSlice";
-import { updateMemmbersList } from "../../features/globalSlice";
 import { socket } from "../../pages/SocketProvider";
+import { useNavigate } from "react-router";
 
 const ChannelsListModal = () => {
   const divRef = useRef(null);
@@ -105,6 +104,7 @@ const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
   const [isPrivate, setIsPrivate] = useState(false);
   const [passwordForm, setPasswordForm] = useState(false);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { unjoinedChannels } = useAppSelector((state) => state.channels);
 
   const joinChannel = (id: number) => {
@@ -117,7 +117,8 @@ const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
       } else {
         socket.emit("join_channel", { channelId: id });
         dispatch(getChannelsList()).then(() => {
-          dispatch(getNewChannelId(id));
+          dispatch(setNewChannelId({ id, render: true }));
+          navigate(`/channels/${id}`);
           dispatch(setChannelsListModal(false));
         });
         console.log("joined");
@@ -127,37 +128,31 @@ const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
 
   const joinPrivateChannel = async (id: number) => {
     if (!password) return;
-    const promise = new Promise<passError>((resolve, reject) => {
+    new Promise<passError>((resolve, reject) => {
       setIsBtnLoading(true);
       socket.emit("join_channel", { channelId: id, password });
       socket.on("error", (data) => {
-        console.log("data: ", data);
         reject(data);
       });
       socket.on("join_success", (data) => {
-        console.log("%c************", "color:orange");
         resolve(data);
       });
-    });
-    await promise
+    })
       .then((response) => {
-        console.log("---------> ", response, isBtnLoading);
         setIsBtnLoading(false);
         if (response.status === 200) {
           setIsValid(1);
           dispatch(getChannelsList()).then(() => {
-            dispatch(addNewChannel());
-            dispatch(getNewChannelId(id));
+            dispatch(setNewChannelId({ id, render: true }));
+            navigate(`/channels/${id}`);
             dispatch(setChannelsListModal(false));
           });
           socket.off("join_success");
-          console.log("%c %d private joined", "color:green", response.status);
         }
       })
-      .catch((err) => {
+      .catch(() => {
         setIsBtnLoading(false);
         setIsValid(2);
-        console.log("%c %d not allowed", "color:red", err.status);
         socket.off("error");
       });
   };

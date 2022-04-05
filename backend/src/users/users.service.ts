@@ -1,5 +1,4 @@
 import {
-  HttpException,
   Injectable,
 } from '@nestjs/common';
 import { ForbiddenException } from 'src/exceptions/forbidden.exception';
@@ -31,7 +30,7 @@ export class UsersService {
     try {
       return this.connection.getRepository(User).find();
     } catch (err) {
-      throw new HttpException(err.message, err.status);
+      throw err;
     }
   }
 
@@ -53,17 +52,17 @@ export class UsersService {
         await this.connection.getRepository(User).update(id, { user_name: user_name });
       } else if (!user_name && file) {
         await this.connection.getRepository(User).update(id,
-          { avatar_url: `http://${process.env.HOST}:${process.env.PORT}/${file.filename}` }
+          { avatar_url: `${process.env.SERVER_HOST}/${file.filename}` }
         );
       } else if (file && user_name) {
         await this.connection.getRepository(User).update(id,
           {
             user_name: user_name,
-            avatar_url: `http://${process.env.HOST}:${process.env.PORT}/${file.filename}`
+            avatar_url: `${process.env.SERVER_HOST}/${file.filename}`
           });
       }
       const user = await this.connection.getRepository(User).findOne(id);
-      if (!user) {
+      if (typeof user === 'undefined') {
         throw new NotFoundException();
       }
       return user;
@@ -111,7 +110,7 @@ export class UsersService {
         await this.connection.getRepository(UserFriends).save({ applicant: userId, recipient: recipientId });
       }
       const user = await this.connection.getRepository(User).findOne({ where: { id: recipientId } });
-      if (!user) {
+      if (typeof user === 'undefined') {
         throw new NotFoundException();
       }
       return user;
@@ -134,7 +133,7 @@ export class UsersService {
           applicantId
         ]);
       const user = await this.connection.getRepository(User).findOne({ where: { id: applicantId } }); // return the accpeted friend
-      if (!user) {
+      if (typeof user === 'undefined') {
         throw new NotFoundException();
       }
       return user;
@@ -149,32 +148,38 @@ export class UsersService {
   */
   async blockFriend(userId: number, blockId: number): Promise<User> {
     try {
-      const relation = await this.connection.getRepository(UserFriends).query(
-        `SELECT * FROM user_friends
-        WHERE ("recipientId" = $1 AND "applicantId" = $2)
-        OR ("applicantId" = $1 AND "recipientId" = $2)`,
-        [
-          userId,
-          blockId
-        ]);
-      if (relation.length === 0) {
-        await this.insertToFriends(userId, blockId);
-      }
-      await this.connection.getRepository(UserFriends).query(
-        `UPDATE user_friends
-      SET "status" = $1
-      WHERE ("recipientId" = $2 AND "applicantId" = $3)
-      OR ("applicantId" = $2 AND "recipientId" = $3)`,
-        [
-          UserFriendsRelation.BLOCKED,
-          userId,
-          blockId
-        ]);
-      const user = await this.connection.getRepository(User).findOne({ where: { id: blockId } }); // return the blocked user
-      if (!user) {
+      const blocker = await this.connection.getRepository(User).findOne(userId);
+      if (typeof blocker === 'undefined') {
         throw new NotFoundException();
       }
-      return user;
+      const blocked = await this.connection.getRepository(User).findOne(blockId);
+      if (typeof blocked === 'undefined') {
+        throw new NotFoundException();
+      }
+      let relation = await this.connection.getRepository(UserFriends).findOne({
+        relations: ['applicant', 'recipient'],
+        where: [{
+          applicant: userId,
+          recipient: blockId,
+        }, {
+          applicant: blockId,
+          recipient: userId
+        }]
+      });
+      if (typeof relation === 'undefined') {
+        await this.connection.getRepository(UserFriends).save({
+          applicant: blocker,
+          recipient: blocked,
+          status: UserFriendsRelation.BLOCKED
+        });
+      } else {
+        await this.connection.getRepository(UserFriends).update(relation.id, {
+          applicant: blocker,
+          recipient: blocked,
+          status: UserFriendsRelation.BLOCKED
+        });
+      }
+      return blocked;
     } catch (error) {
       throw error;
     }
@@ -245,9 +250,7 @@ export class UsersService {
       return await this.connection.getRepository(UserFriends).query(
         `SELECT * FROM users
         WHERE "users"."id"
-        IN (SELECT "recipientId" FROM user_friends WHERE "user_friends"."applicantId" = $1 AND "user_friends"."status" = $2)
-        OR "users"."id"
-        IN (SELECT "applicantId" FROM user_friends WHERE "user_friends"."recipientId" = $1 AND "user_friends"."status" = $2)`,
+        IN (SELECT "recipientId" FROM user_friends WHERE "user_friends"."applicantId" = $1 AND "user_friends"."status" = $2)`,
         [
           userId,
           UserFriendsRelation.BLOCKED
@@ -264,12 +267,12 @@ export class UsersService {
         `SELECT * FROM users
         WHERE "users"."id"
         NOT IN (SELECT "recipientId" FROM user_friends
-      WHERE ("user_friends"."recipientId" = $1 OR "user_friends"."applicantId" = $1)
-      AND ("user_friends"."status" = $2 OR "user_friends"."status" = $3 OR  "user_friends"."status" = $4))
-      AND "users"."id"
-      NOT IN (SELECT "applicantId" FROM user_friends
-      WHERE ("user_friends"."applicantId" = $1 OR "user_friends"."recipientId" = $1)
-      AND ("user_friends"."status" = $2 OR "user_friends"."status" = $3 OR  "user_friends"."status" = $4))
+        WHERE ("user_friends"."recipientId" = $1 OR "user_friends"."applicantId" = $1)
+        AND ("user_friends"."status" = $2 OR "user_friends"."status" = $3 OR  "user_friends"."status" = $4))
+        AND "users"."id"
+        NOT IN (SELECT "applicantId" FROM user_friends
+        WHERE ("user_friends"."applicantId" = $1 OR "user_friends"."recipientId" = $1)
+        AND ("user_friends"."status" = $2 OR "user_friends"."status" = $3 OR  "user_friends"."status" = $4))
       `, [
         userId,
         UserFriendsRelation.ACCEPTED,
@@ -295,7 +298,7 @@ export class UsersService {
       throw new NotFoundException();
     }
     return user;
-    
+
   }
 
   /* Turn on the two factor authentication */
@@ -305,27 +308,27 @@ export class UsersService {
         is_2fa_enabled: bool,
       });
       const user = await this.connection.getRepository(User).findOne(userId);
-      if (!user) {
-        throw new NotFoundException();
-      }
-      return user;
-    } catch (e) {
-      throw e;
-    }
-  }
-  
-
-  /* get the user profile */
-  getUserProfileById = async (userId: number): Promise<User> => {
-    try {
-      const user = await this.connection.getRepository(User).findOne(userId);
-      if (!user) {
+      if (typeof user === 'undefined') {
         throw new NotFoundException();
       }
       return user;
     } catch (err) {
       throw err;
     }
-  } 
+  }
+
+
+  /* get the user profile */
+  getUserProfileById = async (userId: number): Promise<User> => {
+    try {
+      const user = await this.connection.getRepository(User).findOne(userId);
+      if (typeof user === 'undefined') {
+        throw new NotFoundException();
+      }
+      return user;
+    } catch (err) {
+      throw err;
+    }
+  }
 
 };

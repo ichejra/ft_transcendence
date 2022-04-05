@@ -47,12 +47,18 @@ const SocketProvider: React.FC = ({ children }) => {
   }, [socket]);
 
   useEffect(() => {
+
+    console.log("emmm : ", pathname);
     if (Cookies.get("accessToken")) {
       console.log("General Render");
+
       dispatch(fetchAllUsers());
       dispatch(fetchNoRelationUsers()).then(() => {
         dispatch(fetchPendingStatus());
-        if (pathname.includes("profile") || pathname.includes("friends")) {
+        if (
+          pathname === `profile/${loggedUser.id}` ||
+          pathname === `users/${loggedUser.id}/friends`
+        ) {
           dispatch(fetchUserFriends());
         }
         dispatch(fetchBlockedUsers());

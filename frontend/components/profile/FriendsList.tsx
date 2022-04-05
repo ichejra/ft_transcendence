@@ -2,11 +2,7 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router";
 import { AiOutlineRight } from "react-icons/ai";
 import { FaUsersSlash } from "react-icons/fa";
-import {
-  User,
-  fetchUserFriends,
-  fetchSingleUser,
-} from "../../features/userProfileSlice";
+import { User, fetchSingleUser } from "../../features/userProfileSlice";
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { friendsPosition } from "../../consts";
@@ -18,12 +14,7 @@ interface Props {
 const FriendsList: React.FC<Props> = ({ friends }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { friends: userFriends } = useAppSelector((state) => state.friends);
   const { isPageLoading, loggedUser } = useAppSelector((state) => state.user);
-
-  // useEffect(() => {
-  //   dispatch(fetchUserFriends());
-  // }, []);
 
   const getFriendProfile = (id: number) => {
     dispatch(fetchSingleUser(id)).then((data: any) => {
@@ -35,11 +26,6 @@ const FriendsList: React.FC<Props> = ({ friends }) => {
   useEffect(() => {
     console.log("%cRENDER USER FRIENDS", "color:green; font-weight: bold");
   }, []);
-
-  useEffect(() => {
-    console.log(2);
-    dispatch(fetchUserFriends());
-  }, [userFriends]);
 
   return (
     <div className="md:relative left-[26rem] xl:left-[30rem] md:w-[22rem] lg:w-[24rem] my-4 xl:w-[28rem]">

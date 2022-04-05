@@ -8,7 +8,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { User } from "./userProfileSlice";
 
-interface Channel {
+export interface Channel {
   id: number;
   name: string;
   type: string;
@@ -41,8 +41,8 @@ export interface ChannelMember {
 interface InitialState {
   createNewChannel: boolean;
   showChannelsList: boolean;
-  addChannel: boolean;
-  newChannelId?: number;
+  channelState: boolean;
+  newChannel: { id: number; render: boolean };
   channels: Channel[];
   unjoinedChannels: Channel[];
   channel: Channel;
@@ -51,12 +51,17 @@ interface InitialState {
   directMessage: DirectMessage[];
   memberStatus: string;
   muteMember: boolean;
+  isMute: boolean;
+  isBan: boolean;
+  isAdmin: boolean;
+  isOwner: boolean;
 }
 
 const initialState: InitialState = {
   createNewChannel: false,
   showChannelsList: false,
-  addChannel: false,
+  channelState: false,
+  newChannel: { id: -1, render: false },
   channels: [],
   unjoinedChannels: [],
   channel: {
@@ -70,6 +75,10 @@ const initialState: InitialState = {
   directMessage: [],
   memberStatus: "",
   muteMember: false,
+  isMute: false,
+  isBan: false,
+  isAdmin: true,
+  isOwner: true,
 };
 
 export const createChannel = createAsyncThunk(
@@ -188,6 +197,59 @@ export const getChannelMembersList = createAsyncThunk(
     }
   }
 );
+//! *****************************************
+//! *****************************************
+export const setMemberAsAdmin = createAsyncThunk(
+  "channels/setMemberAsAdmin",
+  async (
+    { channelId, memberId }: { channelId: number; memberId: number },
+    _api
+  ) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:3001/api/channels/${channelId}/add-new-admin`,
+        { memberId },
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      console.log("set admin %d: ", memberId, response.data);
+      return _api.fulfillWithValue(response.data);
+    } catch (error) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
+
+//! *****************************************
+
+export const setAdminAsMember = createAsyncThunk(
+  "channels/setAdminAsMember",
+  async (
+    { channelId, memberId }: { channelId: number; memberId: number },
+    _api
+  ) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:3001/api/channels/${channelId}/remove-admin`,
+        { memberId },
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      console.log("remove admin  %d: ", memberId, response.data);
+      return _api.fulfillWithValue(response.data);
+    } catch (error) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
+//! *****************************************
+//! *****************************************
 
 export const muteChannelMember = createAsyncThunk(
   "channels/muteChannelMember",
@@ -213,6 +275,30 @@ export const muteChannelMember = createAsyncThunk(
   }
 );
 
+export const unmuteChannelMember = createAsyncThunk(
+  "channels/unmuteChannelMember",
+  async (
+    { channelId, memberId }: { channelId: number; memberId: number },
+    _api
+  ) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:3001/api/channels/${channelId}/unmute-user`,
+        { memberId },
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      console.log("unmute %d: ", memberId, response.data);
+      return _api.fulfillWithValue(response.data);
+    } catch (error) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
+
 export const banChannelMember = createAsyncThunk(
   "channels/banChannelMember",
   async (
@@ -230,6 +316,30 @@ export const banChannelMember = createAsyncThunk(
         }
       );
       console.log("ban %d: ", memberId, response.data);
+      return _api.fulfillWithValue(response.data);
+    } catch (error) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
+
+export const unbanChannelMember = createAsyncThunk(
+  "channels/unbanChannelMember",
+  async (
+    { channelId, memberId }: { channelId: number; memberId: number },
+    _api
+  ) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:3001/api/channels/${channelId}/unban-user`,
+        { memberId },
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      console.log("unban %d: ", memberId, response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error) {
       return _api.rejectWithValue(error);
@@ -327,21 +437,44 @@ const channelsManagmentSlice = createSlice({
       state.channelContent.push(action.payload);
       // console.log("CHAT SLICE", current(state.channelContent));
     },
-    addNewChannel: (state: InitialState = initialState) => {
-      state.addChannel = !state.addChannel;
+    updateChannelState: (state: InitialState = initialState) => {
+      state.channelState = !state.channelState;
       // console.log("CHAT SLICE", current(state.channelContent));
     },
-    getNewChannelId: (
+    setNewChannelId: (
       state: InitialState = initialState,
-      action: { payload: number | undefined; type: string }
+      action: { payload: { id: number; render: boolean }; type: string }
     ) => {
-      if (action.payload) {
-        state.newChannelId = action.payload;
-      } else {
-        state.newChannelId = undefined;
-      }
+      state.newChannel = action.payload;
       // console.log("CHAT SLICE", current(state.channelContent));
     },
+
+    setIsMute: (
+      state: InitialState = initialState,
+      action: { payload: boolean; type: string }
+    ) => {
+      state.isMute = action.payload;
+    },
+    setIsBan: (
+      state: InitialState = initialState,
+      action: { payload: boolean; type: string }
+    ) => {
+      state.isBan = action.payload;
+    },
+
+    setIsAdmin: (
+      state: InitialState = initialState,
+      action: { payload: boolean; type: string }
+    ) => {
+      state.isAdmin = action.payload;
+    },
+    setIsOwner: (
+      state: InitialState = initialState,
+      action: { payload: boolean; type: string }
+    ) => {
+      state.isOwner = action.payload;
+    },
+
     setMuteCountDown: (state: InitialState = initialState) => {
       state.muteMember = true;
     },
@@ -377,8 +510,20 @@ const channelsManagmentSlice = createSlice({
     builder.addCase(getChannelMembersList.fulfilled, (state, action: any) => {
       state.channelMembers = action.payload;
     });
+    //! ************************
+    builder.addCase(setMemberAsAdmin.fulfilled, (state, action: any) => {
+      state.memberStatus = "admin";
+    });
+    builder.addCase(setAdminAsMember.fulfilled, (state, action: any) => {
+      state.memberStatus = "member";
+    });
+    //! ************************
+
     builder.addCase(muteChannelMember.fulfilled, (state, action: any) => {
       state.memberStatus = "muted";
+    });
+    builder.addCase(unmuteChannelMember.fulfilled, (state, action: any) => {
+      state.memberStatus = "unmuted";
     });
     builder.addCase(banChannelMember.fulfilled, (state, action: any) => {
       state.memberStatus = "banned";
@@ -393,10 +538,14 @@ export const {
   setNewChannelModal,
   setChannelsListModal,
   addNewMessage,
-  addNewChannel,
-  getNewChannelId,
+  updateChannelState,
+  setNewChannelId,
   setMuteCountDown,
   endMuteCountDown,
+  setIsMute,
+  setIsBan,
+  setIsAdmin,
+  setIsOwner,
 } = channelsManagmentSlice.actions;
 
 export default channelsManagmentSlice.reducer;
@@ -405,4 +554,3 @@ export default channelsManagmentSlice.reducer;
 //TODO add an openedLock icon for private joined channels
 //TODO online/offline status (profile, friends list)
 //TODO set sockets for update_member_status
-//TODO set sockets for leave_channel
