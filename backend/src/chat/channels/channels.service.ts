@@ -21,6 +21,7 @@ import { MessageChannel } from "../messages/entities/message-channel.entity";
 import * as bcrypt from "bcrypt";
 import { ForbiddenException } from "src/exceptions/forbidden.exception";
 import { WsException } from "@nestjs/websockets";
+import { UserFriends, UserFriendsRelation } from "src/users/entities/user-friends.entity";
 
 @Injectable()
 export class ChannelsService {
@@ -74,7 +75,24 @@ export class ChannelsService {
     }
 
     /* get the channel members */
-    getChannelsMembers = async (channelId: number): Promise<UserChannel[]> => {
+    private asyncFilterMembers = async (members: UserChannel[], userId: number): Promise<UserChannel[]> => {
+        const toFilter = await Promise.all(members.map(async (member: UserChannel) => {
+            const relation: UserFriends = await this.connection.getRepository(UserFriends).findOne({
+                where: [{
+                    applicant: userId,
+                    recipient: member.user.id,
+                    status: UserFriendsRelation.BLOCKED
+                }, {
+                    applicant: member.user.id,
+                    recipient: userId,
+                    status: UserFriendsRelation.BLOCKED
+                }]
+            });
+            return (!relation) ? true : false;
+        }))
+        return members.filter((_, index) => toFilter[index]);
+    }
+    getChannelsMembers = async (userId: number, channelId: number): Promise<UserChannel[]> => {
         try {
             const members = await this.connection.getRepository(UserChannel).find({
                 relations: ['user'],
@@ -82,7 +100,7 @@ export class ChannelsService {
                     channel: channelId
                 }
             });
-            return members;
+            return await this.asyncFilterMembers(members, userId);
         } catch (err) {
             throw err;
         }
@@ -310,15 +328,16 @@ export class ChannelsService {
     }
 
     // getting the unjoined channels
-    getUnjoinedChannels = async (userId: Number): Promise<Channel[]> => {
+    getUnjoinedChannels = async (userId: number): Promise<Channel[]> => {
         try {
-            return await this.connection.getRepository(Channel).query(
+            const channels = await this.connection.getRepository(Channel).query(
                 `SELECT * FROM channels
                 WHERE "channels"."id"
                 NOT IN (SELECT "channelId" FROM user_channel 
                 WHERE "user_channel"."userId" = $1 AND "user_channel"."userStatus" != $2)`,
                 [userId, MemberStatus.BANNED]
             );
+            return channels;
         } catch (err) {
             throw err;
         }
@@ -335,4 +354,27 @@ export class ChannelsService {
          )
          return { status: 200, success: true, message: 'the member has been unbaned' };
     }
+
+    // room for blocked users by logged user
+     async getBlockedRoom(author: User, sockets: any): Promise<string> {
+         const room: string = 'blockedRoom';
+         await Promise.all(sockets.map(async (socket: Socket) => {
+             const user = await this.connectionsService.getUserFromSocket(socket);
+             const relation = await this.connection.getRepository(UserFriends).findOne({
+                where: [{
+                    applicant: user.id,
+                    recipient: author.id,
+                    status: UserFriendsRelation.BLOCKED
+                }, {
+                    applicant: author.id,
+                    recipient: user.id,
+                    status: UserFriendsRelation.BLOCKED
+                }]
+             });
+             if (relation) {
+                 socket.join(room);
+             }
+         }));
+         return room;
+     }
 }

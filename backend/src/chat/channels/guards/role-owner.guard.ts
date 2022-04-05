@@ -18,7 +18,7 @@ export class RoleOwnerGuard implements CanActivate {
             }
         });
         if (role === undefined) {
-            throw new HttpException("Forbidden: permission denied: you should be channel owner", HttpStatus.FORBIDDEN);
+            throw new HttpException("Forbidden: you do not have permissions", HttpStatus.FORBIDDEN);
         }
         return true;
     }

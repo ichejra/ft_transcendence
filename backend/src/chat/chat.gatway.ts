@@ -31,18 +31,18 @@ import { WsExceptionsFilter } from "src/exceptions/ws-exceptions.filter";
 @UsePipes(new ValidationPipe())
 @WebSocketGateway({
     cors: {
-        origin: '*', // http://frontend:port
+        origin: '*', // http://${frontend}:${port}
     },
 })
 export class ChatGatway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer()
     private server: Server;
 
-    @Inject()
+    @Inject(ChannelsService)
     private channelsService: ChannelsService;
-    @Inject()
+    @Inject(DirectChatService)
     private directChatService: DirectChatService;
-    @Inject()
+    @Inject(ConnectionsService)
     private connectionsService: ConnectionsService;
 
     private logger: Logger = new Logger('ChatGateway');
@@ -92,7 +92,10 @@ export class ChatGatway implements OnGatewayInit, OnGatewayConnection, OnGateway
         try {
             const channel: Channel = await this.channelsService.getChannelById(payload.channelId);
             const message: MessageChannel = await this.channelsService.saveMessage(client, channel, payload.content);
-            this.server.to(channel.name).emit('receive_message_channel', message);
+            const sockets = await this.server.in(channel.name).fetchSockets();
+            const blockedRoom: string = await this.channelsService.getBlockedRoom(message.author, sockets);
+            this.server.to(channel.name).except(blockedRoom).emit('receive_message_channel', message);
+            sockets.map((sock) => sock.leave(blockedRoom));
         } catch (error) {
             throw new WsException('forbidden');
         }

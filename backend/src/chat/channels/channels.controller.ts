@@ -78,8 +78,10 @@ export class ChannelsController {
     @Get('/:channelId/members')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    getChannelMembers(@Param('channelId', ParseIntPipe) channelId: number): Promise<UserChannel[]> {
-        return this.channelsService.getChannelsMembers(Number(channelId));
+    getChannelMembers(
+        @ReqUser() user: User,
+        @Param('channelId', ParseIntPipe) channelId: number): Promise<UserChannel[]> {
+        return this.channelsService.getChannelsMembers(Number(user.id), Number(channelId));
     }
 
     /* Route update channel
@@ -180,10 +182,10 @@ export class ChannelsController {
     @UseGuards(JwtAuthGuard)
     unbanUser(
         @Param('channelId', ParseIntPipe) channelId: number,
-        @Body('memberId', ParseIntPipe) memberId: number) : Promise<any> {
-        return this.channelsService.unbanUser(channelId, memberId);  
+        @Body('memberId', ParseIntPipe) memberId: number): Promise<any> {
+        return this.channelsService.unbanUser(channelId, memberId);
     }
-    
+
     // route unmute users
     @Patch('/:channelId/unmute-user')
     @HttpCode(200)
