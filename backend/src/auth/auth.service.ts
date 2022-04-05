@@ -53,7 +53,8 @@ export class AuthService {
             _res.cookie('accessToken', jwtToken);
             return _res.redirect(url);
         } catch (err) {
-            throw new ForbiddenException('user cannot log in');
+            console.log(err);
+            throw new ForbiddenException('Forbidden: user cannot log in');
         }
     }
 

@@ -1,6 +1,8 @@
 import {
     ConnectedSocket,
     MessageBody,
+    OnGatewayConnection,
+    OnGatewayDisconnect,
     OnGatewayInit,
     SubscribeMessage,
     WebSocketGateway,
@@ -32,7 +34,7 @@ import { WsExceptionsFilter } from "src/exceptions/ws-exceptions.filter";
         origin: '*', // http://frontend:port
     },
 })
-export class ChatGatway implements OnGatewayInit {
+export class ChatGatway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer()
     private server: Server;
 
@@ -47,6 +49,22 @@ export class ChatGatway implements OnGatewayInit {
 
     public async afterInit(server: Server): Promise<void> {
         this.logger.log('Initialized');
+    }
+
+    public async handleConnection(client: Socket, ...args: any[]): Promise<void> {
+        try {
+            await this.connectionsService.addConnection(client);
+        } catch (err) {
+            throw new WsException('unauthorized: unauthenticated connection');
+        }
+    }
+
+    public async handleDisconnect(client: Socket): Promise<void> {
+        try {
+            await this.connectionsService.eraseConnection(client);
+        } catch (err) {
+            throw new WsException('unauthorized connection');
+        }
     }
 
     // ? handling messages for direct chat
@@ -115,7 +133,17 @@ export class ChatGatway implements OnGatewayInit {
 
     // ? handling member status changing 
     @SubscribeMessage('member_status_changed')
-    async handleChangeStatus(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
-        client.to(payload.room).emit('member_status_changed', { status: payload.status, time: payload.time});
+    async handleChangeStatus(@ConnectedSocket() client: Socket, @MessageBody() room: string) {
+        client.to(room).emit('member_status_changed');
+    }
+
+    @SubscribeMessage('update_member_status')
+    async handleMemberStatus(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
+        const sockets = await this.connectionsService.getUserConnections(payload.userId);
+        if (sockets) {
+            sockets.forEach((socket) => {
+                client.to(socket.id).emit('update_member_status', { status: payload.status, time: payload.time });
+            })
+        }
     }
 }

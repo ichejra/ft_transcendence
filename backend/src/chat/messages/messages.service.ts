@@ -44,7 +44,7 @@ export class MessagesService {
                 });
             return messages;
         } catch (err) {
-            throw new ForbiddenException('Forbidden: can get messsages');
+            throw new ForbiddenException('Forbidden: cannot get the messsages');
         }
     }
 
@@ -83,6 +83,25 @@ export class MessagesService {
         }
     }
 
+    // get the direct chat
+    private asyncFilter = async (users: User[], userId: number): Promise<User[]> => {
+        const toFilter = await Promise.all(users.map(async (user: User) => {
+            const relation: UserFriends = await this.connection.getRepository(UserFriends).findOne({
+                where: [{
+                    applicant: userId,
+                    recipient: user.id,
+                    status: UserFriendsRelation.BLOCKED
+                }, {
+                    applicant: user.id,
+                    recipient: userId,
+                    status: UserFriendsRelation.BLOCKED
+                }]
+            });
+            return (!relation) ? true : false;
+        }))
+        return users.filter((_, index) => toFilter[index]);
+    }
+
     getDirectChat = async (userId: number): Promise<User[]> => {
         try {
             let users: User[] = await this.connection.getRepository(User).query(
@@ -95,8 +114,9 @@ export class MessagesService {
                 WHERE "direct_messages"."senderId" = $1)`,
                 [userId]
             );
-            return users;
+            return await this.asyncFilter(users, userId);
         } catch (err) {
+            console.log(err);
             throw new HttpException('connot get the direct chat!', 403);
         }
     }
