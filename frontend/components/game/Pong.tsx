@@ -132,8 +132,6 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   }
 
   if (userType === "player" && !leftPlayer) {
-    // console.log('I am here');
-
     socket.emit("spectator_left");
   }
   //* chek if the users still in game to protect the render of the game when a player navigate to another page
@@ -163,19 +161,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
     };
   }, [location]);
 
-  // useEffect(() => {
-  //   delay(100).then(() => {
-  //     socket.on('joined', () => {
-  //       setJoined(true);
-  //     });
-  //   });
-  //   return () => {
-  //     socket.off('joined');
-  //   };
-  // }, [joined]);
-
-  //* moving paddles
-
+  //* move paddles
   const movePaddle = (e: any) => {
     if (e.code === "ArrowUp") {
       socket.emit("ArrowUp", "down");
@@ -379,7 +365,6 @@ const Pong: React.FC<UserType> = ({ userType }) => {
         }
       });
     }
-
     // return ()=>
   }, []);
 
