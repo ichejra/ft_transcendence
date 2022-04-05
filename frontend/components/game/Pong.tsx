@@ -1,8 +1,8 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router';
-import { useAppSelector } from '../../app/hooks';
-import { User } from '../../features/userProfileSlice';
-import { socket } from '../../pages/SocketProvider';
+import React, { useRef, useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
+import { useAppSelector } from "../../app/hooks";
+import { User } from "../../features/userProfileSlice";
+import { socket } from "../../pages/SocketProvider";
 import {
   CANVAS_HEIGHT,
   CANVAS_WIDTH,
@@ -27,12 +27,14 @@ import {
   Circle,
   Text,
   IFrame,
-} from './GameConsts';
-import GameRules from './GameRules';
+} from "./GameConsts";
+import GameRules from "./GameRules";
 
 class Paddle extends Rect {}
 class Ball extends Circle {}
 class Score extends Text {}
+
+import { Link } from "react-router-dom";
 
 const stateInit: IFrame = {
   ball: {
@@ -49,7 +51,7 @@ const stateInit: IFrame = {
     score1: 0,
     score2: 0,
   },
-  state: 'void',
+  state: "void",
   isWinner: false,
 };
 
@@ -64,7 +66,7 @@ function delay(ms: number) {
 let isRefresh = false;
 
 const Pong: React.FC<UserType> = ({ userType }) => {
-  console.log('Pong game built');
+  console.log("Pong game built ==> |"+userType+'|');
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const playBtnsRef: React.RefObject<HTMLDivElement> = React.createRef();
@@ -79,21 +81,21 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   const { loggedUser } = useAppSelector((state) => state.user);
 
   // console.log('user type: ', userType);
-  // console.log('location: ', location);
+  // console.log('location: ', location.pathname);
   useEffect(() => {
     // console.log('location: ', location);
     // console.log('user type: ', userType);
     // console.log('player: ', leftPlayer);
-    if (userType === 'spectator' && location.pathname !== '/watch')
-      socket.emit('spectator_left');
+    if (userType === "spectator" && location.pathname !== "/watch")
+      socket.emit("spectator_left");
   }, []);
 
   const joinMatch = () => {
-    socket.emit('join_queue', 'default');
+    socket.emit("join_queue", "default");
     setJoined(true);
   };
   const joinMatchWithObstacle = () => {
-    socket.emit('join_queue', 'obstacle');
+    socket.emit("join_queue", "obstacle");
     setJoined(true);
   };
 
@@ -101,33 +103,26 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   //   socket.emit('stop_game', 'default');
   // };
   const handlePlayAgain = () => {
-    console.log('reset game');
-    socket.emit('spectator_left');
+    // console.log('reset game');
+    socket.emit("spectator_left");
     setUsers([]);
     setFrame(stateInit);
     setJoined(false);
     // document.getElementById('canvas')?.remove();
     // playBtnsRef.current?.style.display = 'block';
   };
-
-  const movePaddle = (e: any) => {
-    if (e.code === 'ArrowUp') {
-      // console.log('------> keydown');
-      socket.emit('ArrowUp', 'down');
-    } else if (e.code === 'ArrowDown') {
-      socket.emit('ArrowDown', 'down');
-    }
-  };
-  const stopPaddle = (e: any) => {
-    if (e.code === 'ArrowUp') {
-      socket.emit('ArrowUp', 'up');
-    } else if (e.code === 'ArrowDown') {
-      socket.emit('ArrowDown', 'up');
-    }
+  const handlePlayForSpec = () => {
+    console.log("handle play for spec");
+    socket.emit("spectator_left");
+    setUsers([]);
+    setFrame(stateInit);
+    setJoined(false);
+    // userType = 'player';
+    navigate("/game");
   };
 
   if (
-    userType === 'player' &&
+    userType === "player" &&
     users.length > 1 &&
     users[0].id !== loggedUser.id &&
     users[1].id !== loggedUser.id
@@ -136,88 +131,86 @@ const Pong: React.FC<UserType> = ({ userType }) => {
     // return;
   }
 
-  if (userType === 'player' && !leftPlayer) {
-    socket.emit('spectator_left');
+  if (userType === "player" && !leftPlayer) {
+    socket.emit("spectator_left");
   }
-
+  //* chek if the users still in game to protect the render of the game when a player navigate to another page
   useEffect(() => {
     if (users.length !== 0) return;
-    socket.emit('isAlreadyInGame');
-    socket.on('set_users', (players) => {
-      console.log('players', players);
+    socket.emit("isAlreadyInGame");
+    socket.on("set_users", (players) => {
+      console.log("players", players);
       isRefresh = true;
       setUsers(players);
-      console.log(
-        'after setting users : players: ',
-        players,
-        'users length: ',
-        users.length
-      );
+      console.log("users length: ", users.length);
     });
     return () => {
-      socket.off('set_users');
+      socket.off("set_users");
     };
   }, []);
 
+  //* check if the player is joined to a queue to hide the buttons
   useEffect(() => {
     if (users.length !== 0) return;
-    socket.emit('isJoined');
-    socket.on('joined', (join) => {
+    socket.emit("isJoined");
+    socket.on("joined", (join) => {
       setJoined(join);
     });
     return () => {
-      socket.off('joined');
+      socket.off("joined");
     };
   }, [location]);
 
-  // useEffect(() => {
-  //   delay(100).then(() => {
-  //     socket.on('joined', () => {
-  //       setJoined(true);
-  //     });
-  //   });
-  //   return () => {
-  //     socket.off('joined');
-  //   };
-  // }, [joined]);
+  //* move paddles
+  const movePaddle = (e: any) => {
+    if (e.code === "ArrowUp") {
+      socket.emit("ArrowUp", "down");
+    } else if (e.code === "ArrowDown") {
+      socket.emit("ArrowDown", "down");
+    }
+  };
+  const stopPaddle = (e: any) => {
+    if (e.code === "ArrowUp") {
+      socket.emit("ArrowUp", "up");
+    } else if (e.code === "ArrowDown") {
+      socket.emit("ArrowDown", "up");
+    }
+  };
 
   useEffect(() => {
-    if (userType !== 'spectator') {
-      document.addEventListener('keydown', movePaddle);
-      document.addEventListener('keyup', stopPaddle);
+    console.log("userType: ==================>|" + userType + "|");
+    if (location.pathname === "/game") {
+      document.addEventListener("keydown", movePaddle);
+      document.addEventListener("keyup", stopPaddle);
     }
-    socket.on('game_state', (newState) => {
+    console.log("I am frame from front", userType);
+    socket.on("game_state", (newState) => {
       setFrame(newState);
-      // console.log('I am frame from front', userType);
     });
     return () => {
-      if (userType !== 'spectator') {
-        document.removeEventListener('keydown', movePaddle);
-        document.removeEventListener('keyup', stopPaddle);
-      }
-      socket.off('game_state');
+      // if (userType !== "spectator") {
+      document.removeEventListener("keydown", movePaddle);
+      document.removeEventListener("keyup", stopPaddle);
+      // }
+      socket.off("game_state");
     };
-  }, []);
+  }, [location]);
 
+  //* render pong game
   useEffect(() => {
     if (canvasRef == null) return;
     const canvas = canvasRef.current;
-    const ctx = canvas != null ? canvas.getContext('2d') : null;
-    if (ctx != null && frame.state != 'void') {
-      //! /////////
-      // if (canvas) {
-      //   canvas.style.display = 'block';
+    const ctx = canvas != null ? canvas.getContext("2d") : null;
+    if (ctx != null && frame.state != "void") {
+      // if (playBtnsRef != null) {
+      //   if (playBtnsRef.current != null) {
+      //     playBtnsRef.current.style.display = 'none';
+      //   }
       // }
-      if (playBtnsRef != null) {
-        if (playBtnsRef.current != null) {
-          playBtnsRef.current.style.display = 'none';
-        }
-      }
-      //! /////////
-      const table = new Rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, 'black', ctx);
+      const table = new Rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, "black", ctx);
       table.drawRect();
       for (let i = 0; i <= ctx.canvas.height; i += 16) {
-        const net = new Rect(NETX, NETY + i, NET_W, NET_H, 'gray', ctx);
+        const net = new Rect(NETX, NETY + i, NET_W, NET_H, "gray", ctx);
         net.drawRect();
       }
       const paddle1 = new Paddle(
@@ -225,7 +218,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
         frame.paddles.leftPad,
         PAD_WIDTH,
         frame.paddles.leftPadH,
-        'white',
+        "white",
         ctx
       );
       paddle1.drawRect();
@@ -234,7 +227,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
         frame.paddles.rightPad,
         PAD_WIDTH,
         frame.paddles.rightPadH,
-        'white',
+        "white",
         ctx
       );
       paddle2.drawRect();
@@ -242,7 +235,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
         frame.ball.x,
         frame.ball.y,
         BALL_RADIUS,
-        'white',
+        "white",
         ctx
       );
       ball.drawCircle();
@@ -250,7 +243,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
         CANVAS_WIDTH / 4,
         CANVAS_HEIGHT / 5,
         frame.score.score1.toString(),
-        'lightgrey',
+        "lightgrey",
         ctx
       );
       player1Score.drawText();
@@ -258,16 +251,16 @@ const Pong: React.FC<UserType> = ({ userType }) => {
         (3 * CANVAS_WIDTH) / 4,
         CANVAS_HEIGHT / 5,
         frame.score.score2.toString(),
-        'lightgrey',
+        "lightgrey",
         ctx
       );
       player2Score.drawText();
-      if (frame.state === 'OVER') {
+      if (frame.state === "OVER") {
         const ball = new Ball(
           frame.ball.x,
           frame.ball.y,
           BALL_RADIUS,
-          'black',
+          "black",
           ctx
         );
         ball.drawCircle();
@@ -276,16 +269,16 @@ const Pong: React.FC<UserType> = ({ userType }) => {
         const gameOver = new Text(
           (2.85 * CANVAS_WIDTH) / 8,
           CANVAS_HEIGHT / 2,
-          'GAME OVER',
-          'lightgrey',
+          "GAME OVER",
+          "lightgrey",
           ctx
         );
         for (let i = 0; i <= ctx.canvas.height; i += 16) {
-          const net = new Rect(NETX, NETY + i, NET_W, NET_H, 'gray', ctx);
+          const net = new Rect(NETX, NETY + i, NET_W, NET_H, "gray", ctx);
           net.drawRect();
         }
         gameOver.drawText();
-        if (userType === 'player') {
+        if (userType === "player") {
           if (frame.isWinner) {
             let position;
             if (frame.score.score1 > frame.score.score2)
@@ -295,8 +288,8 @@ const Pong: React.FC<UserType> = ({ userType }) => {
             const playerMsg = new Text(
               position,
               CANVAS_HEIGHT / 3,
-              'YOU WIN',
-              'lightgrey',
+              "YOU WIN",
+              "lightgrey",
               ctx
             );
             playerMsg.drawText();
@@ -309,28 +302,28 @@ const Pong: React.FC<UserType> = ({ userType }) => {
             const playerMsg = new Text(
               position,
               CANVAS_HEIGHT / 3,
-              'YOU LOOSE',
-              'lightgrey',
+              "YOU LOOSE",
+              "lightgrey",
               ctx
             );
             playerMsg.drawText();
           }
-        } else if (userType === 'spectator') {
+        } else if (userType === "spectator") {
           let playerMsg;
           if (frame.score.score1 > frame.score.score2) {
             playerMsg = new Text(
               (1 * CANVAS_WIDTH) / 6,
               CANVAS_HEIGHT / 3,
-              'WINNER',
-              'lightgrey',
+              "WINNER",
+              "lightgrey",
               ctx
             );
             playerMsg.drawText();
             playerMsg = new Text(
               (3.9 * CANVAS_WIDTH) / 6,
               CANVAS_HEIGHT / 3,
-              'LOOSER',
-              'lightgrey',
+              "LOOSER",
+              "lightgrey",
               ctx
             );
             playerMsg.drawText();
@@ -338,16 +331,16 @@ const Pong: React.FC<UserType> = ({ userType }) => {
             playerMsg = new Text(
               (1 * CANVAS_WIDTH) / 6,
               CANVAS_HEIGHT / 3,
-              'LOOSER',
-              'lightgrey',
+              "LOOSER",
+              "lightgrey",
               ctx
             );
             playerMsg.drawText();
             playerMsg = new Text(
               (3.9 * CANVAS_WIDTH) / 6,
               CANVAS_HEIGHT / 3,
-              'WINNER',
-              'lightgrey',
+              "WINNER",
+              "lightgrey",
               ctx
             );
             playerMsg.drawText();
@@ -365,31 +358,30 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   }, [users]);
 
   useEffect(() => {
-    if (userType === 'spectator') {
+    if (userType === "spectator") {
       delay(1000).then(() => {
         if (!isRefresh) {
-          navigate('/liveGames');
+          navigate("/liveGames");
         }
       });
     }
-
     // return ()=>
   }, []);
 
   return (
-    <div className='flex w-full flex-col items-center justify-center'>
-      {users.length === 0 && userType === 'player' && (
-        <div className='items-center flex justify-center p-22 md:mt-64 mt-52 w-full'>
+    <div className="flex w-full flex-col items-center justify-center">
+      {users.length === 0 && userType === "player" && (
+        <div className="items-center flex justify-center p-22 md:mt-64 mt-52 w-full">
           <GameRules />
         </div>
       )}
-      {userType === 'player' && users.length === 0 && joined === false && (
+      {userType === "player" && users.length === 0 && joined === false && (
         <div
           ref={playBtnsRef}
-          className='flex md:flex-row flex-col items-center justify-between md:w-[50rem] m-20'
+          className="flex md:flex-row flex-col items-center justify-between md:w-[50rem] m-20"
         >
-          <div className='button '>
-            <button type='button' className='text-white' onClick={joinMatch}>
+          <div className="button ">
+            <button type="button" className="text-white" onClick={joinMatch}>
               Play Pong
             </button>
           </div>
@@ -398,18 +390,18 @@ const Pong: React.FC<UserType> = ({ userType }) => {
             Stop Now
           </button>
         </div> */}
-          <div className='button'>
-            <button className='text-white' onClick={joinMatchWithObstacle}>
+          <div className="button">
+            <button className="text-white" onClick={joinMatchWithObstacle}>
               Play Our Pong
             </button>
           </div>
         </div>
       )}
       {joined === true && users.length === 0 && (
-        <div className='text-white m-20'>Waiting For Your Opponent...</div>
+        <div className="text-white m-20">Waiting For Your Opponent...</div>
       )}
       {users.length !== 0 && (
-        <div className='border-4 border-[lightgrey] mt-52'>
+        <div className="border-4 border-[lightgrey] mt-52">
           <canvas
             ref={canvasRef}
             width={CANVAS_WIDTH}
@@ -417,42 +409,43 @@ const Pong: React.FC<UserType> = ({ userType }) => {
           ></canvas>
         </div>
       )}
-      <div className=''>
+      <div className="">
         {users.length !== 0 && (
-          <div className='w-[24rem] md:w-[50rem] flex items-center justify-between m-16 md:mb-2'>
-            <div className=' flex flex-col items-center'>
+          <div className="w-[24rem] md:w-[50rem] flex items-center justify-between m-16 md:mb-2">
+            <div className=" flex flex-col items-center">
               <img
                 src={leftPlayer?.avatar_url}
-                className='w-28 h-28 md:w-44 md:h-44 rounded-full m-4'
+                className="w-28 h-28 md:w-44 md:h-44 rounded-full m-4"
               />
-              <h1 className='text-white text-center'>
+              <h1 className="text-white text-center">
                 {leftPlayer?.display_name}
               </h1>
             </div>
-            <div className='items-center'>
+            <div className="items-center">
               <img
                 src={rightPlayer?.avatar_url}
-                className='w-28 h-28 md:w-44 md:h-44 rounded-full m-4'
+                className="w-28 h-28 md:w-44 md:h-44 rounded-full m-4"
               />
-              <h1 className='text-white text-center'>
+              <h1 className="text-white text-center">
                 {rightPlayer?.display_name}
               </h1>
             </div>
           </div>
         )}
-        {frame.state === 'OVER' && userType === 'player' && (
-          <div className='play-again-btn items-center mb-44'>
+        {frame.state === "OVER" && userType === "player" && (
+          <div className="play-again-btn items-center mb-44">
             <button onClick={handlePlayAgain}>Play Again</button>
           </div>
         )}
-        {frame.state === 'OVER' &&
-          userType === 'spectator' &&
-          location.pathname === '/watch' && (
-            <div className='play-again-btn items-center'>
+        {frame.state === "OVER" &&
+          userType === "spectator" &&
+          location.pathname === "/watch" && (
+            <div className="play-again-btn items-center">
               <button
-                onClick={() => {
-                  navigate('/game');
-                }}
+                // onClick={() => {
+                //   navigate('/game');
+                // }}
+                onClick={handlePlayForSpec}
               >
                 Play Now
               </button>

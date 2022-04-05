@@ -1,6 +1,6 @@
-import { IsNumber, IsString } from "class-validator";
-import { UserChannel } from "src/chat/channels/entities/user-channel.entity";
-import { User } from "src/users/entities/user.entity";
+import { IsNumber, IsString } from 'class-validator';
+import { UserChannel } from 'src/chat/channels/entities/user-channel.entity';
+import { User } from 'src/users/entities/user.entity';
 
 export class GameDto {
   @IsNumber()
@@ -13,5 +13,5 @@ export class GameDto {
   loser: User;
 
   @IsString()
-  score?: string
+  score?: string;
 }

@@ -1,28 +1,28 @@
-import { useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
+import { useEffect, useState } from "react";
+import { io } from "socket.io-client";
 import {
   fetchAllUsers,
   fetchUserFriends,
   fetchNoRelationUsers,
   setIsPending,
   setIsFriend,
-} from '../features/userProfileSlice';
+} from "../features/userProfileSlice";
 import {
   fetchPendingStatus,
   fetchBlockedUsers,
-} from '../features/friendsManagmentSlice';
-import { updateGlobalState } from '../features/globalSlice';
-import { useAppDispatch, useAppSelector } from '../app/hooks';
-import Cookies from 'js-cookie';
-import { User } from '../features/userProfileSlice';
-import swal from 'sweetalert';
-import { useNavigate } from 'react-router';
+} from "../features/friendsManagmentSlice";
+import { updateGlobalState } from "../features/globalSlice";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import Cookies from "js-cookie";
+import { User } from "../features/userProfileSlice";
+import swal from "sweetalert";
+import { useNavigate } from "react-router";
 
-import { useLocation } from 'react-router';
+import { useLocation } from "react-router";
 
-export const socket = io('http://localhost:3001', {
+export const socket = io("http://localhost:3001", {
   auth: {
-    token: Cookies.get('accessToken'),
+    token: Cookies.get("accessToken"),
   },
 });
 
@@ -36,13 +36,13 @@ const SocketProvider: React.FC = ({ children }) => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    socket.on('receive_notification', () => {
+    socket.on("receive_notification", () => {
       dispatch(updateGlobalState());
-      console.log('trigger the refresh');
+      console.log("trigger the refresh");
     });
 
     return () => {
-      socket.off('receive_notification');
+      socket.off("receive_notification");
     };
   }, [socket]);
 
@@ -63,45 +63,61 @@ const SocketProvider: React.FC = ({ children }) => {
         }
         dispatch(fetchBlockedUsers());
       });
-      if (pathname.includes('profile')) {
+      if (pathname.includes("profile")) {
         dispatch(setIsPending(false));
       }
-      console.log('--------------------> refershhhhhh');
+      console.log("--------------------> refershhhhhh");
     }
   }, [refresh]);
 
   useEffect(() => {
-    socket.on('game_invitation', ({ inviter, challengeId }) => {
-      console.log('invit recieved from ', inviter.display_name);
-      // swal('Good job!', 'You clicked the button!', 'success');
-      swal(`You have been invited to a game by ${inviter.display_name}.`).then(
-        (value) => {
-          // swal(`The returned value is: ${value}`);
-          if (value) {
-            console.log(`The returned value is: ${value}`);
-            socket.emit('accept_challenge', {challengeId});
-            navigate('/game');
-          } else {
-            console.log(`The returned value is: ${value}`);
-            socket.emit('reject_challenge', {challengeId});
-          }
+    socket.on("game_invitation", ({ inviter, challengeId }) => {
+      swal(`You have been invited to a game by ${inviter.display_name}.`, {
+        buttons: {
+          cancel: {
+            text: "Reject",
+            value: null,
+            visible: true,
+            className: "",
+            closeModal: true,
+          },
+          confirm: {
+            text: "Accept",
+            value: true,
+            visible: true,
+            className: "",
+            closeModal: true,
+          },
+        },
+      }).then((value) => {
+        if (value) {
+          console.log(`The returned value is: ${value}`);
+          socket.emit("accept_challenge", { challengeId });
+          navigate("/game");
+        } else {
+          console.log(`The returned value is: ${value}`);
+          socket.emit("reject_challenge", { challengeId, loggedUser });
         }
-      );
-      
+      });
     });
     return () => {
-      socket.off('game_invitation');
+      socket.off("game_invitation");
     };
   }, []);
 
   useEffect(() => {
-    // socket.on('start_challenge', (args: any) => {
-    // })
-    socket.on('challenge_accepted', (data) => {
-      navigate('/game');
+    //TODO: socket.on('start_challenge', (args: any) => { })
+    socket.on("challenge_accepted", (data) => {
+      navigate("/game");
     });
-    socket.on('challenge_rejected', (data) => {
-      swal('Your request has been rejected!'); //TODO: add invitee name
+    socket.on("challenge_rejected", ({ user }) => {
+      swal(`Your request has been rejected by ${user.display_name}!`);
+    });
+    socket.on("inviter_in_game", () => {
+      swal("FINISH YOUR CURRENT GAME FIRST... 😡😡😡");
+    });
+    socket.on("invitee_in_game", ({ user }) => {
+      swal(`${user.display_name} is in game right now!`);
     });
   }, []);
 
@@ -111,3 +127,5 @@ const SocketProvider: React.FC = ({ children }) => {
 export default SocketProvider;
 
 //*DONE show game request Modal
+//*DONE erase disconnected sockets in game_gateway
+//*DONE add Game type options to game request
