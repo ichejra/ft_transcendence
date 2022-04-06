@@ -164,12 +164,12 @@ const Member: React.FC<MemberProps> = ({
     };
   }, [toggleMenu]);
 
-  //   useEffect(() => {
-  //     console.log("[Member] newChannelId --------->", chId, memberStatus);
-  //     if (chId) {
-  //       dispatch(getChannelMembersList(chId));
-  //     }
-  //   }, [memberStatus]);
+  useEffect(() => {
+    console.log("[Member] newChannelId --------->", chId, memberStatus);
+    if (chId) {
+      dispatch(getChannelMembersList(chId));
+    }
+  }, [memberStatus]);
 
   return (
     <div className="relative flex items-center justify-between my-2">
@@ -209,13 +209,22 @@ const Member: React.FC<MemberProps> = ({
         </div>
       </div>
       <div ref={menuRef}>
-        <BsThreeDotsVertical
-          onClick={() => {
-            setToggleMenu(!toggleMenu);
-          }}
-          className="hover:bg-opacity-30 hover:opacity-60 hover:bg-gray-400 user-card-bg rounded-full p-1 w-6 h-6 cursor-pointer transition duration-300"
-        />
-
+        {isOwner && userRole !== "owner" && (
+          <BsThreeDotsVertical
+            onClick={() => {
+              setToggleMenu(!toggleMenu);
+            }}
+            className="hover:bg-opacity-30 hover:opacity-60 hover:bg-gray-400 user-card-bg rounded-full p-1 w-6 h-6 cursor-pointer transition duration-300"
+          />
+        )}
+        {isAdmin && !isOwner && userRole === "member" && (
+          <BsThreeDotsVertical
+            onClick={() => {
+              setToggleMenu(!toggleMenu);
+            }}
+            className="hover:bg-opacity-30 hover:opacity-60 hover:bg-gray-400 user-card-bg rounded-full p-1 w-6 h-6 cursor-pointer transition duration-300"
+          />
+        )}
         {toggleMenu && (
           <div className="absolute z-10 top-2 border-gray-500 w-[230px] user-card-bg border user-menu">
             <ul className="">

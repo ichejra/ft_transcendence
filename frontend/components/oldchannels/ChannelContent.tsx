@@ -1,13 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { IoMdSend, IoMdExit } from "react-icons/io";
-import { AiFillSetting } from "react-icons/ai";
 import { RiListSettingsLine } from "react-icons/ri";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { useParams } from "react-router";
 import { socket } from "../../pages/SocketProvider";
 import { useNavigate } from "react-router";
 import { updateChannelContent } from "../../features/globalSlice";
-import Member from "./Member";
 import {
   getChannelMembersList,
   ChannelMember,
@@ -18,10 +16,9 @@ import {
   getChannelsList,
   setIsAdmin,
   setIsOwner,
-  setIsMember,
   ChannelMessage,
-  setUpdateChannelModal,
 } from "../../features/chatSlice";
+import Member from "./Member";
 interface ContentProps {
   channelName: string;
   channelID: number;
@@ -29,17 +26,11 @@ interface ContentProps {
 
 const ChannelContent: React.FC<ContentProps> = ({ channelName, channelID }) => {
   const [message, setMessage] = useState("");
-  const [toggleMenu, setToggleMenu] = useState(false);
-  const menuRef = useRef<any>(null);
   const messagesDivRef = useRef<HTMLDivElement>(null);
-  const msgContainerRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
-  const params = useParams();
   const dispatch = useAppDispatch();
-  const { loggedUser } = useAppSelector((state) => state.user);
-  const { updateMessages, membersList } = useAppSelector(
-    (state) => state.globalState
-  );
+  const navigate = useNavigate();
+  const msgContainerRef = useRef<HTMLDivElement>(null);
+  const params = useParams();
   const {
     channelContent,
     channelMembers,
@@ -47,8 +38,11 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName, channelID }) => {
     memberStatus,
     isAdmin,
     isOwner,
-    isMember,
   } = useAppSelector((state) => state.channels);
+  const { updateMessages, membersList } = useAppSelector(
+    (state) => state.globalState
+  );
+  const { loggedUser } = useAppSelector((state) => state.user);
 
   const sendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,6 +64,15 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName, channelID }) => {
     setMessage(e.target.value);
   };
 
+  useEffect(() => {
+    messagesDivRef.current?.scrollTo({
+      left: 0,
+      top: messagesDivRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [updateMessages]);
+
+  //TODO render leave channel
   const leaveChannel = async () => {
     socket.emit("leave_channel", { channelId: params.id });
     dispatch(getChannelsList()).then(() => {
@@ -79,106 +82,91 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName, channelID }) => {
   };
 
   useEffect(() => {
-    messagesDivRef.current?.scrollTo({
-      left: 0,
-      top: messagesDivRef.current.scrollHeight,
-      behavior: "smooth",
+    // ************** sed message socket
+    socket.on("receive_message_channel", (data: any) => {
+      dispatch(updateChannelContent());
+      dispatch(addNewMessage(data));
     });
-  }, [updateMessages]);
+
+    // ************** leave socket
+    socket.on(
+      "leave_success",
+      (data: { message: string; status: number; channelId: number }) => {
+        dispatch(getChannelMembersList(data.channelId));
+        console.log("%cleaved the channel", "color:red");
+      }
+    );
+    // *************** share member status socket
+    socket.on("member_status_changed", () => {
+      console.log("member status changed ==><==");
+      dispatch(getChannelMembersList(channelID));
+    });
+
+    // *************** apply member status socket
+    socket.on("update_member_status", (data) => {
+      let timer;
+      console.log("%cmember status changed: ", "color:pink", channelID);
+      if (data.status === "kick" || data.status === "ban") {
+        dispatch(getChannelMembersList(channelID)).then(() => {
+          navigate("/channels");
+          dispatch(updateChannelState());
+        });
+      } else if (data.status === "mute") {
+        dispatch(getChannelMembersList(channelID));
+        dispatch(setMuteCountDown());
+        //TODO ** unmute member when the timer is done
+        timer = setTimeout(() => {
+          dispatch(endMuteCountDown("active"));
+          dispatch(getChannelMembersList(channelID));
+          console.log(memberStatus);
+        }, data.time * 1000);
+      } else if (data.status === "unmute") {
+        clearTimeout(timer);
+        dispatch(endMuteCountDown("active"));
+        dispatch(getChannelMembersList(channelID));
+      } else if (data.status === "unban") {
+        dispatch(getChannelMembersList(channelID));
+      } else if (data.status === "set_admin") {
+        dispatch(setIsAdmin(true));
+        dispatch(getChannelMembersList(channelID));
+      } else if (data.status === "remove_admin") {
+        dispatch(setIsAdmin(false));
+        dispatch(getChannelMembersList(channelID));
+      }
+    });
+    return () => {
+      socket.off("receive_message_channel");
+      socket.off("member_status_changed");
+      socket.off("update_member_status");
+      socket.off("leave_success");
+    };
+  }, []);
 
   useEffect(() => {
-    console.log("[Member] newChannelId --------->", channelID, memberStatus);
-    if (channelID) {
-      dispatch(getChannelMembersList(channelID));
-    }
-  }, [memberStatus]);
-
-  useEffect(() => {
-    console.log("[ChannelContent] >>>>>> ", params.id, channelID);
-    if (channelID) {
-      dispatch(getChannelMembersList(channelID));
+    console.log(
+      "[ChannelContent] xxxxxxxxxxxxx>>>>>> ",
+      params.id,
+      membersList
+    );
+    if (Number(params.id)) {
+      dispatch(getChannelMembersList(Number(params.id)));
     }
   }, [membersList]);
 
-  // useEffect(() => {
-  //   // *************** share member status socket
-  //   socket.on("member_status_changed", () => {
-  //     console.log("member status changed ==><==");
-  //     dispatch(getChannelMembersList(channelID));
-  //   });
-
-  //   // *************** apply member status socket
-  //   socket.on("update_member_status", (data) => {
-  //     let timer;
-  //     console.log("%cmember status changed: ", "color:pink", channelID);
-  //     if (data.status === "kick" || data.status === "ban") {
-  //       dispatch(getChannelMembersList(channelID)).then(() => {
-  //         navigate("/channels");
-  //         dispatch(updateChannelState());
-  //       });
-  //     } else if (data.status === "mute") {
-  //       dispatch(getChannelMembersList(channelID));
-  //       dispatch(setMuteCountDown());
-  //       //TODO ** unmute member when the timer is done
-  //       timer = setTimeout(() => {
-  //         dispatch(endMuteCountDown("active"));
-  //         dispatch(getChannelMembersList(channelID));
-  //         console.log(memberStatus);
-  //       }, data.time * 1000);
-  //     } else if (data.status === "unmute") {
-  //       clearTimeout(timer);
-  //       dispatch(endMuteCountDown("active"));
-  //       dispatch(getChannelMembersList(channelID));
-  //     } else if (data.status === "unban") {
-  //       dispatch(getChannelMembersList(channelID));
-  //     } else if (data.status === "set_admin") {
-  //       dispatch(setIsAdmin());
-  //       dispatch(getChannelMembersList(channelID));
-  //     } else if (data.status === "remove_admin") {
-  //       dispatch(setIsAdmin());
-  //       dispatch(getChannelMembersList(channelID));
-  //     }
-  //   });
-  //   return () => {
-  //     socket.off("receive_message_channel");
-  //     socket.off("member_status_changed");
-  //     socket.off("update_member_status");
-  //     socket.off("leave_success");
-  //   };
-  // }, []);
-
   useEffect(() => {
-    const loggedMember = channelMembers.find(
+    console.log("[ChannelContent] set member role");
+    const checkMember = channelMembers.find(
       (member: ChannelMember) => member.user.id === loggedUser.id
     );
-    if (loggedMember) {
-      if (loggedMember.userRole === "admin") dispatch(setIsAdmin());
-      if (loggedMember.userRole === "owner") dispatch(setIsOwner());
-      if (loggedMember.userRole === "member") {
-        dispatch(setIsMember());
+    if (checkMember) {
+      if (checkMember.userRole === "admin") dispatch(setIsAdmin(true));
+      if (checkMember.userRole === "owner") dispatch(setIsOwner(true));
+      if (checkMember.userRole === "member") {
+        dispatch(setIsAdmin(false));
+        dispatch(setIsOwner(false));
       }
     }
-    console.log("Logged user: ", loggedUser.user_name);
-    console.log("isMember: ", isMember);
-    console.log("isAdmin: ", isAdmin);
-    console.log("isOwner: ", isOwner);
-  }, [channelID]);
-
-  useEffect(() => {
-    const updateUserMenu = (e: Event) => {
-      if (
-        toggleMenu &&
-        menuRef.current &&
-        !menuRef.current.contains(e.target)
-      ) {
-        setToggleMenu(false);
-      }
-    };
-    document.addEventListener("mousedown", updateUserMenu);
-    return () => {
-      document.removeEventListener("mousedown", updateUserMenu);
-    };
-  }, [toggleMenu]);
+  }, [channelName]);
 
   return (
     <div
@@ -188,33 +176,19 @@ const ChannelContent: React.FC<ContentProps> = ({ channelName, channelID }) => {
       <div className="relative w-full">
         <div className="fixed user-card-bg border-b border-l border-gray-700 shadow-gray-700  shadow-sm left-[7.4rem] text-white p-2 right-0 flex items-center justify-between">
           <h1 className="text-xl">#{channelName.split(" ").join("-")}</h1>
-          <div ref={menuRef}>
+          {isOwner ? (
             <RiListSettingsLine
-              onClick={() => setToggleMenu(!toggleMenu)}
               size="2rem"
               className="mr-2 hover:scale-110 transition duration-300 hover:text-blue-400 cursor-pointer"
             />
-            {toggleMenu && (
-              <div className="absolute z-10 top-2 border-gray-500 w-[150px] user-card-bg border user-menu">
-                <ul className="">
-                  <li
-                    onClick={() => dispatch(setUpdateChannelModal(true))}
-                    className="flex items-center p-1 m-1 font-mono text-sm font-bold hover:bg-opacity-40 hover:bg-gray-400 transition duration-300 cursor-pointer"
-                  >
-                    <AiFillSetting size="1.5rem" className="mr-2" />
-                    Settings
-                  </li>
-                  <li
-                    onClick={leaveChannel}
-                    className="flex items-center p-1 m-1 font-mono text-sm font-bold hover:bg-opacity-40 hover:bg-gray-400 transition duration-300 cursor-pointer"
-                  >
-                    <IoMdExit size="1.5rem" className="mr-2" />
-                    Leave
-                  </li>
-                </ul>
-              </div>
-            )}
-          </div>
+          ) : (
+            <button
+              onClick={leaveChannel}
+              className="flex items-center hover:text-blue-400 cursor-pointer hover:scale-110 transition duration-300"
+            >
+              leave <IoMdExit size="2rem" className="ml-2" />
+            </button>
+          )}
         </div>
         <ChannelMessages
           messagesDivRef={messagesDivRef}

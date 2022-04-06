@@ -10,14 +10,14 @@ import {
 
 interface Props {
   setShowDirect: (s: boolean) => void;
+  getSelectedChannel: (id: number) => void;
   setShowChannelContent: (s: boolean) => void;
-  getCurrentChannelContent: (id: number) => void;
 }
 
 const ChannelsList: React.FC<Props> = ({
   setShowDirect,
+  getSelectedChannel,
   setShowChannelContent,
-  getCurrentChannelContent,
 }) => {
   const params = useParams();
   const navigate = useNavigate();
@@ -25,21 +25,23 @@ const ChannelsList: React.FC<Props> = ({
   const dispatch = useAppDispatch();
   const { channels } = useAppSelector((state) => state.channels);
 
-  //* Functions_________
-  //? Get inbox
+  const getChannelMessages = (id: number) => {
+    setShowDirect(false);
+    dispatch(setChannelsListModal(false));
+    getSelectedChannel(id);
+  };
+
   const getDirectMessages = () => {
     setShowDirect(true);
     setShowChannelContent(false);
-    navigate("/channels/direct");
+    navigate(`/channels/direct`);
   };
 
-  //? Create new channel
   const createChannel = () => {
     dispatch(setNewChannelModal(true));
   };
 
-  //? Discover unjoined channels
-  const exploreUnjoinedChannels = () => {
+  const exploreChannels = () => {
     dispatch(setChannelsListModal(true));
   };
 
@@ -59,7 +61,7 @@ const ChannelsList: React.FC<Props> = ({
         return (
           <div
             key={id}
-            onClick={() => getCurrentChannelContent(id)}
+            onClick={() => getChannelMessages(id)}
             className={`hover:scale-105 ${
               id === Number(params.id) && "highlight"
             } relative cursor-pointer transition duration-300 border border-blue-400 bg-transparent text-gray-200 rounded-xl w-[70px] h-[70px] flex items-center justify-center mx-6 my-3`}
@@ -86,7 +88,7 @@ const ChannelsList: React.FC<Props> = ({
         <HiViewGridAdd size="3rem" />
       </div>
       <div
-        onClick={exploreUnjoinedChannels}
+        onClick={exploreChannels}
         className="hover:scale-105 cursor-pointer transition duration-300 border border-blue-400 bg-transparent text-gray-200 rounded-lg w-[70px] h-[70px] flex items-center justify-center mx-6 my-3"
       >
         <MdExplore size="3rem" />
