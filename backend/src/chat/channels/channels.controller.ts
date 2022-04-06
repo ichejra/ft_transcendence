@@ -17,34 +17,28 @@ import { ChannelsService } from "./channels.service";
 import { ChannelDto } from "./dto/channel.dto";
 import { UpdateChannelDto } from "./dto/update-channel.dto";
 import { Channel } from "./entities/channel.entity";
-import { MemberStatus, UserChannel } from "./entities/user-channel.entity";
+import {
+    MemberStatus,
+    UserChannel,
+    UserRole
+} from "./entities/user-channel.entity";
 import { RoleAdminGuard } from "./guards/role-admin.guard";
 import { RoleOwnerGuard } from "./guards/role-owner.guard";
 
 @Controller('channels')
 export class ChannelsController {
+
     constructor(private channelsService: ChannelsService) { }
 
-    /* Route for creating a channel
-        http://${host}:${port}/api/channels/create
-    */
+    //* Route for creating a channel => http://${host}:${port}/api/channels/create
     @Post('create')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    createChannel(@ReqUser() user: User, @Body() data: ChannelDto): Promise<Channel> {
+    createChannel(@ReqUser() user: User, @Body() data: ChannelDto): Promise<UserChannel> {
         return this.channelsService.createChannel(user, data);
     }
 
-    /* Route for getting all channels 
-        http://${host}:${port}/api/channels
-    */
-    @Get()
-    @HttpCode(200)
-    @UseGuards(JwtAuthGuard)
-    getChannels(): Promise<Channel[]> {
-        return this.channelsService.getChannels();
-    }
-    // Route for getting the channes that the user join
+    //* Route for getting the channes that the user join
     @Get('joined')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
@@ -54,7 +48,7 @@ export class ChannelsController {
         return this.channelsService.getJoinedChannels(Number(user.id));
     }
 
-    // Route for getting the channes that the user does not join yet
+    //* Route for getting the channes that the user does not join yet
     @Get('unjoined')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
@@ -64,29 +58,39 @@ export class ChannelsController {
         return this.channelsService.getUnjoinedChannels(Number(user.id));
     }
 
-    /* Route get channel 
-        http://${host}:${port}/api/channels/{channelId}
-    */
+    //* Route for getting logged user role => http://${host}:${port}/api/channels/${channelId}
     @Get('/:channelId')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    getChannelById(@Param('channelId', ParseIntPipe) channelId: number): Promise<Channel> {
-        return this.channelsService.getChannelById(Number(channelId));
+    getLoggedUserRole(
+        @ReqUser() user: User,
+        @Param('channelId', ParseIntPipe) channelId: number
+    ): Promise<UserChannel> {
+        return this.channelsService.getLoggedUserRole(Number(user.id), channelId);
     }
 
-    /* channel members */
+    //* admins channel => http://${host}:${port}/api/channels/${channelId}/admins
+    @Get('/:channelId/admins')
+    @HttpCode(200)
+    @UseGuards(JwtAuthGuard)
+    getChannelAdmins(
+        @ReqUser() user: User,
+        @Param('channelId', ParseIntPipe) channelId: number): Promise<UserChannel[]> {
+        return this.channelsService.getChannelsMembersByRole(Number(user.id), Number(channelId), UserRole.ADMIN);
+    }
+
+
+    //* channel members => http://${host}:${port}/api/channels/${channelId}/members
     @Get('/:channelId/members')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
     getChannelMembers(
         @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number): Promise<UserChannel[]> {
-        return this.channelsService.getChannelsMembers(Number(user.id), Number(channelId));
+        return this.channelsService.getChannelsMembersByRole(Number(user.id), Number(channelId), UserRole.MEMBER);
     }
 
-    /* Route update channel
-        http://${host}:${port}/api/channels/channelId
-    */
+    //* Route update channel =>    http://${host}:${port}/api/channels/channelId
     @Patch('/:channelId')
     @HttpCode(200)
     @UseGuards(RoleOwnerGuard)
@@ -97,7 +101,7 @@ export class ChannelsController {
         return this.channelsService.updateChannel(channelId, data);
     }
 
-    /* Route delete channel */
+    //* Route delete channel */
     @Delete('/:channelId')
     @HttpCode(200)
     @UseGuards(RoleOwnerGuard)
@@ -107,7 +111,7 @@ export class ChannelsController {
         return this.channelsService.deleteChannel(Number(channelId));
     }
 
-    /* Route add admin -> set a member as admin */
+    //* Route add admin -> set a member as admin
     @Patch('/:channelId/add-new-admin')
     @HttpCode(200)
     @UseGuards(RoleOwnerGuard)
@@ -118,7 +122,7 @@ export class ChannelsController {
         return this.channelsService.addAdmin(channelId, memberId);
     }
 
-    /* Route remove admin -> change the status user to member */
+    //* Route remove admin -> change the status user to member */
     @Patch('/:channelId/remove-admin')
     @HttpCode(200)
     @UseGuards(RoleOwnerGuard)
@@ -129,7 +133,7 @@ export class ChannelsController {
         return this.channelsService.removeAdmin(channelId, memberId);
     }
 
-    /* Route mute member ()-> set the user as mutant */
+    //* Route mute member ()-> set the user as mutant */
     @Patch('/:channelId/mute-user')
     @HttpCode(200)
     @UseGuards(RoleAdminGuard)
@@ -141,7 +145,7 @@ export class ChannelsController {
         return this.channelsService.changeStatus(channelId, memberId, MemberStatus.MUTED);
     }
 
-    // route ban users
+    //* route ban users
     @Patch('/:channelId/ban-user')
     @HttpCode(200)
     @UseGuards(RoleAdminGuard)
@@ -152,7 +156,7 @@ export class ChannelsController {
         return this.channelsService.changeStatus(channelId, memberId, MemberStatus.BANNED);
     }
 
-    // route sert, update password
+    //* route sert, update password
     @Patch('/:channelId/set-update-password')
     @HttpCode(200)
     @UseGuards(RoleOwnerGuard)
@@ -164,7 +168,7 @@ export class ChannelsController {
         return this.channelsService.setUpdatePassword(channelId, password);
     }
 
-    // route kick users
+    //* route kick users
     @Patch('/:channelId/kick-user')
     @HttpCode(200)
     @UseGuards(RoleAdminGuard)
@@ -175,7 +179,7 @@ export class ChannelsController {
         return this.channelsService.kickUser(memberId, channelId);
     }
 
-    // route unban users
+    //* route unban users
     @Patch('/:channelId/unban-user')
     @HttpCode(200)
     @UseGuards(RoleAdminGuard)
@@ -186,7 +190,7 @@ export class ChannelsController {
         return this.channelsService.unbanUser(channelId, memberId);
     }
 
-    // route unmute users
+    //* route unmute users
     @Patch('/:channelId/unmute-user')
     @HttpCode(200)
     @UseGuards(RoleAdminGuard)
