@@ -2,6 +2,7 @@ import type { NextPage } from "next";
 import { Routes, Route } from "react-router-dom";
 import HomePage from "../components/home";
 import Channels from "../components/channels";
+import DirectChat from "../components/chat/DirectChat";
 import PongGame from "../components/game";
 import AllUsers from "../components/users";
 import UserProfile from "../components/profile/Profile";
@@ -66,11 +67,21 @@ const Home: NextPage = () => {
           }
         />
         <Route
-          path="/channels/direct/:id"
+          path="/direct"
           element={
             <AuthRoute>
               <CompleteProfile>
-                <Channels />
+                <DirectChat />
+              </CompleteProfile>
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/direct/:id"
+          element={
+            <AuthRoute>
+              <CompleteProfile>
+                <DirectChat />
               </CompleteProfile>
             </AuthRoute>
           }

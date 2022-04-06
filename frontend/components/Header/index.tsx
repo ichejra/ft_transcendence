@@ -48,6 +48,13 @@ const Header: React.FC = () => {
               </Link>
             </li>
             <li className="mx-2">
+              <Link to={`/direct`}>
+                <div className="header-item hover:scale-110 transition duration-300 cursor-pointer text-md font-medium px-2">
+                  Chat
+                </div>
+              </Link>
+            </li>
+            <li className="mx-2">
               <Link to="/game">
                 <div className="header-item hover:scale-110 transition duration-300 cursor-pointer text-md font-medium px-2">
                   Game
@@ -64,7 +71,7 @@ const Header: React.FC = () => {
             <li className="mx-2">
               <Link to="/liveGames">
                 <div className="header-item hover:scale-110 transition duration-300 cursor-pointer text-md font-medium px-2">
-                  Live Games
+                  Live
                 </div>
               </Link>
             </li>

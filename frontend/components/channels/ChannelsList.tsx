@@ -9,13 +9,11 @@ import {
 } from "../../features/chatSlice";
 
 interface Props {
-  setShowDirect: (s: boolean) => void;
   setShowChannelContent: (s: boolean) => void;
   getCurrentChannelContent: (id: number) => void;
 }
 
 const ChannelsList: React.FC<Props> = ({
-  setShowDirect,
   setShowChannelContent,
   getCurrentChannelContent,
 }) => {
@@ -27,11 +25,10 @@ const ChannelsList: React.FC<Props> = ({
 
   //* Functions_________
   //? Get inbox
-  const getDirectMessages = () => {
-    setShowDirect(true);
-    setShowChannelContent(false);
-    navigate("/channels/direct");
-  };
+  // const getDirectMessages = () => {
+  //   setShowChannelContent(false);
+  //   navigate("/channels/direct");
+  // };
 
   //? Create new channel
   const createChannel = () => {
@@ -45,14 +42,14 @@ const ChannelsList: React.FC<Props> = ({
 
   return (
     <div>
-      <div
+      {/* <div
         onClick={getDirectMessages}
         className={`hover:scale-105 ${
-          pathname === "/channels/direct" && "highlight"
+          pathname.includes("/channels/direct") && "highlight"
         } cursor-pointer transition duration-300 border border-blue-400 bg-transparent text-gray-200 rounded-lg w-[70px] h-[70px] flex items-center justify-center mx-6 my-3`}
       >
         Inbox
-      </div>
+      </div> */}
       <hr className="mx-10" />
       {channels.map((channel) => {
         const { id, name, type } = channel;

@@ -9,6 +9,7 @@ import ChannelsList from "./ChannelsList";
 import {
   updateMemmbersList,
   updateChannelContent,
+  setUpdateDirectMessages,
 } from "../../features/globalSlice";
 import ChannelContent from "./ChannelContent";
 import NewChannelModal from "../modals/NewChannelModal";
@@ -21,11 +22,10 @@ import {
   getSingleChannel,
   setNewChannelId,
   addNewMessage,
-  updateChannelState,
 } from "../../features/chatSlice";
+import { addNewDirectMessage } from "../../features/directChatslice";
 
 const ChatRooms = () => {
-  const [showDirect, setShowDirect] = useState(false);
   const [showChannelContent, setShowChannelContent] = useState(false);
   const [channelName, setChannelName] = useState("");
   const [channelId, setChannelId] = useState(-1);
@@ -54,7 +54,6 @@ const ChatRooms = () => {
         setChannelName(channel.name);
         setChannelId(channel.id);
         dispatch(getChannelMembersList(channel.id)).then(() => {
-          setShowDirect(false);
           setShowChannelContent(true);
         });
       });
@@ -125,17 +124,15 @@ const ChatRooms = () => {
     <div className="relative page-100 h-full w-full pt-20 pb-16 about-family channels-bar-bg">
       <div className="fixed h-full overflow-auto no-scrollbar pb-20 user-card-bg border-r border-r-gray-600">
         <ChannelsList
-          setShowDirect={setShowDirect}
           setShowChannelContent={setShowChannelContent}
           getCurrentChannelContent={getCurrentChannelContent}
         />
       </div>
-      {showChannelContent || showDirect ? (
+      {showChannelContent && params.id ? (
         <div className="fixed h-full left-[7.5rem] right-0">
           {showChannelContent && (
             <ChannelContent channelName={channelName} channelID={channelId} />
           )}
-          {showDirect && <div>Direct Direct Direct</div>}
         </div>
       ) : (
         <div className="relative text-white left-[7.5rem]">
