@@ -331,4 +331,16 @@ export class UsersService {
     }
   }
 
+  //* Get non-blocked-users
+  getNonBlockedUsers = async (userId: number): Promise<User[]> => {
+    return await this.connection.getRepository(User).query(
+      `SELECT * FROM users
+      WHERE ("users"."id" != $1)
+      AND "users"."id"
+      NOT IN (SELECT "recipientId" FROM user_friends WHERE "user_friends"."applicantId" = $1 AND "user_friends"."status" = $2)
+      AND "users"."id"
+      NOT IN (SELECT "applicantId" FROM user_friends WHERE "user_friends"."recipientId" = $1 AND "user_friends"."status" = $2)`,
+      [userId, UserFriendsRelation.BLOCKED]
+    );
+  }
 };

@@ -32,7 +32,7 @@ export class ChannelsService {
     ) { }
     /* Channels */
     /* Method: create a new channel in database */
-    async createChannel(user: User, channel: ChannelDto): Promise<Channel> {
+    async createChannel(user: User, channel: ChannelDto): Promise<UserChannel> {
         let newChannel: Channel;
         try {
             // password hashing§
@@ -45,12 +45,11 @@ export class ChannelsService {
             // save channel
             newChannel = await this.connection.getRepository(Channel).save(newChannel);
             // create relation between user and target channel
-            await this.connection.getRepository(UserChannel).save({
+            return await this.connection.getRepository(UserChannel).save({
                 user: user,
                 channel: newChannel,
                 userRole: UserRole.OWNER
             });
-            return newChannel;
         } catch (err) {
             throw new ForbiddenException("Forbidden: cannot create a new channel.");
         }
@@ -92,18 +91,29 @@ export class ChannelsService {
         }))
         return members.filter((_, index) => toFilter[index]);
     }
-    getChannelsMembers = async (userId: number, channelId: number): Promise<UserChannel[]> => {
+    getChannelsMembersByRole = async (userId: number, channelId: number, role: UserRole): Promise<UserChannel[]> => {
         try {
             const members = await this.connection.getRepository(UserChannel).find({
-                relations: ['user'],
+                relations: ['user', 'channel'],
                 where: {
-                    channel: channelId
+                    channel: channelId,
+                    userRole: role
                 }
             });
             return await this.asyncFilterMembers(members, userId);
         } catch (err) {
             throw err;
         }
+    }
+
+    //* get the logged user role
+    getLoggedUserRole = async (userId: number, channelId: number): Promise<UserChannel> => {
+        return await this.connection.getRepository(UserChannel).findOne({
+            where:{
+                channel: channelId,
+                user: userId
+            }
+        });
     }
 
     /* update channel */
@@ -253,7 +263,7 @@ export class ChannelsService {
             AND "userId" = $3`,
             [status, channelId, memberId]
         );
-        return { status: 200, success: true};
+        return { status: 200, success: true };
     }
 
     // Set or update password
@@ -346,21 +356,21 @@ export class ChannelsService {
     // unban user
     unbanUser = async (channelId: number, memberId: number): Promise<any> => {
         // get the role of the user
-         await this.connection.getRepository(UserChannel).query(
-             `DELETE FROM user_channel
+        await this.connection.getRepository(UserChannel).query(
+            `DELETE FROM user_channel
              WHERE "user_channel"."channelId" = $1
              AND "user_channel"."userId" = $2`,
-             [ channelId, memberId ]
-         )
-         return { status: 200, success: true, message: 'the member has been unbaned' };
+            [channelId, memberId]
+        )
+        return { status: 200, success: true, message: 'the member has been unbaned' };
     }
 
     // room for blocked users by logged user
-     async getBlockedRoom(author: User, sockets: any): Promise<string> {
-         const room: string = 'blockedRoom';
-         await Promise.all(sockets.map(async (socket: Socket) => {
-             const user = await this.connectionsService.getUserFromSocket(socket);
-             const relation = await this.connection.getRepository(UserFriends).findOne({
+    async getBlockedRoom(author: User, sockets: any): Promise<string> {
+        const room: string = 'blockedRoom';
+        await Promise.all(sockets.map(async (socket: Socket) => {
+            const user = await this.connectionsService.getUserFromSocket(socket);
+            const relation = await this.connection.getRepository(UserFriends).findOne({
                 where: [{
                     applicant: user.id,
                     recipient: author.id,
@@ -370,11 +380,11 @@ export class ChannelsService {
                     recipient: user.id,
                     status: UserFriendsRelation.BLOCKED
                 }]
-             });
-             if (relation) {
-                 socket.join(room);
-             }
-         }));
-         return room;
-     }
+            });
+            if (relation) {
+                socket.join(room);
+            }
+        }));
+        return room;
+    }
 }

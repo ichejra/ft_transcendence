@@ -38,9 +38,8 @@ export class UsersController {
     return this.usersService.create(data);
   }
 
-  /* route get all users 
-    https://${host}:${port}/api/users/all_users
-  */
+  //* route get all users => https://${host}:${port}/api/users/all_users
+  
   @Get('/all_users')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
@@ -48,9 +47,7 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  /* route get the logged user 
-    http://${host}:${port}/api/users/me
-  */
+  //* route get the logged user =>  http://${host}:${port}/api/users/me
   @Get('me')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
@@ -76,9 +73,7 @@ export class UsersController {
     return this.usersService.updateProfile(Number(user.id), user_name, file);
   }
 
-  /* Route delete user 
-    http://${host}:${port}/api/users/remove-user/:userId
-  */
+  //* Route delete user =>  http://${host}:${port}/api/users/remove-user/:userId
   @Delete('/remove-user/:userId')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
@@ -180,9 +175,15 @@ export class UsersController {
     return this.usersService.getNoRelationUsers(Number(user.id));
   }
 
-  /* Route for cancelling, rejecting and removing a friend 
-    http://${host}:${port}/api/users/remove-relation
-  */
+  //* Route getting all non-blocked users => http://${host}:${port}/api/users/non-blocked-users
+  @Get('non-blocked-users')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  getNonBlockedUsers(@ReqUser() user: User): Promise<User[]> {
+    return this.usersService.getNonBlockedUsers(Number(user.id));
+  }
+
+  //* Route for cancelling, rejecting and removing a friend => http://${host}:${port}/api/users/remove-relation
   @Patch('remove-relation')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
