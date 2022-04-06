@@ -23,13 +23,6 @@ export interface ChannelMessage {
   id: number;
 }
 
-interface DirectMessage {
-  id: number;
-  sender: User;
-  receiver: User;
-  content: string;
-  createdAt: string;
-}
 export interface ChannelMember {
   id: number;
   userRole: string;
@@ -49,7 +42,6 @@ interface InitialState {
   channel: Channel;
   channelContent: ChannelMessage[];
   channelMembers: ChannelMember[];
-  directMessage: DirectMessage[];
   memberStatus: string;
   muteMember: boolean;
   isMute: boolean;
@@ -75,7 +67,6 @@ const initialState: InitialState = {
   },
   channelContent: [],
   channelMembers: [],
-  directMessage: [],
   memberStatus: "",
   muteMember: false,
   isMute: false,
@@ -395,29 +386,6 @@ export const getChannelContent = createAsyncThunk(
   }
 );
 
-export const getDirectContent = createAsyncThunk(
-  "direct/getDirectContent",
-  async (userId: number, _api) => {
-    console.log("get direct messages", userId);
-
-    try {
-      const response = await axios.get(
-        `http://localhost:3001/api/messages/direct/${userId}`,
-        {
-          headers: {
-            authorization: `Bearer ${Cookies.get("accessToken")}`,
-          },
-        }
-      );
-      console.log("messages:", response.data);
-
-      return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      return _api.rejectWithValue(error);
-    }
-  }
-);
-
 const channelsManagmentSlice = createSlice({
   name: "channelsManagment",
   initialState,
@@ -434,6 +402,7 @@ const channelsManagmentSlice = createSlice({
     ) => {
       state.showChannelsList = action.payload;
     },
+
     setUpdateChannelModal: (
       state: InitialState = initialState,
       action: PayloadAction<boolean>
@@ -447,6 +416,7 @@ const channelsManagmentSlice = createSlice({
       state.channelContent.push(action.payload);
       // console.log("CHAT SLICE", current(state.channelContent));
     },
+
     updateChannelState: (state: InitialState = initialState) => {
       state.channelState = !state.channelState;
       // console.log("CHAT SLICE", current(state.channelContent));
@@ -518,9 +488,7 @@ const channelsManagmentSlice = createSlice({
     builder.addCase(getChannelContent.fulfilled, (state, action: any) => {
       state.channelContent = action.payload;
     });
-    builder.addCase(getDirectContent.fulfilled, (state, action: any) => {
-      state.directMessage = action.payload;
-    });
+
     builder.addCase(getChannelMembersList.fulfilled, (state, action: any) => {
       state.channelMembers = action.payload;
     });
