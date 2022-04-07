@@ -69,7 +69,7 @@ export class ChannelsService {
         try {
             return await this.connection.getRepository(Channel).findOne(channelId);
         } catch (err) {
-            throw new ForbiddenException('Forbidden: cannot get channels info.');
+            throw new ForbiddenException('Forbidden: cannot get channel info.');
         }
     }
 
@@ -109,7 +109,8 @@ export class ChannelsService {
     //* get the logged user role
     getLoggedUserRole = async (userId: number, channelId: number): Promise<UserChannel> => {
         return await this.connection.getRepository(UserChannel).findOne({
-            where:{
+            relations: ['user', 'channel'],
+            where: {
                 channel: channelId,
                 user: userId
             }
