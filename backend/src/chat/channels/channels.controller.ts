@@ -58,8 +58,16 @@ export class ChannelsController {
         return this.channelsService.getUnjoinedChannels(Number(user.id));
     }
 
-    //* Route for getting logged user role => http://${host}:${port}/api/channels/${channelId}
+    //* Route for getting channel by id => http://${host}:${port}/api/channels/${channelId}
     @Get('/:channelId')
+    @HttpCode(200)
+    @UseGuards(JwtAuthGuard)
+    getChannelById(@Param('channelId', ParseIntPipe) channelId: number): Promise<Channel> {
+        return this.channelsService.getChannelById(channelId);
+    }
+
+    //* Route for getting the logged user role => http://${host}:${port}/api/channels/${channelId}/role
+    @Get('/:channelId/role')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
     getLoggedUserRole(
