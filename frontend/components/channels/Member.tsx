@@ -18,8 +18,6 @@ import {
   banChannelMember,
   unbanChannelMember,
   kickChannelMember,
-  setIsMute,
-  setIsBan,
 } from "../../features/chatSlice";
 import { socket } from "../../pages/SocketProvider";
 
@@ -28,8 +26,6 @@ interface MemberProps {
   user: User;
   userRole: string;
   userStatus: string;
-  isAdmin: boolean;
-  isOwner: boolean;
   chId: number;
   channelName: string;
 }
@@ -38,12 +34,10 @@ const Member: React.FC<MemberProps> = ({
   user,
   userRole,
   userStatus,
-  isAdmin,
-  isOwner,
   chId,
   channelName,
 }) => {
-  const { memberStatus, isMute, isBan } = useAppSelector(
+  const { memberStatus, loggedMemberRole } = useAppSelector(
     (state) => state.channels
   );
   const [toggleMenu, setToggleMenu] = useState(false);
@@ -87,7 +81,6 @@ const Member: React.FC<MemberProps> = ({
       });
       dispatch(getChannelMembersList(chId));
       setToggleMenu(false);
-      dispatch(setIsMute(true));
     });
   };
 
@@ -102,7 +95,6 @@ const Member: React.FC<MemberProps> = ({
         });
         dispatch(getChannelMembersList(chId));
         setToggleMenu(false);
-        dispatch(setIsMute(false));
       }
     );
   };
@@ -117,7 +109,6 @@ const Member: React.FC<MemberProps> = ({
       });
       dispatch(getChannelMembersList(chId));
       setToggleMenu(false);
-      dispatch(setIsBan(true));
     });
   };
 
@@ -131,7 +122,6 @@ const Member: React.FC<MemberProps> = ({
       });
       dispatch(getChannelMembersList(chId));
       setToggleMenu(false);
-      dispatch(setIsBan(false));
     });
   };
 
@@ -209,33 +199,47 @@ const Member: React.FC<MemberProps> = ({
         </div>
       </div>
       <div ref={menuRef}>
-        <BsThreeDotsVertical
-          onClick={() => {
-            setToggleMenu(!toggleMenu);
-          }}
-          className="hover:bg-opacity-30 hover:opacity-60 hover:bg-gray-400 user-card-bg rounded-full p-1 w-6 h-6 cursor-pointer transition duration-300"
-        />
+        {loggedMemberRole.userRole === "owner" && (
+          <BsThreeDotsVertical
+            onClick={() => {
+              dispatch(getChannelMembersList(chId));
+              setToggleMenu(!toggleMenu);
+            }}
+            className="hover:bg-opacity-30 hover:opacity-60 hover:bg-gray-400 user-card-bg rounded-full p-1 w-6 h-6 cursor-pointer transition duration-300"
+          />
+        )}
+        {loggedMemberRole.userRole === "admin" && userRole === "member" && (
+          <BsThreeDotsVertical
+            onClick={() => {
+              dispatch(getChannelMembersList(chId));
+              setToggleMenu(!toggleMenu);
+            }}
+            className="hover:bg-opacity-30 hover:opacity-60 hover:bg-gray-400 user-card-bg rounded-full p-1 w-6 h-6 cursor-pointer transition duration-300"
+          />
+        )}
 
         {toggleMenu && (
           <div className="absolute z-10 top-2 border-gray-500 w-[230px] user-card-bg border user-menu">
             <ul className="">
-              {userRole === "admin" && isOwner && (
-                <MenuItem
-                  func={removeAdmin}
-                  user={user}
-                  title="Remove admin"
-                  icon={1}
-                />
-              )}
-              {userRole === "member" && isOwner && (
-                <MenuItem
-                  func={setAdmin}
-                  user={user}
-                  title="Set admin"
-                  icon={2}
-                />
-              )}
-              {!isMute ? (
+              {userRole === "admin" &&
+                loggedMemberRole.userRole === "owner" && (
+                  <MenuItem
+                    func={removeAdmin}
+                    user={user}
+                    title="Remove admin"
+                    icon={1}
+                  />
+                )}
+              {userRole === "member" &&
+                loggedMemberRole.userRole === "owner" && (
+                  <MenuItem
+                    func={setAdmin}
+                    user={user}
+                    title="Set admin"
+                    icon={2}
+                  />
+                )}
+              {userStatus !== "muted" ? (
                 <MenuItem func={muteUser} user={user} title="Mute" icon={3} />
               ) : (
                 <MenuItem
@@ -245,7 +249,7 @@ const Member: React.FC<MemberProps> = ({
                   icon={3}
                 />
               )}
-              {!isBan ? (
+              {userStatus !== "banned" ? (
                 <MenuItem func={banUser} user={user} title="Ban" icon={4} />
               ) : (
                 <MenuItem func={unbanUser} user={user} title="Unban" icon={4} />

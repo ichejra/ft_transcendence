@@ -62,7 +62,7 @@ export class ChannelsController {
     @Get('/:channelId')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    getChannelById(@Param('channelId', ParseIntPipe) channelId: number): Promise<Channel> {
+    getChannelById(@Param('channelId', ParseIntPipe) channelId: number): Promise<UserChannel> {
         return this.channelsService.getChannelById(channelId);
     }
 
@@ -95,7 +95,7 @@ export class ChannelsController {
     getChannelMembers(
         @ReqUser() user: User,
         @Param('channelId', ParseIntPipe) channelId: number): Promise<UserChannel[]> {
-        return this.channelsService.getChannelsMembersByRole(Number(user.id), Number(channelId), UserRole.MEMBER);
+        return this.channelsService.getChannelsMembersByRole(Number(user.id), Number(channelId));
     }
 
     //* Route update channel =>    http://${host}:${port}/api/channels/channelId
