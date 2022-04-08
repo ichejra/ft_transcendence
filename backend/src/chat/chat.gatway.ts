@@ -106,7 +106,7 @@ export class ChatGatway implements OnGatewayInit, OnGatewayConnection, OnGateway
         try {
             const channel: Channel = await this.channelsService.joinChannel(client, payload);
             client.join(channel.name);
-            this.server.to(channel.name).emit('join_success', { message: "success", status: 200 });
+            this.server.to(channel.name).emit('join_success', { message: "success", status: 200 , channelId: payload.channelId });
         } catch (error) {
             throw error;
         }
@@ -136,8 +136,8 @@ export class ChatGatway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
     // ? handling member status changing 
     @SubscribeMessage('member_status_changed')
-    async handleChangeStatus(@ConnectedSocket() client: Socket, @MessageBody() room: string) {
-        client.to(room).emit('member_status_changed');
+    async handleChangeStatus(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
+        client.to(payload.room).emit('member_status_changed', { channelId: payload.channelId });
     }
 
     @SubscribeMessage('update_member_status')
@@ -145,7 +145,7 @@ export class ChatGatway implements OnGatewayInit, OnGatewayConnection, OnGateway
         const sockets = await this.connectionsService.getUserConnections(payload.userId);
         if (sockets) {
             sockets.forEach((socket) => {
-                client.to(socket.id).emit('update_member_status', { status: payload.status, time: payload.time });
+                client.to(socket.id).emit('update_member_status', { status: payload.status, time: payload.time, channelId: payload.channelId });
             })
         }
     }

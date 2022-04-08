@@ -1,8 +1,7 @@
 import {
-  Injectable,
+  Injectable, NotFoundException,
 } from '@nestjs/common';
 import { ForbiddenException } from 'src/exceptions/forbidden.exception';
-import { NotFoundException } from 'src/exceptions/not-found.exception';
 import { Connection } from 'typeorm'
 
 import { UserDto } from './dto/user.dto';
@@ -30,7 +29,7 @@ export class UsersService {
     try {
       return this.connection.getRepository(User).find();
     } catch (err) {
-      throw err;
+      throw new NotFoundException(`Users not found`);
     }
   }
 
@@ -62,19 +61,28 @@ export class UsersService {
           });
       }
       const user = await this.connection.getRepository(User).findOne(id);
-      if (typeof user === 'undefined') {
-        throw new NotFoundException();
+      if (user) {
+        return user;
       }
-      return user;
+      throw new NotFoundException('User not found.');
     } catch (e) {
-      throw new ForbiddenException('could not update the profile');
+      throw e;
     }
   }
 
   // function used for updating user state
   updateState = async (id: number, state: UserState): Promise<User> => {
-    await this.connection.getRepository(User).update(id, { state: state });
-    return await this.connection.getRepository(User).findOne(id);
+    try {
+
+      await this.connection.getRepository(User).update(id, { state: state });
+      const user = await this.connection.getRepository(User).findOne(id);
+      if (user) {
+        return user;
+      }
+      throw new NotFoundException('User not found.');
+    } catch (err) {
+      throw new NotFoundException('User not found.');
+    }
   }
 
   async remove(id: number | string): Promise<any> {
@@ -82,7 +90,7 @@ export class UsersService {
       return await this.connection.getRepository(User).delete(id);
     }
     catch (e) {
-      throw new ForbiddenException('cannot delete the profile');
+      throw new NotFoundException('User not found.');
     }
   }
 
@@ -110,10 +118,10 @@ export class UsersService {
         await this.connection.getRepository(UserFriends).save({ applicant: userId, recipient: recipientId });
       }
       const user = await this.connection.getRepository(User).findOne({ where: { id: recipientId } });
-      if (typeof user === 'undefined') {
-        throw new NotFoundException();
+      if (user) {
+        return user;
       }
-      return user;
+      throw new NotFoundException('User not found.');
     } catch (error) {
       throw error;
     }
@@ -133,10 +141,10 @@ export class UsersService {
           applicantId
         ]);
       const user = await this.connection.getRepository(User).findOne({ where: { id: applicantId } }); // return the accpeted friend
-      if (typeof user === 'undefined') {
-        throw new NotFoundException();
+      if (user) {
+        return user;
       }
-      return user;
+      throw new NotFoundException('User not found.');
     } catch (error) {
       throw error;
     }
@@ -149,12 +157,12 @@ export class UsersService {
   async blockFriend(userId: number, blockId: number): Promise<User> {
     try {
       const blocker = await this.connection.getRepository(User).findOne(userId);
-      if (typeof blocker === 'undefined') {
-        throw new NotFoundException();
+      if (!blocker) {
+        throw new NotFoundException('User not found.');
       }
       const blocked = await this.connection.getRepository(User).findOne(blockId);
-      if (typeof blocked === 'undefined') {
-        throw new NotFoundException();
+      if (!blocked) {
+        throw new NotFoundException('User not found');
       }
       let relation = await this.connection.getRepository(UserFriends).findOne({
         relations: ['applicant', 'recipient'],
@@ -166,7 +174,7 @@ export class UsersService {
           recipient: userId
         }]
       });
-      if (typeof relation === 'undefined') {
+      if (relation) {
         await this.connection.getRepository(UserFriends).save({
           applicant: blocker,
           recipient: blocked,
@@ -200,10 +208,10 @@ export class UsersService {
           unblockId
         ]);
       const user = await this.connection.getRepository(User).findOne({ where: { id: unblockId } });
-      if (!user) {
-        throw new NotFoundException();
+      if (user) {
+        return user;
       }
-      return user;
+      throw new NotFoundException('User not found.');
     } catch (error) {
       throw error;
     }
@@ -294,11 +302,10 @@ export class UsersService {
       [userId, rejectedId]
     );
     const user = await this.connection.getRepository(User).findOne(rejectedId);
-    if (!user) {
-      throw new NotFoundException();
+    if (user) {
+      return user;
     }
-    return user;
-
+    throw new NotFoundException('User not found');
   }
 
   /* Turn on the two factor authentication */
@@ -308,10 +315,10 @@ export class UsersService {
         is_2fa_enabled: bool,
       });
       const user = await this.connection.getRepository(User).findOne(userId);
-      if (typeof user === 'undefined') {
-        throw new NotFoundException();
+      if (user) {
+        return user;
       }
-      return user;
+      throw new NotFoundException('User not found');
     } catch (err) {
       throw err;
     }
@@ -322,10 +329,10 @@ export class UsersService {
   getUserProfileById = async (userId: number): Promise<User> => {
     try {
       const user = await this.connection.getRepository(User).findOne(userId);
-      if (typeof user === 'undefined') {
-        throw new NotFoundException();
+      if (user) {
+        return user;
       }
-      return user;
+      throw new NotFoundException('User not found');
     } catch (err) {
       throw err;
     }

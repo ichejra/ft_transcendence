@@ -1,5 +1,6 @@
 import {
-    Injectable
+    HttpStatus,
+    Injectable, NotFoundException
 } from "@nestjs/common";
 import { User } from "src/users/entities/user.entity";
 import { Connection } from "typeorm";
@@ -60,7 +61,7 @@ export class ChannelsService {
         try {
             return await this.connection.getRepository(Channel).find();
         } catch (err) {
-            throw new ForbiddenException("Forbidden: cannot get the channels.");
+            throw new NotFoundException("Channels not found.");
         }
     }
 
@@ -75,7 +76,7 @@ export class ChannelsService {
                 }
             });
         } catch (err) {
-            throw new ForbiddenException('Forbidden: cannot get channel info.');
+            throw new NotFoundException('Channel not found.');
         }
     }
 
@@ -135,7 +136,7 @@ export class ChannelsService {
             await this.connection.getRepository(Channel).update(channelId, { name: data.name });
             return await this.connection.getRepository(Channel).findOne(channelId);
         } catch (err) {
-            throw new ForbiddenException('Forbidden: cannot update channel');
+            throw new NotFoundException('Channel not found.');
         }
     }
 
@@ -151,7 +152,7 @@ export class ChannelsService {
             await this.connection.getRepository(Channel).delete(channelId);
             return { status: 200, success: true, message: 'channel has been removed.' };
         } catch (err) {
-            throw new ForbiddenException("Forbidden: cannot delete the channel");
+            throw new NotFoundException('Channel not found.');
         }
     }
 

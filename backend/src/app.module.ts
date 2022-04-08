@@ -15,21 +15,29 @@ import { EventsModule } from './events/events.module';
 import { ChatModule } from './chat/chat.module';
 import { DirectMessage } from './chat/messages/entities/direct-messages.entity';
 import { MessageChannel } from './chat/messages/entities/message-channel.entity';
+import * as Joi from 'Joi';
 
 dotenv.config();
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.env`
+      envFilePath: `.env`,
+      validationSchema: Joi.object({
+        POSTGRES_HOST: Joi.string().required(),
+        POSTGRES_PORT: Joi.number().required(),
+        POSTGRES_USERNAME: Joi.string().required(),
+        POSTGRES_PASSWORD: Joi.string().required(),
+        POSTGRES_DATABASE: Joi.string().required()
+      })
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.TYPEORM_HOST,
-      port: parseInt(<string>process.env.TYPEORM_PORT),
-      username: process.env.TYPEORM_USERNAME,
-      password: process.env.TYPEORM_PASSWORD,
-      database: process.env.TYPEORM_DATABASE,
+      host: process.env.POSTGRES_HOST,
+      port: parseInt(<string>process.env.POSTGRES_PORT),
+      username: process.env.POSTGRES_USERNAME,
+      password: process.env.POSTGRES_PASSWORD,
+      database: process.env.POSTGRES_DATABASE,
       entities: [
         User,
         UserFriends,

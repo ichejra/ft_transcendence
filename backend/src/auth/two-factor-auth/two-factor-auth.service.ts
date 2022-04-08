@@ -1,4 +1,4 @@
-import { Injectable, Res } from "@nestjs/common";
+import { HttpStatus, Injectable, Res } from "@nestjs/common";
 import * as dotenv from "dotenv";
 import { JwtService } from "@nestjs/jwt";
 import { MailService } from "src/mail/mail.service";
@@ -51,7 +51,7 @@ export class TwoFactorAuthService {
             res.cookie('accessToken', token);
             return res.redirect(process.env.HOME_PAGE);// redirect to Home page
         } else {
-            return res.status(401).json({ succes: false, msg: 'UNAUTHORIZED' }).send();// redirect to the error page
+            return res.status(HttpStatus.UNAUTHORIZED).json({ succes: false, msg: 'UNAUTHORIZED' }).send();// redirect to the error page
         }
     }
 }
