@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { IoMdSend, IoMdExit } from "react-icons/io";
 import { GoPrimitiveDot } from "react-icons/go";
-import { AiFillSetting } from "react-icons/ai";
 import { RiListSettingsLine } from "react-icons/ri";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { useParams } from "react-router";
@@ -19,17 +18,18 @@ import {
   getChannelsList,
   ChannelMessage,
   setUpdateChannelModal,
-  getChannelAdminsList,
   getLoggedUserRole,
 } from "../../features/chatSlice";
 interface ContentProps {
   channelName: string;
+  currentChannelID: number;
   channelOwner: User;
 }
 
 const ChannelContent: React.FC<ContentProps> = ({
   channelName,
   channelOwner,
+  currentChannelID,
 }) => {
   const [message, setMessage] = useState("");
   const [toggleMenu, setToggleMenu] = useState(false);
@@ -47,8 +47,6 @@ const ChannelContent: React.FC<ContentProps> = ({
     muteMember,
     memberStatus,
     loggedMemberRole,
-    channelAdmins,
-    currentChannelId,
   } = useAppSelector((state) => state.channels);
 
   const sendMessage = (e: React.FormEvent) => {
@@ -91,65 +89,57 @@ const ChannelContent: React.FC<ContentProps> = ({
     console.log(
       "[Member] newChannelId --------->",
       Number(params.id),
-      currentChannelId,
+      currentChannelID,
       memberStatus
     );
-    if (currentChannelId !== -1) {
-      dispatch(getChannelMembersList(currentChannelId));
-      dispatch(getChannelAdminsList(currentChannelId));
+    if (currentChannelID !== -1) {
+      dispatch(getChannelMembersList(currentChannelID));
     }
   }, [memberStatus]);
 
   useEffect(() => {
-    console.log("[ChannelContent] >>>>>> ", params.id, currentChannelId);
-    if (currentChannelId) {
-      dispatch(getChannelMembersList(currentChannelId));
-      dispatch(getChannelAdminsList(currentChannelId));
+    console.log("[ChannelContent] >>>>>> ", params.id, currentChannelID);
+    if (currentChannelID) {
+      dispatch(getChannelMembersList(currentChannelID));
     }
   }, [membersList]);
 
   useEffect(() => {
     // *************** share member status socket
-    socket.on("member_status_changed", () => {
+    socket.on("member_status_changed", (data) => {
       console.log("member status changed ==><==");
-      dispatch(getChannelMembersList(currentChannelId));
-      dispatch(getChannelAdminsList(currentChannelId));
-      dispatch(getLoggedUserRole(currentChannelId));
+      dispatch(getChannelMembersList(data.channelId));
+      dispatch(getLoggedUserRole(data.channelId));
     });
 
     // *************** apply member status socket
     socket.on("update_member_status", (data) => {
       let timer;
-      console.log("%cmember status changed: ", "color:pink", currentChannelId);
+      console.log("%cmember status changed: ", "color:pink", data.channelId);
       if (data.status === "kick" || data.status === "ban") {
-        dispatch(getChannelMembersList(currentChannelId)).then(() => {
+        dispatch(getChannelMembersList(data.channelId)).then(() => {
           navigate("/channels");
           dispatch(updateChannelState());
         });
       } else if (data.status === "mute") {
-        dispatch(getChannelMembersList(currentChannelId));
-        dispatch(getChannelAdminsList(currentChannelId));
+        dispatch(getChannelMembersList(data.channelId));
         dispatch(setMuteCountDown());
         //TODO ** unmute member when the timer is done
         timer = setTimeout(() => {
           dispatch(endMuteCountDown("active"));
-          dispatch(getChannelMembersList(currentChannelId));
+          dispatch(getChannelMembersList(data.channelId));
           console.log(memberStatus);
         }, data.time * 1000);
       } else if (data.status === "unmute") {
         clearTimeout(timer);
         dispatch(endMuteCountDown("active"));
-        dispatch(getChannelMembersList(currentChannelId));
-        dispatch(getChannelAdminsList(currentChannelId));
+        dispatch(getChannelMembersList(data.channelId));
       } else if (data.status === "unban") {
-        dispatch(getChannelMembersList(currentChannelId));
-        dispatch(getChannelAdminsList(currentChannelId));
+        dispatch(getChannelMembersList(data.channelId));
       } else if (data.status === "set_admin") {
-        dispatch(getChannelMembersList(currentChannelId));
-        dispatch(getChannelAdminsList(currentChannelId));
+        dispatch(getChannelMembersList(data.channelId));
       } else if (data.status === "remove_admin") {
-        dispatch(getChannelMembersList(currentChannelId));
-        dispatch(getChannelAdminsList(currentChannelId));
+        dispatch(getChannelMembersList(data.channelId));
       }
     });
     return () => {
@@ -245,36 +235,42 @@ const ChannelContent: React.FC<ContentProps> = ({
             <p className="text-[12px] font-thin text-gray-400">owner</p>
           </div>
         </div>
-        {channelAdmins.length ? (
+        {channelMembers.filter((member) => member.userRole === "admin")
+          .length ? (
           <div>
             <h1 className="text-gray-300 mt-3">Admins</h1>
-            {channelAdmins.map((admin) => {
-              return (
-                <Member
-                  key={admin.id}
-                  chId={currentChannelId}
-                  {...admin}
-                  channelName={channelName}
-                />
-              );
-            })}
+            {channelMembers
+              .filter((member) => member.userRole === "admin")
+              .map((admin) => {
+                return (
+                  <Member
+                    key={admin.id}
+                    chId={currentChannelID}
+                    {...admin}
+                    channelName={channelName}
+                  />
+                );
+              })}
           </div>
         ) : (
           <div></div>
         )}
-        {channelMembers.length ? (
+        {channelMembers.filter((member) => member.userRole === "member")
+          .length ? (
           <div>
             <h1 className="text-gray-300 mt-3">Members</h1>
-            {channelMembers.map((member) => {
-              return (
-                <Member
-                  key={member.id}
-                  chId={currentChannelId}
-                  {...member}
-                  channelName={channelName}
-                />
-              );
-            })}
+            {channelMembers
+              .filter((member) => member.userRole === "member")
+              .map((member) => {
+                return (
+                  <Member
+                    key={member.id}
+                    chId={currentChannelID}
+                    {...member}
+                    channelName={channelName}
+                  />
+                );
+              })}
           </div>
         ) : (
           <div></div>

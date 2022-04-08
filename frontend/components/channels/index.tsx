@@ -1,7 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { HiViewGridAdd } from "react-icons/hi";
-import { SiPrivateinternetaccess } from "react-icons/si";
-import { MdExplore } from "react-icons/md";
 import { useParams, useNavigate, useLocation } from "react-router";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { socket } from "../../pages/SocketProvider";
@@ -9,7 +6,6 @@ import ChannelsList from "./ChannelsList";
 import {
   updateMemmbersList,
   updateChannelContent,
-  setUpdateDirectMessages,
 } from "../../features/globalSlice";
 import { User } from "../../features/userProfileSlice";
 import ChannelContent from "./ChannelContent";
@@ -24,28 +20,22 @@ import {
   setNewChannelId,
   addNewMessage,
   getLoggedUserRole,
-  getChannelAdminsList,
-  getSelectedChannelId,
 } from "../../features/chatSlice";
-import { addNewDirectMessage } from "../../features/directChatslice";
 
 const ChatRooms = () => {
   const [showChannelContent, setShowChannelContent] = useState(false);
   const [channelName, setChannelName] = useState("");
+  const [channelID, setChannelID] = useState(-1);
   const [channelOwner, setChannelOwner] = useState({} as User);
-  const { pathname } = useLocation();
   const navigate = useNavigate();
   const params = useParams();
   const dispatch = useAppDispatch();
-  const { loggedUser } = useAppSelector((state) => state.user);
   const {
     channels,
     createNewChannel,
     showChannelsList,
     newChannel,
     channelState,
-    channelMembers,
-    currentChannelId,
   } = useAppSelector((state) => state.channels);
 
   //* Functions_________
@@ -59,8 +49,7 @@ const ChatRooms = () => {
         dispatch(setNewChannelId({ id: newChannel.id, render: false }));
         setChannelName(channel.name);
         setChannelOwner(owner);
-        dispatch(getSelectedChannelId(channel.id));
-        dispatch(getChannelAdminsList(channel.id));
+        setChannelID(channel.id);
         dispatch(getChannelMembersList(channel.id)).then(() => {
           setShowChannelContent(true);
         });
@@ -109,13 +98,13 @@ const ChatRooms = () => {
       dispatch(getChannelMembersList(data.channelId));
       console.log("%cleaved the channel", "color:red");
     });
-    socket.on("join_success", () => {
+    socket.on("join_success", (data) => {
+      console.log("join_success");
       dispatch(updateMemmbersList());
       dispatch(getChannelsList()).then(() => {
-        if (currentChannelId !== -1) {
-          console.log("join_success: ", newChannel.id, currentChannelId);
-          dispatch(getChannelMembersList(currentChannelId));
-          dispatch(getChannelAdminsList(currentChannelId));
+        if (channelID !== -1) {
+          console.log("join_success: ", data.channelId, channelID);
+          dispatch(getChannelMembersList(data.channelId));
         }
       });
     });
@@ -143,6 +132,7 @@ const ChatRooms = () => {
           {showChannelContent && (
             <ChannelContent
               channelName={channelName}
+              currentChannelID={channelID}
               channelOwner={channelOwner}
             />
           )}
