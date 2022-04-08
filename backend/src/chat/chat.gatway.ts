@@ -90,7 +90,7 @@ export class ChatGatway implements OnGatewayInit, OnGatewayConnection, OnGateway
     @SubscribeMessage('send_message_channel')
     async handleChannelMessage(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
         try {
-            const channel: Channel = await this.channelsService.getChannelById(payload.channelId);
+            const { channel } = await this.channelsService.getChannelById(payload.channelId);
             const message: MessageChannel = await this.channelsService.saveMessage(client, channel, payload.content);
             const sockets = await this.server.in(channel.name).fetchSockets();
             const blockedRoom: string = await this.channelsService.getBlockedRoom(message.author, sockets);

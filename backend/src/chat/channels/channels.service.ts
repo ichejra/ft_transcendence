@@ -65,9 +65,15 @@ export class ChannelsService {
     }
 
     /* get a channel by id */
-    async getChannelById(channelId: number): Promise<Channel> {
+    async getChannelById(channelId: number): Promise<UserChannel> {
         try {
-            return await this.connection.getRepository(Channel).findOne(channelId);
+            return await this.connection.getRepository(UserChannel).findOne({
+                relations: ['user', 'channel'],
+                where: {
+                    channel: channelId,
+                    userRole: UserRole.OWNER
+                }
+            });
         } catch (err) {
             throw new ForbiddenException('Forbidden: cannot get channel info.');
         }
@@ -91,14 +97,17 @@ export class ChannelsService {
         }))
         return members.filter((_, index) => toFilter[index]);
     }
-    getChannelsMembersByRole = async (userId: number, channelId: number, role: UserRole): Promise<UserChannel[]> => {
+    getChannelsMembersByRole = async (userId: number, channelId: number, role?: UserRole): Promise<UserChannel[]> => {
         try {
             const members = await this.connection.getRepository(UserChannel).find({
                 relations: ['user', 'channel'],
-                where: {
+                where: [{
                     channel: channelId,
-                    userRole: role
-                }
+                    userRole: UserRole.ADMIN
+                }, {
+                    channel: channelId,
+                    userRole: UserRole.MEMBER
+                }]
             });
             return await this.asyncFilterMembers(members, userId);
         } catch (err) {
@@ -150,7 +159,7 @@ export class ChannelsService {
     joinChannel = async (socket: Socket, payload: any): Promise<Channel> => {
         // get user and channel
         try {
-            const channel = await this.getChannelById(payload.channelId);
+            const channel = await this.connection.getRepository(Channel).findOne(payload.channelId);
             // check for channel type
             if (channel.type === ChannelType.PRIVATE) {
                 // require a password
@@ -178,7 +187,7 @@ export class ChannelsService {
     leaveChannel = async (socket: Socket, payload: any): Promise<Channel> => {
         // get user_channel relation
         const user = await this.connectionsService.getUserFromSocket(socket);
-        const channel = await this.getChannelById(payload.channelId);
+        const channel = await this.connection.getRepository(Channel).findOne(payload.channelId);
         const relation = await this.connection.getRepository(UserChannel).findOne({
             where: {
                 user,

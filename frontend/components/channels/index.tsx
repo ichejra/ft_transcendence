@@ -11,6 +11,7 @@ import {
   updateChannelContent,
   setUpdateDirectMessages,
 } from "../../features/globalSlice";
+import { User } from "../../features/userProfileSlice";
 import ChannelContent from "./ChannelContent";
 import NewChannelModal from "../modals/NewChannelModal";
 import ChannelsListModal from "../modals/ChannelsListModal";
@@ -22,13 +23,16 @@ import {
   getSingleChannel,
   setNewChannelId,
   addNewMessage,
+  getLoggedUserRole,
+  getChannelAdminsList,
+  getSelectedChannelId,
 } from "../../features/chatSlice";
 import { addNewDirectMessage } from "../../features/directChatslice";
 
 const ChatRooms = () => {
   const [showChannelContent, setShowChannelContent] = useState(false);
   const [channelName, setChannelName] = useState("");
-  const [channelId, setChannelId] = useState(-1);
+  const [channelOwner, setChannelOwner] = useState({} as User);
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const params = useParams();
@@ -41,22 +45,27 @@ const ChatRooms = () => {
     newChannel,
     channelState,
     channelMembers,
+    currentChannelId,
   } = useAppSelector((state) => state.channels);
 
   //* Functions_________
   //? Get selected channel content
   const getCurrentChannelContent = (id: number) => {
     dispatch(getSingleChannel(id)).then((data: any) => {
-      const channel: Channel = data.payload;
+      const channel: Channel = data.payload.channel;
+      const owner: User = data.payload.user;
       dispatch(getChannelContent(id)).then(() => {
         socket.emit("update_join", { rooms: channels, room: channel });
         dispatch(setNewChannelId({ id: newChannel.id, render: false }));
         setChannelName(channel.name);
-        setChannelId(channel.id);
+        setChannelOwner(owner);
+        dispatch(getSelectedChannelId(channel.id));
+        dispatch(getChannelAdminsList(channel.id));
         dispatch(getChannelMembersList(channel.id)).then(() => {
           setShowChannelContent(true);
         });
       });
+      dispatch(getLoggedUserRole(id));
     });
     navigate(`/channels/${id}`);
   };
@@ -89,9 +98,6 @@ const ChatRooms = () => {
   }, [channelState]);
 
   useEffect(() => {
-    const loggedMember = channelMembers.find(
-      (member) => member.user.id === loggedUser.id
-    );
     socket.on("leave_success", (data) => {
       //TODO send the userRole of the user left the channel
       /* if (data.userRole === 'owner') {
@@ -106,7 +112,11 @@ const ChatRooms = () => {
     socket.on("join_success", () => {
       dispatch(updateMemmbersList());
       dispatch(getChannelsList()).then(() => {
-        dispatch(getChannelMembersList(channelId));
+        if (currentChannelId !== -1) {
+          console.log("join_success: ", newChannel.id, currentChannelId);
+          dispatch(getChannelMembersList(currentChannelId));
+          dispatch(getChannelAdminsList(currentChannelId));
+        }
       });
     });
     socket.on("receive_message_channel", (data: any) => {
@@ -131,7 +141,10 @@ const ChatRooms = () => {
       {showChannelContent && params.id ? (
         <div className="fixed h-full left-[7.5rem] right-0">
           {showChannelContent && (
-            <ChannelContent channelName={channelName} channelID={channelId} />
+            <ChannelContent
+              channelName={channelName}
+              channelOwner={channelOwner}
+            />
           )}
         </div>
       ) : (

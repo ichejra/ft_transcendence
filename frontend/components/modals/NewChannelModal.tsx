@@ -36,7 +36,7 @@ const UsersModal: React.FC = () => {
         type: isPrivate ? "private" : "public",
       })
     ).then((data: any) => {
-      const newChannel: Channel = data.payload;
+      const newChannel: Channel = data.payload.channel;
       socket.emit("create_channel", { room: newChannel.name });
       dispatch(getChannelsList()).then(() => {
         dispatch(setNewChannelId({ id: newChannel.id, render: true }));

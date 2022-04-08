@@ -31,6 +31,15 @@ export interface ChannelMember {
   user: User;
 }
 
+export interface ChannelOwner {
+  id: number;
+  channel: Channel;
+  userRole: string;
+  userStatus: string;
+  createdAt: string;
+  user: User;
+}
+
 interface InitialState {
   createNewChannel: boolean;
   showChannelsList: boolean;
@@ -42,13 +51,11 @@ interface InitialState {
   channel: Channel;
   channelContent: ChannelMessage[];
   channelMembers: ChannelMember[];
+  channelAdmins: ChannelMember[];
+  loggedMemberRole: ChannelOwner;
   memberStatus: string;
   muteMember: boolean;
-  isMute: boolean;
-  isBan: boolean;
-  isAdmin: boolean;
-  isOwner: boolean;
-  isMember: boolean;
+  currentChannelId: number;
 }
 
 const initialState: InitialState = {
@@ -67,13 +74,11 @@ const initialState: InitialState = {
   },
   channelContent: [],
   channelMembers: [],
+  channelAdmins: [],
+  loggedMemberRole: {} as ChannelOwner,
   memberStatus: "",
   muteMember: false,
-  isMute: false,
-  isBan: false,
-  isAdmin: true,
-  isOwner: true,
-  isMember: false,
+  currentChannelId: -1,
 };
 
 export const createChannel = createAsyncThunk(
@@ -105,7 +110,7 @@ export const createChannel = createAsyncThunk(
           },
         }
       );
-      console.log(response.data);
+      console.log("[CHAT SLICE] created channel => ", response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error) {
       return _api.rejectWithValue(error);
@@ -125,7 +130,6 @@ export const getChannelsList = createAsyncThunk(
           },
         }
       );
-      console.log("joined channels", response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error) {
       return _api.rejectWithValue(error);
@@ -145,7 +149,6 @@ export const fetchUnjoinedChannels = createAsyncThunk(
           },
         }
       );
-      console.log("unjoined channels", response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error) {
       return _api.rejectWithValue(error);
@@ -159,6 +162,27 @@ export const getSingleChannel = createAsyncThunk(
     try {
       const response = await axios.get(
         `http://localhost:3001/api/channels/${channelId}`,
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      console.log("[CHAT SLICE] single channel => ", response.data);
+
+      return _api.fulfillWithValue(response.data);
+    } catch (error) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
+
+export const getLoggedUserRole = createAsyncThunk(
+  "channels/getLoggedUserRole",
+  async (channelId: number, _api) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/api/channels/${channelId}/role`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -184,16 +208,32 @@ export const getChannelMembersList = createAsyncThunk(
           },
         }
       );
-      console.log("channel %d members: ", channelId, response.data);
-
       return _api.fulfillWithValue(response.data);
     } catch (error) {
       return _api.rejectWithValue(error);
     }
   }
 );
-//! *****************************************
-//! *****************************************
+
+export const getChannelAdminsList = createAsyncThunk(
+  "channels/getChannelAdminsList",
+  async (channelId: number, _api) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/api/channels/${channelId}/admins`,
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      return _api.fulfillWithValue(response.data);
+    } catch (error) {
+      return _api.rejectWithValue(error);
+    }
+  }
+);
+
 export const setMemberAsAdmin = createAsyncThunk(
   "channels/setMemberAsAdmin",
   async (
@@ -210,15 +250,12 @@ export const setMemberAsAdmin = createAsyncThunk(
           },
         }
       );
-      console.log("set admin %d: ", memberId, response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error) {
       return _api.rejectWithValue(error);
     }
   }
 );
-
-//! *****************************************
 
 export const setAdminAsMember = createAsyncThunk(
   "channels/setAdminAsMember",
@@ -236,15 +273,12 @@ export const setAdminAsMember = createAsyncThunk(
           },
         }
       );
-      console.log("remove admin  %d: ", memberId, response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error) {
       return _api.rejectWithValue(error);
     }
   }
 );
-//! *****************************************
-//! *****************************************
 
 export const muteChannelMember = createAsyncThunk(
   "channels/muteChannelMember",
@@ -262,7 +296,6 @@ export const muteChannelMember = createAsyncThunk(
           },
         }
       );
-      console.log("mute %d: ", memberId, response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error) {
       return _api.rejectWithValue(error);
@@ -286,7 +319,6 @@ export const unmuteChannelMember = createAsyncThunk(
           },
         }
       );
-      console.log("unmute %d: ", memberId, response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error) {
       return _api.rejectWithValue(error);
@@ -310,7 +342,6 @@ export const banChannelMember = createAsyncThunk(
           },
         }
       );
-      console.log("ban %d: ", memberId, response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error) {
       return _api.rejectWithValue(error);
@@ -334,7 +365,6 @@ export const unbanChannelMember = createAsyncThunk(
           },
         }
       );
-      console.log("unban %d: ", memberId, response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error) {
       return _api.rejectWithValue(error);
@@ -358,7 +388,6 @@ export const kickChannelMember = createAsyncThunk(
           },
         }
       );
-      console.log("kick %d: ", memberId, response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error) {
       return _api.rejectWithValue(error);
@@ -378,7 +407,7 @@ export const getChannelContent = createAsyncThunk(
           },
         }
       );
-      console.log("CHAT SLICE:", response.data);
+      console.log("[CHAT SLICE] channel content =>", response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error) {
       return _api.rejectWithValue(error);
@@ -396,6 +425,7 @@ const channelsManagmentSlice = createSlice({
     ) => {
       state.createNewChannel = action.payload;
     },
+
     setChannelsListModal: (
       state: InitialState = initialState,
       action: PayloadAction<boolean>
@@ -409,59 +439,28 @@ const channelsManagmentSlice = createSlice({
     ) => {
       state.updateChannelModal = action.payload;
     },
+
     addNewMessage: (
       state: InitialState = initialState,
       action: PayloadAction<ChannelMessage>
     ) => {
       state.channelContent.push(action.payload);
-      // console.log("CHAT SLICE", current(state.channelContent));
     },
 
     updateChannelState: (state: InitialState = initialState) => {
       state.channelState = !state.channelState;
-      // console.log("CHAT SLICE", current(state.channelContent));
     },
     setNewChannelId: (
       state: InitialState = initialState,
       action: { payload: { id: number; render: boolean }; type: string }
     ) => {
       state.newChannel = action.payload;
-      // console.log("CHAT SLICE", current(state.channelContent));
-    },
-
-    setIsMute: (
-      state: InitialState = initialState,
-      action: { payload: boolean; type: string }
-    ) => {
-      state.isMute = action.payload;
-    },
-    setIsBan: (
-      state: InitialState = initialState,
-      action: { payload: boolean; type: string }
-    ) => {
-      state.isBan = action.payload;
-    },
-
-    setIsAdmin: (state: InitialState = initialState) => {
-      state.isAdmin = true;
-      state.isOwner = false;
-      state.isMember = false;
-    },
-    setIsOwner: (state: InitialState = initialState) => {
-      state.isOwner = true;
-      state.isAdmin = false;
-      state.isMember = false;
-    },
-
-    setIsMember: (state: InitialState = initialState) => {
-      state.isMember = true;
-      state.isAdmin = false;
-      state.isOwner = false;
     },
 
     setMuteCountDown: (state: InitialState = initialState) => {
       state.muteMember = true;
     },
+
     endMuteCountDown: (
       state: InitialState = initialState,
       action: { payload: string | undefined }
@@ -470,6 +469,13 @@ const channelsManagmentSlice = createSlice({
       if (action.payload) {
         state.memberStatus = action.payload;
       }
+    },
+
+    getSelectedChannelId: (
+      state: InitialState = initialState,
+      action: PayloadAction<number>
+    ) => {
+      state.currentChannelId = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -485,32 +491,34 @@ const channelsManagmentSlice = createSlice({
     builder.addCase(getSingleChannel.fulfilled, (state, action: any) => {
       state.channel = action.payload;
     });
+    builder.addCase(getLoggedUserRole.fulfilled, (state, action: any) => {
+      state.loggedMemberRole = action.payload;
+    });
     builder.addCase(getChannelContent.fulfilled, (state, action: any) => {
       state.channelContent = action.payload;
     });
-
     builder.addCase(getChannelMembersList.fulfilled, (state, action: any) => {
       state.channelMembers = action.payload;
     });
-    //! ************************
-    builder.addCase(setMemberAsAdmin.fulfilled, (state, action: any) => {
+    builder.addCase(getChannelAdminsList.fulfilled, (state, action: any) => {
+      state.channelAdmins = action.payload;
+    });
+    builder.addCase(setMemberAsAdmin.fulfilled, (state) => {
       state.memberStatus = "admin";
     });
-    builder.addCase(setAdminAsMember.fulfilled, (state, action: any) => {
+    builder.addCase(setAdminAsMember.fulfilled, (state) => {
       state.memberStatus = "member";
     });
-    //! ************************
-
-    builder.addCase(muteChannelMember.fulfilled, (state, action: any) => {
+    builder.addCase(muteChannelMember.fulfilled, (state) => {
       state.memberStatus = "muted";
     });
-    builder.addCase(unmuteChannelMember.fulfilled, (state, action: any) => {
+    builder.addCase(unmuteChannelMember.fulfilled, (state) => {
       state.memberStatus = "unmuted";
     });
-    builder.addCase(banChannelMember.fulfilled, (state, action: any) => {
+    builder.addCase(banChannelMember.fulfilled, (state) => {
       state.memberStatus = "banned";
     });
-    builder.addCase(kickChannelMember.fulfilled, (state, action: any) => {
+    builder.addCase(kickChannelMember.fulfilled, (state) => {
       state.memberStatus = "kicked";
     });
   },
@@ -525,11 +533,7 @@ export const {
   setNewChannelId,
   setMuteCountDown,
   endMuteCountDown,
-  setIsMute,
-  setIsBan,
-  setIsAdmin,
-  setIsOwner,
-  setIsMember,
+  getSelectedChannelId,
 } = channelsManagmentSlice.actions;
 
 export default channelsManagmentSlice.reducer;
@@ -537,4 +541,3 @@ export default channelsManagmentSlice.reducer;
 //TODO update channel (name, password, owners)
 //TODO add an openedLock icon for private joined channels
 //TODO online/offline status (profile, friends list)
-//TODO set sockets for update_member_status
