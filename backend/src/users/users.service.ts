@@ -1,6 +1,7 @@
 import {
   Injectable, NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ForbiddenException } from 'src/exceptions/forbidden.exception';
 import { Connection } from 'typeorm'
 
@@ -15,6 +16,7 @@ import { User, UserState } from './entities/user.entity';
 export class UsersService {
   constructor(
     private connection: Connection,
+    private configService: ConfigService
   ) { }
 
   async create(user: UserDto): Promise<User> {
@@ -51,13 +53,13 @@ export class UsersService {
         await this.connection.getRepository(User).update(id, { user_name: user_name });
       } else if (!user_name && file) {
         await this.connection.getRepository(User).update(id,
-          { avatar_url: `${process.env.SERVER_HOST}/${file.filename}` }
+          { avatar_url: `${this.configService.get('BACKEND_URL')}/${file.filename}` }
         );
       } else if (file && user_name) {
         await this.connection.getRepository(User).update(id,
           {
             user_name: user_name,
-            avatar_url: `${process.env.SERVER_HOST}/${file.filename}`
+            avatar_url: `${this.configService.get('BACKEND_URL')}/${file.filename}`
           });
       }
       const user = await this.connection.getRepository(User).findOne(id);
@@ -99,7 +101,7 @@ export class UsersService {
     if (user) {
       _res.clearCookie('jwt');
     }
-    _res.redirect(process.env.HOME_PAGE);
+    _res.redirect(this.configService.get('HOME_PAGE'));
   }
 
   // method used for insert the logged user id and requested user id in a database table("user_friends") with status pending until accept

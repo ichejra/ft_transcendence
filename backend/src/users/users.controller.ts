@@ -14,11 +14,10 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-
+import * as dotenv from 'dotenv';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UserDto } from "src/users/dto/user.dto";
 import { UsersService } from './users.service';
-import * as dotenv from 'dotenv';
 import {
   editFileName,
   fileFilter
@@ -26,11 +25,15 @@ import {
 import { User } from './entities/user.entity';
 import { ReqUser } from './decorators/req-user.decorator'
 import { IsBlockedGuard } from './guards/is-blocked.guard';
+import { ConfigService } from '@nestjs/config';
 
-dotenv.config()
+dotenv.config();
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(
+    private readonly usersService: UsersService,
+    private configService: ConfigService
+  ) { }
 
   @Post('create')
   @HttpCode(200)
@@ -39,7 +42,7 @@ export class UsersController {
   }
 
   //* route get all users => https://${host}:${port}/api/users/all_users
-  
+
   @Get('/all_users')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
@@ -199,7 +202,7 @@ export class UsersController {
   @UseGuards(IsBlockedGuard)
   @UseGuards(JwtAuthGuard)
   getUserProfile(
-    @Param('userId', ParseIntPipe) userId: number) : Promise<User> {
+    @Param('userId', ParseIntPipe) userId: number): Promise<User> {
     return this.usersService.getUserProfileById(userId);
   }
 }

@@ -132,6 +132,8 @@ export class ChannelsService {
         try {
             if (data.type === ChannelType.PRIVATE) {
                 await this.setUpdatePassword(channelId, data.password);
+            } else if (data.type === ChannelType.PUBLIC) {
+                await this.removePassword(channelId);
             }
             await this.connection.getRepository(Channel).update(channelId, { name: data.name });
             return await this.connection.getRepository(Channel).findOne(channelId);

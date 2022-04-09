@@ -2,17 +2,16 @@ import { Injectable } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Strategy } from 'passport-42';
 import { UserDto } from "src/users/dto/user.dto";
-import * as dotenv from 'dotenv';
+import { ConfigService } from "@nestjs/config";
 
-dotenv.config();
 @Injectable()
 export class IntraStrategy extends PassportStrategy(Strategy, '42') {
 
-    constructor() {
+    constructor(private configService: ConfigService) {
         super({
-            clientID: process.env.CLIENT_ID,
-            clientSecret: process.env.SECRET,
-            callbackURL: process.env.CALLBACK_URL,
+            clientID: configService.get('CLIENT_ID'),
+            clientSecret: configService.get('SECRET'),
+            callbackURL: configService.get('CALLBACK_URL'),
             profileFields: {
                 'id': function (obj: any) { return String(obj.id); },
                 'username': 'login',

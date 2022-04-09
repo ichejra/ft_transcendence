@@ -31,7 +31,7 @@ import { WsExceptionsFilter } from "src/exceptions/ws-exceptions.filter";
 @UsePipes(new ValidationPipe())
 @WebSocketGateway({
     cors: {
-        origin: '*', // http://${frontend}:${port}
+        origin: true, // FRONTEND_URL
     },
 })
 export class ChatGatway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -106,7 +106,11 @@ export class ChatGatway implements OnGatewayInit, OnGatewayConnection, OnGateway
         try {
             const channel: Channel = await this.channelsService.joinChannel(client, payload);
             client.join(channel.name);
-            this.server.to(channel.name).emit('join_success', { message: "success", status: 200 , channelId: payload.channelId });
+            this.server.to(channel.name).emit('join_success', {
+                message: "success",
+                status: 200,
+                channelId: payload.channelId
+            });
         } catch (error) {
             throw error;
         }
@@ -115,11 +119,15 @@ export class ChatGatway implements OnGatewayInit, OnGatewayConnection, OnGateway
     // ? handling joining after refeshing
     @SubscribeMessage('update_join')
     async handleUpdate(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
-        const { rooms, room } = payload;
-        rooms.forEach((room: any) => {
-            client.leave(room.name);
-        });
-        client.join(room.name);
+        try {
+            const { rooms, room } = payload;
+            rooms.forEach((room: any) => {
+                client.leave(room.name);
+            });
+            client.join(room.name);
+        } catch (err) {
+            throw new WsException('Room not found.');
+        }
     }
 
     // ? leaving channel handle
@@ -128,7 +136,11 @@ export class ChatGatway implements OnGatewayInit, OnGatewayConnection, OnGateway
         try {
             const channel: Channel = await this.channelsService.leaveChannel(client, payload);
             client.leave(channel.name);
-            this.server.to(channel.name).emit('leave_success', { message: "success", status: 200, channelId: channel.id });
+            this.server.to(channel.name).emit('leave_success', {
+                message: "success",
+                status: 200,
+                channelId: channel.id
+            });
         } catch (error) {
             throw new WsException('leave the channel unsuccessfully.');
         }
@@ -142,11 +154,11 @@ export class ChatGatway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
     @SubscribeMessage('update_member_status')
     async handleMemberStatus(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
-        const sockets = await this.connectionsService.getUserConnections(payload.userId);
-        if (sockets) {
-            sockets.forEach((socket) => {
-                client.to(socket.id).emit('update_member_status', { status: payload.status, time: payload.time, channelId: payload.channelId });
-            })
-        }
+        client.to(payload.room).emit('update_member_status', {
+            status: payload.status,
+            time: payload.time,
+            channelId: payload.channelId,
+            memberId: payload.userId,
+        });
     }
 }
