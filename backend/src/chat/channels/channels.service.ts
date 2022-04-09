@@ -130,7 +130,7 @@ export class ChannelsService {
     /* update channel */
     async updateChannel(channelId: number, data: UpdateChannelDto): Promise<Channel> {
         try {
-            if (data.type === ChannelType.PRIVATE) {
+            if (data.type === ChannelType.PRIVATE && data.password) {
                 await this.setUpdatePassword(channelId, data.password);
             } else if (data.type === ChannelType.PUBLIC) {
                 await this.removePassword(channelId);
