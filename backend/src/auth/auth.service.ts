@@ -1,4 +1,8 @@
-import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
+import {
+    ForbiddenException,
+    Injectable
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { User } from "src/users/entities/user.entity";
 import { UsersService } from "src/users/users.service";
@@ -10,7 +14,8 @@ export class AuthService {
     constructor(
         private usersService: UsersService,
         private jwtService: JwtService,
-        private twoFactorAuthService: TwoFactorAuthService
+        private twoFactorAuthService: TwoFactorAuthService,
+        private configService: ConfigService
     ) { }
 
     /* an async function  used for validate the user if exist in database */
@@ -40,13 +45,13 @@ export class AuthService {
                 } catch (err) {
                     throw new ForbiddenException('connot send the link');
                 }
-                return _res.redirect(process.env.HOME_PAGE);
+                return _res.redirect(this.configService.get('HOME_PAGE'));
             }
             if (!user) {
                 user = await this.usersService.create(_req.user);
-                url = process.env.COMPLETE_INFO; // redirect to complete-info page
+                url = this.configService.get('COMPLETE_INFO'); // redirect to complete-info page
             } else {
-                url = process.env.HOME_PAGE; // redirect to Home page
+                url = this.configService.get('HOME_PAGE'); // redirect to Home page
             }
             const payload: JwtPayload = { id: user.id, user_name: user.user_name, email: user.email };
             const jwtToken = this.jwtService.sign(payload);
@@ -63,13 +68,13 @@ export class AuthService {
         if (user && _res.cookie('accessToken')) {
             _res.clearCookie('accessToken');
         }
-        return _res.redirect(process.env.HOME_PAGE);
+        return _res.redirect(this.configService.get('HOME_PAGE'));
     }
 
     getUserFromToken = async (token: string): Promise<User> => {
         try {
             const payload: JwtPayload = this.jwtService.verify(token, {
-                secret: process.env.JWT_SECRET,
+                secret: this.configService.get('JWT_SECRET'),
             });
             if (payload.id) {
                 return await this.usersService.findOne(Number(payload.id));

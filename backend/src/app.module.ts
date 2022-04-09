@@ -3,7 +3,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './users/entities/user.entity';
 import { Channel } from './chat/channels/entities/channel.entity';
 import { UserChannel } from './chat/channels/entities/user-channel.entity';
@@ -28,31 +28,56 @@ dotenv.config();
         POSTGRES_PORT: Joi.number().required(),
         POSTGRES_USERNAME: Joi.string().required(),
         POSTGRES_PASSWORD: Joi.string().required(),
-        POSTGRES_DATABASE: Joi.string().required()
+        POSTGRES_DATABASE: Joi.string().required(),
+        HOST: Joi.string().required(),
+        PORT: Joi.number().required(),
+        APP_NAME: Joi.string().required(),
+        BACKEND_URL: Joi.string().required(),
+        CLIENT_ID: Joi.string().required(),
+        SECRET: Joi.string().required(),
+        CALLBACK_URL: Joi.string().required(),
+        JWT_SECRET: Joi.string().required(),
+        JWT_EXPIRESIN: Joi.string(),
+        HOME_PAGE: Joi.string().required(),
+        COMPLETE_INFO: Joi.string().required(),
+        EMAIL_SERVICE: Joi.string().required(),
+        EMAIL_USER: Joi.string().required(),
+        EMAIL_PASSWORD: Joi.string().required(),
+        FRONTEND_URL: Joi.string().required(),
       })
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.POSTGRES_HOST,
-      port: parseInt(<string>process.env.POSTGRES_PORT),
-      username: process.env.POSTGRES_USERNAME,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DATABASE,
-      entities: [
-        User,
-        UserFriends,
-        Channel,
-        UserChannel,
-        Game,
-        MessageChannel,
-        DirectMessage
-      ],
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get('POSTGRES_HOST'),
+        port: parseInt(<string>configService.get('POSTGRES_PORT')),
+        username: configService.get('POSTGRES_USERNAME'),
+        password: configService.get('POSTGRES_PASSWORD'),
+        database: configService.get('POSTGRES_DATABASE'),
+        entities: [
+          User,
+          UserFriends,
+          Channel,
+          UserChannel,
+          Game,
+          MessageChannel,
+          DirectMessage
+        ],
+        synchronize: true,
+      })
     }),
     UsersModule,
     AuthModule,
-    ServeStaticModule.forRoot({
-      rootPath: process.env.DESTINATION
+    ServeStaticModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => [
+        { 
+          rootPath: configService.get('DESTINATION'),
+        },
+      ]
     }),
     ChatModule,
     GameModule,
