@@ -96,16 +96,14 @@ const ChatRooms = () => {
         });
       } */
       dispatch(getChannelMembersList(data.channelId));
-      console.log("%cleaved the channel", "color:red");
+      console.log("%cleft the channel", "color:red");
     });
     socket.on("join_success", (data) => {
       console.log("join_success");
       dispatch(updateMemmbersList());
       dispatch(getChannelsList()).then(() => {
-        if (channelID !== -1) {
-          console.log("join_success: ", data.channelId, channelID);
-          dispatch(getChannelMembersList(data.channelId));
-        }
+        console.log("join_success: ", data.channelId, channelID);
+        dispatch(getChannelMembersList(data.channelId));
       });
     });
     socket.on("receive_message_channel", (data: any) => {

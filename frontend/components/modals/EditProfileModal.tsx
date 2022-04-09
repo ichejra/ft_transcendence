@@ -3,7 +3,7 @@ import { UpdateProfileForm } from "../profile/UpdateProfileInfo";
 import { useAppDispatch } from "../../app/hooks";
 import { editUserProfile } from "../../features/userProfileSlice";
 
-const UsersModal: React.FC = () => {
+const EditProfileModal: React.FC = () => {
   const divRef = useRef(null);
   const dispatch = useAppDispatch();
 
@@ -33,4 +33,4 @@ const UsersModal: React.FC = () => {
   );
 };
 
-export default UsersModal;
+export default EditProfileModal;

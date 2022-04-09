@@ -104,7 +104,6 @@ const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
   const [isPrivate, setIsPrivate] = useState(false);
   const [passwordForm, setPasswordForm] = useState(false);
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
   const { unjoinedChannels } = useAppSelector((state) => state.channels);
 
   const joinChannel = (id: number) => {
@@ -116,6 +115,7 @@ const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
         setIsPrivate(true);
       } else {
         socket.emit("join_channel", { channelId: id });
+
         dispatch(getChannelsList()).then(() => {
           dispatch(setNewChannelId({ id, render: true }));
           dispatch(setChannelsListModal(false));
