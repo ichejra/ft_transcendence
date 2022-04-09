@@ -16,7 +16,6 @@ async function bootstrap() {
   app.enableCors({
     origin: configService.get('FRONTEND_URL'),
   });
-
   app.useGlobalFilters(new ExceptionsFilter());
   app.setGlobalPrefix('api', { exclude: ['auth'] });
   app.useGlobalPipes(new ValidationPipe());
