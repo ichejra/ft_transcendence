@@ -2,14 +2,15 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { IoMdSend, IoMdExit } from "react-icons/io";
 import { GoPrimitiveDot } from "react-icons/go";
-import { AiFillSetting } from "react-icons/ai";
 import { RiListSettingsLine } from "react-icons/ri";
+import { MdSettings } from "react-icons/md";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { useParams } from "react-router";
 import { socket } from "../../pages/SocketProvider";
 import { useNavigate } from "react-router";
 import { updateChannelContent } from "../../features/globalSlice";
 import { User } from "../../features/userProfileSlice";
+import UpdateChannelModal from "../modals/UpdateChannelModal";
 import Member from "./Member";
 import {
   getChannelMembersList,
@@ -19,17 +20,19 @@ import {
   getChannelsList,
   ChannelMessage,
   setUpdateChannelModal,
-  getChannelAdminsList,
   getLoggedUserRole,
+  setNewChannelId,
 } from "../../features/chatSlice";
 interface ContentProps {
   channelName: string;
+  currentChannelID: number;
   channelOwner: User;
 }
 
 const ChannelContent: React.FC<ContentProps> = ({
   channelName,
   channelOwner,
+  currentChannelID,
 }) => {
   const [message, setMessage] = useState("");
   const [toggleMenu, setToggleMenu] = useState(false);
@@ -41,14 +44,14 @@ const ChannelContent: React.FC<ContentProps> = ({
   const { updateMessages, membersList } = useAppSelector(
     (state) => state.globalState
   );
+  const { loggedUser } = useAppSelector((state) => state.user);
   const {
     channelContent,
     channelMembers,
     muteMember,
     memberStatus,
     loggedMemberRole,
-    channelAdmins,
-    currentChannelId,
+    updateChannelModal,
   } = useAppSelector((state) => state.channels);
 
   const sendMessage = (e: React.FormEvent) => {
@@ -75,6 +78,7 @@ const ChannelContent: React.FC<ContentProps> = ({
     socket.emit("leave_channel", { channelId: params.id });
     dispatch(getChannelsList()).then(() => {
       navigate("/channels");
+      dispatch(setNewChannelId({ id: -1, render: false }));
       dispatch(updateChannelState());
     });
   };
@@ -91,72 +95,74 @@ const ChannelContent: React.FC<ContentProps> = ({
     console.log(
       "[Member] newChannelId --------->",
       Number(params.id),
-      currentChannelId,
+      currentChannelID,
       memberStatus
     );
-    if (currentChannelId !== -1) {
-      dispatch(getChannelMembersList(currentChannelId));
-      dispatch(getChannelAdminsList(currentChannelId));
+    if (currentChannelID !== -1) {
+      dispatch(getChannelMembersList(currentChannelID));
     }
   }, [memberStatus]);
 
   useEffect(() => {
-    console.log("[ChannelContent] >>>>>> ", params.id, currentChannelId);
-    if (currentChannelId) {
-      dispatch(getChannelMembersList(currentChannelId));
-      dispatch(getChannelAdminsList(currentChannelId));
+    console.log("[ChannelContent] >>>>>> ", params.id, currentChannelID);
+    if (currentChannelID) {
+      dispatch(getChannelMembersList(currentChannelID));
     }
   }, [membersList]);
 
   useEffect(() => {
     // *************** share member status socket
-    socket.on("member_status_changed", () => {
-      console.log("member status changed ==><==");
-      dispatch(getChannelMembersList(currentChannelId));
-      dispatch(getChannelAdminsList(currentChannelId));
-      dispatch(getLoggedUserRole(currentChannelId));
+    socket.on("member_status_changed", (data) => {
+      console.log(
+        "member status changed ==><==",
+        data.channelId,
+        currentChannelID
+      );
+      dispatch(getChannelMembersList(data.channelId));
+      dispatch(getLoggedUserRole(data.channelId));
     });
 
     // *************** apply member status socket
     socket.on("update_member_status", (data) => {
       let timer;
-      console.log("%cmember status changed: ", "color:pink", currentChannelId);
-      if (data.status === "kick" || data.status === "ban") {
-        dispatch(getChannelMembersList(currentChannelId)).then(() => {
-          navigate("/channels");
-          dispatch(updateChannelState());
-        });
-      } else if (data.status === "mute") {
-        dispatch(getChannelMembersList(currentChannelId));
-        dispatch(getChannelAdminsList(currentChannelId));
-        dispatch(setMuteCountDown());
-        //TODO ** unmute member when the timer is done
-        timer = setTimeout(() => {
+      console.log(
+        "%cmember status changed: ",
+        "color:pink",
+        data.memberId,
+        data.channelId
+      );
+      if (data.memberId === loggedUser.id) {
+        if (data.status === "kick" || data.status === "ban") {
+          dispatch(getChannelMembersList(data.channelId)).then(() => {
+            navigate("/channels");
+            dispatch(setNewChannelId({ id: -1, render: false }));
+            dispatch(updateChannelState());
+          });
+        } else if (data.status === "mute") {
+          dispatch(getChannelMembersList(data.channelId));
+          dispatch(setMuteCountDown());
+          //TODO ** unmute member when the timer is done
+          timer = setTimeout(() => {
+            dispatch(endMuteCountDown("active"));
+            dispatch(getChannelMembersList(data.channelId));
+            console.log(memberStatus);
+          }, data.time * 1000);
+        } else if (data.status === "unmute") {
+          clearTimeout(timer);
           dispatch(endMuteCountDown("active"));
-          dispatch(getChannelMembersList(currentChannelId));
-          console.log(memberStatus);
-        }, data.time * 1000);
-      } else if (data.status === "unmute") {
-        clearTimeout(timer);
-        dispatch(endMuteCountDown("active"));
-        dispatch(getChannelMembersList(currentChannelId));
-        dispatch(getChannelAdminsList(currentChannelId));
-      } else if (data.status === "unban") {
-        dispatch(getChannelMembersList(currentChannelId));
-        dispatch(getChannelAdminsList(currentChannelId));
-      } else if (data.status === "set_admin") {
-        dispatch(getChannelMembersList(currentChannelId));
-        dispatch(getChannelAdminsList(currentChannelId));
-      } else if (data.status === "remove_admin") {
-        dispatch(getChannelMembersList(currentChannelId));
-        dispatch(getChannelAdminsList(currentChannelId));
+          dispatch(getChannelMembersList(data.channelId));
+        } else if (data.status === "unban") {
+          dispatch(getChannelMembersList(data.channelId));
+        } else if (data.status === "set_admin") {
+          dispatch(getChannelMembersList(data.channelId));
+        } else if (data.status === "remove_admin") {
+          dispatch(getChannelMembersList(data.channelId));
+        }
       }
     });
     return () => {
-      // socket.off("receive_message_channel");
       socket.off("member_status_changed");
       socket.off("update_member_status");
-      // socket.off("leave_success");
     };
   }, []);
 
@@ -184,17 +190,39 @@ const ChannelContent: React.FC<ContentProps> = ({
           <div ref={menuRef}>
             {loggedMemberRole.userRole === "owner" ? (
               <RiListSettingsLine
-                onClick={() => dispatch(setUpdateChannelModal(true))}
+                onClick={() => setToggleMenu(true)}
                 size="2rem"
                 className="mr-2 hover:scale-110 transition duration-300 hover:text-blue-400 cursor-pointer"
               />
             ) : (
               <div
                 onClick={leaveChannel}
-                className=" border-gray-500 user-card-bg flex"
+                className="border-gray-500 user-card-bg flex cursor-pointer hover:scale-105 hover:text-blue-400 transition duration-300"
               >
                 Leave
                 <IoMdExit size="1.5rem" className="ml-2" />
+              </div>
+            )}
+            {toggleMenu && (
+              <div className="absolute z-10 top-2 border-gray-500 w-[150px] user-card-bg border user-menu">
+                <ul className="">
+                  <li
+                    onClick={() => {
+                      dispatch(setUpdateChannelModal(true));
+                    }}
+                    className="flex items-center p-1 m-1 font-mono text-sm font-bold hover:bg-opacity-40 hover:bg-gray-400 transition duration-300 cursor-pointer"
+                  >
+                    <MdSettings size="1.5rem" className="mr-2" />
+                    Settings
+                  </li>
+                  <li
+                    onClick={leaveChannel}
+                    className="flex items-center p-1 m-1 font-mono text-sm font-bold hover:bg-opacity-40 hover:bg-gray-400 transition duration-300 cursor-pointer"
+                  >
+                    <IoMdExit size="1.5rem" className="mr-2" />
+                    Leave
+                  </li>
+                </ul>
               </div>
             )}
           </div>
@@ -245,39 +273,51 @@ const ChannelContent: React.FC<ContentProps> = ({
             <p className="text-[12px] font-thin text-gray-400">owner</p>
           </div>
         </div>
-        {channelAdmins.length ? (
+        {channelMembers.filter((member) => member.userRole === "admin")
+          .length ? (
           <div>
             <h1 className="text-gray-300 mt-3">Admins</h1>
-            {channelAdmins.map((admin) => {
-              return (
-                <Member
-                  key={admin.id}
-                  chId={currentChannelId}
-                  {...admin}
-                  channelName={channelName}
-                />
-              );
-            })}
+            {channelMembers
+              .filter((member) => member.userRole === "admin")
+              .map((admin) => {
+                return (
+                  <Member
+                    key={admin.id}
+                    chId={currentChannelID}
+                    {...admin}
+                    channelName={channelName}
+                  />
+                );
+              })}
           </div>
         ) : (
           <div></div>
         )}
-        {channelMembers.length ? (
+        {channelMembers.filter((member) => member.userRole === "member")
+          .length ? (
           <div>
             <h1 className="text-gray-300 mt-3">Members</h1>
-            {channelMembers.map((member) => {
-              return (
-                <Member
-                  key={member.id}
-                  chId={currentChannelId}
-                  {...member}
-                  channelName={channelName}
-                />
-              );
-            })}
+            {channelMembers
+              .filter((member) => member.userRole === "member")
+              .map((member) => {
+                return (
+                  <Member
+                    key={member.id}
+                    chId={currentChannelID}
+                    {...member}
+                    channelName={channelName}
+                  />
+                );
+              })}
           </div>
         ) : (
           <div></div>
+        )}
+        {updateChannelModal && (
+          <UpdateChannelModal
+            channelId={currentChannelID}
+            channelOldName={channelName}
+          />
         )}
       </div>
     </div>

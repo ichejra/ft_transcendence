@@ -118,6 +118,48 @@ export const createChannel = createAsyncThunk(
   }
 );
 
+export const updateChannel = createAsyncThunk(
+  "channels/updateChannel",
+  async (
+    {
+      name,
+      password,
+      type,
+      channelId,
+    }: {
+      name: string;
+      type: string;
+      password: string;
+      channelId: number;
+    },
+    _api
+  ) => {
+    try {
+      console.log("type ", type);
+
+      const response = await axios.patch(
+        `http://localhost:3001/api/channels/${channelId}`,
+        {
+          name,
+          type,
+          password,
+        },
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("[CHAT SLICE] updated channel => ", response.data);
+      return _api.fulfillWithValue(response.data);
+    } catch (error) {
+      console.log("catch------------->", error);
+      return _api.rejectWithValue(error);
+    }
+  }
+);
+
 export const getChannelsList = createAsyncThunk(
   "channels/getChannelsList",
   async (_, _api) => {
@@ -482,6 +524,14 @@ const channelsManagmentSlice = createSlice({
     builder.addCase(createChannel.fulfilled, (state, action: any) => {
       state.channel = action.payload;
     });
+
+    builder.addCase(updateChannel.fulfilled, (state, action: any) => {
+      state.channel = action.payload;
+    });
+    builder.addCase(updateChannel.rejected, (state, action: any) => {
+      console.log("___________rejected", action.payload);
+    });
+
     builder.addCase(getChannelsList.fulfilled, (state, action: any) => {
       state.channels = action.payload;
     });
@@ -538,6 +588,4 @@ export const {
 
 export default channelsManagmentSlice.reducer;
 
-//TODO update channel (name, password, owners)
-//TODO add an openedLock icon for private joined channels
 //TODO online/offline status (profile, friends list)

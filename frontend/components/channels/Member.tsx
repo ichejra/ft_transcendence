@@ -46,9 +46,13 @@ const Member: React.FC<MemberProps> = ({
 
   const setAdmin = (id: number) => {
     dispatch(setMemberAsAdmin({ channelId: chId, memberId: id })).then(() => {
-      socket.emit("member_status_changed", channelName);
+      socket.emit("member_status_changed", {
+        room: channelName,
+        channelId: chId,
+      });
       socket.emit("update_member_status", {
         room: channelName,
+        channelId: chId,
         status: "set_admin",
         userId: id,
       });
@@ -59,9 +63,13 @@ const Member: React.FC<MemberProps> = ({
 
   const removeAdmin = (id: number) => {
     dispatch(setAdminAsMember({ channelId: chId, memberId: id })).then(() => {
-      socket.emit("member_status_changed", channelName);
+      socket.emit("member_status_changed", {
+        room: channelName,
+        channelId: chId,
+      });
       socket.emit("update_member_status", {
         room: channelName,
+        channelId: chId,
         status: "remove_admin",
         userId: id,
       });
@@ -72,9 +80,13 @@ const Member: React.FC<MemberProps> = ({
 
   const muteUser = (id: number) => {
     dispatch(muteChannelMember({ channelId: chId, memberId: id })).then(() => {
-      socket.emit("member_status_changed", channelName);
+      socket.emit("member_status_changed", {
+        room: channelName,
+        channelId: chId,
+      });
       socket.emit("update_member_status", {
         room: channelName,
+        channelId: chId,
         status: "mute",
         userId: id,
         time: 10,
@@ -87,9 +99,13 @@ const Member: React.FC<MemberProps> = ({
   const unmuteUser = (id: number) => {
     dispatch(unmuteChannelMember({ channelId: chId, memberId: id })).then(
       () => {
-        socket.emit("member_status_changed", channelName);
+        socket.emit("member_status_changed", {
+          room: channelName,
+          channelId: chId,
+        });
         socket.emit("update_member_status", {
           room: channelName,
+          channelId: chId,
           status: "unmute",
           userId: id,
         });
@@ -101,9 +117,13 @@ const Member: React.FC<MemberProps> = ({
 
   const banUser = (id: number) => {
     dispatch(banChannelMember({ channelId: chId, memberId: id })).then(() => {
-      socket.emit("member_status_changed", channelName);
+      socket.emit("member_status_changed", {
+        room: channelName,
+        channelId: chId,
+      });
       socket.emit("update_member_status", {
         room: channelName,
+        channelId: chId,
         status: "ban",
         userId: id,
       });
@@ -114,9 +134,13 @@ const Member: React.FC<MemberProps> = ({
 
   const unbanUser = (id: number) => {
     dispatch(unbanChannelMember({ channelId: chId, memberId: id })).then(() => {
-      socket.emit("member_status_changed", channelName);
+      socket.emit("member_status_changed", {
+        room: channelName,
+        channelId: chId,
+      });
       socket.emit("update_member_status", {
         room: channelName,
+        channelId: chId,
         status: "unban",
         userId: id,
       });
@@ -127,9 +151,13 @@ const Member: React.FC<MemberProps> = ({
 
   const kickUser = (id: number) => {
     dispatch(kickChannelMember({ channelId: chId, memberId: id })).then(() => {
-      socket.emit("member_status_changed", channelName);
+      socket.emit("member_status_changed", {
+        room: channelName,
+        channelId: chId,
+      });
       socket.emit("update_member_status", {
         room: channelName,
+        channelId: chId,
         status: "kick",
         userId: id,
       });
