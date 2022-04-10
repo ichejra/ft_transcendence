@@ -1,8 +1,9 @@
 import {
-  Injectable, NotFoundException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ForbiddenException } from 'src/exceptions/forbidden.exception';
 import { Connection } from 'typeorm'
 
 import { UserDto } from './dto/user.dto';
@@ -67,8 +68,8 @@ export class UsersService {
         return user;
       }
       throw new NotFoundException('User not found.');
-    } catch (e) {
-      throw e;
+    } catch (err) {
+      throw (err.statusCode) ? err : new ForbiddenException('Forbidden: cannot update the profile');
     }
   }
 
@@ -83,7 +84,7 @@ export class UsersService {
       }
       throw new NotFoundException('User not found.');
     } catch (err) {
-      throw new NotFoundException('User not found.');
+      throw (err.statusCode) ? err : new ForbiddenException('Forbidden: cannot update the user state');
     }
   }
 
@@ -104,19 +105,20 @@ export class UsersService {
     _res.redirect(this.configService.get('HOME_PAGE'));
   }
 
-  // method used for insert the logged user id and requested user id in a database table("user_friends") with status pending until accept
+  //* method used for insert the logged user id and requested user id in a database table("user_friends") with status pending until accept
   async insertToFriends(userId: any, recipientId: any): Promise<User> {
     try {
-      const relation = await this.connection.getRepository(UserFriends).query(
-        `SELECT "id" FROM user_friends
-        WHERE ("applicantId" = $1 AND "recipientId" = $2)
-        OR ("recipientId" = $1 AND "applicantId" = $2)`,
-        [
-          userId,
-          recipientId
-        ]
-      );
-      if (relation.length === 0) {
+      const relation = await this.connection.getRepository(UserFriends).findOne({
+        relations: ['applicant', 'recipient'],
+        where: [{
+          applicant: userId,
+          recipient: recipientId,
+        }, {
+          applicant: recipientId,
+          recipient: userId,
+        }]
+      })
+      if (!relation) {
         await this.connection.getRepository(UserFriends).save({ applicant: userId, recipient: recipientId });
       }
       const user = await this.connection.getRepository(User).findOne({ where: { id: recipientId } });
@@ -129,7 +131,7 @@ export class UsersService {
     }
   }
 
-  // method used for accept the request friend (applicantId) by update status in databases from pending to accepted
+  //* method used for accept the request friend (applicantId) by update status in databases from pending to accepted
   async acceptFriend(userId, applicantId): Promise<User> {
     try {
       await this.connection.getRepository(UserFriends).query(
@@ -191,7 +193,7 @@ export class UsersService {
       }
       return blocked;
     } catch (error) {
-      throw error;
+      throw (error.statusCode) ? error : new ForbiddenException('cannot block the user');
     }
   }
 
@@ -310,7 +312,7 @@ export class UsersService {
     throw new NotFoundException('User not found');
   }
 
-  /* Turn on the two factor authentication */
+  //* Turn on the two factor authentication
   async turnOnOffTwoFactorAuth(userId: number, bool: boolean): Promise<User> {
     try {
       await this.connection.getRepository(User).update(userId, {
@@ -327,7 +329,7 @@ export class UsersService {
   }
 
 
-  /* get the user profile */
+  //* get the user profile
   getUserProfileById = async (userId: number): Promise<User> => {
     try {
       const user = await this.connection.getRepository(User).findOne(userId);

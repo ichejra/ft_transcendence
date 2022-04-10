@@ -1,6 +1,5 @@
-import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common";
 import { Observable } from "rxjs";
-import { ForbiddenException } from "src/exceptions/forbidden.exception";
 import { Connection } from "typeorm";
 import { UserFriends, UserFriendsRelation } from "../entities/user-friends.entity";
 
