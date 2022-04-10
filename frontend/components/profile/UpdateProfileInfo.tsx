@@ -9,13 +9,14 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { BiEditAlt } from "react-icons/bi";
 
 export const UpdateProfileForm: React.FC = () => {
-  const { loggedUser } = useAppSelector((state) => state.user);
   const [avatar, setAvatar] = useState("");
-  const [username, setUsername] = useState(loggedUser.user_name);
   const [isValid, setIsValid] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const dispatch = useAppDispatch();
-
+  const { error, loggedUser, isLoading } = useAppSelector(
+    (state) => state.user
+  );
+  const [username, setUsername] = useState(loggedUser.user_name);
   const readURL = (e: any) => {
     const img = document.getElementById("profile-picture") as HTMLImageElement;
     img.src = URL.createObjectURL(e.target.files[0]);
@@ -23,7 +24,7 @@ export const UpdateProfileForm: React.FC = () => {
     console.log("new img->", URL.createObjectURL(e.target.files[0]));
   };
 
-  const handleLoginForm = (e: React.FormEvent<EventTarget>) => {
+  const handleProfileUpdate = (e: React.FormEvent<EventTarget>) => {
     e.preventDefault();
     if (isValid !== 2) return;
     const formData = new FormData();
@@ -34,8 +35,16 @@ export const UpdateProfileForm: React.FC = () => {
       completeProfileInfo({
         data: formData,
       })
-    );
-    dispatch(editUserProfile(false));
+    ).then((data: any) => {
+      if (data.error) {
+        setIsValid(0);
+        console.log("rejected _______+++++++++++>>>", data);
+      } else {
+        console.log("fulfilled _______+++++++++++>>>", data);
+        setIsValid(2);
+        dispatch(editUserProfile(false));
+      }
+    });
   };
 
   const handleTwoFactorAuth = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -111,14 +120,12 @@ export const UpdateProfileForm: React.FC = () => {
             Username must be lowercase including numbers and contain 4 - 12
             characters
           </p>
-        ) : isValid === 2 ? (
-          <p
-            className={`w-72 font-sans text-[.8rem] pl-2 text-green-400 font-thin`}
-          >
-            <span className="font-bold">{username}</span> is valid..
+        ) : isValid === 0 ? (
+          <p className="w-72 font-sans text-[.8rem] font-thin text-red-500">
+            {isLoading ? "Loading..." : error.status === 403 && error.message}
           </p>
         ) : (
-          <></>
+          <p></p>
         )}
       </div>
       <div className="flex about-family tracking-wider items-center justify-center mt-2">
@@ -144,7 +151,7 @@ export const UpdateProfileForm: React.FC = () => {
         </button>
         <button
           type="submit"
-          onClick={handleLoginForm}
+          onClick={handleProfileUpdate}
           className={`about-family transition duration-300 border-2 text-gray-900  bg-gray-200 hover:bg-white rounded-md  m-2 p-1 w-[200px] md:w-28 tracking-wider ${
             isValid !== 2 && "opacity-50 cursor-auto"
           }`}

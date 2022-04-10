@@ -41,6 +41,7 @@ const Member: React.FC<MemberProps> = ({
     (state) => state.channels
   );
   const [toggleMenu, setToggleMenu] = useState(false);
+  const [showMuteOptions, setShowMuteOptions] = useState(false);
   const menuRef = useRef<any>(null);
   const dispatch = useAppDispatch();
 
@@ -78,7 +79,12 @@ const Member: React.FC<MemberProps> = ({
     });
   };
 
-  const muteUser = (id: number) => {
+  const setMuteDelay = (id: number) => {
+    setShowMuteOptions(true);
+  };
+
+  const muteUser = (e: any, id: number) => {
+    const muteTime = Number(e.target.dataset.time);
     dispatch(muteChannelMember({ channelId: chId, memberId: id })).then(() => {
       socket.emit("member_status_changed", {
         room: channelName,
@@ -89,10 +95,16 @@ const Member: React.FC<MemberProps> = ({
         channelId: chId,
         status: "mute",
         userId: id,
-        time: 10,
+        time: muteTime,
       });
-      dispatch(getChannelMembersList(chId));
+      dispatch(getChannelMembersList(chId)).then(() => {
+        const timer = setTimeout(() => {
+          unmuteUser(id);
+          clearTimeout(timer);
+        }, muteTime * 1000);
+      });
       setToggleMenu(false);
+      setShowMuteOptions(false);
     });
   };
 
@@ -248,42 +260,100 @@ const Member: React.FC<MemberProps> = ({
 
         {toggleMenu && (
           <div className="absolute z-10 top-2 border-gray-500 w-[230px] user-card-bg border user-menu">
-            <ul className="">
-              {userRole === "admin" &&
-                loggedMemberRole.userRole === "owner" && (
+            {userStatus !== "banned" ? (
+              <ul className="">
+                {userRole === "admin" &&
+                  loggedMemberRole.userRole === "owner" && (
+                    <MenuItem
+                      func={removeAdmin}
+                      user={user}
+                      title="Remove admin"
+                      icon={1}
+                    />
+                  )}
+                {userRole === "member" &&
+                  loggedMemberRole.userRole === "owner" && (
+                    <MenuItem
+                      func={setAdmin}
+                      user={user}
+                      title="Set admin"
+                      icon={2}
+                    />
+                  )}
+                {userStatus !== "muted" ? (
+                  <div>
+                    {!showMuteOptions ? (
+                      <MenuItem
+                        func={setMuteDelay}
+                        user={user}
+                        title="Mute"
+                        icon={3}
+                      />
+                    ) : (
+                      <div className="font-sans flex justify-between text-sm px-2 p-1">
+                        <button
+                          data-time="10"
+                          onClick={(e) => muteUser(e, user.id)}
+                          className="border-[1px] border-gray-700 p-1 hover:bg-blue-300 hover:bg-opacity-30 transition duration-300"
+                        >
+                          10sec
+                        </button>
+                        <button
+                          data-time="300"
+                          onClick={(e) => muteUser(e, user.id)}
+                          className="border-[1px] border-gray-700 p-1 hover:bg-blue-300 hover:bg-opacity-30 transition duration-300"
+                        >
+                          5min
+                        </button>
+                        <button
+                          data-time="3600"
+                          onClick={(e) => muteUser(e, user.id)}
+                          className="border-[1px] border-gray-700 p-1 hover:bg-blue-300 hover:bg-opacity-30 transition duration-300"
+                        >
+                          1h
+                        </button>
+                        <button
+                          data-time="86400"
+                          onClick={(e) => muteUser(e, user.id)}
+                          className="border-[1px] border-gray-700 p-1 hover:bg-blue-300 hover:bg-opacity-30 transition duration-300"
+                        >
+                          24h
+                        </button>
+                        <button
+                          data-time="115516800"
+                          onClick={(e) => muteUser(e, user.id)}
+                          className="border-[1px] border-gray-700 p-1 hover:bg-blue-300 hover:bg-opacity-30 transition duration-300"
+                        >
+                          1337h
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
                   <MenuItem
-                    func={removeAdmin}
+                    func={unmuteUser}
                     user={user}
-                    title="Remove admin"
-                    icon={1}
+                    title="Unmute"
+                    icon={3}
                   />
                 )}
-              {userRole === "member" &&
-                loggedMemberRole.userRole === "owner" && (
+                {userStatus !== "banned" ? (
+                  <MenuItem func={banUser} user={user} title="Ban" icon={4} />
+                ) : (
                   <MenuItem
-                    func={setAdmin}
+                    func={unbanUser}
                     user={user}
-                    title="Set admin"
-                    icon={2}
+                    title="Unban"
+                    icon={4}
                   />
                 )}
-              {userStatus !== "muted" ? (
-                <MenuItem func={muteUser} user={user} title="Mute" icon={3} />
-              ) : (
-                <MenuItem
-                  func={unmuteUser}
-                  user={user}
-                  title="Unmute"
-                  icon={3}
-                />
-              )}
-              {userStatus !== "banned" ? (
-                <MenuItem func={banUser} user={user} title="Ban" icon={4} />
-              ) : (
+                <MenuItem func={kickUser} user={user} title="Kick" icon={5} />
+              </ul>
+            ) : (
+              <ul>
                 <MenuItem func={unbanUser} user={user} title="Unban" icon={4} />
-              )}
-              <MenuItem func={kickUser} user={user} title="Kick" icon={5} />
-            </ul>
+              </ul>
+            )}
           </div>
         )}
       </div>

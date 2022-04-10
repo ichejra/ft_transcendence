@@ -88,15 +88,17 @@ const ChatRooms = () => {
 
   useEffect(() => {
     socket.on("leave_success", (data) => {
-      //TODO send the userRole of the user left the channel
-      /* if (data.userRole === 'owner') {
+      console.log("destroy channe: ", data.removeChannel);
+
+      if (data.removeChannel) {
         navigate("/channels");
         dispatch(getChannelsList()).then(() => {
           setShowChannelContent(false);
         });
-      } */
-      dispatch(getChannelMembersList(data.channelId));
-      console.log("%cleft the channel", "color:red");
+      } else {
+        dispatch(getChannelMembersList(data.channelId));
+        console.log("%cleft the channel", "color:red");
+      }
     });
     socket.on("join_success", (data) => {
       console.log("join_success");
