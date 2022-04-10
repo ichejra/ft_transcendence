@@ -1,5 +1,7 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { ForbiddenException } from 'src/exceptions/forbidden.exception';
+import {
+    ForbiddenException,
+    Injectable
+} from '@nestjs/common';
 import { UserFriends, UserFriendsRelation } from 'src/users/entities/user-friends.entity';
 import { User } from "src/users/entities/user.entity";
 import { Connection } from "typeorm";
@@ -25,7 +27,7 @@ export class MessagesService {
                 content,
             });
         } catch (err) {
-            throw new HttpException('Forbidden: cannot save the messsage', HttpStatus.FORBIDDEN);
+            throw new ForbiddenException('Forbidden: cannot save the messsage');
         }
     }
 
@@ -81,7 +83,7 @@ export class MessagesService {
                 content
             });
         } catch (err) {
-            throw new HttpException('cannot save the messsage', HttpStatus.FORBIDDEN);
+            throw new ForbiddenException('cannot save the messsage');
         }
     }
 
@@ -136,7 +138,7 @@ export class MessagesService {
             );
             return await this.asyncFilter(users, userId);
         } catch (err) {
-            throw new HttpException('connot get the direct chat!', 403);
+            throw new ForbiddenException('connot get the direct chat!');
         }
     }
 }

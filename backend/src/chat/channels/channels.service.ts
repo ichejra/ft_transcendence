@@ -1,4 +1,5 @@
 import {
+    ForbiddenException,
     HttpStatus,
     Injectable, NotFoundException
 } from "@nestjs/common";
@@ -20,7 +21,6 @@ import { MessagesService } from "../messages/messages.service";
 import { ConnectionsService } from "src/events/connections.service";
 import { MessageChannel } from "../messages/entities/message-channel.entity";
 import * as bcrypt from "bcrypt";
-import { ForbiddenException } from "src/exceptions/forbidden.exception";
 import { WsException } from "@nestjs/websockets";
 import { UserFriends, UserFriendsRelation } from "src/users/entities/user-friends.entity";
 
@@ -98,6 +98,7 @@ export class ChannelsService {
         }))
         return members.filter((_, index) => toFilter[index]);
     }
+
     getChannelsMembersByRole = async (userId: number, channelId: number, role?: UserRole): Promise<UserChannel[]> => {
         try {
             const members = await this.connection.getRepository(UserChannel).find({
@@ -136,9 +137,13 @@ export class ChannelsService {
                 await this.removePassword(channelId);
             }
             await this.connection.getRepository(Channel).update(channelId, { name: data.name });
-            return await this.connection.getRepository(Channel).findOne(channelId);
+            const channel = await this.connection.getRepository(Channel).findOne(channelId);
+            if (channel) {
+                return channel;
+            }
+            throw new NotFoundException('Channel not found');
         } catch (err) {
-            throw new NotFoundException('Channel not found.');
+            throw (err.statusCode) ? err : new ForbiddenException('cannot update the channel');
         }
     }
 
