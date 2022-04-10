@@ -28,6 +28,7 @@ export const CompleteProfileInfo: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { error } = useAppSelector((state) => state.user);
 
   const readURL = (e: any) => {
     const img = document.getElementById("profile-picture") as HTMLImageElement;
@@ -47,10 +48,14 @@ export const CompleteProfileInfo: React.FC = () => {
       completeProfileInfo({
         data: formData,
       })
-    ).then(() => {
-      navigate(`/profile/${loggedUser.id}`);
+    ).then((data: any) => {
+      if (data.error) {
+        setIsValid(3);
+      } else {
+        navigate(`/profile/${loggedUser.id}`);
+        dispatch(completeUserInfo(false));
+      }
     });
-    dispatch(completeUserInfo(false));
   };
 
   useEffect(() => {
@@ -112,12 +117,10 @@ export const CompleteProfileInfo: React.FC = () => {
             Username must be lowercase including numbers and contain 4 - 12
             characters
           </p>
-        ) : isValid === 2 ? (
-          <p className={`w-72 text-sm pl-2 text-green-400 font-thin`}>
-            <span className="font-bold">{username}</span> is valid..
-          </p>
         ) : (
-          <></>
+          <p className="w-72 font-sans text-[.8rem] font-thin text-red-500">
+            {isValid === 3 && error.status === 403 && error.message}
+          </p>
         )}
       </div>
       <button

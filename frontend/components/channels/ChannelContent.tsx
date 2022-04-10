@@ -15,13 +15,13 @@ import Member from "./Member";
 import {
   getChannelMembersList,
   updateChannelState,
-  setMuteCountDown,
-  endMuteCountDown,
   getChannelsList,
   ChannelMessage,
   setUpdateChannelModal,
   getLoggedUserRole,
   setNewChannelId,
+  ChannelMember,
+  ChannelOwner,
 } from "../../features/chatSlice";
 interface ContentProps {
   channelName: string;
@@ -57,25 +57,40 @@ const ChannelContent: React.FC<ContentProps> = ({
   const sendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!message) return;
-    socket.emit("send_message_channel", {
-      channelId: params.id,
-      content: message,
-      room: channelName,
-    });
-    setMessage("");
-    messagesDivRef.current?.scrollTo({
-      left: 0,
-      top: messagesDivRef.current.scrollHeight,
-      behavior: "smooth",
+    dispatch(getLoggedUserRole(Number(params.id))).then((data: any) => {
+      const loggedMember: ChannelOwner = data.payload;
+      console.log("-_-_-_-_>>", loggedMember.userStatus);
+      socket.emit("send_message_channel", {
+        channelId: params.id,
+        content: message,
+        room: channelName,
+        senderStatus: loggedMember.userStatus,
+      });
+      setMessage("");
+      messagesDivRef.current?.scrollTo({
+        left: 0,
+        top: messagesDivRef.current.scrollHeight,
+        behavior: "smooth",
+      });
     });
   };
 
   const handleChange = (e: any) => {
+    const value = e.target.value;
+    if (value.length > 200) {
+      return;
+    }
     setMessage(e.target.value);
   };
 
   const leaveChannel = async () => {
-    socket.emit("leave_channel", { channelId: params.id });
+    socket.emit("leave_channel", {
+      channelId: params.id,
+      removeChannel:
+        channelOwner.id === loggedUser.id &&
+        channelMembers.filter((member) => member.userRole === "admin")
+          .length === 0,
+    });
     dispatch(getChannelsList()).then(() => {
       navigate("/channels");
       dispatch(setNewChannelId({ id: -1, render: false }));
@@ -124,7 +139,6 @@ const ChannelContent: React.FC<ContentProps> = ({
 
     // *************** apply member status socket
     socket.on("update_member_status", (data) => {
-      let timer;
       console.log(
         "%cmember status changed: ",
         "color:pink",
@@ -138,24 +152,7 @@ const ChannelContent: React.FC<ContentProps> = ({
             dispatch(setNewChannelId({ id: -1, render: false }));
             dispatch(updateChannelState());
           });
-        } else if (data.status === "mute") {
-          dispatch(getChannelMembersList(data.channelId));
-          dispatch(setMuteCountDown());
-          //TODO ** unmute member when the timer is done
-          timer = setTimeout(() => {
-            dispatch(endMuteCountDown("active"));
-            dispatch(getChannelMembersList(data.channelId));
-            console.log(memberStatus);
-          }, data.time * 1000);
-        } else if (data.status === "unmute") {
-          clearTimeout(timer);
-          dispatch(endMuteCountDown("active"));
-          dispatch(getChannelMembersList(data.channelId));
-        } else if (data.status === "unban") {
-          dispatch(getChannelMembersList(data.channelId));
-        } else if (data.status === "set_admin") {
-          dispatch(getChannelMembersList(data.channelId));
-        } else if (data.status === "remove_admin") {
+        } else {
           dispatch(getChannelMembersList(data.channelId));
         }
       }
@@ -231,16 +228,11 @@ const ChannelContent: React.FC<ContentProps> = ({
           messagesDivRef={messagesDivRef}
           channelContent={channelContent}
         />
-
-        {!muteMember ? (
-          <MessageForm
-            message={message}
-            handleChange={handleChange}
-            sendMessage={sendMessage}
-          />
-        ) : (
-          <Timer />
-        )}
+        <MessageForm
+          message={message}
+          handleChange={handleChange}
+          sendMessage={sendMessage}
+        />
       </div>
       <div className="h-full pt-12 px-4 my-2 w-[400px] border-l border-gray-700 user-card-bg">
         <h1 className="text-gray-300 pb-2">Owner</h1>
@@ -276,19 +268,14 @@ const ChannelContent: React.FC<ContentProps> = ({
         {channelMembers.filter((member) => member.userRole === "admin")
           .length ? (
           <div>
-            <h1 className="text-gray-300 mt-3">Admins</h1>
-            {channelMembers
-              .filter((member) => member.userRole === "admin")
-              .map((admin) => {
-                return (
-                  <Member
-                    key={admin.id}
-                    chId={currentChannelID}
-                    {...admin}
-                    channelName={channelName}
-                  />
-                );
-              })}
+            <UsersList
+              members={channelMembers.filter(
+                (member) => member.userRole === "admin"
+              )}
+              channelName={channelName}
+              title="Admins"
+              currentChannelID={currentChannelID}
+            />
           </div>
         ) : (
           <div></div>
@@ -296,19 +283,14 @@ const ChannelContent: React.FC<ContentProps> = ({
         {channelMembers.filter((member) => member.userRole === "member")
           .length ? (
           <div>
-            <h1 className="text-gray-300 mt-3">Members</h1>
-            {channelMembers
-              .filter((member) => member.userRole === "member")
-              .map((member) => {
-                return (
-                  <Member
-                    key={member.id}
-                    chId={currentChannelID}
-                    {...member}
-                    channelName={channelName}
-                  />
-                );
-              })}
+            <UsersList
+              members={channelMembers.filter(
+                (member) => member.userRole === "member"
+              )}
+              channelName={channelName}
+              title="Members"
+              currentChannelID={currentChannelID}
+            />
           </div>
         ) : (
           <div></div>
@@ -320,6 +302,37 @@ const ChannelContent: React.FC<ContentProps> = ({
           />
         )}
       </div>
+    </div>
+  );
+};
+
+//? Channel Members___________________
+interface UsersListProps {
+  members: ChannelMember[];
+  currentChannelID: number;
+  channelName: string;
+  title: string;
+}
+
+const UsersList: React.FC<UsersListProps> = ({
+  members,
+  currentChannelID,
+  channelName,
+  title,
+}) => {
+  return (
+    <div>
+      <h1 className="text-gray-300 mt-3">{title}</h1>
+      {members.map((member) => {
+        return (
+          <Member
+            key={member.id}
+            chId={currentChannelID}
+            {...member}
+            channelName={channelName}
+          />
+        );
+      })}
     </div>
   );
 };
@@ -398,6 +411,7 @@ const MessageForm: React.FC<FormProps> = ({
           ref={inputRef}
           type="text"
           value={message}
+          maxLength={200}
           onChange={(e) => handleChange(e)}
           placeholder="new message"
           className="w-full p-3 pr-12 rounded-md user-card-bg border border-gray-700 text-gray-200 text-sm"
@@ -413,53 +427,6 @@ const MessageForm: React.FC<FormProps> = ({
           />
         </button>
       </form>
-    </div>
-  );
-};
-
-//? Mute Timer________________
-const Timer = () => {
-  const [timer, setTimer] = useState("");
-  const [muteTime, setMuteTime] = useState(10);
-
-  const muteTimer = (seconds: number) => {
-    const now = Date.now();
-    const then = now + seconds * 1000;
-    displayTimeLeft(seconds);
-    const countdown = setInterval(() => {
-      const secondsLeft = Math.round((then - Date.now()) / 1000);
-      if (secondsLeft < 0) {
-        clearInterval(countdown);
-        return;
-      }
-      displayTimeLeft(secondsLeft);
-    }, 1000);
-  };
-
-  const displayTimeLeft = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    let secondsLeft = seconds % 3600;
-    const minutes = Math.floor(secondsLeft / 60);
-    secondsLeft = secondsLeft % 60;
-
-    setTimer(
-      `${hours < 10 ? "0" : ""}${hours}:${minutes < 10 ? "0" : ""}${minutes}:${
-        secondsLeft < 10 ? "0" : ""
-      }${secondsLeft}`
-    );
-  };
-
-  useEffect(() => {
-    muteTimer(muteTime);
-  }, []);
-
-  return (
-    <div className="absolute bottom-20 flex justify-center items-center w-full h-[60px] bg-red-600">
-      <p className="flex items-center font-sans">
-        {" "}
-        You have been muted for:
-        <span className="ml-2 text-[1.5rem] font-sans">{timer}</span>
-      </p>
     </div>
   );
 };

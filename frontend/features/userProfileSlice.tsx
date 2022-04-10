@@ -23,7 +23,7 @@ interface History {
 interface UserState {
   isLoading: boolean;
   isPageLoading: boolean;
-
+  error: { status: number; message: string };
   loggedUser: User;
   user: User;
   users: User[];
@@ -54,7 +54,7 @@ const user: User = {
 const initialState: UserState = {
   isLoading: false,
   isPageLoading: false,
-
+  error: { status: 200, message: "OK" },
   isLoggedIn: false,
   loggedUser: user,
   user: user,
@@ -85,8 +85,8 @@ export const fetchNoRelationUsers = createAsyncThunk(
       console.log("[US] NRU ==>", response.data);
 
       return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      return _api.rejectWithValue(error);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -106,8 +106,8 @@ export const fetchAllUsers = createAsyncThunk(
       console.log("[US] ARU ==>", response.data);
 
       return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      return _api.rejectWithValue(error);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -197,8 +197,8 @@ export const fetchUserFriends = createAsyncThunk(
       console.log("[US] Friends => ", response.data);
 
       return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      return _api.rejectWithValue(error);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -207,6 +207,7 @@ export const completeProfileInfo = createAsyncThunk(
   "user/completeProfileInfo",
   async ({ data }: { data: FormData }, _api) => {
     try {
+      console.log("");
       const response = await axios.patch(
         `http://localhost:3001/api/users/update-profile`,
         data,
@@ -219,7 +220,8 @@ export const completeProfileInfo = createAsyncThunk(
       );
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
-      _api.rejectWithValue(error.message);
+      console.log();
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -311,8 +313,15 @@ export const userProfileSlice = createSlice({
     builder.addCase(completeProfileInfo.fulfilled, (state, action: any) => {
       state.loggedUser = action.payload;
       state.completeInfo = true;
+      state.isLoading = false;
     });
-    builder.addCase(completeProfileInfo.rejected, (state, action: any) => {});
+    builder.addCase(completeProfileInfo.pending, (state, action: any) => {
+      state.isLoading = true;
+    });
+    builder.addCase(completeProfileInfo.rejected, (state, action: any) => {
+      state.error = { status: 403, message: "This username is not available" };
+      state.isLoading = false;
+    });
 
     //* User friends
     builder.addCase(fetchUserFriends.fulfilled, (state, action: any) => {

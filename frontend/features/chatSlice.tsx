@@ -56,6 +56,7 @@ interface InitialState {
   memberStatus: string;
   muteMember: boolean;
   currentChannelId: number;
+  error: { status: number; message: string };
 }
 
 const initialState: InitialState = {
@@ -79,6 +80,7 @@ const initialState: InitialState = {
   memberStatus: "",
   muteMember: false,
   currentChannelId: -1,
+  error: { status: 200, message: "OK" },
 };
 
 export const createChannel = createAsyncThunk(
@@ -112,8 +114,8 @@ export const createChannel = createAsyncThunk(
       );
       console.log("[CHAT SLICE] created channel => ", response.data);
       return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      return _api.rejectWithValue(error);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -135,7 +137,7 @@ export const updateChannel = createAsyncThunk(
     _api
   ) => {
     try {
-      console.log("type ", type);
+      console.log("==================> ", name, password, type, channelId);
 
       const response = await axios.patch(
         `http://localhost:3001/api/channels/${channelId}`,
@@ -153,9 +155,8 @@ export const updateChannel = createAsyncThunk(
       );
       console.log("[CHAT SLICE] updated channel => ", response.data);
       return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      console.log("catch------------->", error);
-      return _api.rejectWithValue(error);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -173,8 +174,8 @@ export const getChannelsList = createAsyncThunk(
         }
       );
       return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      return _api.rejectWithValue(error);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -192,8 +193,8 @@ export const fetchUnjoinedChannels = createAsyncThunk(
         }
       );
       return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      return _api.rejectWithValue(error);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -213,8 +214,8 @@ export const getSingleChannel = createAsyncThunk(
       console.log("[CHAT SLICE] single channel => ", response.data);
 
       return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      return _api.rejectWithValue(error);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -232,8 +233,8 @@ export const getLoggedUserRole = createAsyncThunk(
         }
       );
       return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      return _api.rejectWithValue(error);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -251,8 +252,8 @@ export const getChannelMembersList = createAsyncThunk(
         }
       );
       return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      return _api.rejectWithValue(error);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -270,8 +271,8 @@ export const getChannelAdminsList = createAsyncThunk(
         }
       );
       return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      return _api.rejectWithValue(error);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -293,8 +294,8 @@ export const setMemberAsAdmin = createAsyncThunk(
         }
       );
       return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      return _api.rejectWithValue(error);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -316,8 +317,8 @@ export const setAdminAsMember = createAsyncThunk(
         }
       );
       return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      return _api.rejectWithValue(error);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -339,8 +340,8 @@ export const muteChannelMember = createAsyncThunk(
         }
       );
       return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      return _api.rejectWithValue(error);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -362,8 +363,8 @@ export const unmuteChannelMember = createAsyncThunk(
         }
       );
       return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      return _api.rejectWithValue(error);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -385,8 +386,8 @@ export const banChannelMember = createAsyncThunk(
         }
       );
       return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      return _api.rejectWithValue(error);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -408,8 +409,8 @@ export const unbanChannelMember = createAsyncThunk(
         }
       );
       return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      return _api.rejectWithValue(error);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -431,8 +432,8 @@ export const kickChannelMember = createAsyncThunk(
         }
       );
       return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      return _api.rejectWithValue(error);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -451,8 +452,8 @@ export const getChannelContent = createAsyncThunk(
       );
       console.log("[CHAT SLICE] channel content =>", response.data);
       return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      return _api.rejectWithValue(error);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -524,12 +525,15 @@ const channelsManagmentSlice = createSlice({
     builder.addCase(createChannel.fulfilled, (state, action: any) => {
       state.channel = action.payload;
     });
+    builder.addCase(createChannel.rejected, (state, action: any) => {
+      state.error = { status: 403, message: "This name is not available." };
+    });
 
     builder.addCase(updateChannel.fulfilled, (state, action: any) => {
       state.channel = action.payload;
     });
     builder.addCase(updateChannel.rejected, (state, action: any) => {
-      console.log("___________rejected", action.payload);
+      state.error = { status: 403, message: "This name is not available." };
     });
 
     builder.addCase(getChannelsList.fulfilled, (state, action: any) => {

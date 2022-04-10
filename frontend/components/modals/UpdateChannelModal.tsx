@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { useAppDispatch } from "../../app/hooks";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   setUpdateChannelModal,
   Channel,
@@ -23,7 +23,7 @@ const UpdateChannelModal: React.FC<Props> = ({ channelId, channelOldName }) => {
   const [isValid, setIsValid] = useState(0);
   const [channelName, setChannelName] = useState(channelOldName);
   const [channelPass, setChannelPass] = useState("");
-  const [errorMsg, setErrorMsg] = useState({ status: 200, message: "OK" });
+  const { error } = useAppSelector((state) => state.channels);
 
   const submitChannelUpdate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,25 +35,17 @@ const UpdateChannelModal: React.FC<Props> = ({ channelId, channelOldName }) => {
         type: isPrivate ? "private" : "public",
         channelId,
       })
-    )
-      .then((data: any) => {
-        console.log("response: ", data);
-        if (data.error) {
-          const { status } = data.payload.response.data;
-          console.log("==> ", status);
-          setErrorMsg({ status, message: "This name is not available" });
-        } else {
-          setErrorMsg({ status: 200, message: "OK" });
-          const updatedChannel: Channel = data.payload;
-          dispatch(getChannelsList()).then(() => {
-            dispatch(setNewChannelId({ id: updatedChannel.id, render: true }));
-            dispatch(setUpdateChannelModal(false));
-          });
-        }
-      })
-      .catch((error) => {
-        console.log("____________error", error);
-      });
+    ).then((data: any) => {
+      if (data.error) {
+        setIsValid(3);
+      } else {
+        const updatedChannel: Channel = data.payload;
+        dispatch(getChannelsList()).then(() => {
+          dispatch(setNewChannelId({ id: updatedChannel.id, render: true }));
+          dispatch(setUpdateChannelModal(false));
+        });
+      }
+    });
   };
 
   const handleRadioChange = () => {
@@ -115,8 +107,8 @@ const UpdateChannelModal: React.FC<Props> = ({ channelId, channelOldName }) => {
                   onChange={(e) => setChannelName(e.target.value)}
                   className="text-sm m-2 p-2 w-[300px] bg-transparent border border-gray-700"
                 />
-                <p className="font-sans text-sm text-red-500">
-                  {errorMsg.status === 403 && errorMsg.message}
+                <p className="font-sans w-full ml-3 text-xs text-red-500">
+                  {isValid === 3 && error.status === 403 && error.message}
                 </p>
                 <div className="w-full px-2 flex justify-start items-center">
                   <RadioButton

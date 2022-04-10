@@ -17,6 +17,7 @@ const NewChannelModal: React.FC = () => {
   const [isValid, setIsValid] = useState(0);
   const [channelName, setChannelName] = useState("");
   const [channelPass, setChannelPass] = useState("");
+  const { error } = useAppSelector((state) => state.channels);
 
   const handleRadioChange = () => {
     setIsPrivate(!isPrivate);
@@ -36,12 +37,17 @@ const NewChannelModal: React.FC = () => {
         type: isPrivate ? "private" : "public",
       })
     ).then((data: any) => {
-      const newChannel: Channel = data.payload.channel;
-      socket.emit("create_channel", { room: newChannel.name });
-      dispatch(getChannelsList()).then(() => {
-        dispatch(setNewChannelId({ id: newChannel.id, render: true }));
-        dispatch(setNewChannelModal(false));
-      });
+      if (data.error) {
+        console.log("________> Rejected");
+        setIsValid(3);
+      } else {
+        const newChannel: Channel = data.payload.channel;
+        socket.emit("create_channel", { room: newChannel.name });
+        dispatch(getChannelsList()).then(() => {
+          dispatch(setNewChannelId({ id: newChannel.id, render: true }));
+          dispatch(setNewChannelModal(false));
+        });
+      }
     });
   };
 
@@ -88,6 +94,9 @@ const NewChannelModal: React.FC = () => {
                   onChange={(e) => setChannelName(e.target.value)}
                   className="text-sm m-2 p-2 w-[300px] bg-transparent border border-gray-700"
                 />
+                <p className="font-sans w-full ml-3 text-xs text-red-500">
+                  {isValid === 3 && error.status === 403 && error.message}
+                </p>
                 <div className="w-full px-2 flex justify-start items-center">
                   <RadioButton
                     label="Public"
