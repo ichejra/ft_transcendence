@@ -13,7 +13,6 @@ export class Consts {
   static readonly PADDLE_DIFF = 10;
   static readonly L_PADDLE_X = 0 + 20; // 20 is the pad dist from the border
   static readonly R_PADDLE_X = Consts.CANVAS_W - Consts.PADDLE_W - 20;
-  static readonly M_PADDLE_X = Consts.CANVAS_W / 2 - Consts.PADDLE_W / 2;
   static readonly PADDLE_INIT_Y = Consts.CANVAS_H / 2 - Consts.PADDLE_H / 2;
   static readonly framePerSec = 60;
 }

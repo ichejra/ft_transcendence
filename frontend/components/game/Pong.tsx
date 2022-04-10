@@ -371,16 +371,16 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   return (
     <div className="flex w-full flex-col items-center justify-center">
       {users.length === 0 && userType === "player" && (
-        <div className="items-center flex justify-center p-22 md:mt-64 mt-52 w-full">
+        <div className="items-center flex justify-center p-22 md:mt-64 mt-52">
           <GameRules />
         </div>
       )}
       {userType === "player" && users.length === 0 && joined === false && (
         <div
           ref={playBtnsRef}
-          className="flex md:flex-row flex-col items-center justify-between md:w-[50rem] m-20"
+          className="flex md:flex-row flex-col items-center justify-between md:w-[43rem] lg:w-[50rem] mx-10 my-20 md:m-20"
         >
-          <div className="button ">
+          <div className="button">
             <button type="button" className="text-white" onClick={joinMatch}>
               Play Pong
             </button>
@@ -442,9 +442,6 @@ const Pong: React.FC<UserType> = ({ userType }) => {
           location.pathname === "/watch" && (
             <div className="play-again-btn items-center">
               <button
-                // onClick={() => {
-                //   navigate('/game');
-                // }}
                 onClick={handlePlayForSpec}
               >
                 Play Now
