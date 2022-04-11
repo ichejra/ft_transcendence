@@ -139,7 +139,8 @@ export class ChatGatway implements OnGatewayInit, OnGatewayConnection, OnGateway
             this.server.to(channel.name).emit('leave_success', {
                 message: "success",
                 status: 200,
-                channelId: channel.id
+                channelId: channel.id,
+                removeChannel: payload.removeChannel
             });
         } catch (error) {
             throw new WsException('leave the channel unsuccessfully.');
