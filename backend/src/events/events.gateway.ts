@@ -20,10 +20,12 @@ import {
 } from "socket.io";
 import { WsExceptionsFilter } from "src/exceptions/ws-exceptions.filter";
 import { ConnectionsService } from "./connections.service";
+import * as dotenv from "dotenv";
 
+dotenv.config();
 @UseFilters(new WsExceptionsFilter)
 @WebSocketGateway({
-    cors: true,
+    cors: process.env.FRONTEND_URL,
 })
 export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 

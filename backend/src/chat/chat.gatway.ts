@@ -26,12 +26,14 @@ import { MessageChannel } from "./messages/entities/message-channel.entity";
 import { DirectChatService } from "./direct-chat/direct-chat.service";
 import { ConnectionsService } from "src/events/connections.service";
 import { WsExceptionsFilter } from "src/exceptions/ws-exceptions.filter";
+import * as dotenv from 'dotenv';
 
+dotenv.config();
 @UseFilters(WsExceptionsFilter)
 @UsePipes(new ValidationPipe())
 @WebSocketGateway({
     cors: {
-        origin: true, // FRONTEND_URL
+        origin: process.env.FRONTEND_URL, // FRONTEND_URL
     },
 })
 export class ChatGatway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
