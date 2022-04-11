@@ -168,7 +168,7 @@ export class UsersService {
       if (!blocked) {
         throw new NotFoundException('User not found');
       }
-      let relation = await this.connection.getRepository(UserFriends).findOne({
+      const relation = await this.connection.getRepository(UserFriends).findOne({
         relations: ['applicant', 'recipient'],
         where: [{
           applicant: userId,
@@ -178,7 +178,7 @@ export class UsersService {
           recipient: userId
         }]
       });
-      if (relation) {
+      if (!relation) {
         await this.connection.getRepository(UserFriends).save({
           applicant: blocker,
           recipient: blocked,
@@ -211,7 +211,11 @@ export class UsersService {
           userId,
           unblockId
         ]);
-      const user = await this.connection.getRepository(User).findOne({ where: { id: unblockId } });
+      const user = await this.connection.getRepository(User).findOne({
+        where: {
+          id: unblockId
+        }
+      });
       if (user) {
         return user;
       }
