@@ -68,15 +68,19 @@ export class ChannelsService {
     /* get a channel by id */
     async getChannelById(channelId: number): Promise<UserChannel> {
         try {
-            return await this.connection.getRepository(UserChannel).findOne({
+            const uc = await this.connection.getRepository(UserChannel).findOne({
                 relations: ['user', 'channel'],
                 where: {
                     channel: channelId,
                     userRole: UserRole.OWNER
                 }
             });
-        } catch (err) {
+            if (uc) {
+                return uc;
+            }
             throw new NotFoundException('Channel not found.');
+        } catch (err) {
+            throw err;
         }
     }
 
@@ -196,33 +200,35 @@ export class ChannelsService {
         // get user_channel relation
         const user = await this.connectionsService.getUserFromSocket(socket);
         const channel = await this.connection.getRepository(Channel).findOne(payload.channelId);
-        const relation = await this.connection.getRepository(UserChannel).findOne({
+        const userCh = await this.connection.getRepository(UserChannel).findOne({
             where: {
                 user,
                 channel
             }
         });
         // remove relation in user_channel
-        await this.connection.getRepository(UserChannel).query(
-            `DELETE FROM user_channel
-            WHERE "user_channel"."channelId" = $1
-            AND "user_channel"."userId" = $2`,
-            [channel.id, user.id]
-        );
-        if (relation.userRole === UserRole.OWNER) {
-            const admins = await this.connection.getRepository(UserChannel).query(
-                `SELECT * FROM user_channel
-                WHERE "user_channel"."channelId" = $1
-                AND "user_channel"."userRole" = $2`,
-                [channel.id, UserRole.ADMIN]
-            );
-            if (admins.length === 0) {
+        await this.connection.getRepository(UserChannel).delete({
+            channel,
+            user,
+        });
+        if (userCh.userRole === UserRole.OWNER) {
+            let adminCh = await this.connection.getRepository(UserChannel).findOne({
+                relations: ['user', 'channel'],
+                where: {
+                    channel,
+                    userRole: UserRole.ADMIN,
+                }
+            });
+            if (!adminCh) {
                 await this.deleteChannel(channel.id);
             } else {
-                await this.connection.getRepository(UserChannel).update({
-                    user: admins[0],
-                    channel: channel
-                }, { userRole: UserRole.OWNER });
+                await this.connection.getRepository(UserChannel).query(
+                    `UPDATE user_channel
+                    SET "userRole" = $1
+                    WHERE "channelId" = $2
+                    AND "userId" = $3`,
+                    [UserRole.OWNER, channel.id, adminCh.user.id]
+                );
             }
         }
         return channel;
