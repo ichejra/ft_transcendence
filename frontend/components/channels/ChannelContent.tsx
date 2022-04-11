@@ -182,8 +182,8 @@ const ChannelContent: React.FC<ContentProps> = ({
   return (
     <div className="relative text-white right-0 flex h-full w-full">
       <div className="relative w-full">
-        <div className="fixed user-card-bg border-b border-l border-gray-700 shadow-gray-700  shadow-sm left-[7.4rem] text-white p-2 right-0 flex items-center justify-between">
-          <h1 className="text-xl">#{channelName.split(" ").join("-")}</h1>
+        <div className="fixed user-card-bg border-b border-l border-gray-700 shadow-gray-700  shadow-sm left-[4.2rem] md:left-[7.4rem] text-white p-1 md:p-2 right-0 flex items-center justify-between">
+          <h1 className="md:text-xl">#{channelName.split(" ").join("-")}</h1>
           <div ref={menuRef}>
             {loggedMemberRole.userRole === "owner" ? (
               <RiListSettingsLine
@@ -194,9 +194,9 @@ const ChannelContent: React.FC<ContentProps> = ({
             ) : (
               <div
                 onClick={leaveChannel}
-                className="border-gray-500 user-card-bg flex cursor-pointer hover:scale-105 hover:text-blue-400 transition duration-300"
+                className="border-gray-500 user-card-bg flex items-center cursor-pointer hover:scale-105 hover:text-blue-400 transition duration-300"
               >
-                Leave
+                <p className="text-sm md:text-md">Leave</p>
                 <IoMdExit size="1.5rem" className="ml-2" />
               </div>
             )}
@@ -234,7 +234,7 @@ const ChannelContent: React.FC<ContentProps> = ({
           sendMessage={sendMessage}
         />
       </div>
-      <div className="h-full pt-12 px-4 my-2 w-[400px] border-l border-gray-700 user-card-bg">
+      <div className="hidden md:block h-full pt-12 px-4 my-2 w-[400px] border-l border-gray-700 user-card-bg">
         <h1 className="text-gray-300 pb-2">Owner</h1>
         <div className="flex items-center">
           <div className="relative">
@@ -350,7 +350,7 @@ const ChannelMessages: React.FC<ChannelMessagesProps> = ({
   return (
     <div
       ref={messagesDivRef}
-      className="mx-6 pt-10 pb-52 h-full channels-bar-bg overflow-auto no-scrollbar"
+      className="mx-3 md:mx-6 pt-8 md:pt-10 pb-52 h-full channels-bar-bg overflow-auto no-scrollbar"
     >
       {channelContent.map((message) => {
         const { id, createdAt, content, author } = message;
@@ -358,12 +358,12 @@ const ChannelMessages: React.FC<ChannelMessagesProps> = ({
           <div key={id} className="my-6 mr-2 flex about-family items-start">
             <img
               src={author?.avatar_url}
-              className="w-10 h-10 rounded-full mr-2"
+              className="w-9 h-9 md:w-10 md:h-10 rounded-full mr-2"
             />
             <div>
-              <p className="text-gray-300 text-lg">
+              <p className="text-gray-300 text-sm md:text-lg">
                 {author?.user_name}
-                <span className="text-gray-500 text-xs mx-1">
+                <span className="text-gray-500 text-[8px] md:text-xs mx-1">
                   {new Date(createdAt).toLocaleString("default", {
                     hour: "2-digit",
                     minute: "2-digit",

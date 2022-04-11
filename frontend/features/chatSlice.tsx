@@ -542,9 +542,15 @@ const channelsManagmentSlice = createSlice({
     builder.addCase(fetchUnjoinedChannels.fulfilled, (state, action: any) => {
       state.unjoinedChannels = action.payload;
     });
+
     builder.addCase(getSingleChannel.fulfilled, (state, action: any) => {
       state.channel = action.payload;
+      state.error = { status: 200, message: "ok" };
     });
+    builder.addCase(getSingleChannel.rejected, (state, action: any) => {
+      state.error = { status: 404, message: "this resource is not available" };
+    });
+
     builder.addCase(getLoggedUserRole.fulfilled, (state, action: any) => {
       state.loggedMemberRole = action.payload;
     });

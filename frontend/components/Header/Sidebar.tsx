@@ -55,6 +55,17 @@ const Sidebar = () => {
           </Link>
         </li>
         <li>
+          <Link to="/direct">
+            <button
+              className="rounded-lg text-left w-full  hover:bg-gray-600 transition duration-300 cursor-pointer text-lg font-medium mx-2 py-4 px-2"
+              onClick={() => dispatch(closeSidebar())}
+              type="button"
+            >
+              Chat
+            </button>
+          </Link>
+        </li>
+        <li>
           <Link to="/game">
             <button
               className="rounded-lg text-left w-full  hover:bg-gray-600 transition duration-300 cursor-pointer text-lg font-medium mx-2 py-4 px-2"
@@ -83,7 +94,7 @@ const Sidebar = () => {
               onClick={() => dispatch(closeSidebar())}
               type="button"
             >
-              Live Games
+              Live
             </button>
           </Link>
         </li>

@@ -186,6 +186,7 @@ const Member: React.FC<MemberProps> = ({
         !menuRef.current.contains(e.target)
       ) {
         setToggleMenu(false);
+        setShowMuteOptions(false);
       }
     };
     document.addEventListener("mousedown", updateUserMenu);

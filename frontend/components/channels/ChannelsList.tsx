@@ -31,7 +31,6 @@ const ChannelsList: React.FC<Props> = ({ getCurrentChannelContent }) => {
 
   return (
     <div>
-      <hr className="mx-10" />
       {channels.map((channel) => {
         const { id, name, type } = channel;
         return (
@@ -40,7 +39,7 @@ const ChannelsList: React.FC<Props> = ({ getCurrentChannelContent }) => {
             onClick={() => getCurrentChannelContent(id)}
             className={`hover:scale-105 ${
               id === Number(params.id) && "highlight"
-            } relative cursor-pointer transition duration-300 border border-blue-400 bg-transparent text-gray-200 rounded-xl w-[70px] h-[70px] flex items-center justify-center mx-6 my-3`}
+            } relative cursor-pointer transition duration-300 border border-blue-400 bg-transparent text-gray-200 rounded-xl w-[50px] h-[50px] md:w-[70px] md:h-[70px] flex items-center justify-center mx-2 md:mx-6 my-3`}
           >
             {type === "private" && (
               <div className="absolute -top-[8px] -right-[8px]">
@@ -59,15 +58,15 @@ const ChannelsList: React.FC<Props> = ({ getCurrentChannelContent }) => {
       })}
       <div
         onClick={createChannel}
-        className="hover:scale-105 cursor-pointer transition duration-300 border border-blue-400 bg-transparent text-gray-200 rounded-lg w-[70px] h-[70px] flex items-center justify-center mx-6 my-3"
+        className="hover:scale-105 cursor-pointer transition duration-300 border border-blue-400 bg-transparent text-gray-200 rounded-lg w-[50px] h-[50px] md:w-[70px] md:h-[70px] flex items-center justify-center mx-2 md:mx-6 my-3"
       >
-        <HiViewGridAdd size="3rem" />
+        <HiViewGridAdd className="w-8 h-8 md:w-12 md:h-12" />
       </div>
       <div
         onClick={exploreUnjoinedChannels}
-        className="hover:scale-105 cursor-pointer transition duration-300 border border-blue-400 bg-transparent text-gray-200 rounded-lg w-[70px] h-[70px] flex items-center justify-center mx-6 my-3"
+        className="hover:scale-105 cursor-pointer transition duration-300 border border-blue-400 bg-transparent text-gray-200 rounded-lg w-[50px] h-[50px] md:w-[70px] md:h-[70px] flex items-center justify-center mx-2 md:mx-6 my-3"
       >
-        <MdExplore size="3rem" />
+        <MdExplore className="w-8 h-8 md:w-12 md:h-12" />
       </div>
     </div>
   );
