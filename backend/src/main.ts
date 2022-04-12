@@ -15,12 +15,13 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   app.enableCors({
     origin: configService.get('FRONTEND_URL'),
+    credentials: true,
   });
   app.useGlobalFilters(new ExceptionsFilter());
   app.setGlobalPrefix('api', { exclude: ['auth'] });
   app.useGlobalPipes(new ValidationPipe());
-  await app.listen(configService.get('PORT') || 3001, async () => {
-    logger.log(`App listening on ${await app.getUrl()}`)
+  await app.listen(configService.get('PORT') ?? 3001, async () => {
+    logger.log(`App running on ${await app.getUrl()}`)
   });
 }
 bootstrap();
