@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -12,6 +13,8 @@ import {
   UserFriendsRelation
 } from './entities/user-friends.entity';
 import { User, UserState } from './entities/user.entity';
+import * as fs from 'fs';
+import * as ImageType from 'image-type';
 
 @Injectable()
 export class UsersService {
@@ -50,6 +53,11 @@ export class UsersService {
 
   async updateProfile(id: number, user_name: string, file: Express.Multer.File): Promise<User> {
     try {
+      const buffer = fs.readFileSync(`${file.destination}/${file.filename}`);
+      if (!buffer || !ImageType(buffer)) {
+        fs.unlinkSync(`${file.destination}/${file.filename}`);
+        throw new ForbiddenException('invalid image.');
+      }
       if (!file && user_name) {
         await this.connection.getRepository(User).update(id, { user_name: user_name });
       } else if (!user_name && file) {
@@ -168,7 +176,7 @@ export class UsersService {
       if (!blocked) {
         throw new NotFoundException('User not found');
       }
-      let relation = await this.connection.getRepository(UserFriends).findOne({
+      const relation = await this.connection.getRepository(UserFriends).findOne({
         relations: ['applicant', 'recipient'],
         where: [{
           applicant: userId,
@@ -178,7 +186,7 @@ export class UsersService {
           recipient: userId
         }]
       });
-      if (relation) {
+      if (!relation) {
         await this.connection.getRepository(UserFriends).save({
           applicant: blocker,
           recipient: blocked,
@@ -211,7 +219,11 @@ export class UsersService {
           userId,
           unblockId
         ]);
-      const user = await this.connection.getRepository(User).findOne({ where: { id: unblockId } });
+      const user = await this.connection.getRepository(User).findOne({
+        where: {
+          id: unblockId
+        }
+      });
       if (user) {
         return user;
       }
