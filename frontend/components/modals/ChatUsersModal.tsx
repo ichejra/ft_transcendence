@@ -105,17 +105,19 @@ const NewChatUser: React.FC<NewChatUserProps> = ({
   return (
     <div
       key={id}
-      className="flex items-center justify-between px-6 py-3 md:px-4 border border-gray-700 my-2 rounded-md"
+      className="w-full flex items-center justify-between px-2 py-3 md:px-4 border border-gray-700 my-2 rounded-md"
     >
-      <div className="flex items-center space-x-10">
+      <div className="flex items-center space-x-10 w-full">
         <div className="flex items-center">
           <img
             src={avatar_url}
-            className="w-12 h-12 lg:w-14 lg:h-14 rounded-full mr-2"
+            className="w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-full mr-2"
           />
           <div>
-            <h1 className="about-family text-[14px]">{display_name}</h1>
-            <h1 className="about-family text-[12px] text-gray-400">
+            <h1 className="about-family text-[12px] md:text-[14px]">
+              {display_name}
+            </h1>
+            <h1 className="about-family text-[10px] md:text-[12px] text-gray-400">
               @{user_name}
             </h1>
           </div>
@@ -126,8 +128,7 @@ const NewChatUser: React.FC<NewChatUserProps> = ({
           <input
             ref={inputMsgRef}
             type="text"
-            className={`focus:outline-none border-blue-400"
-         about-family px-3 py-1 bg-transparent rounded-md mx-2 opacity-70 tracking-wider border-[1px]`}
+            className="focus:outline-none border-blue-400 font-sans w-full px-2 py-1 text-md bg-transparent rounded-md opacity-70 md:tracking-wider border-[1px]"
             value={message}
             placeholder="New Message"
             onChange={(e) => setMessage(e.target.value)}
@@ -147,7 +148,7 @@ const NewChatUser: React.FC<NewChatUserProps> = ({
         <button
           type="button"
           onClick={() => sendMessage(id)}
-          className="bg-blue-500 py-2 px-6 rounded-md hover:bg-blue-400 transition duration-300"
+          className="bg-blue-500 text-sm py-1 px-2 md:text-md md:py-2 md:px-6 rounded-md hover:bg-blue-400 transition duration-300"
         >
           Message
         </button>

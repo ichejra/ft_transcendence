@@ -28,6 +28,7 @@ interface MemberProps {
   userStatus: string;
   chId: number;
   channelName: string;
+  inviteToGame: (user: User) => void;
 }
 
 const Member: React.FC<MemberProps> = ({
@@ -36,14 +37,14 @@ const Member: React.FC<MemberProps> = ({
   userStatus,
   chId,
   channelName,
+  inviteToGame,
 }) => {
-  const { memberStatus, loggedMemberRole } = useAppSelector(
-    (state) => state.channels
-  );
+  const { loggedMemberRole } = useAppSelector((state) => state.channels);
   const [toggleMenu, setToggleMenu] = useState(false);
   const [showMuteOptions, setShowMuteOptions] = useState(false);
   const menuRef = useRef<any>(null);
   const dispatch = useAppDispatch();
+  const { loggedUser } = useAppSelector((state) => state.user);
 
   const setAdmin = (id: number) => {
     dispatch(setMemberAsAdmin({ channelId: chId, memberId: id })).then(() => {
@@ -195,13 +196,6 @@ const Member: React.FC<MemberProps> = ({
     };
   }, [toggleMenu]);
 
-  //   useEffect(() => {
-  //     console.log("[Member] newChannelId --------->", chId, memberStatus);
-  //     if (chId) {
-  //       dispatch(getChannelMembersList(chId));
-  //     }
-  //   }, [memberStatus]);
-
   return (
     <div className="relative flex items-center justify-between my-2">
       <div className="flex items-center">
@@ -211,13 +205,18 @@ const Member: React.FC<MemberProps> = ({
               size="1.3rem"
               className="absolute text-green-400 right-[1px] -bottom-[2px]"
             />
+          ) : user.state === "in_game" ? (
+            <GoPrimitiveDot
+              size="1.3rem"
+              className="absolute text-orange-400 right-[1px] -bottom-[2px]"
+            />
           ) : (
             <GoPrimitiveDot
               size="1.3rem"
               className="absolute text-gray-400 right-[1px] -bottom-[2px]"
             />
           )}
-          <img src={user.avatar_url} className="w-10 rounded-full mr-2" />
+          <img src={user.avatar_url} className="w-10 h-10 rounded-full mr-2" />
         </div>
         <div>
           <Link to={`/profile/${user.id}`}>
@@ -236,9 +235,17 @@ const Member: React.FC<MemberProps> = ({
               )}
             </p>
           </Link>
-          <p className="text-[12px] font-thin text-gray-400">{userRole}</p>
+          <p className="text-[12px] font-thin text-gray-400">{user.state}</p>
         </div>
       </div>
+      {loggedUser.id !== user.id && (
+        <button
+          onClick={() => inviteToGame(user)}
+          className="bg-green-400 py-1 px-2 text-[12px] ml-4 rounded-sm hover:scale-105 hover:bg-green-300 transition duration-300"
+        >
+          invite
+        </button>
+      )}
       <div ref={menuRef}>
         {loggedMemberRole.userRole === "owner" && (
           <BsThreeDotsVertical
@@ -392,5 +399,3 @@ const MenuItem: React.FC<MenuProps> = ({ func, user, title, icon }) => {
 };
 
 export default Member;
-
-//TODO FIX member menu visibility for admin

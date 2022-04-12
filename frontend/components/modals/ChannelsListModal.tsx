@@ -1,6 +1,7 @@
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { SiPrivateinternetaccess } from "react-icons/si";
 import { BsEmojiFrown } from "react-icons/bs";
+import { FaTimes } from "react-icons/fa";
 import { useEffect, useRef, useState } from "react";
 import {
   setChannelsListModal,
@@ -59,9 +60,14 @@ const ChannelsListModal = () => {
         ref={divRef}
         className="flex flex-col justify-center items-center h-full"
       >
-        <div className="profile-card-bg-color w-full h-full md:w-[720px] md:h-[500px] border-[1px] border-gray-700 rounded-lg">
+        <div className="relative profile-card-bg-color w-full h-full md:w-[720px] md:h-[500px] border-[1px] border-gray-700 rounded-lg">
+          <FaTimes
+            size="2rem"
+            onClick={() => dispatch(setChannelsListModal(false))}
+            className="absolute z-10 text-white right-2 m-2 hover:text-blue-400 transition duration-300 cursor-pointer top-20 md:top-0"
+          />
           {unjoinedChannels.length ? (
-            <div className="relative h-full overflow-auto">
+            <div className="relative top-28 md:top-0 h-full overflow-auto pb-28 md:pb-0">
               <h1 className="text-center text-white m-2 p-2 font-bold about-title-family">
                 Discover new channels
               </h1>
@@ -161,7 +167,7 @@ const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
   return (
     <div>
       <div
-        className={`relative transition duration-300 border border-blue-400 bg-transparent text-gray-200 rounded-xl w-[320px] h-[90px] flex items-center justify-between mx-3 my-3`}
+        className={`relative transition duration-300 border border-blue-400 bg-transparent text-gray-200 rounded-xl w-[300px] h-[90px] flex items-center justify-between mx-3 my-3`}
       >
         {type === "private" && (
           <div className="absolute -top-[8px] -right-[8px]">

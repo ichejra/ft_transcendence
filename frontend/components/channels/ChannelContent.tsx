@@ -4,6 +4,7 @@ import { IoMdSend, IoMdExit } from "react-icons/io";
 import { GoPrimitiveDot } from "react-icons/go";
 import { RiListSettingsLine } from "react-icons/ri";
 import { MdSettings } from "react-icons/md";
+import { FaUserFriends, FaTimes } from "react-icons/fa";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { useParams } from "react-router";
 import { socket } from "../../pages/SocketProvider";
@@ -11,6 +12,7 @@ import { useNavigate } from "react-router";
 import { updateChannelContent } from "../../features/globalSlice";
 import { User } from "../../features/userProfileSlice";
 import UpdateChannelModal from "../modals/UpdateChannelModal";
+import swal from "sweetalert";
 import Member from "./Member";
 import {
   getChannelMembersList,
@@ -22,6 +24,7 @@ import {
   setNewChannelId,
   ChannelMember,
   ChannelOwner,
+  setShowMembersList,
 } from "../../features/chatSlice";
 interface ContentProps {
   channelName: string;
@@ -52,6 +55,7 @@ const ChannelContent: React.FC<ContentProps> = ({
     memberStatus,
     loggedMemberRole,
     updateChannelModal,
+    showMembersList,
   } = useAppSelector((state) => state.channels);
 
   const sendMessage = (e: React.FormEvent) => {
@@ -182,12 +186,20 @@ const ChannelContent: React.FC<ContentProps> = ({
   return (
     <div className="relative text-white right-0 flex h-full w-full">
       <div className="relative w-full">
-        <div className="fixed user-card-bg border-b border-l border-gray-700 shadow-gray-700  shadow-sm left-[4.2rem] md:left-[7.4rem] text-white p-1 md:p-2 right-0 flex items-center justify-between">
+        <div className="fixed user-card-bg border-b border-l border-gray-700 shadow-gray-700 shadow-sm left-[4.2rem] md:left-[7.4rem] text-white p-1 md:p-2 right-0 flex items-center justify-between">
           <h1 className="md:text-xl">#{channelName.split(" ").join("-")}</h1>
-          <div ref={menuRef}>
+          <div ref={menuRef} className="flex items-center">
+            <FaUserFriends
+              size="2rem"
+              onClick={() => dispatch(setShowMembersList(true))}
+              className="block md:hidden mr-2 hover:scale-110 transition duration-300 hover:text-blue-400 cursor-pointer"
+            />
             {loggedMemberRole.userRole === "owner" ? (
               <RiListSettingsLine
-                onClick={() => setToggleMenu(true)}
+                onClick={() => {
+                  setToggleMenu(true);
+                  dispatch(setShowMembersList(false));
+                }}
                 size="2rem"
                 className="mr-2 hover:scale-110 transition duration-300 hover:text-blue-400 cursor-pointer"
               />
@@ -196,8 +208,8 @@ const ChannelContent: React.FC<ContentProps> = ({
                 onClick={leaveChannel}
                 className="border-gray-500 user-card-bg flex items-center cursor-pointer hover:scale-105 hover:text-blue-400 transition duration-300"
               >
-                <p className="text-sm md:text-md">Leave</p>
-                <IoMdExit size="1.5rem" className="ml-2" />
+                <p className="hidden md:block text-md">Leave</p>
+                <IoMdExit size="2rem" className="ml-2" />
               </div>
             )}
             {toggleMenu && (
@@ -235,83 +247,170 @@ const ChannelContent: React.FC<ContentProps> = ({
         />
       </div>
       <div className="hidden md:block h-full pt-12 px-4 my-2 w-[400px] border-l border-gray-700 user-card-bg">
-        <h1 className="text-gray-300 pb-2">Owner</h1>
-        <div className="flex items-center">
-          <div className="relative">
-            {channelOwner.state === "online" ? (
-              <GoPrimitiveDot
-                size="1.3rem"
-                className="absolute text-green-400 right-[1px] -bottom-[2px]"
-              />
-            ) : (
-              <GoPrimitiveDot
-                size="1.3rem"
-                className="absolute text-gray-400 right-[1px] -bottom-[2px]"
-              />
-            )}
-            <img
-              src={channelOwner.avatar_url}
-              className="w-10 rounded-full mr-2"
+        <ChannelMembersList
+          channelOwner={channelOwner}
+          channelMembers={channelMembers}
+          channelName={channelName}
+          currentChannelID={currentChannelID}
+        />
+      </div>
+      {showMembersList && (
+        <div className="block md:hidden absolute top-9 right-0 h-full px-4 my-2 w-full border-l border-gray-700 user-card-bg">
+          <FaTimes
+            size="2rem"
+            onClick={() => dispatch(setShowMembersList(false))}
+            className="absolute font-sans mt-1 right-2 hover:text-blue-400 transition duration-300 cursor-pointer"
+          />
+          <div className="mt-8">
+            <ChannelMembersList
+              channelOwner={channelOwner}
+              channelMembers={channelMembers}
+              channelName={channelName}
+              currentChannelID={currentChannelID}
             />
-          </div>
-          <div>
-            <Link to={`/profile/${channelOwner.id}`}>
-              <p
-                className={`text-blue-400 hover:underline transition duration-300 cursor-pointer flex items-center`}
-              >
-                {channelOwner.user_name}
-              </p>
-            </Link>
-            <p className="text-[12px] font-thin text-gray-400">owner</p>
           </div>
         </div>
-        {channelMembers.filter((member) => member.userRole === "admin")
-          .length ? (
-          <div>
-            <UsersList
-              members={channelMembers.filter(
-                (member) => member.userRole === "admin"
-              )}
-              channelName={channelName}
-              title="Admins"
-              currentChannelID={currentChannelID}
-            />
-          </div>
-        ) : (
-          <div></div>
-        )}
-        {channelMembers.filter((member) => member.userRole === "member")
-          .length ? (
-          <div>
-            <UsersList
-              members={channelMembers.filter(
-                (member) => member.userRole === "member"
-              )}
-              channelName={channelName}
-              title="Members"
-              currentChannelID={currentChannelID}
-            />
-          </div>
-        ) : (
-          <div></div>
-        )}
-        {updateChannelModal && (
-          <UpdateChannelModal
-            channelId={currentChannelID}
-            channelOldName={channelName}
-          />
-        )}
-      </div>
+      )}
+      {updateChannelModal && (
+        <UpdateChannelModal
+          channelId={currentChannelID}
+          channelOldName={channelName}
+        />
+      )}
     </div>
   );
 };
 
 //? Channel Members___________________
+
+interface ChannelMembersProps {
+  channelOwner: User;
+  channelMembers: ChannelMember[];
+  channelName: string;
+  currentChannelID: number;
+}
+
+const ChannelMembersList: React.FC<ChannelMembersProps> = ({
+  channelOwner,
+  channelMembers,
+  channelName,
+  currentChannelID,
+}) => {
+  const { loggedUser } = useAppSelector((state) => state.user);
+
+  const inviteToGame = (user: User) => {
+    console.log(loggedUser.id, " sent invit to: ", user.id);
+    swal("Regular Pong or Our Pong?", "", {
+      buttons: {
+        Default: true,
+        Obstacle: true,
+      },
+    }).then((value) => {
+      console.log(value);
+      if (value === "Default") {
+        socket.emit("invite_to_game", {
+          inviter: loggedUser,
+          invitee: user,
+          gameType: "default",
+        });
+      } else if (value === "Obstacle") {
+        socket.emit("invite_to_game", {
+          inviter: loggedUser,
+          invitee: user,
+          gameType: "obstacle",
+        });
+      }
+    });
+  };
+
+  return (
+    <>
+      <h1 className="text-gray-300 pb-2">Owner</h1>
+      <div className="flex items-center">
+        <div className="relative">
+          {channelOwner.state === "online" ? (
+            <GoPrimitiveDot
+              size="1.3rem"
+              className="absolute text-green-400 right-[1px] -bottom-[2px]"
+            />
+          ) : channelOwner.state === "in_game" ? (
+            <GoPrimitiveDot
+              size="1.3rem"
+              className="absolute text-orange-400 right-[1px] -bottom-[2px]"
+            />
+          ) : (
+            <GoPrimitiveDot
+              size="1.3rem"
+              className="absolute text-gray-400 right-[1px] -bottom-[2px]"
+            />
+          )}
+          <img
+            src={channelOwner.avatar_url}
+            className="w-10 h-10 rounded-full mr-2"
+          />
+        </div>
+        <div>
+          <Link to={`/profile/${channelOwner.id}`}>
+            <p
+              className={`text-blue-400 hover:underline transition duration-300 cursor-pointer flex items-center`}
+            >
+              {channelOwner.user_name}
+            </p>
+          </Link>
+          <p className="text-[12px] font-thin text-gray-400">
+            {channelOwner.state}
+          </p>
+        </div>
+        {loggedUser.id !== channelOwner.id && (
+          <button
+            onClick={() => inviteToGame(channelOwner)}
+            className="bg-green-400 py-1 px-2 text-[12px] ml-4 rounded-sm hover:scale-105 hover:bg-green-300 transition duration-300"
+          >
+            invite
+          </button>
+        )}
+      </div>
+      {channelMembers.filter((member) => member.userRole === "admin").length ? (
+        <div>
+          <UsersList
+            members={channelMembers.filter(
+              (member) => member.userRole === "admin"
+            )}
+            inviteToGame={inviteToGame}
+            channelName={channelName}
+            title="Admins"
+            currentChannelID={currentChannelID}
+          />
+        </div>
+      ) : (
+        <div></div>
+      )}
+      {channelMembers.filter((member) => member.userRole === "member")
+        .length ? (
+        <div>
+          <UsersList
+            members={channelMembers.filter(
+              (member) => member.userRole === "member"
+            )}
+            inviteToGame={inviteToGame}
+            channelName={channelName}
+            title="Members"
+            currentChannelID={currentChannelID}
+          />
+        </div>
+      ) : (
+        <div></div>
+      )}
+    </>
+  );
+};
+
 interface UsersListProps {
   members: ChannelMember[];
   currentChannelID: number;
   channelName: string;
   title: string;
+  inviteToGame: (user: User) => void;
 }
 
 const UsersList: React.FC<UsersListProps> = ({
@@ -319,6 +418,7 @@ const UsersList: React.FC<UsersListProps> = ({
   currentChannelID,
   channelName,
   title,
+  inviteToGame,
 }) => {
   return (
     <div>
@@ -326,6 +426,7 @@ const UsersList: React.FC<UsersListProps> = ({
       {members.map((member) => {
         return (
           <Member
+            inviteToGame={inviteToGame}
             key={member.id}
             chId={currentChannelID}
             {...member}

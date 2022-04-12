@@ -20,6 +20,7 @@ import {
   setNewChannelId,
   addNewMessage,
   getLoggedUserRole,
+  setShowMembersList,
 } from "../../features/chatSlice";
 
 const ChatRooms = () => {
@@ -36,7 +37,6 @@ const ChatRooms = () => {
     showChannelsList,
     newChannel,
     channelState,
-    error,
   } = useAppSelector((state) => state.channels);
 
   //* Functions_________
@@ -63,6 +63,7 @@ const ChatRooms = () => {
           });
         });
         dispatch(getLoggedUserRole(id));
+        dispatch(setShowMembersList(false));
         navigate(`/channels/${id}`);
       }
     });

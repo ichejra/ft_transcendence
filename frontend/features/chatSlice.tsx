@@ -44,6 +44,7 @@ interface InitialState {
   createNewChannel: boolean;
   showChannelsList: boolean;
   updateChannelModal: boolean;
+  showMembersList: boolean;
   channelState: boolean;
   newChannel: { id: number; render: boolean };
   channels: Channel[];
@@ -63,6 +64,7 @@ const initialState: InitialState = {
   createNewChannel: false,
   showChannelsList: false,
   updateChannelModal: false,
+  showMembersList: false,
   channelState: false,
   newChannel: { id: -1, render: false },
   channels: [],
@@ -482,6 +484,12 @@ const channelsManagmentSlice = createSlice({
     ) => {
       state.updateChannelModal = action.payload;
     },
+    setShowMembersList: (
+      state: InitialState = initialState,
+      action: PayloadAction<boolean>
+    ) => {
+      state.showMembersList = action.payload;
+    },
 
     addNewMessage: (
       state: InitialState = initialState,
@@ -588,6 +596,7 @@ export const {
   setNewChannelModal,
   setChannelsListModal,
   setUpdateChannelModal,
+  setShowMembersList,
   addNewMessage,
   updateChannelState,
   setNewChannelId,
@@ -597,5 +606,3 @@ export const {
 } = channelsManagmentSlice.actions;
 
 export default channelsManagmentSlice.reducer;
-
-//TODO online/offline status (profile, friends list)
