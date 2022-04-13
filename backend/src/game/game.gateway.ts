@@ -149,6 +149,7 @@ export class GameGateway
       const user2 = await this.getPlayerAsUser(second);
       if (user1.id === user2.id) {
         gameQueue.splice(gameQueue.indexOf(first), 1);
+        // first.emit('unjoin_queue');
         return;
       }
       await this.usersService.updateState(Number(user1.id), UserState.IN_GAME);
@@ -405,6 +406,7 @@ export class GameGateway
       challenge.getInviterSocket().emit('challenge_accepted', {
         challengeId: challenge.getChallengeId(),
       });
+
       this.joinGame(
         [challenge.getInviterSocket(), client],
         challenge.getGameType(),
@@ -414,7 +416,7 @@ export class GameGateway
 
   //* reject challenge
   @SubscribeMessage('reject_challenge')
-  rejectChallenge(
+  private async rejectChallenge(
     client: Socket,
     payload: { challengeId: string; loggedUser: User },
   ) {
@@ -426,6 +428,16 @@ export class GameGateway
       challenge.getInviterSocket().emit('challenge_rejected', {
         user: payload.loggedUser,
       });
+      //* DONE changed state for invitation game players players
+      const inviter = await this.getPlayerAsUser(challenge.getInviterSocket());
+      await this.usersService.updateState(
+        Number(inviter.id),
+        UserState.IN_GAME,
+      );
+      await this.usersService.updateState(
+        Number(payload.loggedUser.id),
+        UserState.IN_GAME,
+      );
       this.challenges.splice(this.challenges.indexOf(challenge), 1);
     }
   }

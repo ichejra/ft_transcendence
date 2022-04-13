@@ -66,7 +66,7 @@ function delay(ms: number) {
 let isRefresh = false;
 
 const Pong: React.FC<UserType> = ({ userType }) => {
-  console.log("Pong game built ==> |"+userType+'|');
+  // console.log("Pong game built ==> |" + userType + "|");
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const playBtnsRef: React.RefObject<HTMLDivElement> = React.createRef();
@@ -98,6 +98,19 @@ const Pong: React.FC<UserType> = ({ userType }) => {
     socket.emit("join_queue", "obstacle");
     setJoined(true);
   };
+
+  useEffect(() => {
+    // socket.emit("check_joined_queue");
+    // socket.on("joined_queue", () => {
+    //   setJoined(true);
+    // });
+    // return () => {
+    //   socket.off("joined");
+    // };
+    socket.on("unjoin_queue", () => {
+      setJoined(false);
+    });
+  }, []);
 
   // const stopMatch = () => {
   //   socket.emit('stop_game', 'default');
@@ -406,46 +419,43 @@ const Pong: React.FC<UserType> = ({ userType }) => {
             ref={canvasRef}
             width={CANVAS_WIDTH}
             height={CANVAS_HEIGHT}
+            style={{ width: "100%" }}
           ></canvas>
         </div>
       )}
       <div className="">
         {users.length !== 0 && (
-          <div className="w-[24rem] md:w-[50rem] flex items-center justify-between m-16 md:mb-2">
-            <div className=" flex flex-col items-center">
+          <div className="w-full md:w-[45rem] flex items-center justify-between my-16 md:mb-2">
+            <div className=" flex flex-col items-center mr-5">
               <img
                 src={leftPlayer?.avatar_url}
-                className="w-28 h-28 md:w-44 md:h-44 rounded-full m-4"
+                className="w-28 h-28 md:w-44 md:h-44 rounded-full mb-2"
               />
               <h1 className="text-white text-center">
                 {leftPlayer?.display_name}
               </h1>
             </div>
-            <div className="items-center">
+            <div className="items-center ml-5">
               <img
                 src={rightPlayer?.avatar_url}
-                className="w-28 h-28 md:w-44 md:h-44 rounded-full m-4"
+                className="w-28 h-28 md:w-44 md:h-44 rounded-full mb-2"
               />
-              <h1 className="text-white text-center">
+              <h1 className="text-white text-center ">
                 {rightPlayer?.display_name}
               </h1>
             </div>
           </div>
         )}
         {frame.state === "OVER" && userType === "player" && (
-          <div className="play-again-btn items-center mb-44">
+          <div className="play-again-btn mb-44">
             <button onClick={handlePlayAgain}>Play Again</button>
           </div>
         )}
         {frame.state === "OVER" &&
           userType === "spectator" &&
           location.pathname === "/watch" && (
-            <div className="play-again-btn items-center">
-              <button
-                onClick={handlePlayForSpec}
-              >
-                Play Now
-              </button>
+            <div className="play-again-btn items-center mb-44">
+              <button onClick={handlePlayForSpec}>Play Now</button>
             </div>
           )}
       </div>
