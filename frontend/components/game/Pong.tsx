@@ -426,21 +426,21 @@ const Pong: React.FC<UserType> = ({ userType }) => {
       <div className="">
         {users.length !== 0 && (
           <div className="w-full md:w-[45rem] flex items-center justify-between my-16 md:mb-2">
-            <div className=" flex flex-col items-center mr-5">
+            <div className=" flex flex-col items-center mr-10 sm:mr-24">
               <img
                 src={leftPlayer?.avatar_url}
-                className="w-28 h-28 md:w-44 md:h-44 rounded-full mb-2"
+                className="w-16 h-16 sm:w-28 sm:h-28 md:w-44 md:h-44 rounded-full mb-2"
               />
-              <h1 className="text-white text-center">
+              <h1 className="text-white text-center sm:text-[16px] text-[12px]">
                 {leftPlayer?.display_name}
               </h1>
             </div>
-            <div className="items-center ml-5">
+            <div className="flex flex-col items-center ml-10 sm:ml-24">
               <img
                 src={rightPlayer?.avatar_url}
-                className="w-28 h-28 md:w-44 md:h-44 rounded-full mb-2"
+                className="w-16 h-16 sm:w-28 sm:h-28 md:w-44 md:h-44 rounded-full mb-2"
               />
-              <h1 className="text-white text-center ">
+              <h1 className="text-white text-center sm:text-[16px] text-[12px]">
                 {rightPlayer?.display_name}
               </h1>
             </div>
@@ -476,3 +476,4 @@ export default Pong;
 
 //TODO: joined not working if player navigate to other path
 //TODO: play and pause //! makainax f subject
+//TODO: make leader board as modal
