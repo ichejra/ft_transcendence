@@ -2,7 +2,7 @@ import React from "react";
 
 const GameRules = () => {
   return (
-    <div className="text-gray-200 border-4 border-[lightgrey]  w-11/12 cursor-default md:w-[62rem]">
+    <div className="text-gray-200 border-4 border-[lightgrey]  w-11/12 cursor-default lg:w-[62rem]">
       <h1 className="title-family text-opacity-80 md:text-2xl text-xl pb-6 sm:text-start p-10 pl-0 underline underline-offset-4">
         HOW TO PLAY PONG?
       </h1>
