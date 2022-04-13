@@ -1,10 +1,9 @@
 import { AiOutlineRight } from "react-icons/ai";
 import { FaHistory } from "react-icons/fa";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import HistoryModal from "../modals/HistoryModal";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { useParams } from "react-router-dom";
-import { User, fetchSingleUser } from "../../features/userProfileSlice";
+import { useAppSelector } from "../../app/hooks";
+import { User } from "../../features/userProfileSlice";
 
 interface Props {
   user_me: User;
@@ -30,9 +29,7 @@ const ProfileInfo: React.FC<Props> = ({ user_me, users }) => {
             <AiOutlineRight />
           </button>
         )}
-        {openModal && (
-          <HistoryModal user={user_me} setOpenModal={setOpenModal} />
-        )}
+        {openModal && <HistoryModal setOpenModal={setOpenModal} />}
       </div>
       <hr className="h-[1px] border-0 mx-4 bg-gray-700" />
       {isPageLoading ? (
@@ -41,43 +38,50 @@ const ProfileInfo: React.FC<Props> = ({ user_me, users }) => {
         <div className="text-white text-opacity-80">
           {gameHistory.length ? (
             <div>
-              {gameHistory.slice(0, 4).map((game) => {
-                const { id, loser, winner, playedAt, score } = game;
-                return (
-                  <div
-                    key={id}
-                    className="flex items-center justify-between px-6 py-3 md:px-4"
-                  >
-                    <div className="flex items-center space-x-10">
-                      <div className="flex flex-col items-center">
-                        <img
-                          src={user_me.avatar_url}
-                          className="w-12 h-12 lg:w-14 lg:h-14 rounded-full"
-                        />
-                        <h1 className="about-family text-[14px] mt-1">
-                          {user_me.user_name}
-                        </h1>
+              {[...gameHistory]
+                .reverse()
+                .slice(0, 4)
+                .map((game) => {
+                  const { id, loser, winner, playedAt, score } = game;
+                  const [score1, score2] = score
+                    .split("-")
+                    .map((num) => Number(num))
+                    .sort((a, b) => b - a);
+                  return (
+                    <div
+                      key={id}
+                      className="flex items-center justify-between px-6 py-3 md:px-4"
+                    >
+                      <div className="flex w-14 items-center space-x-10">
+                        <div className="flex flex-col items-center">
+                          <img
+                            src={winner.avatar_url}
+                            className="w-12 h-12 lg:w-14 lg:h-14 rounded-full"
+                          />
+                          <h1 className="about-family text-[14px] mt-1">
+                            {winner.user_name}
+                          </h1>
+                        </div>
+                      </div>
+                      <span className="flex  md:text-xl font-bold space-x-2">
+                        <p className="about-family">{score1}</p>
+                        <span>-</span>
+                        <p className="about-family">{score2}</p>
+                      </span>
+                      <div className="flex w-14 items-center space-x-10">
+                        <div className="flex flex-col items-center">
+                          <img
+                            src={loser.avatar_url}
+                            className="w-12 h-12 lg:w-14 lg:h-14 rounded-full"
+                          />
+                          <h1 className="about-family text-[14px] mt-1">
+                            {loser.user_name}
+                          </h1>
+                        </div>
                       </div>
                     </div>
-                    <span className="flex  md:text-xl font-bold space-x-2">
-                      <p className="about-family">{score.split("-")[0]}</p>
-                      <span>-</span>
-                      <p className="about-family">{score.split("-")[1]}</p>
-                    </span>
-                    <div className="flex items-center space-x-10">
-                      <div className="flex flex-col items-center">
-                        <img
-                          src={user_me.avatar_url}
-                          className="w-12 h-12 lg:w-14 lg:h-14 rounded-full"
-                        />
-                        <h1 className="about-family text-[14px] mt-1">
-                          {user_me.user_name}
-                        </h1>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
             </div>
           ) : (
             <div className="rounded-lg p-4 shadow-md h-56 bg-white bg-opacity-5">

@@ -17,8 +17,8 @@ interface History {
   id: number;
   score: string;
   playedAt: string;
-  winnerId: number;
-  loserId: number;
+  winner: User;
+  loser: User;
 }
 interface UserState {
   isLoading: boolean;
@@ -133,7 +133,7 @@ export const fetchUserGameHistory = createAsyncThunk(
   async (userId: number, _api) => {
     try {
       const response = await axios.get(
-        `http://localhost:3001/api/games/${userId}`,
+        `http://localhost:3001/api/games/user/${userId}`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
