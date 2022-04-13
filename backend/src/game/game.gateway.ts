@@ -140,7 +140,11 @@ export class GameGateway
   }
 
   //* manage the game type queue
-  private async gameTypeQueue(gameQueue: Socket[], client: Socket, type: string) {
+  private async gameTypeQueue(
+    gameQueue: Socket[],
+    client: Socket,
+    type: string,
+  ) {
     gameQueue.push(client);
     if (gameQueue.length > 1) {
       console.log(gameQueue.length);
@@ -351,20 +355,20 @@ export class GameGateway
     //     game.getPlayersSockets()[1] === client
     //   );
     // });
-    const inviterJoinedGame = this.games.find(game => {
+    const inviterJoinedGame = this.games.find((game) => {
       return game.hasUser(payload.inviter.id);
-    })
-    const inviteeJoinedGame = this.games.find(game => {
+    });
+    const inviteeJoinedGame = this.games.find((game) => {
       return game.hasUser(payload.invitee.id);
-    })
-    if (inviterJoinedGame){
+    });
+    if (inviterJoinedGame) {
       client.emit('inviter_in_game');
       return;
-    } 
-    if (inviteeJoinedGame){
-      client.emit('invitee_in_game', {user: payload.invitee});
+    }
+    if (inviteeJoinedGame) {
+      client.emit('invitee_in_game', { user: payload.invitee });
       return;
-    } 
+    }
     const challengeId = this.generateId();
     const challenge = new gameChallenge(
       challengeId,
@@ -395,7 +399,7 @@ export class GameGateway
 
   //* accept challenge
   @SubscribeMessage('accept_challenge')
-  accpetChallenge(client: Socket, payload: { challengeId: string }) {
+  private async accpetChallenge(client: Socket, payload: { challengeId: string }) {
     console.log('%cCHALLENGE ACCEPTED', payload.challengeId);
 
     //TODO : remove players from all queues
@@ -406,7 +410,17 @@ export class GameGateway
       challenge.getInviterSocket().emit('challenge_accepted', {
         challengeId: challenge.getChallengeId(),
       });
-
+      //* DONE changed state for invitation game players players
+      const inviter = await this.getPlayerAsUser(challenge.getInviterSocket());
+      const invitee = await this.getPlayerAsUser(client);
+      await this.usersService.updateState(
+        Number(inviter.id),
+        UserState.IN_GAME,
+      );
+      await this.usersService.updateState(
+        Number(invitee.id),
+        UserState.IN_GAME,
+      );
       this.joinGame(
         [challenge.getInviterSocket(), client],
         challenge.getGameType(),
@@ -416,7 +430,7 @@ export class GameGateway
 
   //* reject challenge
   @SubscribeMessage('reject_challenge')
-  private async rejectChallenge(
+  private rejectChallenge(
     client: Socket,
     payload: { challengeId: string; loggedUser: User },
   ) {
@@ -428,16 +442,6 @@ export class GameGateway
       challenge.getInviterSocket().emit('challenge_rejected', {
         user: payload.loggedUser,
       });
-      //* DONE changed state for invitation game players players
-      const inviter = await this.getPlayerAsUser(challenge.getInviterSocket());
-      await this.usersService.updateState(
-        Number(inviter.id),
-        UserState.IN_GAME,
-      );
-      await this.usersService.updateState(
-        Number(payload.loggedUser.id),
-        UserState.IN_GAME,
-      );
       this.challenges.splice(this.challenges.indexOf(challenge), 1);
     }
   }
