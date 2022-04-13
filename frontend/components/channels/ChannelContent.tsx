@@ -25,8 +25,6 @@ import {
   ChannelMember,
   ChannelOwner,
   setShowMembersList,
-  setMuteCountDown,
-  endMuteCountDown,
 } from "../../features/chatSlice";
 interface ContentProps {
   channelName: string;
@@ -41,7 +39,6 @@ const ChannelContent: React.FC<ContentProps> = ({
 }) => {
   const [message, setMessage] = useState("");
   const [toggleMenu, setToggleMenu] = useState(false);
-  const [muteTime, setMuteTime] = useState(0);
   const menuRef = useRef<any>(null);
   const messagesDivRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -58,7 +55,6 @@ const ChannelContent: React.FC<ContentProps> = ({
     loggedMemberRole,
     updateChannelModal,
     showMembersList,
-    muteMember,
   } = useAppSelector((state) => state.channels);
 
   const sendMessage = (e: React.FormEvent) => {
@@ -122,6 +118,7 @@ const ChannelContent: React.FC<ContentProps> = ({
     );
     if (currentChannelID !== -1) {
       dispatch(getChannelMembersList(currentChannelID));
+      dispatch(getLoggedUserRole(currentChannelID));
     }
   }, [memberStatus]);
 
@@ -159,14 +156,6 @@ const ChannelContent: React.FC<ContentProps> = ({
             dispatch(setNewChannelId({ id: -1, render: false }));
             dispatch(updateChannelState());
           });
-        } else if (data.status === "mute") {
-          setMuteTime(Number(data.time));
-          console.log("--->", data.time);
-          dispatch(setMuteCountDown());
-          dispatch(getChannelMembersList(data.channelId));
-        } else if (data.status === "unmute") {
-          dispatch(endMuteCountDown());
-          dispatch(getChannelMembersList(data.channelId));
         } else {
           dispatch(getChannelMembersList(data.channelId));
         }
@@ -251,14 +240,16 @@ const ChannelContent: React.FC<ContentProps> = ({
           messagesDivRef={messagesDivRef}
           channelContent={channelContent}
         />
-        {!muteMember ? (
+        {loggedMemberRole.userStatus !== "muted" ? (
           <MessageForm
             message={message}
             handleChange={handleChange}
             sendMessage={sendMessage}
           />
         ) : (
-          <Timer muteTime={muteTime} />
+          <div className="absolute bottom-20 flex justify-center items-center w-full h-[60px] bg-red-600">
+            <p className="flex items-center font-sans">You have been muted</p>
+          </div>
         )}
       </div>
       <div className="hidden md:block h-full pt-12 px-4 my-2 w-[400px] border-l border-gray-700 user-card-bg">
@@ -548,54 +539,4 @@ const MessageForm: React.FC<FormProps> = ({
   );
 };
 
-interface TimerProps {
-  muteTime: number;
-}
-
-const Timer: React.FC<TimerProps> = ({ muteTime }) => {
-  const [timer, setTimer] = useState("");
-
-  const muteTimer = (seconds: number) => {
-    const now = Date.now();
-    const then = now + seconds * 1000;
-    displayTimeLeft(seconds);
-    const countdown = setInterval(() => {
-      const secondsLeft = Math.round((then - Date.now()) / 1000);
-      if (secondsLeft < 0) {
-        clearInterval(countdown);
-        return;
-      }
-      displayTimeLeft(secondsLeft);
-    }, 1000);
-  };
-
-  const displayTimeLeft = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    let secondsLeft = seconds % 3600;
-    const minutes = Math.floor(secondsLeft / 60);
-    secondsLeft = secondsLeft % 60;
-
-    setTimer(
-      `${hours < 10 ? "0" : ""}${hours}:${minutes < 10 ? "0" : ""}${minutes}:${
-        secondsLeft < 10 ? "0" : ""
-      }${secondsLeft}`
-    );
-  };
-
-  useEffect(() => {
-    muteTimer(muteTime);
-  }, []);
-
-  return (
-    <div className="absolute bottom-20 flex justify-center items-center w-full h-[60px] bg-red-600">
-      <p className="flex items-center font-sans">
-        {" "}
-        You have been muted for:
-        <span className="ml-2 text-[1.5rem] font-sans">{timer}</span>
-      </p>
-    </div>
-  );
-};
-
 export default ChannelContent;
-

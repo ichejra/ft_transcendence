@@ -55,7 +55,6 @@ interface InitialState {
   channelAdmins: ChannelMember[];
   loggedMemberRole: ChannelOwner;
   memberStatus: string;
-  muteMember: boolean;
   currentChannelId: number;
   error: { status: number; message: string };
 }
@@ -80,7 +79,6 @@ const initialState: InitialState = {
   channelAdmins: [],
   loggedMemberRole: {} as ChannelOwner,
   memberStatus: "",
-  muteMember: false,
   currentChannelId: -1,
   error: { status: 200, message: "OK" },
 };
@@ -508,20 +506,6 @@ const channelsManagmentSlice = createSlice({
       state.newChannel = action.payload;
     },
 
-    setMuteCountDown: (state: InitialState = initialState) => {
-      state.muteMember = true;
-    },
-
-    endMuteCountDown: (
-      state: InitialState = initialState,
-      action: { payload: string | undefined }
-    ) => {
-      state.muteMember = false;
-      if (action.payload) {
-        state.memberStatus = action.payload;
-      }
-    },
-
     getSelectedChannelId: (
       state: InitialState = initialState,
       action: PayloadAction<number>
@@ -600,8 +584,6 @@ export const {
   addNewMessage,
   updateChannelState,
   setNewChannelId,
-  setMuteCountDown,
-  endMuteCountDown,
   getSelectedChannelId,
 } = channelsManagmentSlice.actions;
 
