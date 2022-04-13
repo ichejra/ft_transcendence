@@ -368,8 +368,8 @@ export class ChannelsService {
                 `SELECT * FROM channels
                 WHERE "channels"."id"
                 NOT IN (SELECT "channelId" FROM user_channel 
-                WHERE "user_channel"."userId" = $1 AND "user_channel"."userStatus" != $2)`,
-                [userId, MemberStatus.BANNED]
+                WHERE "user_channel"."userId" = $1)`,
+                [userId]
             );
             return channels;
         } catch (err) {

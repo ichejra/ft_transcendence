@@ -53,10 +53,12 @@ export class UsersService {
 
   async updateProfile(id: number, user_name: string, file: Express.Multer.File): Promise<User> {
     try {
-      const buffer = fs.readFileSync(`${file.destination}/${file.filename}`);
-      if (!buffer || !ImageType(buffer)) {
-        fs.unlinkSync(`${file.destination}/${file.filename}`);
-        throw new ForbiddenException('invalid image.');
+      if (file) {
+        const buffer = fs.readFileSync(`${file.destination}/${file.filename}`);
+        if (!buffer || !ImageType(buffer)) {
+          fs.unlinkSync(`${file.destination}/${file.filename}`);
+          throw new ForbiddenException('invalid image.');
+        }
       }
       if (!file && user_name) {
         await this.connection.getRepository(User).update(id, { user_name: user_name });

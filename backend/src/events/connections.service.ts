@@ -104,6 +104,9 @@ export class ConnectionsService {
         if (sockets) {
             sockets.forEach((sock) => {
                 if (socket.handshake.headers["user-agent"] === sock.handshake.headers["user-agent"]) {
+                    if (sock != socket) {
+                        sock.emit('logout');
+                    }
                     sock.disconnect();
                 }
             });
