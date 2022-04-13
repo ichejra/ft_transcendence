@@ -182,7 +182,7 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
                   {user_me.state === "online" ? (
                     <GoPrimitiveDot
                       size="1.5rem"
-                      className="absolute text-green-400 right-[4px] bottom-[2px] md:right-[1px] md:-bottom-[2px]"
+                      className="absolute text-green-500 right-[4px] bottom-[2px] md:right-[1px] md:-bottom-[2px]"
                     />
                   ) : user_me.state === "in_game" ? (
                     <GoPrimitiveDot

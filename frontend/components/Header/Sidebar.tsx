@@ -11,7 +11,7 @@ const Sidebar = () => {
 
   return (
     <aside
-      className={`about-title-family z-50 px-2 h-screen py-4 w-full bg-black bg-opacity-80 txt-cyan ${
+      className={`md:hidden about-title-family z-50 px-2 h-screen py-4 w-full bg-black bg-opacity-80 txt-cyan ${
         isSidebarOpen ? "show-sidebar sidebar" : "sidebar"
       }`}
     >

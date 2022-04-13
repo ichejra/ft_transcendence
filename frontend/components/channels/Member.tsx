@@ -42,6 +42,7 @@ const Member: React.FC<MemberProps> = ({
   const { loggedMemberRole } = useAppSelector((state) => state.channels);
   const [toggleMenu, setToggleMenu] = useState(false);
   const [showMuteOptions, setShowMuteOptions] = useState(false);
+  const [showBaneOptions, setShowBanOptions] = useState(false);
   const menuRef = useRef<any>(null);
   const dispatch = useAppDispatch();
   const { loggedUser } = useAppSelector((state) => state.user);
@@ -82,6 +83,10 @@ const Member: React.FC<MemberProps> = ({
 
   const setMuteDelay = (id: number) => {
     setShowMuteOptions(true);
+  };
+
+  const setBanDelay = (id: number) => {
+    setShowBanOptions(true);
   };
 
   const muteUser = (e: any, id: number) => {
@@ -128,7 +133,8 @@ const Member: React.FC<MemberProps> = ({
     );
   };
 
-  const banUser = (id: number) => {
+  const banUser = (e: any, id: number) => {
+    const banTime = Number(e.target.dataset.time);
     dispatch(banChannelMember({ channelId: chId, memberId: id })).then(() => {
       socket.emit("member_status_changed", {
         room: channelName,
@@ -140,8 +146,14 @@ const Member: React.FC<MemberProps> = ({
         status: "ban",
         userId: id,
       });
-      dispatch(getChannelMembersList(chId));
+      dispatch(getChannelMembersList(chId)).then(() => {
+        const banTimer = setTimeout(() => {
+          unbanUser(id);
+          clearTimeout(banTimer);
+        }, banTime * 1000);
+      });
       setToggleMenu(false);
+      setShowBanOptions(false);
     });
   };
 
@@ -188,6 +200,7 @@ const Member: React.FC<MemberProps> = ({
       ) {
         setToggleMenu(false);
         setShowMuteOptions(false);
+        setShowBanOptions(false);
       }
     };
     document.addEventListener("mousedown", updateUserMenu);
@@ -198,7 +211,7 @@ const Member: React.FC<MemberProps> = ({
 
   return (
     <div className="relative flex items-center justify-between my-2">
-      <div className="flex items-center">
+      <div className="relative flex items-center">
         <div className="relative">
           {user.state === "online" ? (
             <GoPrimitiveDot
@@ -238,10 +251,10 @@ const Member: React.FC<MemberProps> = ({
           <p className="text-[12px] font-thin text-gray-400">{user.state}</p>
         </div>
       </div>
-      {loggedUser.id !== user.id && (
+      {loggedUser.id !== user.id && user.state !== "in_game" && (
         <button
           onClick={() => inviteToGame(user)}
-          className="bg-green-400 py-1 px-2 text-[12px] ml-4 rounded-sm hover:scale-105 hover:bg-green-300 transition duration-300"
+          className="absolute right-8 bg-green-400 py-1 px-2 text-[12px] ml-4 rounded-sm hover:scale-105 hover:bg-green-300 transition duration-300"
         >
           invite
         </button>
@@ -298,43 +311,7 @@ const Member: React.FC<MemberProps> = ({
                         icon={3}
                       />
                     ) : (
-                      <div className="font-sans flex justify-between text-sm px-2 p-1">
-                        <button
-                          data-time="10"
-                          onClick={(e) => muteUser(e, user.id)}
-                          className="border-[1px] border-gray-700 p-1 hover:bg-blue-300 hover:bg-opacity-30 transition duration-300"
-                        >
-                          10sec
-                        </button>
-                        <button
-                          data-time="300"
-                          onClick={(e) => muteUser(e, user.id)}
-                          className="border-[1px] border-gray-700 p-1 hover:bg-blue-300 hover:bg-opacity-30 transition duration-300"
-                        >
-                          5min
-                        </button>
-                        <button
-                          data-time="3600"
-                          onClick={(e) => muteUser(e, user.id)}
-                          className="border-[1px] border-gray-700 p-1 hover:bg-blue-300 hover:bg-opacity-30 transition duration-300"
-                        >
-                          1h
-                        </button>
-                        <button
-                          data-time="86400"
-                          onClick={(e) => muteUser(e, user.id)}
-                          className="border-[1px] border-gray-700 p-1 hover:bg-blue-300 hover:bg-opacity-30 transition duration-300"
-                        >
-                          24h
-                        </button>
-                        <button
-                          data-time="115516800"
-                          onClick={(e) => muteUser(e, user.id)}
-                          className="border-[1px] border-gray-700 p-1 hover:bg-blue-300 hover:bg-opacity-30 transition duration-300"
-                        >
-                          1337h
-                        </button>
-                      </div>
+                      <TimerOptions func={muteUser} user={user} />
                     )}
                   </div>
                 ) : (
@@ -346,7 +323,18 @@ const Member: React.FC<MemberProps> = ({
                   />
                 )}
                 {userStatus !== "banned" ? (
-                  <MenuItem func={banUser} user={user} title="Ban" icon={4} />
+                  <div>
+                    {!showBaneOptions ? (
+                      <MenuItem
+                        func={setBanDelay}
+                        user={user}
+                        title="Ban"
+                        icon={4}
+                      />
+                    ) : (
+                      <TimerOptions func={banUser} user={user} />
+                    )}
+                  </div>
                 ) : (
                   <MenuItem
                     func={unbanUser}
@@ -395,6 +383,53 @@ const MenuItem: React.FC<MenuProps> = ({ func, user, title, icon }) => {
       {title}
       <span className="ml-1 font-mono font-normal">{user.user_name}</span>
     </li>
+  );
+};
+
+interface TimerProps {
+  func: (e: any, id: number) => void;
+  user: User;
+}
+
+const TimerOptions: React.FC<TimerProps> = ({ func, user }) => {
+  return (
+    <div className="font-sans flex justify-between text-sm px-2 p-1">
+      <button
+        data-time="10"
+        onClick={(e) => func(e, user.id)}
+        className="border-[1px] border-gray-700 p-1 hover:bg-blue-300 hover:bg-opacity-30 transition duration-300"
+      >
+        10sec
+      </button>
+      <button
+        data-time="300"
+        onClick={(e) => func(e, user.id)}
+        className="border-[1px] border-gray-700 p-1 hover:bg-blue-300 hover:bg-opacity-30 transition duration-300"
+      >
+        5min
+      </button>
+      <button
+        data-time="3600"
+        onClick={(e) => func(e, user.id)}
+        className="border-[1px] border-gray-700 p-1 hover:bg-blue-300 hover:bg-opacity-30 transition duration-300"
+      >
+        1h
+      </button>
+      <button
+        data-time="86400"
+        onClick={(e) => func(e, user.id)}
+        className="border-[1px] border-gray-700 p-1 hover:bg-blue-300 hover:bg-opacity-30 transition duration-300"
+      >
+        24h
+      </button>
+      <button
+        data-time="115516800"
+        onClick={(e) => func(e, user.id)}
+        className="border-[1px] border-gray-700 p-1 hover:bg-blue-300 hover:bg-opacity-30 transition duration-300"
+      >
+        1337h
+      </button>
+    </div>
   );
 };
 

@@ -128,6 +128,25 @@ export const fetchCurrentUser = createAsyncThunk(
   }
 );
 
+export const fetchUserGameHistory = createAsyncThunk(
+  "users/fetchUserGameHistory",
+  async (userId: number, _api) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/api/games/${userId}`,
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      return _api.fulfillWithValue(response.data);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
+    }
+  }
+);
+
 export const enableTwoFactorAuth = createAsyncThunk(
   "users/enableTwoFactorAuth",
   async (_, _api) => {
@@ -290,6 +309,11 @@ export const userProfileSlice = createSlice({
       state.isLoggedIn = true;
     });
     builder.addCase(fetchCurrentUser.rejected, (state, action: any) => {});
+
+    //* User game history
+    builder.addCase(fetchUserGameHistory.fulfilled, (state, action: any) => {
+      state.gameHistory = action.payload;
+    });
 
     //* enable 2fa
     builder.addCase(enableTwoFactorAuth.fulfilled, (state) => {
