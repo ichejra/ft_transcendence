@@ -16,7 +16,9 @@ import { socket } from "../../pages/SocketProvider";
 const ChatUsersModal: React.FC = () => {
   const divRef = useRef(null);
   const dispatch = useAppDispatch();
-  const { nrusers, loggedUser } = useAppSelector((state) => state.user);
+  const { nrusers, friends, loggedUser } = useAppSelector(
+    (state) => state.user
+  );
 
   return (
     <div
@@ -38,7 +40,7 @@ const ChatUsersModal: React.FC = () => {
               onClick={() => dispatch(setShowChatUsersModal(false))}
             />
           </div>
-          {nrusers
+          {[...nrusers, ...friends]
             .filter((user) => user.id !== loggedUser.id)
             .map((user) => {
               return <NewChatUser key={user.id} {...user} />;

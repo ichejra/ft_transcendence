@@ -9,6 +9,7 @@ import {
   fetchSingleUser,
   fetchUserFriends,
   setIsPageLoading,
+  fetchUserGameHistory,
 } from "../../features/userProfileSlice";
 
 const UserProfile: React.FC = () => {
@@ -39,6 +40,7 @@ const UserProfile: React.FC = () => {
   }, [editProfile, completeInfo]);
 
   useEffect(() => {
+    dispatch(fetchUserGameHistory(Number(id)));
     if (Number(id) !== loggedUser.id) {
       dispatch(setIsPageLoading(true));
       dispatch(fetchSingleUser(Number(id))).then((response: any) => {

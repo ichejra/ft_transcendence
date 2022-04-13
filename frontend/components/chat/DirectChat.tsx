@@ -128,6 +128,7 @@ const DirectChat = () => {
           dispatch(addNewDirectMessage(data));
         });
       }
+      dispatch(getDirectChatHistory());
     });
     return () => {
       socket.off("receive_message");

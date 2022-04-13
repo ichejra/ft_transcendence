@@ -41,7 +41,11 @@ const SocketProvider: React.FC = ({ children }) => {
       console.log("trigger the refresh");
     });
 
+    socket.on("logout", () => {
+      window.location.reload();
+    });
     return () => {
+      socket.off("logout");
       socket.off("receive_notification");
     };
   }, [socket]);

@@ -26,9 +26,8 @@ const ProfileDropdown = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   // const { refresh } = useAppSelector((state) => state.globalState);
-  const { loggedUser, isLoggedIn, completeInfo, showNotifList } = useAppSelector(
-    (state) => state.user
-  );
+  const { loggedUser, isLoggedIn, completeInfo, showNotifList } =
+    useAppSelector((state) => state.user);
   const { pendingUsers, pendingReq } = useAppSelector((state) => state.friends);
   const { refresh } = useAppSelector((state) => state.globalState);
 
@@ -62,7 +61,6 @@ const ProfileDropdown = () => {
   }, []);
 
   useEffect(() => {
-    console.log(1);
     if (logout) {
       dispatch(logOutUser());
       socket.emit("logout");

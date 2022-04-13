@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { FaUsersSlash } from "react-icons/fa";
+import { GoPrimitiveDot } from "react-icons/go";
 import Cookies from "js-cookie";
 import { socket } from "../../pages/SocketProvider";
 import {
@@ -32,6 +32,7 @@ const GlobalUsers: React.FC<UsersProps> = ({ users, type }) => {
   const {
     loggedUser: { id: userID },
   } = useAppSelector((state) => state.user);
+  const { refresh } = useAppSelector((state) => state.globalState);
 
   useEffect(() => {
     if (Cookies.get("accessToken")) {
@@ -44,7 +45,7 @@ const GlobalUsers: React.FC<UsersProps> = ({ users, type }) => {
         dispatch(fetchAllUsers());
       }
     }
-  }, []);
+  }, [refresh]);
 
   if (users.length < 1) {
     return (
@@ -67,14 +68,13 @@ const GlobalUsers: React.FC<UsersProps> = ({ users, type }) => {
   );
 };
 
-//!---------------------------
-
 interface UserProps {
   id: number;
   avatar_url: string;
   display_name: string;
   user_name: string;
   type?: string;
+  state: string;
 }
 
 const User: React.FC<UserProps> = ({
@@ -82,6 +82,7 @@ const User: React.FC<UserProps> = ({
   avatar_url,
   display_name,
   user_name,
+  state,
   type,
 }) => {
   const dispatch = useAppDispatch();
@@ -128,8 +129,6 @@ const User: React.FC<UserProps> = ({
           });
         });
       });
-
-      // socket.emit("refresh", id);
     }
   };
 
@@ -147,11 +146,33 @@ const User: React.FC<UserProps> = ({
     <div className="text-gray-200 flex flex-col border border-gray-700 items-center user-card-bg p-2 m-3 w-[200px] about-family tracking-wide">
       <div className="flex flex-col items-center">
         {type !== "blocked" ? (
-          <img
-            src={avatar_url}
-            alt={display_name}
-            className="w-32 h-32 rounded-full p-3"
-          />
+          <div className="relative">
+            {type === "friends" && (
+              <div>
+                {state === "online" ? (
+                  <GoPrimitiveDot
+                    size="1.5rem"
+                    className="absolute text-green-400 right-[15px] bottom-[15px]"
+                  />
+                ) : state === "in_game" ? (
+                  <GoPrimitiveDot
+                    size="1.5rem"
+                    className="absolute text-orange-400 right-[15px] bottom-[15px]"
+                  />
+                ) : (
+                  <GoPrimitiveDot
+                    size="1.5rem"
+                    className="absolute text-gray-400 right-[15px] bottom-[15px]"
+                  />
+                )}
+              </div>
+            )}
+            <img
+              src={avatar_url}
+              alt={display_name}
+              className="w-32 h-32 rounded-full p-3"
+            />
+          </div>
         ) : (
           <img
             src="/images/blank-profile-picture.svg"

@@ -51,7 +51,6 @@ const ChannelContent: React.FC<ContentProps> = ({
   const {
     channelContent,
     channelMembers,
-    muteMember,
     memberStatus,
     loggedMemberRole,
     updateChannelModal,
@@ -326,7 +325,7 @@ const ChannelMembersList: React.FC<ChannelMembersProps> = ({
   return (
     <>
       <h1 className="text-gray-300 pb-2">Owner</h1>
-      <div className="flex items-center">
+      <div className="relative flex items-center">
         <div className="relative">
           {channelOwner.state === "online" ? (
             <GoPrimitiveDot
@@ -361,19 +360,20 @@ const ChannelMembersList: React.FC<ChannelMembersProps> = ({
             {channelOwner.state}
           </p>
         </div>
-        {loggedUser.id !== channelOwner.id && (
+        {loggedUser.id !== channelOwner.id && channelOwner.state !== "in_game" && (
           <button
             onClick={() => inviteToGame(channelOwner)}
-            className="bg-green-400 py-1 px-2 text-[12px] ml-4 rounded-sm hover:scale-105 hover:bg-green-300 transition duration-300"
+            className="absolute right-8 bg-green-400 py-1 px-2 text-[12px] ml-4 rounded-sm hover:scale-105 hover:bg-green-300 transition duration-300"
           >
             invite
           </button>
         )}
       </div>
-      {channelMembers.filter((member) => member.userRole === "admin").length ? (
+      {[...channelMembers].filter((member) => member.userRole === "admin")
+        .length ? (
         <div>
           <UsersList
-            members={channelMembers.filter(
+            members={[...channelMembers].filter(
               (member) => member.userRole === "admin"
             )}
             inviteToGame={inviteToGame}
@@ -385,11 +385,11 @@ const ChannelMembersList: React.FC<ChannelMembersProps> = ({
       ) : (
         <div></div>
       )}
-      {channelMembers.filter((member) => member.userRole === "member")
+      {[...channelMembers].filter((member) => member.userRole === "member")
         .length ? (
         <div>
           <UsersList
-            members={channelMembers.filter(
+            members={[...channelMembers].filter(
               (member) => member.userRole === "member"
             )}
             inviteToGame={inviteToGame}
