@@ -423,11 +423,11 @@ const TimerOptions: React.FC<TimerProps> = ({ func, user }) => {
         24h
       </button>
       <button
-        data-time="115516800"
+        data-time="360000"
         onClick={(e) => func(e, user.id)}
         className="border-[1px] border-gray-700 p-1 hover:bg-blue-300 hover:bg-opacity-30 transition duration-300"
       >
-        1337h
+        100h
       </button>
     </div>
   );

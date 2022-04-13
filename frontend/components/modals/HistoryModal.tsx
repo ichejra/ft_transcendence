@@ -1,14 +1,12 @@
 import { useRef } from "react";
 import { FaTimes } from "react-icons/fa";
 import { useAppSelector } from "../../app/hooks";
-import { User } from "../../features/userProfileSlice";
 
 interface Props {
   setOpenModal: (a: boolean) => void;
-  user: User;
 }
 
-const HistoryModal: React.FC<Props> = ({ setOpenModal, user }) => {
+const HistoryModal: React.FC<Props> = ({ setOpenModal }) => {
   const divRef = useRef(null);
   const { gameHistory } = useAppSelector((state) => state.user);
   return (
@@ -31,37 +29,41 @@ const HistoryModal: React.FC<Props> = ({ setOpenModal, user }) => {
               onClick={() => setOpenModal(false)}
             />
           </div>
-          {gameHistory.map((game) => {
+          {[...gameHistory].reverse().map((game) => {
             const { id, loser, winner, playedAt, score } = game;
+            const [score1, score2] = score
+              .split("-")
+              .map((num) => Number(num))
+              .sort((a, b) => b - a);
             return (
               <div
                 key={id}
                 className="flex items-center justify-between px-6 py-3 md:px-4 border border-gray-700 my-2 rounded-md"
               >
                 <div className="flex items-center space-x-10">
-                  <div className="flex flex-col items-center">
+                  <div className="flex w-14 flex-col items-center">
                     <img
-                      src={user.avatar_url}
+                      src={winner.avatar_url}
                       className="w-12 h-12 lg:w-14 lg:h-14 rounded-full"
                     />
                     <h1 className="about-family text-[14px] mt-1">
-                      {user.user_name}
+                      {winner.user_name}
                     </h1>
                   </div>
                 </div>
                 <span className="flex  md:text-xl font-bold space-x-2">
-                  <p className="about-family">{score.split("-")[0]}</p>
+                  <p className="about-family">{score1}</p>
                   <span>-</span>
-                  <p className="about-family">{score.split("-")[1]}</p>
+                  <p className="about-family">{score2}</p>
                 </span>
-                <div className="flex items-center space-x-10">
+                <div className="flex w-14 items-center space-x-10">
                   <div className="flex flex-col items-center">
                     <img
-                      src={user.avatar_url}
+                      src={loser.avatar_url}
                       className="w-12 h-12 lg:w-14 lg:h-14 rounded-full"
                     />
                     <h1 className="about-family text-[14px] mt-1">
-                      {user.user_name}
+                      {loser.user_name}
                     </h1>
                   </div>
                 </div>
