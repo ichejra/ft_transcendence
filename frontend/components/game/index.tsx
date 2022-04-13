@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from "react";
+import LeaderBoard from "./LeaderBoard";
 import Pong from "./Pong";
 
 interface UserType {
@@ -34,6 +35,7 @@ const PongGame: React.FC<UserType> = ({ userType }) => {
     // <div className=''>
     <div className="page-100 w-full h-full relative">
       <Pong userType={userType} />
+      <LeaderBoard/>
     </div>
     // </div>
   );
