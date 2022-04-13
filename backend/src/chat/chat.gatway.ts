@@ -164,4 +164,18 @@ export class ChatGatway implements OnGatewayInit, OnGatewayConnection, OnGateway
             memberId: payload.userId,
         });
     }
+
+    @SubscribeMessage('new_msg_notification')
+    async handleNewMsgNotification(@ConnectedSocket() client: Socket, @MessageBody('userId') userId: number | string) {
+        try {
+            // ! check for muting UserStatus
+            // !  
+            const targets: Set<Socket> = await this.connectionsService.getUserConnections(Number(userId));
+            targets.forEach((target) => {
+                this.server.to(target.id).emit('new_msg_notification');
+            })
+        } catch(error) {
+            throw error;
+        }
+    }
 }
