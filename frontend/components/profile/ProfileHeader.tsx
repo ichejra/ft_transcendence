@@ -1,6 +1,7 @@
 import { FaUserFriends } from "react-icons/fa";
 import { AiFillCalendar } from "react-icons/ai";
 import { RiPingPongFill } from "react-icons/ri";
+import { GoPrimitiveDot } from "react-icons/go";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import EditProfileModal from "../modals/EditProfileModal";
 import {
@@ -177,12 +178,31 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
           ) : (
             <div>
               <div className="flex flex-col md:flex-row items-center space-y-6 md:space-y-0 text-center md:text-left">
-                <img
-                  src={user_me.avatar_url}
-                  className="w-28 h-28 md:w-20 md:h-20 rounded-full md:mr-4"
-                />
-                <div>
-                  <p className="text-[16px] about-title-family">
+                <div className="relative md:mr-4 w-28 h-28 md:w-20 md:h-20">
+                  {user_me.state === "online" ? (
+                    <GoPrimitiveDot
+                      size="1.5rem"
+                      className="absolute text-green-400 right-[4px] bottom-[2px] md:right-[1px] md:-bottom-[2px]"
+                    />
+                  ) : user_me.state === "in_game" ? (
+                    <GoPrimitiveDot
+                      size="1.5rem"
+                      className="absolute text-orange-400 right-[4px] bottom-[2px] md:right-[1px] md:-bottom-[2px]"
+                    />
+                  ) : (
+                    <GoPrimitiveDot
+                      size="1.5rem"
+                      className="absolute text-gray-400 right-[4px
+                      ] bottom-[2px] md:right-[1px] md:-bottom-[2px]"
+                    />
+                  )}
+                  <img
+                    src={user_me.avatar_url}
+                    className="w-28 h-28 md:w-20 md:h-20 rounded-full"
+                  />
+                </div>
+                <div className="w-[200px]">
+                  <p className="text-[14px] w-full about-title-family">
                     {user_me.display_name}
                   </p>
                   <p className="about-family md:text-[12px]">
@@ -225,7 +245,7 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
           </div> */}
               <div className="flex justify-center md:justify-start">
                 {loggedUser.id !== Number(profileID) ? (
-                  <div>
+                  <div className="w-full flex flex-col items-center md:items-start">
                     {!isFriend && !isPending && !pendingUsers.length && (
                       <PButton
                         type={"Add Friend"}
@@ -236,7 +256,7 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
                       />
                     )}
                     {isFriend && (
-                      <div>
+                      <div className="w-full flex flex-col items-center md:items-start">
                         <PButton
                           func={removeFriend}
                           type="Unfriend"
@@ -264,7 +284,7 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
                     )}
                     <button
                       onClick={() => handleInviteToGame(user_me)}
-                      className={`hover:scale-105 mt-1 transition duration-300 w-[214px] h-[37px] rounded-md about-family bg-green-600`}
+                      className={`hover:scale-105 mt-2 transition duration-300 w-[214px] h-[37px] rounded-md about-family bg-green-600`}
                     >
                       {isLoading ? (
                         <div className="loading-2 border border-cyan-200 w-6 h-6"></div>

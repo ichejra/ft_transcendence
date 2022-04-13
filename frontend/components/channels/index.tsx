@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate, useLocation } from "react-router";
+import { useParams, useNavigate, useLocation, Navigate } from "react-router";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { socket } from "../../pages/SocketProvider";
 import ChannelsList from "./ChannelsList";
@@ -20,6 +20,7 @@ import {
   setNewChannelId,
   addNewMessage,
   getLoggedUserRole,
+  setShowMembersList,
 } from "../../features/chatSlice";
 
 const ChatRooms = () => {
@@ -42,21 +43,30 @@ const ChatRooms = () => {
   //? Get selected channel content
   const getCurrentChannelContent = (id: number) => {
     dispatch(getSingleChannel(id)).then((data: any) => {
-      const channel: Channel = data.payload.channel;
-      const owner: User = data.payload.user;
-      dispatch(getChannelContent(id)).then(() => {
-        socket.emit("update_join", { rooms: channels, room: channel });
-        dispatch(setNewChannelId({ id: newChannel.id, render: false }));
-        setChannelName(channel.name);
-        setChannelOwner(owner);
-        setChannelID(channel.id);
-        dispatch(getChannelMembersList(channel.id)).then(() => {
-          setShowChannelContent(true);
+      if (data.error) {
+        const errorCode = Number(data.payload.match(/(\d+)/)[0]);
+        console.log("error___________", errorCode);
+        if (errorCode === 404) {
+          navigate(`/404`, { replace: true });
+        }
+      } else {
+        const channel: Channel = data.payload.channel;
+        const owner: User = data.payload.user;
+        dispatch(getChannelContent(id)).then(() => {
+          socket.emit("update_join", { rooms: channels, room: channel });
+          dispatch(setNewChannelId({ id: newChannel.id, render: false }));
+          setChannelName(channel.name);
+          setChannelOwner(owner);
+          setChannelID(channel.id);
+          dispatch(getChannelMembersList(channel.id)).then(() => {
+            setShowChannelContent(true);
+          });
         });
-      });
-      dispatch(getLoggedUserRole(id));
+        dispatch(getLoggedUserRole(id));
+        dispatch(setShowMembersList(false));
+        navigate(`/channels/${id}`);
+      }
     });
-    navigate(`/channels/${id}`);
   };
 
   //* Effects__________
@@ -96,7 +106,11 @@ const ChatRooms = () => {
           setShowChannelContent(false);
         });
       } else {
-        dispatch(getChannelMembersList(data.channelId));
+        // dispatch(getSingleChannel(data.channelId)).then(() => {
+        //   dispatch(getChannelMembersList(data.channelId));
+        // });
+        getCurrentChannelContent(data.channelId);
+
         console.log("%cleft the channel", "color:red");
       }
     });
@@ -128,7 +142,7 @@ const ChatRooms = () => {
         />
       </div>
       {showChannelContent && params.id ? (
-        <div className="fixed h-full left-[7.5rem] right-0">
+        <div className="fixed h-full left-[4.2rem] md:left-[7.5rem] right-0">
           {showChannelContent && (
             <ChannelContent
               channelName={channelName}

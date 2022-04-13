@@ -18,16 +18,20 @@ export interface DirectMessage {
 
 interface InitialState {
   showChatUsersModal: boolean;
+  showChatUsersHistory: boolean;
   directChatUsersHistory: User[];
   directMessages: DirectMessage[];
   chatFriend: User;
+  error: { status: number; message: string };
 }
 
 const initialState: InitialState = {
   showChatUsersModal: false,
+  showChatUsersHistory: false,
   directChatUsersHistory: [],
   directMessages: [],
   chatFriend: {} as User,
+  error: { status: 200, message: "OK" },
 };
 
 export const fetchChatFriend = createAsyncThunk(
@@ -62,8 +66,8 @@ export const getDirectChatHistory = createAsyncThunk(
         }
       );
       return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      return _api.rejectWithValue(error);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -85,8 +89,8 @@ export const getDirectContent = createAsyncThunk(
       console.log("messages:", response.data);
 
       return _api.fulfillWithValue(response.data);
-    } catch (error) {
-      return _api.rejectWithValue(error);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
     }
   }
 );
@@ -100,6 +104,12 @@ const directChatSlice = createSlice({
       action: PayloadAction<boolean>
     ) => {
       state.showChatUsersModal = action.payload;
+    },
+    setShowChatUsersHistory: (
+      state: InitialState = initialState,
+      action: PayloadAction<boolean>
+    ) => {
+      state.showChatUsersHistory = action.payload;
     },
     addNewDirectMessage: (
       state: InitialState = initialState,
@@ -115,6 +125,7 @@ const directChatSlice = createSlice({
     });
     builder.addCase(getDirectContent.fulfilled, (state, action: any) => {
       state.directMessages = action.payload;
+      state.error = { status: 200, message: "OK" };
     });
     builder.addCase(fetchChatFriend.fulfilled, (state, action: any) => {
       state.chatFriend = action.payload;
@@ -122,7 +133,10 @@ const directChatSlice = createSlice({
   },
 });
 
-export const { addNewDirectMessage, setShowChatUsersModal } =
-  directChatSlice.actions;
+export const {
+  addNewDirectMessage,
+  setShowChatUsersModal,
+  setShowChatUsersHistory,
+} = directChatSlice.actions;
 
 export default directChatSlice.reducer;

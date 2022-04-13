@@ -44,6 +44,7 @@ interface InitialState {
   createNewChannel: boolean;
   showChannelsList: boolean;
   updateChannelModal: boolean;
+  showMembersList: boolean;
   channelState: boolean;
   newChannel: { id: number; render: boolean };
   channels: Channel[];
@@ -63,6 +64,7 @@ const initialState: InitialState = {
   createNewChannel: false,
   showChannelsList: false,
   updateChannelModal: false,
+  showMembersList: false,
   channelState: false,
   newChannel: { id: -1, render: false },
   channels: [],
@@ -482,6 +484,12 @@ const channelsManagmentSlice = createSlice({
     ) => {
       state.updateChannelModal = action.payload;
     },
+    setShowMembersList: (
+      state: InitialState = initialState,
+      action: PayloadAction<boolean>
+    ) => {
+      state.showMembersList = action.payload;
+    },
 
     addNewMessage: (
       state: InitialState = initialState,
@@ -542,9 +550,15 @@ const channelsManagmentSlice = createSlice({
     builder.addCase(fetchUnjoinedChannels.fulfilled, (state, action: any) => {
       state.unjoinedChannels = action.payload;
     });
+
     builder.addCase(getSingleChannel.fulfilled, (state, action: any) => {
       state.channel = action.payload;
+      state.error = { status: 200, message: "ok" };
     });
+    builder.addCase(getSingleChannel.rejected, (state, action: any) => {
+      state.error = { status: 404, message: "this resource is not available" };
+    });
+
     builder.addCase(getLoggedUserRole.fulfilled, (state, action: any) => {
       state.loggedMemberRole = action.payload;
     });
@@ -582,6 +596,7 @@ export const {
   setNewChannelModal,
   setChannelsListModal,
   setUpdateChannelModal,
+  setShowMembersList,
   addNewMessage,
   updateChannelState,
   setNewChannelId,
@@ -591,5 +606,3 @@ export const {
 } = channelsManagmentSlice.actions;
 
 export default channelsManagmentSlice.reducer;
-
-//TODO online/offline status (profile, friends list)

@@ -1,5 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { FaTimes } from "react-icons/fa";
+
 import {
   setUpdateChannelModal,
   Channel,
@@ -91,8 +93,13 @@ const UpdateChannelModal: React.FC<Props> = ({ channelId, channelOldName }) => {
         ref={divRef}
         className="flex flex-col justify-center items-center h-full"
       >
-        <div className="profile-card-bg-color w-full h-full md:w-[700px] md:h-[516px] border-[1px] border-gray-700">
-          <div className="relative flex h-full">
+        <div className="profile-card-bg-color w-full h-full md:w-[700px] md:h-[500px] border-[1px] border-gray-700">
+          <div className="relative h-full">
+            <FaTimes
+              size="2rem"
+              onClick={() => dispatch(setUpdateChannelModal(false))}
+              className="absolute z-10 text-white right-0 m-2 hover:text-blue-400 transition duration-300 cursor-pointer top-20 md:top-0"
+            />
             <div className="relative text-gray-300 h-full w-full flex flex-col items-center justify-center space-y-[2rem]">
               <h1 className=" text-xl about-title-family">Update Channel</h1>
               <form

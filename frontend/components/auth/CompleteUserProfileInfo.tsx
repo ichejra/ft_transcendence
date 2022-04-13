@@ -59,6 +59,9 @@ export const CompleteProfileInfo: React.FC = () => {
   };
 
   useEffect(() => {
+    if (loggedUser.user_name) {
+      navigate("/", { replace: true });
+    }
     inputRef.current?.focus();
     dispatch(completeUserInfo(true));
   }, []);
