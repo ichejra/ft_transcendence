@@ -56,11 +56,17 @@ export class GameGateway
   }
 
   public async handleDisconnect(socket: Socket): Promise<void> {
+    console.log('Disconnected');
     try {
       await this.clientsService.eraseConnection(socket);
     } catch (err) {
       throw new WsException('unauthorized connection');
     }
+    this.queue.delete(socket);
+    if (this.defaultGameQueue.includes(socket))
+      this.defaultGameQueue.splice(this.defaultGameQueue.indexOf(socket));
+    if (this.obstacleGameQueue.includes(socket))
+      this.obstacleGameQueue.splice(this.obstacleGameQueue.indexOf(socket));
     let gameFound = this.games.find((game) => {
       return (
         game.getPlayersSockets()[0] === socket ||
@@ -399,7 +405,10 @@ export class GameGateway
 
   //* accept challenge
   @SubscribeMessage('accept_challenge')
-  private async accpetChallenge(client: Socket, payload: { challengeId: string }) {
+  private async accpetChallenge(
+    client: Socket,
+    payload: { challengeId: string },
+  ) {
     console.log('%cCHALLENGE ACCEPTED', payload.challengeId);
 
     //TODO : remove players from all queues
@@ -451,3 +460,5 @@ export class GameGateway
 //TODO: add game invit in profile
 //TODO: make the game responsive waaaaaaaaaaaaaaaaaaaaaaaaaa3
 //TODO: refactor the shit
+//TODO: update the obstacle game
+

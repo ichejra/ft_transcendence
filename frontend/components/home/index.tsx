@@ -45,7 +45,7 @@ const HomePage: React.FC = () => {
         <div className="hero-bg relative w-full 2xl:w-[80rem] flex items-center justify-between">
           <div className="home-script">
             <h1 className="home-title">PING PONG</h1>
-            <p className="home-quote">Oldie But Goldie!</p>
+            <p className="home-quote">Meet Your Childhood!</p>
             <Link to="/game">
               <button className="hover:scale-110 transition duration-300 play-button">
                 PLAY NOW
@@ -60,10 +60,13 @@ const HomePage: React.FC = () => {
               PONG
             </h1>
             <p className="text-family text-white text-opacity-80">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Assumenda
-              laborum expedita qui saepe voluptas. Eveniet facere aut explicabo
-              amet illum, cum in sit veniam provident blanditiis ab a omnis
-              consectetur.
+              Pong is one of the first computer games that ever created, this
+              simple "tennis like" game features two paddles and a ball. The
+              game was originally developed by Allan Alcorn and released in 1972
+              by Atari corporations. Soon, Pong became a huge success that is
+              considered to be the game which started the video games industry.
+              <br />
+              <span className="font-mono text-xs">source: ponggame.org</span>
             </p>
           </div>
           <div className="w-auto lg:w-1/3 relative mb-72 lg:mb-60 text-family pong-game">
@@ -77,10 +80,7 @@ const HomePage: React.FC = () => {
             About
           </h1>
           <p className="about-family text-center text-white text-opacity-80 w-3/4">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum
-            voluptatibus placeat commodi aliquam temporibus quas exercitationem
-            velit cupiditate ducimus aspernatur nisi a dolorem dolore, dolorum
-            accusamus maxime et illo fugit!
+            This project is about creating a website for the mighty Pong contest! It will allow you to play PING PONG gane as well as chatting with your friends. It is made by a team of 3 students of 1337 | 42 school.
           </p>
         </div>
         <div className="w-5/6 xl:w-3/6 mb-40">
@@ -95,7 +95,7 @@ const HomePage: React.FC = () => {
         </div>
         <div className="mb-32 flex flex-col items-center">
           <h3 className="about-family text-white text-opacity-80 text-center">
-            Bring Back Old Memories With Old Friends
+            Ready To Bring Out The Child In You?
           </h3>
 
           {users
@@ -124,3 +124,6 @@ const HomePage: React.FC = () => {
 };
 
 export default HomePage;
+
+//TODO remove the invite button later
+//TODO Photos
