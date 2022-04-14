@@ -1,5 +1,18 @@
-import { ConsoleLogger, Controller, Get, HttpCode, Patch, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    Get,
+    HttpCode,
+    Patch,
+    Post,
+    Query,
+    Req,
+    Res,
+    UseGuards
+} from "@nestjs/common";
 import { Response } from "express";
+import { ReqUser } from "src/users/decorators/req-user.decorator";
+import { User } from "src/users/entities/user.entity";
 import { JwtAuthGuard } from "../guards/jwt-auth.guard";
 import { TwoFactorAuthService } from "./two-factor-auth.service";
 
@@ -12,28 +25,35 @@ export class TwoFactorAuthController {
     @Get('enable')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    enableTwoFactorAuth(@Req() _req: any) {
-        return this.twoFactorAuthService.enableDisableTwoFactorAuth(Number(_req.user.id), true);
+    enableTwoFactorAuth(@ReqUser() user: User) {
+        return this.twoFactorAuthService.enableDisableTwoFactorAuth(Number(user.id), true);
     }
 
     @Get('disable')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    disableTwoFactorAuth(@Req() _req: any) {
-        return this.twoFactorAuthService.enableDisableTwoFactorAuth(Number(_req.user.id), false);
+    disableTwoFactorAuth(@ReqUser() user: User) {
+        return this.twoFactorAuthService.enableDisableTwoFactorAuth(Number(user.id), false);
 
     }
 
-    @Get('send-email')
+    @Get('generate')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    sendEmail(@Req() _req: any) {
-        return this.twoFactorAuthService.sendConnectLink(_req.user);
+    sendEmail(
+        @ReqUser() user: User,
+        @Res() res: Response) {
+        return this.twoFactorAuthService.generateTwoFactorAuthSecretAndQRCode(user, res);
     }
 
-    @Get('verify')
+    @Post('verify')
     @HttpCode(200)
-    verifyLogin(@Res() res: Response, @Query('token') token: string): Promise<any> {
-        return this.twoFactorAuthService.verify(token, res);
+    @UseGuards(JwtAuthGuard)
+    verifyLogin(
+        @ReqUser() user: User,
+        @Res() res: Response,
+        @Body('code') code: string
+    ): Promise<any> {
+        return this.twoFactorAuthService.verifyCode(user, code, res);
     }
 } 

@@ -1,18 +1,19 @@
-import { HttpStatus, Injectable, Res } from "@nestjs/common";
+import { Injectable,
+    UnauthorizedException } from "@nestjs/common";
 import * as dotenv from "dotenv";
 import { JwtService } from "@nestjs/jwt";
-import { MailService } from "src/mail/mail.service";
 import { UsersService } from "src/users/users.service";
 import { User } from "src/users/entities/user.entity";
 import { JwtPayload } from "../type/jwt-payload.type";
 import { ConfigService } from "@nestjs/config";
+import { authenticator } from "otplib";
+import { toFileStream } from "qrcode";
 
 dotenv.config();
 @Injectable()
 export class TwoFactorAuthService {
     constructor(
         private readonly jwtService: JwtService,
-        private mailService: MailService,
         private readonly usersService: UsersService,
         private configService: ConfigService,
     ) { }
@@ -22,38 +23,35 @@ export class TwoFactorAuthService {
         return this.usersService.turnOnOffTwoFactorAuth(userId, bool);
     }
 
-    /* method used for email sending */
-    async sendConnectLink(user: User): Promise<any> {
-        try {
-            const payload: JwtPayload = { id: user.id, user_name: user.user_name, email: user.email };
-            const token: string = this.jwtService.sign(payload, {
-                secret: this.configService.get('JWT_SECRET'),
-                expiresIn: this.configService.get('JWT_EXPIRESIN')
-            });
-
-            const url: string = `${this.configService.get('BACKEND_URL')}/api/2fa/verify?token=${token}`;
-            const text = `Welcome to ${this.configService.get('APP_NAME')} 2FA. To continue, click here: ${url}`;
-
-            await this.mailService.sendMail({
-                to: user.email,
-                subject: 'Account login',
-                text
-            });
-            return { success: true, message: 'check inbox.' }
-        } catch (err) {
-            throw err;
-        }
+    //*  All the new change will be here
+    //* code:
+    generateTwoFactorAuthSecretAndQRCode = async (user: User, stream: any): Promise<any> => {
+        const secret = authenticator.generateSecret();
+        const otpauth = authenticator.keyuri(
+            user.email,
+            this.configService.get('APP_NAME'),
+            secret
+        );
+        await this.usersService.setTwoFactorAuthSecret(user.id, secret);
+        // pipe qr code stream
+        return toFileStream(stream, otpauth);
     }
 
-    /* method used for logging verified */
-    async verify(token: string, res: any): Promise<any> {
-        const { id, email } = await this.jwtService.verify(token);
-        const user = await this.usersService.findOne(Number(id));
-        if (user && user.email === email) {
-            res.cookie('accessToken', token);
-            return res.redirect(this.configService.get('HOME_PAGE'));// redirect to Home page
-        } else {
-            return res.status(HttpStatus.UNAUTHORIZED).json({ succes: false, msg: 'UNAUTHORIZED' }).send();// redirect to the error page
+    verifyCode = async (user: User, code: string, res: any): Promise<any> => {
+        const isValid = authenticator.verify({
+            token: code,
+            secret: user.twoFactorAuthSecret,
+        });
+        if (!isValid) {
+            throw new UnauthorizedException('Invalid code.')
         }
+        const payload: JwtPayload = { id: user.id, user_name: user.user_name, email: user.email };
+        const token: string = this.jwtService.sign(payload, {
+            secret: this.configService.get('JWT_SECRET'),
+            expiresIn: this.configService.get('JWT_EXPIRESIN'),
+        });
+        res.cookie('accessToken', token);
+        return res.redirect(this.configService.get('HOME_PAGE'));// redirect to Home page
     }
+    //* end
 }

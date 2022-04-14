@@ -34,19 +34,13 @@ export class AuthService {
 
     /* function used for creating the user if not exist and sign it */
     async login(_req: any, _res: any): Promise<any> {
-        let user: User = null;
-        let url: string;
         try {
-            user = await this.usersService.findOne(Number(_req.user.id));
+            let user = await this.usersService.findOne(Number(_req.user.id));
             // 2FA ENABLE
-            if (user && user.is_2fa_enabled === true) {
-                try {
-                    await this.twoFactorAuthService.sendConnectLink(user);
-                } catch (err) {
-                    throw new ForbiddenException('connot send the link');
-                }
-                return _res.redirect(this.configService.get('HOME_PAGE'));
+            if (user && user.is_2fa_enabled) {
+                return await this.twoFactorAuthService.generateTwoFactorAuthSecretAndQRCode(user, _res);
             }
+            let url: string;
             if (!user) {
                 user = await this.usersService.create(_req.user);
                 url = this.configService.get('COMPLETE_INFO'); // redirect to complete-info page
@@ -58,7 +52,6 @@ export class AuthService {
             _res.cookie('accessToken', jwtToken);
             return _res.redirect(url);
         } catch (err) {
-            console.log(err);
             throw new ForbiddenException('Forbidden: user cannot log in');
         }
     }

@@ -326,7 +326,7 @@ export class UsersService {
     throw new NotFoundException('User not found');
   }
 
-  //* Turn on the two factor authentication
+  //* two factor authentication
   async turnOnOffTwoFactorAuth(userId: number, bool: boolean): Promise<User> {
     try {
       await this.connection.getRepository(User).update(userId, {
@@ -340,6 +340,12 @@ export class UsersService {
     } catch (err) {
       throw err;
     }
+  }
+
+  async setTwoFactorAuthSecret(userId: number, secret: string): Promise<any> {
+    await this.connection.getRepository(User).update(userId, {
+      twoFactorAuthSecret: secret
+    });
   }
 
 

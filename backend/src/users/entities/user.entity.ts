@@ -48,6 +48,9 @@ export class User {
     @Column({ default: false })
     is_2fa_enabled: boolean;
 
+    @Column({ nullable: true })
+    twoFactorAuthSecret?: string;
+
     @Column({
         type: 'enum',
         enum: UserState,
