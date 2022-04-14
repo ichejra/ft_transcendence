@@ -10,26 +10,26 @@ export class GameService {
   constructor(
     @InjectRepository(Game)
     private gameRepository: Repository<Game>,
-  ) {}
+  ) { }
 
 
-    async insertGameData(data: GameDto) : Promise<Game> {
-      return await this.gameRepository.save({
-        winner: data.winner,
-        loser: data.loser,
-        score: data.score
-      });
-    }
+  async insertGameData(data: GameDto): Promise<Game> {
+    return await this.gameRepository.save({
+      winner: data.winner,
+      loser: data.loser,
+      score: data.score
+    });
+  }
 
-    async getGamesHistory(playerId: number): Promise<Game[]> {
-      const games: Game[] = await this.gameRepository.find({
-        relations: [ 'winner', 'loser' ],
-        where: [{
-          winner: playerId,
-        },{
-          loser: playerId,
-        }]
-      });
-      return games;
-    }
+  async getGamesHistory(playerId: number): Promise<Game[]> {
+    const games: Game[] = await this.gameRepository.find({
+      relations: ['winner', 'loser'],
+      where: [{
+        winner: playerId,
+      }, {
+        loser: playerId,
+      }]
+    });
+    return games;
+  }
 }

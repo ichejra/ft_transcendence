@@ -11,16 +11,16 @@ import { GameService } from "./game.service";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ Game ]),
+    TypeOrmModule.forFeature([Game]),
     UsersModule,
     ChannelsModule,
     AuthModule
   ],
-  controllers: [ GameController ],
+  controllers: [GameController],
   providers: [
     GameService,
     GameGateway,
     ConnectionsService
   ], //? Gateways are not instantiated until they are referenced in the providers array of an existing module.
 })
-export class GameModule {}
+export class GameModule { }
