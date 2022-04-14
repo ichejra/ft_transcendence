@@ -37,6 +37,7 @@ interface UserState {
   isPending: boolean;
   isFriend: boolean;
   isBlocked: boolean;
+  qrCode: string;
 }
 
 const user: User = {
@@ -68,6 +69,7 @@ const initialState: UserState = {
   isPending: false,
   isFriend: false,
   isBlocked: false,
+  qrCode: "",
 };
 
 export const fetchNoRelationUsers = createAsyncThunk(
@@ -156,6 +158,45 @@ export const enableTwoFactorAuth = createAsyncThunk(
           authorization: `Bearer ${Cookies.get("accessToken")}`,
         },
       });
+      return _api.fulfillWithValue(response.data);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const generate2FAQrCode = createAsyncThunk(
+  "users/generate2FAQrCode",
+  async (_, _api) => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3001/api/2fa/generate",
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      return _api.fulfillWithValue(response.data);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const verify2FACode = createAsyncThunk(
+  "users/verify2FACode",
+  async (verificationCode: string, _api) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3001/api/2fa/verify",
+        { code: verificationCode },
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error.message);
@@ -320,6 +361,12 @@ export const userProfileSlice = createSlice({
       state.loggedUser.is_2fa_enabled = true;
     });
     builder.addCase(enableTwoFactorAuth.rejected, (state, action: any) => {});
+
+    //* genrate qrCode
+    builder.addCase(generate2FAQrCode.fulfilled, (state, action: any) => {
+      state.qrCode = action.payload;
+    });
+    builder.addCase(generate2FAQrCode.rejected, (state, action: any) => {});
 
     //* disable 2fa
     builder.addCase(disableTwoFactorAuth.fulfilled, (state) => {

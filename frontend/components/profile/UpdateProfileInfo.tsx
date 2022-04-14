@@ -4,16 +4,20 @@ import {
   editUserProfile,
   enableTwoFactorAuth,
   disableTwoFactorAuth,
+  generate2FAQrCode,
+  verify2FACode,
 } from "../../features/userProfileSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { BiEditAlt } from "react-icons/bi";
+import Swal from "sweetalert2";
 
 export const UpdateProfileForm: React.FC = () => {
   const [avatar, setAvatar] = useState("");
   const [isValid, setIsValid] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const checkboxRef = useRef<any>(null);
   const dispatch = useAppDispatch();
-  const { error, loggedUser, isLoading } = useAppSelector(
+  const { error, loggedUser, isLoading, qrCode } = useAppSelector(
     (state) => state.user
   );
   const [username, setUsername] = useState(loggedUser.user_name);
@@ -50,8 +54,41 @@ export const UpdateProfileForm: React.FC = () => {
   const handleTwoFactorAuth = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
     if (checked) {
-      dispatch(enableTwoFactorAuth()).then(() => {
-        console.log("2FA enabled: ", checked, loggedUser);
+      dispatch(generate2FAQrCode()).then(async (data: any) => {
+        const { value: verificationCode } = await Swal.fire({
+          imageUrl: data.payload,
+          imageHeight: 200,
+          imageAlt: "A tall image",
+          confirmButtonText: "Confirm",
+          showCancelButton: true,
+          title: "Enter verification code",
+          input: "text",
+          inputPlaceholder: "XXX XXX",
+          showLoaderOnConfirm: true,
+          preConfirm: (code: string) => {
+            console.log("code: ", code);
+            return dispatch(verify2FACode(code)).then((data: any) => {
+              console.log("data: ", data);
+              if (data.error) {
+                console.log("invalid code_____", data.error);
+                Swal.showValidationMessage(`invalid code`);
+              } else {
+                Swal.fire({
+                  icon: "success",
+                  title: "2FA Enabled Successfully!",
+                  showConfirmButton: false,
+                  timer: 1500,
+                });
+                dispatch(enableTwoFactorAuth()).then(() => {
+                  console.log("2FA enabled: ", checked, loggedUser);
+                });
+              }
+            });
+          },
+        });
+        if (!verificationCode) {
+          checkboxRef.current.checked = false;
+        }
       });
     } else {
       dispatch(disableTwoFactorAuth()).then(() => {
@@ -132,6 +169,7 @@ export const UpdateProfileForm: React.FC = () => {
         <div className="flex items-center md:w-72">
           <label className="switch mr-2">
             <input
+              ref={checkboxRef}
               type="checkbox"
               checked={loggedUser.is_2fa_enabled}
               onChange={handleTwoFactorAuth}

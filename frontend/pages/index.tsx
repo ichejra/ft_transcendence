@@ -12,6 +12,7 @@ import Footer from "../components/Footer";
 import NotFound from "../components/NotFound";
 import { AuthRoute, CompleteProfile } from "../components/privateRoutes";
 import CompleteUserProfileInfo from "../components/auth/CompleteUserProfileInfo";
+import VerificationPage from "../components/auth/VerificationPage";
 import { useAppSelector, useAppDispatch } from "../app/hooks";
 import { useEffect, useState } from "react";
 import { fetchCurrentUser } from "../features/userProfileSlice";
@@ -156,6 +157,7 @@ const Home: NextPage = () => {
             </AuthRoute>
           }
         ></Route>
+        <Route path="/verify-page" element={<VerificationPage />}></Route>
         <Route
           path="/complete-info"
           element={
