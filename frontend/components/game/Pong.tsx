@@ -35,6 +35,9 @@ class Ball extends Circle {}
 class Score extends Text {}
 
 import { Link } from "react-router-dom";
+import { GiTrophyCup, GiDiamondTrophy } from "react-icons/gi";
+import { GrTrophy } from "react-icons/gr";
+import LeaderBoard from "./LeaderBoard";
 
 const stateInit: IFrame = {
   ball: {
@@ -76,6 +79,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   const [leftPlayer, setLeftPlayer] = useState<User>(users[0]);
   const [rightPlayer, setRightPlayer] = useState<User>(users[1]);
   const [joined, setJoined] = useState(false);
+  const [openLeaderBoard, setOpenLeaderBoard] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { loggedUser } = useAppSelector((state) => state.user);
@@ -382,7 +386,26 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   }, []);
 
   return (
-    <div className="flex w-full flex-col items-center justify-center">
+    <div className="flex w-full flex-col items-center justify-center relative">
+      {users.length === 0 && userType === "player" && (
+        <div className="text-white w-full grid sm:justify-items-end absolute top-24 sm:right-8 justify-items-center">
+          {/* <button>Click Me</button> */}
+          <div
+            className="tooltip border-2 border-yellow-300 rounded-full p-1 w-24 h-24 flex justify-center items-center cursor-pointer hover:border-yellow-400"
+            onClick={() => setOpenLeaderBoard(true)}
+          >
+            <span className="tooltiptext border flex justify-center items-center top-2 right-20">
+              Leader Board
+            </span>
+            <GiTrophyCup
+              size="5rem"
+              className="border-2 border-yellow-300 p-2 text-yellow-300 hover:text-yellow-400 hover:border-yellow-400"
+            />
+            {/* <GiDiamondTrophy size="4rem" className="" /> */}
+          </div>
+          {openLeaderBoard && <LeaderBoard setOpenModal={setOpenLeaderBoard} />}
+        </div>
+      )}
       {users.length === 0 && userType === "player" && (
         <div className="items-center flex justify-center p-22 md:mt-64 mt-52">
           <GameRules />
@@ -477,3 +500,4 @@ export default Pong;
 //TODO: joined not working if player navigate to other path
 //TODO: play and pause //! makainax f subject
 //TODO: make leader board as modal
+//TODO: COPYWRITING
