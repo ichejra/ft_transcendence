@@ -1,4 +1,3 @@
-import { User } from "src/users/entities/user.entity";
 import {
     BaseEntity,
     Column,
@@ -8,6 +7,7 @@ import {
     ManyToOne,
     PrimaryGeneratedColumn
 } from "typeorm";
+import { User } from "src/users/entities/user.entity";
 import { Channel } from "../../channels/entities/channel.entity";
 
 @Entity('messages_channels')

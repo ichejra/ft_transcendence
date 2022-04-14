@@ -6,7 +6,6 @@ import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { User } from "src/users/entities/user.entity";
 import { UsersService } from "src/users/users.service";
-import { TwoFactorAuthService } from "./two-factor-auth/two-factor-auth.service";
 import { JwtPayload } from "./type/jwt-payload.type";
 
 @Injectable()
@@ -14,7 +13,6 @@ export class AuthService {
     constructor(
         private usersService: UsersService,
         private jwtService: JwtService,
-        private twoFactorAuthService: TwoFactorAuthService,
         private configService: ConfigService
     ) { }
 
@@ -38,7 +36,7 @@ export class AuthService {
             let user = await this.usersService.findOne(Number(_req.user.id));
             // 2FA ENABLE
             if (user && user.is_2fa_enabled) {
-                return await this.twoFactorAuthService.generateTwoFactorAuthSecretAndQRCode(user, _res);
+                return _res.redirect(this.configService.get('VERIFY_PAGE'));
             }
             let url: string;
             if (!user) {

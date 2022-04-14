@@ -3,7 +3,7 @@ import {
     Injectable
 } from '@nestjs/common';
 import { UserFriends, UserFriendsRelation } from 'src/users/entities/user-friends.entity';
-import { User } from "src/users/entities/user.entity";
+import { User } from 'src/users/entities/user.entity';
 import { Connection } from "typeorm";
 import { Channel } from "../channels/entities/channel.entity";
 import { DirectMessage } from './entities/direct-messages.entity';

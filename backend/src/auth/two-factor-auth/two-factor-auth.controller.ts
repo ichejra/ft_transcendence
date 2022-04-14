@@ -42,7 +42,7 @@ export class TwoFactorAuthController {
     @UseGuards(JwtAuthGuard)
     sendEmail(
         @ReqUser() user: User,
-        @Res() res: Response) {
+        @Res() res: Response): Promise<any> {
         return this.twoFactorAuthService.generateTwoFactorAuthSecretAndQRCode(user, res);
     }
 

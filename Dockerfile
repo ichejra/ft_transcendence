@@ -1,4 +1,4 @@
-FROM node:17
+FROM node:16
 
 WORKDIR /usr/app/ft_transcendence
 
@@ -8,7 +8,7 @@ WORKDIR /usr/app/ft_transcendence/frontend
 COPY frontend/* .
 RUN npm install
 RUN npx tsc
-
+# * Client side will be run in the background
 # * Serer side
 
 WORKDIR /usr/app/ft_transcendence/backend/

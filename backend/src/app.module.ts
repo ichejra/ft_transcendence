@@ -38,12 +38,10 @@ dotenv.config();
         CALLBACK_URL: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
         JWT_EXPIRESIN: Joi.string(),
+        FRONTEND_URL: Joi.string().required(),
         HOME_PAGE: Joi.string().required(),
         COMPLETE_INFO: Joi.string().required(),
-        EMAIL_SERVICE: Joi.string().required(),
-        EMAIL_USER: Joi.string().required(),
-        EMAIL_PASSWORD: Joi.string().required(),
-        FRONTEND_URL: Joi.string().required(),
+        VERIFY_PAGE: Joi.string().required(),
       })
     }),
     TypeOrmModule.forRootAsync({
@@ -52,7 +50,7 @@ dotenv.config();
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         host: configService.get('POSTGRES_HOST'),
-        port: parseInt(<string>configService.get('POSTGRES_PORT')),
+        port: configService.get('POSTGRES_PORT'),
         username: configService.get('POSTGRES_USERNAME'),
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
