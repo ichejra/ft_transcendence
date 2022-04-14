@@ -1,22 +1,51 @@
-import {
-  fetchCurrentUser,
-  fetchAllUsers,
-} from "../../features/userProfileSlice";
+import { verify2FACode } from "../../features/userProfileSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
-import { Navigate } from "react-router";
+import { Navigate, useNavigate } from "react-router";
 
 const VerificationPage = () => {
   const dispatch = useAppDispatch();
   const [toHome, setToHome] = useState(false);
-  const { completeInfo } = useAppSelector((state) => state.user);
+  const [isValid, setIsValid] = useState(0);
+  const [code, setCode] = useState("");
+  const navigate = useNavigate();
   const divRef = useRef(null);
+
+  const handleUserVerification = (e: any) => {
+    e.preventDefault();
+    dispatch(verify2FACode(code)).then((data: any) => {
+      if (data.error) {
+        setIsValid(1);
+      } else {
+        setIsValid(0);
+        navigate("/", { replace: true });
+      }
+    });
+    setCode("");
+  };
+
+  const codeValueChange = (e: any) => {
+    const value = e.target.value;
+    // const checkType = /^\d+$/.test(value);
+    // console.log("code => ", checkType);
+    if (value.length > 6 || (value && !Number(value))) return;
+    setCode(value);
+  };
+
+  useEffect(() => {
+    const codeRegex = /^[0-9]{6}$/;
+    setIsValid(() => {
+      if (!code) {
+        return 0;
+      }
+      return !codeRegex.test(code) ? 2 : 0;
+    });
+  }, [code]);
 
   if (toHome) {
     return <Navigate to="/" replace={true} />;
   }
-
   return (
     <div
       onClick={(e) => {
@@ -29,29 +58,37 @@ const VerificationPage = () => {
     >
       <div ref={divRef} className="flex justify-center items-center h-full">
         <div className="flex flex-col items-center justify-center w-full md:w-[35rem] 2xl:w-[40rem] h-full md:h-[20rem] py-12 user-card-bg border border-gray-700 text-gray-300 about-family">
-          <h1 className="font-bold about-title-family text-3xl mb-8 tracking-wider">
+          <h1 className="font-bold about-title-family text-2xl mb-8 tracking-wider">
             Verify
           </h1>
-          <div className="flex flex-col w-5/6 md:w-4/6 text-gray-800">
-            {/* <a
-              href="http://localhost:3001/auth"
-              className="flex items-center justify-center about-family transition duration-300 border-2 text-gray-900  bg-gray-300 hover:bg-white rounded-md  m-2 p-2 tracking-wider"
-            >
-              <img
-                src="/images/42_logo_white.svg"
-                className="w-8 h-8 mr-4 pr-1"
-              />
-              <p className="font-bold">Login with Intra</p>
-            </a> */}
+          <form className="flex flex-col w-5/6 md:w-4/6 text-gray-800">
             <input
               type="text"
               placeholder="XXX XXX"
+              value={code}
+              onChange={codeValueChange}
               className="flex items-center justify-center transition duration-300 border-2 text-gray-600  bg-gray-300 hover:bg-white rounded-md  m-2 p-2 tracking-wider"
             />
-            <button className="flex items-center justify-center about-family transition duration-300 border-2 text-gray-900  bg-gray-300 hover:bg-white rounded-md  m-2 p-2 tracking-wider">
+            {isValid === 1 ? (
+              <p className="text-red-400 text-sm font-sans font-bold px-2">
+                Invalid Code
+              </p>
+            ) : isValid === 2 ? (
+              <p className="text-red-400 text-sm font-sans font-bold px-2">
+                6 numbers required
+              </p>
+            ) : (
+              <span></span>
+            )}
+
+            <button
+              type="submit"
+              onClick={handleUserVerification}
+              className="flex items-center justify-center about-family transition duration-300 border-2 text-gray-900  bg-gray-300 hover:bg-white rounded-md  m-2 p-2 tracking-wider"
+            >
               Submit
             </button>
-          </div>
+          </form>
         </div>
       </div>
     </div>
