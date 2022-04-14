@@ -5,7 +5,6 @@ import {
     Entity,
     JoinColumn,
     ManyToOne,
-    OneToOne,
     PrimaryGeneratedColumn
 } from "typeorm";
 import { Channel } from "./channel.entity";

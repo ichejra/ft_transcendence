@@ -15,7 +15,6 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as dotenv from 'dotenv';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UserDto } from "src/users/dto/user.dto";
 import { UsersService } from './users.service';
 import {
@@ -26,6 +25,7 @@ import { User } from './entities/user.entity';
 import { ReqUser } from './decorators/req-user.decorator'
 import { IsBlockedGuard } from './guards/is-blocked.guard';
 import { ConfigService } from '@nestjs/config';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 dotenv.config();
 @Controller('users')

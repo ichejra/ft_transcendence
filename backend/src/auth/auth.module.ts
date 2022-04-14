@@ -8,8 +8,6 @@ import { AuthService } from './auth.service';
 import { IntraStrategy } from './strategies/intra.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { TwoFactorAuthModule } from './two-factor-auth/two-factor-auth.module';
-import { TwoFactorAuthService } from './two-factor-auth/two-factor-auth.service';
-import { MailService } from 'src/mail/mail.service';
 
 @Module({
     imports: [
@@ -32,8 +30,6 @@ import { MailService } from 'src/mail/mail.service';
         AuthService,
         IntraStrategy,
         JwtStrategy,
-        TwoFactorAuthService,
-        MailService
     ],
     exports: [AuthService]
 })

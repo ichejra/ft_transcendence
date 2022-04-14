@@ -1,4 +1,3 @@
-import { User } from "src/users/entities/user.entity";
 import {
     BaseEntity,
     Column,
@@ -8,6 +7,8 @@ import {
     ManyToOne,
     PrimaryGeneratedColumn
 } from "typeorm";
+
+import { User } from "src/users/entities/user.entity";
 
 @Entity('direct_messages')
 export class DirectMessage extends BaseEntity {
