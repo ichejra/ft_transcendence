@@ -157,7 +157,16 @@ const Home: NextPage = () => {
             </AuthRoute>
           }
         ></Route>
-        <Route path="/verify-page" element={<VerificationPage />}></Route>
+        <Route
+          path="/verify-page"
+          element={
+            <AuthRoute>
+              <CompleteProfile>
+                <VerificationPage />
+              </CompleteProfile>
+            </AuthRoute>
+          }
+        ></Route>
         <Route
           path="/complete-info"
           element={
