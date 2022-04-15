@@ -30,6 +30,7 @@
     width: 15rem;
   }
 }
+
 @media only screen and (max-width: 320px) {
   div.play-again-btn button {
     width: 12rem;

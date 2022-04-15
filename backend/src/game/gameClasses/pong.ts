@@ -168,8 +168,12 @@ class GameObj {
     //! incremented the ball speed too 0.2=>0.3
     //! changed the paddle min height and the increment ammount 40=>30 and 2=>3
     if (!this._isDefault) {
-      if (player.getPaddle().getHeight() > 30)
-        player.getPaddle().setHeight(player.getPaddle().getHeight() - 3);
+      player
+      .getPaddle()
+      .setHeight(Math.floor(Math.random() * (100 - 40 + 1) + 40));
+      
+      // if (player.getPaddle().getHeight() > 30)
+        // player.getPaddle().setHeight(player.getPaddle().getHeight() - 3);
     }
   }
 

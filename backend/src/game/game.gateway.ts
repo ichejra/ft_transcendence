@@ -56,7 +56,6 @@ export class GameGateway
   }
 
   public async handleDisconnect(socket: Socket): Promise<void> {
-    console.log('Disconnected');
     try {
       await this.clientsService.eraseConnection(socket);
     } catch (err) {
@@ -124,7 +123,6 @@ export class GameGateway
   //* start playing
   @SubscribeMessage('join_game')
   private async joinGame(socketsArr: Socket[], payload: any) {
-    console.log('join game: am here');
     const game = new GameObj(
       new Player(socketsArr[0], true),
       new Player(socketsArr[1], false),
@@ -153,7 +151,6 @@ export class GameGateway
   ) {
     gameQueue.push(client);
     if (gameQueue.length > 1) {
-      console.log(gameQueue.length);
       const [first, second] = gameQueue;
       const user1 = await this.getPlayerAsUser(first);
       const user2 = await this.getPlayerAsUser(second);
@@ -172,60 +169,12 @@ export class GameGateway
   //* join the queue
   @SubscribeMessage('join_queue')
   private async joinQueue(client: Socket, payload: string): Promise<void> {
-    console.log('join queue: am here ', payload);
     if (this.queue.has(client) === true) return;
     this.queue.add(client);
     if (payload === 'obstacle') {
-      console.log('obstacleGameQueue: am here');
       this.gameTypeQueue(this.obstacleGameQueue, client, 'obstacle');
-      // this.obstacleGameQueue.push(client);
-      // if (this.obstacleGameQueue.length > 1) {
-      //   console.log(this.obstacleGameQueue.length);
-      //   const [first, second] = this.obstacleGameQueue;
-      //   const user1 = await this.getPlayerAsUser(first);
-      //   const user2 = await this.getPlayerAsUser(second);
-      //   if (user1.id === user2.id) {
-      //     this.obstacleGameQueue.splice(
-      //       this.obstacleGameQueue.indexOf(first),
-      //       1,
-      //     );
-      //     return;
-      //   }
-      //   await this.usersService.updateState(
-      //     Number(user1.id),
-      //     UserState.IN_GAME,
-      //   );
-      //   await this.usersService.updateState(
-      //     Number(user2.id),
-      //     UserState.IN_GAME,
-      //   );
-      //   this.obstacleGameQueue.splice(0, this.obstacleGameQueue.length);
-      //   this.joinGame([first, second], payload);
-      // }
     } else if (payload === 'default') {
-      console.log('defaultGameQueue: am here');
       this.gameTypeQueue(this.defaultGameQueue, client, 'default');
-      // this.defaultGameQueue.push(client);
-      // console.log(this.defaultGameQueue.length);
-      // if (this.defaultGameQueue.length > 1) {
-      //   const [first, second] = this.defaultGameQueue;
-      //   const user1 = await this.getPlayerAsUser(first);
-      //   const user2 = await this.getPlayerAsUser(second);
-      //   if (user1.id === user2.id) {
-      //     this.defaultGameQueue.splice(this.defaultGameQueue.indexOf(first), 1);
-      //     return;
-      //   }
-      //   await this.usersService.updateState(
-      //     Number(user1.id),
-      //     UserState.IN_GAME,
-      //   );
-      //   await this.usersService.updateState(
-      //     Number(user2.id),
-      //     UserState.IN_GAME,
-      //   );
-      //   this.defaultGameQueue.splice(0, this.defaultGameQueue.length);
-      //   this.joinGame([first, second], payload);
-      // }
     }
   }
 
@@ -329,14 +278,10 @@ export class GameGateway
 
   @SubscribeMessage('spectator')
   private watchGame(socket: Socket, payload: number) {
-    console.log('hello from watch game');
     const gameFound = this.games.find((game) => {
-      console.log('id ======= ', payload);
       if (game.hasUser(payload)) return game;
     });
     if (gameFound) {
-      console.log('watcher has been added');
-
       gameFound.addSpectators(socket);
     }
   }
@@ -345,7 +290,6 @@ export class GameGateway
   private removeSpectator(socket: Socket) {
     const gameFound = this.games.find((game) => game.hasSpectator(socket));
     if (gameFound) {
-      console.log('I should be removed here');
       gameFound.removeSpectator(socket);
     }
   }
@@ -361,12 +305,6 @@ export class GameGateway
     client: Socket,
     payload: { inviter: User; invitee: User; gameType: string },
   ) {
-    // const gameFound = this.games.find((game) => {
-    //   return (
-    //     game.getPlayersSockets()[0] === client ||
-    //     game.getPlayersSockets()[1] === client
-    //   );
-    // });
     const inviterJoinedGame = this.games.find((game) => {
       return game.hasUser(payload.inviter.id);
     });
@@ -394,17 +332,14 @@ export class GameGateway
         await this.clientsService.getUserConnections(
           Number(payload.invitee.id),
         );
-      console.log(inviteeSockets.size);
       inviteeSockets.forEach((sock) => {
         this.server.to(sock.id).emit('game_invitation', {
           inviter: payload.inviter,
           challengeId: challengeId,
         });
-        console.log('cha %s --- sock %s', challengeId, sock.id);
       });
       this.challenges.push(challenge);
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }
@@ -415,8 +350,6 @@ export class GameGateway
     client: Socket,
     payload: { challengeId: string },
   ) {
-    console.log('%cCHALLENGE ACCEPTED', payload.challengeId);
-
     //TODO : remove players from all queues
     const challenge = this.challenges.find((challenge) => {
       return challenge.getChallengeId() === payload.challengeId;
@@ -425,7 +358,6 @@ export class GameGateway
       challenge.getInviterSocket().emit('challenge_accepted', {
         challengeId: challenge.getChallengeId(),
       });
-      //* DONE changed state for invitation game players players
       const inviter = await this.getPlayerAsUser(challenge.getInviterSocket());
       const invitee = await this.getPlayerAsUser(client);
       await this.usersService.updateState(
@@ -449,7 +381,6 @@ export class GameGateway
     client: Socket,
     payload: { challengeId: string; loggedUser: User },
   ) {
-    console.log('%cCHALLENGE REJECTED', payload.challengeId);
     const challenge = this.challenges.find((challenge) => {
       return challenge.getChallengeId() === payload.challengeId;
     });

@@ -1,5 +1,4 @@
 import { Socket } from 'socket.io';
-import { User } from 'src/users/entities/user.entity';
 
 export class gameChallenge {
   private _challenge_id: string;

@@ -1,4 +1,3 @@
-
 import Pong from "./Pong";
 
 interface UserType {
