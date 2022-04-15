@@ -35,11 +35,11 @@ export class AuthService {
         try {
             let user = await this.usersService.findOne(Number(_req.user.id));
             // 2FA ENABLE
-            if (user && user.is_2fa_enabled) {
-                return _res.redirect(this.configService.get('VERIFY_PAGE'));
-            }
             let url: string;
-            if (!user) {
+            if (user && user.is_2fa_enabled) {
+                url = this.configService.get('VERIFY_PAGE');
+            }
+            else if (!user) {
                 user = await this.usersService.create(_req.user);
                 url = this.configService.get('COMPLETE_INFO'); // redirect to complete-info page
             } else {

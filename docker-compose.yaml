@@ -11,7 +11,7 @@ services:
    - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
    - POSTGRES_DB=${POSTGRES_DATABASE}
   networks:
-   - backend
+   - my_net
   ports:
    - ${POSTGRES_PORT}:5432
 
@@ -21,13 +21,27 @@ services:
   container_name: adminer
   restart: always
   networks:
-   - backend
+   - my_net
   ports:
    - 8080:8080
   depends_on:
    - db
 
+ app:
+  build: ./app
+  container_name: app
+  restart: always
+  env_file:
+   - .env
+  networks:
+   - my_net
+  ports:
+   - 80:80
+   - 3000:3000
+   - 3001:3001
+  depends_on:
+   - db
 
 networks:
- backend:
+ my_net:
   driver: bridge
