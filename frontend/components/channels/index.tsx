@@ -45,7 +45,6 @@ const ChatRooms = () => {
     dispatch(getSingleChannel(id)).then((data: any) => {
       if (data.error) {
         const errorCode = Number(data.payload.match(/(\d+)/)[0]);
-        console.log("error___________", errorCode);
         if (errorCode === 404) {
           navigate(`/404`, { replace: true });
         }
@@ -71,20 +70,14 @@ const ChatRooms = () => {
 
   //* Effects__________
   useEffect(() => {
-    console.log("%c[Index] get channels list", "color:blue");
     if (Number(params.id)) {
       getCurrentChannelContent(Number(params.id));
     } else {
       dispatch(getChannelsList());
     }
-  }, []);
+  }, [params.id]);
 
   useEffect(() => {
-    console.log(
-      "%c[Index] get new joined channel content",
-      "color:green",
-      newChannel.id
-    );
     if (newChannel.render) {
       getCurrentChannelContent(newChannel.id);
     }
@@ -98,27 +91,18 @@ const ChatRooms = () => {
 
   useEffect(() => {
     socket.on("leave_success", (data) => {
-      console.log("destroy channe: ", data.removeChannel);
-
       if (data.removeChannel) {
         navigate("/channels");
         dispatch(getChannelsList()).then(() => {
           setShowChannelContent(false);
         });
       } else {
-        // dispatch(getSingleChannel(data.channelId)).then(() => {
-        //   dispatch(getChannelMembersList(data.channelId));
-        // });
         getCurrentChannelContent(data.channelId);
-
-        console.log("%cleft the channel", "color:red");
       }
     });
     socket.on("join_success", (data) => {
-      console.log("join_success");
       dispatch(updateMemmbersList());
       dispatch(getChannelsList()).then(() => {
-        console.log("join_success: ", data.channelId, channelID);
         dispatch(getChannelMembersList(data.channelId));
       });
     });

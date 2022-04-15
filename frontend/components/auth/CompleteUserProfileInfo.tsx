@@ -34,7 +34,6 @@ export const CompleteProfileInfo: React.FC = () => {
     const img = document.getElementById("profile-picture") as HTMLImageElement;
     img.src = URL.createObjectURL(e.target.files[0]);
     setAvatar(e.target.files[0]);
-    console.log("new img->", URL.createObjectURL(e.target.files[0]));
   };
 
   const handleLoginForm = (e: React.FormEvent<EventTarget>) => {

@@ -1,8 +1,7 @@
 import { verify2FACode, logOutUser } from "../../features/userProfileSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { useAppDispatch } from "../../app/hooks";
 import { useEffect, useRef, useState } from "react";
-import Cookies from "js-cookie";
-import { Navigate, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 const VerificationPage = () => {
   const dispatch = useAppDispatch();
@@ -27,9 +26,7 @@ const VerificationPage = () => {
 
   const codeValueChange = (e: any) => {
     const value = e.target.value;
-    // const checkType = /^\d+$/.test(value);
-    // console.log("code => ", checkType);
-    if (value.length > 6 || (value && !Number(value))) return;
+    if (value.length > 6 || (value && isNaN(Number(value)))) return;
     setCode(value);
   };
 
@@ -47,7 +44,6 @@ const VerificationPage = () => {
     <div
       onClick={(e) => {
         if (e.target == divRef.current) {
-          console.log("go home");
           dispatch(logOutUser());
           navigate("/", { replace: true });
         }
