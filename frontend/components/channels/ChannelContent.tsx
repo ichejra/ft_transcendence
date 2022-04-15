@@ -25,6 +25,7 @@ import {
   ChannelMember,
   ChannelOwner,
   setShowMembersList,
+  getChannelContent,
 } from "../../features/chatSlice";
 interface ContentProps {
   channelName: string;
@@ -44,7 +45,7 @@ const ChannelContent: React.FC<ContentProps> = ({
   const navigate = useNavigate();
   const params = useParams();
   const dispatch = useAppDispatch();
-  const { updateMessages, membersList } = useAppSelector(
+  const { updateMessages, membersList, refresh } = useAppSelector(
     (state) => state.globalState
   );
   const { loggedUser } = useAppSelector((state) => state.user);
@@ -62,7 +63,6 @@ const ChannelContent: React.FC<ContentProps> = ({
     if (!message) return;
     dispatch(getLoggedUserRole(Number(params.id))).then((data: any) => {
       const loggedMember: ChannelOwner = data.payload;
-      console.log("-_-_-_-_>>", loggedMember.userStatus);
       socket.emit("send_message_channel", {
         channelId: params.id,
         content: message,
@@ -110,12 +110,6 @@ const ChannelContent: React.FC<ContentProps> = ({
   }, [updateMessages]);
 
   useEffect(() => {
-    console.log(
-      "[Member] newChannelId --------->",
-      Number(params.id),
-      currentChannelID,
-      memberStatus
-    );
     if (currentChannelID !== -1) {
       dispatch(getChannelMembersList(currentChannelID));
       dispatch(getLoggedUserRole(currentChannelID));
@@ -123,32 +117,27 @@ const ChannelContent: React.FC<ContentProps> = ({
   }, [memberStatus]);
 
   useEffect(() => {
-    console.log("[ChannelContent] >>>>>> ", params.id, currentChannelID);
     if (currentChannelID) {
       dispatch(getChannelMembersList(currentChannelID));
     }
   }, [membersList]);
 
   useEffect(() => {
+    if (Number(params.id)) {
+      dispatch(getChannelContent(Number(params.id)));
+      dispatch(getChannelMembersList(Number(params.id)));
+    }
+  }, [refresh]);
+
+  useEffect(() => {
     // *************** share member status socket
     socket.on("member_status_changed", (data) => {
-      console.log(
-        "member status changed ==><==",
-        data.channelId,
-        currentChannelID
-      );
       dispatch(getChannelMembersList(data.channelId));
       dispatch(getLoggedUserRole(data.channelId));
     });
 
     // *************** apply member status socket
     socket.on("update_member_status", (data) => {
-      console.log(
-        "%cmember status changed: ",
-        "color:pink",
-        data.memberId,
-        data.channelId
-      );
       if (data.memberId === loggedUser.id) {
         if (data.status === "kick" || data.status === "ban") {
           dispatch(getChannelMembersList(data.channelId)).then(() => {
@@ -302,17 +291,17 @@ const ChannelMembersList: React.FC<ChannelMembersProps> = ({
   channelName,
   currentChannelID,
 }) => {
-  const { loggedUser } = useAppSelector((state) => state.user);
+  const { loggedUser, nrusers, friends } = useAppSelector(
+    (state) => state.user
+  );
 
   const inviteToGame = (user: User) => {
-    console.log(loggedUser.id, " sent invit to: ", user.id);
     swal("Regular Pong or Our Pong?", "", {
       buttons: {
         Default: true,
         Obstacle: true,
       },
     }).then((value) => {
-      console.log(value);
       if (value === "Default") {
         socket.emit("invite_to_game", {
           inviter: loggedUser,
@@ -334,21 +323,27 @@ const ChannelMembersList: React.FC<ChannelMembersProps> = ({
       <h1 className="text-gray-300 pb-2">Owner</h1>
       <div className="relative flex items-center">
         <div className="relative">
-          {channelOwner.state === "online" ? (
-            <GoPrimitiveDot
-              size="1.3rem"
-              className="absolute text-green-400 right-[1px] -bottom-[2px]"
-            />
-          ) : channelOwner.state === "in_game" ? (
-            <GoPrimitiveDot
-              size="1.3rem"
-              className="absolute text-orange-400 right-[1px] -bottom-[2px]"
-            />
-          ) : (
-            <GoPrimitiveDot
-              size="1.3rem"
-              className="absolute text-gray-400 right-[1px] -bottom-[2px]"
-            />
+          {[...nrusers, ...friends, loggedUser].find(
+            (user) => user.id === channelOwner.id
+          ) && (
+            <div>
+              {channelOwner.state === "online" ? (
+                <GoPrimitiveDot
+                  size="1.3rem"
+                  className="absolute text-green-400 right-[1px] -bottom-[2px]"
+                />
+              ) : channelOwner.state === "in_game" ? (
+                <GoPrimitiveDot
+                  size="1.3rem"
+                  className="absolute text-orange-400 right-[1px] -bottom-[2px]"
+                />
+              ) : (
+                <GoPrimitiveDot
+                  size="1.3rem"
+                  className="absolute text-gray-400 right-[1px] -bottom-[2px]"
+                />
+              )}
+            </div>
           )}
           <img
             src={channelOwner.avatar_url}
@@ -367,14 +362,18 @@ const ChannelMembersList: React.FC<ChannelMembersProps> = ({
             {channelOwner.state}
           </p>
         </div>
-        {loggedUser.id !== channelOwner.id && channelOwner.state !== "in_game" && (
-          <button
-            onClick={() => inviteToGame(channelOwner)}
-            className="absolute right-8 bg-green-400 py-1 px-2 text-[12px] ml-4 rounded-sm hover:scale-105 hover:bg-green-300 transition duration-300"
-          >
-            invite
-          </button>
-        )}
+        {loggedUser.id !== channelOwner.id &&
+          channelOwner.state !== "in_game" &&
+          [...nrusers, ...friends, loggedUser].find(
+            (user) => user.id === channelOwner.id
+          ) && (
+            <button
+              onClick={() => inviteToGame(channelOwner)}
+              className="absolute right-8 bg-green-400 py-1 px-2 text-[12px] ml-4 rounded-sm hover:scale-105 hover:bg-green-300 transition duration-300"
+            >
+              invite
+            </button>
+          )}
       </div>
       {[...channelMembers].filter((member) => member.userRole === "admin")
         .length ? (

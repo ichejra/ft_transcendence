@@ -46,10 +46,8 @@ const DirectChat = () => {
 
   const getDirectMessages = (id: number) => {
     dispatch(fetchChatFriend(id)).then(() => {
-      console.log("chat friend => ", chatFriend);
       dispatch(getDirectContent(id)).then((data: any) => {
         if (data.error) {
-          console.log("error__________________");
           setError({ status: 403, message: "Forbidden" });
         } else {
           setError({ status: 200, message: "OK" });
@@ -61,13 +59,14 @@ const DirectChat = () => {
   };
 
   const handleChange = (e: any) => {
+    const value = e.target.value;
+    if (value.length > 200) return;
     setMessage(e.target.value);
   };
 
   const sendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!message) return;
-    console.log("--------------------- send message to", Number(params.id));
     socket.emit("send_message", {
       receiverId: Number(params.id),
       content: message,
@@ -95,8 +94,7 @@ const DirectChat = () => {
         getDirectMessages(Number(params.id));
       }
     }
-    console.log("friends", directChatUsersHistory);
-  }, []);
+  }, [params.id]);
 
   useEffect(() => {
     if (Cookies.get("accessToken")) {
@@ -117,11 +115,6 @@ const DirectChat = () => {
 
   useEffect(() => {
     socket.on("receive_message", (data: DirectMessage) => {
-      console.log(
-        "++++++++++++++++ receive message",
-        data.sender.id,
-        params.id
-      );
       if (data.sender.id === Number(params.id)) {
         dispatch(getDirectChatHistory()).then(() => {
           dispatch(setUpdateDirectMessages());

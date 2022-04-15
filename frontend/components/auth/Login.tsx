@@ -3,15 +3,16 @@ import {
   fetchAllUsers,
 } from "../../features/userProfileSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Cookies from "js-cookie";
-import { Navigate } from "react-router";
+import { useNavigate } from "react-router";
 
 const Login = () => {
   const dispatch = useAppDispatch();
-  const [toHome, setToHome] = useState(false);
   const { completeInfo } = useAppSelector((state) => state.user);
   const divRef = useRef(null);
+  const navigate = useNavigate();
+
   useEffect(() => {
     if (Cookies.get("accessToken") && completeInfo) {
       dispatch(fetchCurrentUser());
@@ -19,16 +20,11 @@ const Login = () => {
     }
   }, []);
 
-  if (toHome) {
-    return <Navigate to="/" replace={true} />;
-  }
-
   return (
     <div
       onClick={(e) => {
         if (e.target == divRef.current) {
-          console.log("go home");
-          setToHome(true);
+          navigate("/", { replace: true });
         }
       }}
       className="page-100 fixed z-50 bg-black bg-opacity-75 w-full h-full top-0 left-0"
