@@ -16,8 +16,10 @@ export class GameService {
   async insertGameData(data: GameDto): Promise<Game> {
     return await this.gameRepository.save({
       winner: data.winner,
+      winnerScore: data.winnerScore,
       loser: data.loser,
-      score: data.score
+      loserScore: data.loserScore,
+      score: data.score,
     });
   }
 

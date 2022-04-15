@@ -261,6 +261,12 @@ export class GameGateway
     GameData.score = `${game.getPlayer1().getScore()}-${game
       .getPlayer2()
       .getScore()}`;
+    GameData.winnerScore = game.getPlayer1().isWinner()
+      ? game.getPlayer1().getScore()
+      : game.getPlayer2().getScore();
+    GameData.loserScore = game.getPlayer1().isWinner()
+      ? game.getPlayer2().getScore()
+      : game.getPlayer1().getScore();
     GameData.winner = await this.clientsService.getUserFromSocket(
       game.getWinnerSocket(),
     );
