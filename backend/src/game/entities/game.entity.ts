@@ -21,12 +21,18 @@ export class Game {
   @JoinColumn({ name: 'winnerId' })
   winner?: User;
 
+  @Column({ default: 0 })
+  winnerScore?: number;
+
   @ManyToOne(() => User, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'loserId' })
   loser?: User;
+
+  @Column({ default: 0 })
+  loserScore?: number;
 
   @Column({
     type: 'varchar',

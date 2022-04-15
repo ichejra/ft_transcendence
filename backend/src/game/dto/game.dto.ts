@@ -12,6 +12,12 @@ export class GameDto {
   // @IsNumber()
   loser: User;
 
+  @IsNumber()
+  winnerScore: number;
+
+  @IsNumber()
+  loserScore: number;
+
   @IsString()
   score?: string;
 }
