@@ -38,6 +38,7 @@ interface UserState {
   isFriend: boolean;
   isBlocked: boolean;
   qrCode: string;
+  isVerified: boolean;
 }
 
 const user: User = {
@@ -70,6 +71,7 @@ const initialState: UserState = {
   isFriend: false,
   isBlocked: false,
   qrCode: "",
+  isVerified: false,
 };
 
 export const fetchNoRelationUsers = createAsyncThunk(
@@ -367,6 +369,14 @@ export const userProfileSlice = createSlice({
       state.qrCode = action.payload;
     });
     builder.addCase(generate2FAQrCode.rejected, (state, action: any) => {});
+
+    //* check 2fa verification
+    builder.addCase(verify2FACode.fulfilled, (state) => {
+      state.isVerified = true;
+    });
+    builder.addCase(verify2FACode.rejected, (state) => {
+      state.isVerified = false;
+    });
 
     //* disable 2fa
     builder.addCase(disableTwoFactorAuth.fulfilled, (state) => {
