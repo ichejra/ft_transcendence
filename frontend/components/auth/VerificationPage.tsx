@@ -1,4 +1,4 @@
-import { verify2FACode } from "../../features/userProfileSlice";
+import { verify2FACode, logOutUser } from "../../features/userProfileSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
@@ -43,15 +43,13 @@ const VerificationPage = () => {
     });
   }, [code]);
 
-  if (toHome) {
-    return <Navigate to="/" replace={true} />;
-  }
   return (
     <div
       onClick={(e) => {
         if (e.target == divRef.current) {
           console.log("go home");
-          setToHome(true);
+          dispatch(logOutUser());
+          navigate("/", { replace: true });
         }
       }}
       className="page-100 fixed z-50 bg-black bg-opacity-75 w-full h-full top-0 left-0"
