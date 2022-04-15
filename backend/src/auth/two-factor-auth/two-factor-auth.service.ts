@@ -40,24 +40,25 @@ export class TwoFactorAuthService {
         return res.status(200).json(dataUrl);
     }
 
-    verifyCode = async (user: User, code: string, res: any): Promise<any> => {
+    verifyCode = async (user: User, code: string, res: Response): Promise<any> => {
         const isValid = authenticator.verify({
             token: code,
             secret: user.twoFactorAuthSecret,
         });
         if (!isValid) {
+            res.clearCookie('accessToken');
             throw new UnauthorizedException('Invalid code.')
         }
-        const payload: JwtPayload = {
-            id: user.id,
-            user_name: user.user_name,
-            email: user.email
-        };
-        const token: string = this.jwtService.sign(payload, {
-            secret: this.configService.get('JWT_SECRET'),
-            expiresIn: this.configService.get('JWT_EXPIRESIN'),
-        });
-        res.cookie('accessToken', token);
+        // const payload: JwtPayload = {
+        //     id: user.id,
+        //     user_name: user.user_name,
+        //     email: user.email
+        // };
+        // const token: string = this.jwtService.sign(payload, {
+        //     secret: this.configService.get('JWT_SECRET'),
+        //     expiresIn: this.configService.get('JWT_EXPIRESIN'),
+        // });
+        // res.cookie('accessToken', token);
         return res.redirect(this.configService.get('HOME_PAGE'));// redirect to Home page
     }
     //* end
