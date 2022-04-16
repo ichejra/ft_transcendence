@@ -15,7 +15,7 @@ import { EventsModule } from './events/events.module';
 import { ChatModule } from './chat/chat.module';
 import { DirectMessage } from './chat/messages/entities/direct-messages.entity';
 import { MessageChannel } from './chat/messages/entities/message-channel.entity';
-import * as Joi from 'Joi';
+import * as Joi from 'joi';
 
 dotenv.config();
 @Module({
