@@ -62,8 +62,11 @@ export class ChannelsController {
     @Get('/:channelId')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    getChannelById(@Param('channelId', ParseIntPipe) channelId: number): Promise<UserChannel> {
-        return this.channelsService.getChannelById(channelId);
+    getChannelById(
+        @ReqUser() user: User,
+        @Param('channelId', ParseIntPipe) channelId: number
+        ): Promise<UserChannel> {
+        return this.channelsService.getChannelById(user, channelId);
     }
 
     //* Route for getting the logged user role => http://${host}:${port}/api/channels/${channelId}/role
