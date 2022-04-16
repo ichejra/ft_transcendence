@@ -1,5 +1,6 @@
 import {
     Injectable,
+    NotFoundException,
     UnauthorizedException
 } from "@nestjs/common";
 import * as dotenv from "dotenv";
@@ -40,26 +41,31 @@ export class TwoFactorAuthService {
         return res.status(200).json(dataUrl);
     }
 
-    verifyCode = async (user: User, code: string, res: Response): Promise<any> => {
+    verifyCode = async (key: number, code: string, bool: boolean): Promise<any> => {
+        const user = await this.usersService.findOne(Number(key));
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
         const isValid = authenticator.verify({
             token: code,
             secret: user.twoFactorAuthSecret,
         });
         if (!isValid) {
-            res.clearCookie('accessToken');
             throw new UnauthorizedException('Invalid code.')
         }
-        // const payload: JwtPayload = {
-        //     id: user.id,
-        //     user_name: user.user_name,
-        //     email: user.email
-        // };
-        // const token: string = this.jwtService.sign(payload, {
-        //     secret: this.configService.get('JWT_SECRET'),
-        //     expiresIn: this.configService.get('JWT_EXPIRESIN'),
-        // });
-        // res.cookie('accessToken', token);
-        return res.redirect(this.configService.get('HOME_PAGE'));// redirect to Home page
+        const payload: JwtPayload = {
+            id: user.id,
+            user_name: user.user_name,
+            email: user.email
+        };
+        const token: string = this.jwtService.sign(payload, {
+            secret: this.configService.get('JWT_SECRET'),
+            expiresIn: this.configService.get('JWT_EXPIRESIN'),
+        });
+        return {
+            token: token,
+            redirect: bool
+        };// redirect to Home page
     }
     //* end
 }

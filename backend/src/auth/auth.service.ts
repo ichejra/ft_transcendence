@@ -34,10 +34,11 @@ export class AuthService {
     async login(_req: any, _res: any): Promise<any> {
         try {
             let user = await this.usersService.findOne(Number(_req.user.id));
-            // 2FA ENABLE
             let url: string;
             if (user && user.is_2fa_enabled) {
+                _res.cookie('key', user.id);
                 url = this.configService.get('VERIFY_PAGE');
+                return _res.redirect(url);
             }
             else if (!user) {
                 user = await this.usersService.create(_req.user);
@@ -46,20 +47,12 @@ export class AuthService {
                 url = this.configService.get('HOME_PAGE'); // redirect to Home page
             }
             const payload: JwtPayload = { id: user.id, user_name: user.user_name, email: user.email };
-            const jwtToken = this.jwtService.sign(payload);
-            _res.cookie('accessToken', jwtToken);
+            const token = this.jwtService.sign(payload);
+            _res.cookie('accessToken', token);
             return _res.redirect(url);
         } catch (err) {
             throw new ForbiddenException('Forbidden: user cannot log in');
         }
-    }
-
-    async logout(_req: any, _res: any): Promise<any> {
-        const user = await this.usersService.findOne(Number(_req.user.id));
-        if (user && _res.cookie('accessToken')) {
-            _res.clearCookie('accessToken');
-        }
-        return _res.redirect(this.configService.get('HOME_PAGE'));
     }
 
     getUserFromToken = async (token: string): Promise<User> => {
