@@ -51,7 +51,7 @@ const FriendsList: React.FC<Props> = ({ friends }) => {
           ) : (
             <div className="relative rounded-lg px-4 shadow-md h-20 flex items-center bg-white bg-opacity-5">
               {friends.slice(0, 3).map((friend, index) => {
-                const { id, avatar_url } = friend;
+                const { id, avatar_url, user_name } = friend;
                 return (
                   <div
                     key={id}
@@ -61,6 +61,7 @@ const FriendsList: React.FC<Props> = ({ friends }) => {
                       onClick={() => getFriendProfile(id)}
                       key={id}
                       src={avatar_url}
+                      alt={user_name}
                       className="bg-gray-300 h-12 w-12 rounded-full bg-contain"
                     />
                   </div>

@@ -26,7 +26,11 @@ const Header: React.FC = () => {
         </button>
         <div className="nav-links cursor-pointer text-2xl text-yellow-500 font-bold">
           <Link to="/">
-            <img src="./images/logo-ft-transcendence.png" className="w-28" />
+            <img
+              src="./images/logo-ft-transcendence.png"
+              alt="pong logo"
+              className="w-28"
+            />
           </Link>
         </div>
         {isLoggedIn && completeInfo && (

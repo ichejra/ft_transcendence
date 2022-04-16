@@ -14,7 +14,6 @@ const HomePage: React.FC = () => {
   const { users, loggedUser } = useAppSelector((state) => state.user);
 
   const handleInvite = (user: User) => {
-
     console.log(loggedUser.id, " sent invit to: ", user.id);
     swal("Regular Pong or Our Pong?", "", {
       buttons: {
@@ -52,7 +51,11 @@ const HomePage: React.FC = () => {
               </button>
             </Link>
           </div>
-          <img src="./images/heroSection.jpg" className="hero-img" />
+          <img
+            src="./images/heroSection.jpg"
+            alt="a boy playing pong game"
+            className="hero-img"
+          />
         </div>
         <div className="flex flex-col lg:flex-row  w-full 2xl:w-[80rem] p-2 m-2 mt-20">
           <div className="w-full lg:w-2/3">
@@ -61,7 +64,7 @@ const HomePage: React.FC = () => {
             </h1>
             <p className="text-family text-white text-opacity-80">
               Pong is one of the first computer games that ever created, this
-              simple "tennis like" game features two paddles and a ball. The
+              simple tennis like game features two paddles and a ball. The
               game was originally developed by Allan Alcorn and released in 1972
               by Atari corporations. Soon, Pong became a huge success that is
               considered to be the game which started the video games industry.
@@ -80,7 +83,10 @@ const HomePage: React.FC = () => {
             About
           </h1>
           <p className="about-family text-center text-white text-opacity-80 w-3/4">
-            This project is about creating a website for the mighty Pong contest! It will allow you to play PING PONG gane as well as chatting with your friends. It is made by a team of 3 students of 1337 | 42 school.
+            This project is about creating a website for the mighty Pong
+            contest! It will allow you to play PING PONG gane as well as
+            chatting with your friends. It is made by a team of 3 students of
+            1337 | 42 school.
           </p>
         </div>
         <div className="w-5/6 xl:w-3/6 mb-40">

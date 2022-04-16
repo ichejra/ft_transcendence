@@ -233,7 +233,11 @@ const Member: React.FC<MemberProps> = ({
               className="absolute text-gray-400 right-[1px] -bottom-[2px]"
             />
           )}
-          <img src={user.avatar_url} className="w-10 h-10 rounded-full mr-2" />
+          <img
+            src={user.avatar_url}
+            alt={user.user_name}
+            className="w-10 h-10 rounded-full mr-2"
+          />
         </div>
         <div>
           <Link to={`/profile/${user.id}`}>
@@ -370,11 +374,11 @@ interface MenuProps {
 
 const icons = [
   ,
-  <FaUserSlash size="1.5rem" className="mr-2  text-red-500" />,
-  <RiShieldUserFill size="1.5rem" className="mr-2  text-red-500" />,
-  <BiVolumeMute size="1.5rem" className="mr-2  text-red-500" />,
-  <HiOutlineBan size="1.5rem" className="mr-2  text-red-500" />,
-  <GiBootKick size="1.5rem" className="mr-2  text-red-500" />,
+  <FaUserSlash key={1} size="1.5rem" className="mr-2  text-red-500" />,
+  <RiShieldUserFill key={2} size="1.5rem" className="mr-2  text-red-500" />,
+  <BiVolumeMute key={3} size="1.5rem" className="mr-2  text-red-500" />,
+  <HiOutlineBan key={4} size="1.5rem" className="mr-2  text-red-500" />,
+  <GiBootKick key={5} size="1.5rem" className="mr-2  text-red-500" />,
 ];
 
 const MenuItem: React.FC<MenuProps> = ({ func, user, title, icon }) => {

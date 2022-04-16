@@ -1,6 +1,7 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { FaTimes } from "react-icons/fa";
-import { useAppSelector } from "../../app/hooks";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { fetchUsersRank } from "../../features/userProfileSlice";
 
 interface Props {
   setOpenModal: (a: boolean) => void;
@@ -8,7 +9,13 @@ interface Props {
 
 const LeaderBoard: React.FC<Props> = ({ setOpenModal }) => {
   const divRef = useRef(null);
-  // const { gameHistory } = useAppSelector((state) => state.user);
+  const dispatch = useAppDispatch();
+  const { leaderboard } = useAppSelector((state) => state.user);
+
+  useEffect(() => {
+    dispatch(fetchUsersRank());
+  }, []);
+
   return (
     <div
       onClick={(e) => {
@@ -33,29 +40,40 @@ const LeaderBoard: React.FC<Props> = ({ setOpenModal }) => {
           </div>
           <div className="mb-20">
             <div className="flex justify-center flex-col items-center">
-              {Array.from({ length: 10 }).map((item, index) => {
+              {leaderboard.map((userScore, index) => {
+                const { user, score } = userScore;
                 return (
                   <div
                     key={index}
-                    className={`w-11/12 md:w-[38rem] h-[6rem] m-6 mb-1 flex justify-between rounded-t-md items-center shadow-lg shadow-white/40 ${index === 0 ? "bg-yellow-500" : index===1 ? "bg-zinc-400" : index===2? "bg-amber-700" : "bg-black"}  relative  border-t-2 border-x-2 border-t-[lightgrey]`}
+                    className={`w-11/12 md:w-[38rem] h-[5rem] md:h-[6rem] m-6 mb-1 flex justify-between rounded-t-md items-center shadow-lg shadow-white/40 ${
+                      index === 0
+                        ? "bg-yellow-500"
+                        : index === 1
+                        ? "bg-zinc-400"
+                        : index === 2
+                        ? "bg-amber-600"
+                        : "bg-black"
+                    }  relative  border-t-2 border-x-2 border-t-[lightgrey]`}
                   >
-                    <div className="w-1/2 ">
-                      <div className="flex items-center">
+                    <div className="w-full">
+                      <div className="flex items-center w-full">
                         <img
-                          src="/images/profile.jpeg"
-                          className="sm:w-20 sm:h-20 h-14 w-16 rounded-full sm:m-4 sm:ml-5 m-1 ml-2"
+                          src={user.avatar_url}
+                          alt={user.user_name}
+                          className="sm:w-20 sm:h-20 w-14 h-14 rounded-full sm:m-4 sm:ml-5 mx-2"
                         />
-                        <h1
-                          className="game-family sm:text-[20px] text-[11px] cursor-pointer "
-                          // onClick={() =}
-                        >
-                          lalala
-                        </h1>
+                        <div className="flex justify-between items-center w-full">
+                          <h1 className="game-family sm:text-[20px] text-[11px] cursor-pointer ">
+                            {user.user_name}
+                          </h1>
+                          <div className="sm:mr-16 mr-2 game-family sm:text-[25px] text-[14px] font-bold flex items-center">
+                            <span className="hidden sm:block sm:text-[12px] text-[7px]">
+                              Points:
+                            </span>
+                            {score}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="sm:mr-16 mr-2 game-family sm:text-[25px] text-[14px] font-bold flex items-center">
-                      <span className="sm:text-[12px] text-[7px]">Points:</span>
-                      100
                     </div>
                   </div>
                 );

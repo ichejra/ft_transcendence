@@ -44,6 +44,7 @@ const HistoryModal: React.FC<Props> = ({ setOpenModal }) => {
                   <div className="flex w-14 flex-col items-center">
                     <img
                       src={winner.avatar_url}
+                      alt={winner.user_name}
                       className="w-12 h-12 lg:w-14 lg:h-14 rounded-full"
                     />
                     <h1 className="about-family text-[14px] mt-1">
@@ -60,6 +61,7 @@ const HistoryModal: React.FC<Props> = ({ setOpenModal }) => {
                   <div className="flex flex-col items-center">
                     <img
                       src={loser.avatar_url}
+                      alt={loser.user_name}
                       className="w-12 h-12 lg:w-14 lg:h-14 rounded-full"
                     />
                     <h1 className="about-family text-[14px] mt-1">

@@ -112,6 +112,7 @@ const NewChatUser: React.FC<NewChatUserProps> = ({
         <div className="flex items-center">
           <img
             src={avatar_url}
+            alt={user_name}
             className="w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-full mr-2"
           />
           <div>

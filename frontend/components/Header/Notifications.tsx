@@ -68,7 +68,11 @@ const Notifications = () => {
           <li key={id}>
             <div className="flex m-1 p-2 border border-gray-500 rounded-lg items-center justify-between">
               <div className="flex mr-2">
-                <img src={avatar_url} className="w-16 h-16 rounded-full mr-2" />
+                <img
+                  src={avatar_url}
+                  alt={display_name}
+                  className="w-16 h-16 rounded-full mr-2"
+                />
                 <div>
                   <p className={`text-md txt-cyan`}>Friend Request</p>
                   <p className={`font-light text-sm text-gray-400`}>

@@ -17,7 +17,7 @@ const Member: React.FC<Props> = ({ img, color, coords }) => {
         className={`absolute w-16 h-14 bg-white right-0 ${coords.rightTop}`}
       ></div>
       <div className="absolute w-[194px] h-[251px] bg-red-200 left-[5px] top-[5px]">
-        <img src={img} className="w-full h-full" />
+        <img src={img} alt="team member" className="w-full h-full" />
       </div>
     </div>
   );

@@ -8,7 +8,11 @@ const Footer: React.FC = () => {
       </h3>
       <div className="cursor-pointer text-xl text-yellow-500 font-bold ml-4">
         <Link to="/">
-          <img src="./images/logo-ft-transcendence.png" className="w-16" />
+          <img
+            src="./images/logo-ft-transcendence.png"
+            alt="pong logo"
+            className="w-16"
+          />
         </Link>
       </div>
     </div>
