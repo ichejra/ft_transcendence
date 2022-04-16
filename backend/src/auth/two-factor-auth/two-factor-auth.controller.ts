@@ -3,6 +3,7 @@ import {
     Controller,
     Get,
     HttpCode,
+    ParseIntPipe,
     Post,
     Res,
     UseGuards
@@ -43,14 +44,22 @@ export class TwoFactorAuthController {
         return this.twoFactorAuthService.generateTwoFactorAuthSecretAndQRCode(user, res);
     }
 
-    @Post('verify')
+    @Post('first-verify')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)
-    verifyLogin(
+    verifyFirstTime(
         @ReqUser() user: User,
-        @Res() res: Response,
-        @Body('code') code: string
+        @Body('code') code: string,
     ): Promise<any> {
-        return this.twoFactorAuthService.verifyCode(user, code, res);
+        return this.twoFactorAuthService.verifyCode(user.id, code, false);
+    }
+
+    @Post('verify')
+    @HttpCode(200)
+    verifyLogin(
+        @Body('key', ParseIntPipe) key: number,
+        @Body('code') code: string,
+    ): Promise<any> {
+        return this.twoFactorAuthService.verifyCode(key, code, true);
     }
 } 

@@ -32,16 +32,4 @@ export class AuthController {
     getProfile(@Req() _req: any): Promise<any> {
         return _req.user;
     }
-
-    /* Route: logout the user 
-        http://${host}:${port}/auth/Logout
-        -> clear user session
-    */
-    @Get('/logout')
-    @HttpCode(200)
-    @UseGuards(JwtAuthGuard)
-    logout(@Req() _req: any, @Res() _res: any): Promise<any> {
-        return this.authService.logout(_req, _res);
-    }
-
 }
