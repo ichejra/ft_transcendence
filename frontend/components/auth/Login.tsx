@@ -41,6 +41,7 @@ const Login = () => {
             >
               <img
                 src="/images/42_logo_white.svg"
+                alt="42 logo"
                 className="w-8 h-8 mr-4 pr-1"
               />
               <p className="font-bold">Login with Intra</p>

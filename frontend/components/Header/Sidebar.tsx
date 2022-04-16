@@ -20,6 +20,7 @@ const Sidebar = () => {
           <img
             onClick={() => dispatch(closeSidebar())}
             src="./images/logo-ft-transcendence.png"
+            alt="pong logo"
             className="w-24"
           />
         </Link>

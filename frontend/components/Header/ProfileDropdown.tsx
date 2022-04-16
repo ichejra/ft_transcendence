@@ -130,6 +130,7 @@ const ProfileDropdown = () => {
                 </p>
                 <img
                   src={loggedUser.avatar_url}
+                  alt={loggedUser.user_name}
                   className="bg-gray-300 h-12 w-12 rounded-full"
                 />
               </button>

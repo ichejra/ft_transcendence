@@ -195,6 +195,7 @@ const ProfileHeader: React.FC<Props> = ({ user_me, friends }) => {
                   )}
                   <img
                     src={user_me.avatar_url}
+                    alt={user_me.user_name}
                     className="w-28 h-28 md:w-20 md:h-20 rounded-full"
                   />
                 </div>

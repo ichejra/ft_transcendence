@@ -20,6 +20,12 @@ interface History {
   winner: User;
   loser: User;
 }
+
+interface UserRank {
+  user: User;
+  score: number;
+}
+
 interface UserState {
   isLoading: boolean;
   isPageLoading: boolean;
@@ -38,6 +44,7 @@ interface UserState {
   isFriend: boolean;
   isBlocked: boolean;
   qrCode: string;
+  leaderboard: UserRank[];
 }
 
 const user: User = {
@@ -70,6 +77,7 @@ const initialState: UserState = {
   isFriend: false,
   isBlocked: false,
   qrCode: "",
+  leaderboard: [],
 };
 
 export const fetchNoRelationUsers = createAsyncThunk(
@@ -132,6 +140,25 @@ export const fetchUserGameHistory = createAsyncThunk(
     try {
       const response = await axios.get(
         `http://localhost:3001/api/games/user/${userId}`,
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      return _api.fulfillWithValue(response.data);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const fetchUsersRank = createAsyncThunk(
+  "users/fetchUsersRank",
+  async (_, _api) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/api/games/ranking`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -366,6 +393,11 @@ export const userProfileSlice = createSlice({
     //* User game history
     builder.addCase(fetchUserGameHistory.fulfilled, (state, action: any) => {
       state.gameHistory = action.payload;
+    });
+
+    //* LeaderBoard
+    builder.addCase(fetchUsersRank.fulfilled, (state, action: any) => {
+      state.leaderboard = action.payload;
     });
 
     //* enable 2fa

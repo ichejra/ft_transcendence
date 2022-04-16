@@ -7,11 +7,11 @@ import { useAppSelector } from "../../app/hooks";
 
 const icons = [
   ,
-  <FaUserEdit size="1.5rem" className="mr-2" />,
-  <HiUserAdd size="1.5rem" className="mr-2" />,
-  <MdPersonRemove size="1.5rem" className="mr-2" />,
-  <CgBlock size="2rem" className="mr-2" />,
-  <CgUnblock size="1.5rem" className="mr-2" />,
+  <FaUserEdit key={1} size="1.5rem" className="mr-2" />,
+  <HiUserAdd key={2} size="1.5rem" className="mr-2" />,
+  <MdPersonRemove key={3} size="1.5rem" className="mr-2" />,
+  <CgBlock key={4} size="2rem" className="mr-2" />,
+  <CgUnblock key={5} size="1.5rem" className="mr-2" />,
 ];
 
 interface Props {

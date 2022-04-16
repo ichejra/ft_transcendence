@@ -347,6 +347,7 @@ const ChannelMembersList: React.FC<ChannelMembersProps> = ({
           )}
           <img
             src={channelOwner.avatar_url}
+            alt={channelOwner.user_name}
             className="w-10 h-10 rounded-full mr-2"
           />
         </div>
@@ -465,6 +466,7 @@ const ChannelMessages: React.FC<ChannelMessagesProps> = ({
           <div key={id} className="my-6 mr-2 flex about-family items-start">
             <img
               src={author?.avatar_url}
+              alt={author.user_name}
               className="w-9 h-9 md:w-10 md:h-10 rounded-full mr-2"
             />
             <div>

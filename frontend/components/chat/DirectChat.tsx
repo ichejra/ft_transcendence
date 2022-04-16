@@ -134,7 +134,7 @@ const DirectChat = () => {
         <div className="flex flex-col w-full text-gray-300 2xl:w-[80rem] items-center justify-center shadow-xl rounded-none lg:rounded-xl">
           <SiAdblock size="18rem" className="p-6 m-2" />
           <p className="about-title-family">
-            This page isn't accessible right now
+            This page is not accessible right now
           </p>
           <Link to="/">
             <button className="hover:text-gray-300 hover:bg-transparent transition duration-300 bg-gray-300 text-gray-900 px-4 py-2 m-4 w-48 border rounded-lg about-family">
@@ -187,6 +187,7 @@ const DirectChat = () => {
                   >
                     <img
                       src={sender.avatar_url}
+                      alt={sender.user_name}
                       className="w-10 h-10 rounded-full mr-2"
                     />
                     <div>
@@ -289,6 +290,7 @@ const ChatUsersHistory: React.FC<ChatUsersHistoryProps> = ({
                   )}
                   <img
                     src={avatar_url}
+                    alt={user_name}
                     className="w-10 h-10 md:w-12 md:h-12 rounded-full mr-2"
                   />
                 </div>

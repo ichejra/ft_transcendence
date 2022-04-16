@@ -6,7 +6,7 @@ const NotFound = () => {
       <h1 className="text-[10rem] about-title-family">404</h1>
       <h3 className="about-title-family">Page not found</h3>
       <p className="about-family">
-        We're sorry, we couldn't find the page you requested.
+        We are sorry, we could not find the page you requested.
       </p>
       <Link to="/">
         <button className="bg-blue txt-cyan px-4 py-2 m-4 w-48 border rounded-lg about-family">

@@ -81,6 +81,7 @@ export const CompleteProfileInfo: React.FC = () => {
         <img
           className="w-32 h-32 rounded-full border border-white bg-center bg-cover"
           src={loggedUser.avatar_url}
+          alt={loggedUser.user_name}
           id="profile-picture"
         ></img>
         <label className="bg-red-200 cursor-pointer" htmlFor="avatar">
