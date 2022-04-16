@@ -24,4 +24,13 @@ export class GameController {
         @Param('userId', ParseIntPipe) userId: number): Promise<Game[]> {
         return this.gameService.getGamesHistory(Number(userId));
     }
+
+    @Get('ranking')
+    @HttpCode(200)
+    @UseGuards(JwtAuthGuard)
+    getUsersRanking(
+        @ReqUser() user: User,
+    ): Promise<any> {
+        return this.gameService.getUsersRanking(user);
+    }
 }
