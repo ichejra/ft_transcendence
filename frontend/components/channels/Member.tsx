@@ -44,6 +44,8 @@ const Member: React.FC<MemberProps> = ({
   const [showMuteOptions, setShowMuteOptions] = useState(false);
   const [showBaneOptions, setShowBanOptions] = useState(false);
   const menuRef = useRef<any>(null);
+  const muteTimer = useRef<any>(null);
+  const banTimer = useRef<any>(null);
   const dispatch = useAppDispatch();
   const { loggedUser } = useAppSelector((state) => state.user);
 
@@ -104,9 +106,9 @@ const Member: React.FC<MemberProps> = ({
         time: muteTime,
       });
       dispatch(getChannelMembersList(chId)).then(() => {
-        const timer = setTimeout(() => {
+        muteTimer.current = setTimeout(() => {
           unmuteUser(id);
-          clearTimeout(timer);
+          clearTimeout(muteTimer.current);
         }, muteTime * 1000);
       });
       setToggleMenu(false);
@@ -128,6 +130,7 @@ const Member: React.FC<MemberProps> = ({
           userId: id,
         });
         dispatch(getChannelMembersList(chId));
+        clearTimeout(muteTimer.current);
         setToggleMenu(false);
       }
     );
@@ -147,9 +150,9 @@ const Member: React.FC<MemberProps> = ({
         userId: id,
       });
       dispatch(getChannelMembersList(chId)).then(() => {
-        const banTimer = setTimeout(() => {
+        banTimer.current = setTimeout(() => {
           unbanUser(id);
-          clearTimeout(banTimer);
+          clearTimeout(banTimer.current);
         }, banTime * 1000);
       });
       setToggleMenu(false);
@@ -170,6 +173,7 @@ const Member: React.FC<MemberProps> = ({
         userId: id,
       });
       dispatch(getChannelMembersList(chId));
+      clearTimeout(banTimer.current);
       setToggleMenu(false);
     });
   };

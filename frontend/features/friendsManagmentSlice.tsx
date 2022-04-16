@@ -39,8 +39,6 @@ export const fetchRequestStatus = createAsyncThunk(
           },
         }
       );
-      console.log("[FRIENDS] Request => ", response.data);
-
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error);
@@ -60,7 +58,6 @@ export const fetchPendingStatus = createAsyncThunk(
           },
         }
       );
-      console.log("[FRIENDS] Pending >> ", response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error);
@@ -81,8 +78,6 @@ export const acceptFriendRequest = createAsyncThunk(
           },
         }
       );
-      console.log("acept friends =>", response.data);
-
       return _api.fulfillWithValue(response.data);
     } catch (error) {
       return _api.rejectWithValue(error);
@@ -142,7 +137,6 @@ export const fetchBlockedUsers = createAsyncThunk(
           },
         }
       );
-      console.log("[FMS] Blocked users ==> ", response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error);
@@ -210,19 +204,3 @@ export const friendsManagementSlice = createSlice({
 });
 
 export default friendsManagementSlice.reducer;
-
-/* 
-
-useEffect(() => 
-{
-  socket.on("updateNotifaction", (data) =>
-  {
-    setData(data)    
-  })
-}, [socket])
-
-useEffect(()=>
-{
-
-}, [data])
-*/

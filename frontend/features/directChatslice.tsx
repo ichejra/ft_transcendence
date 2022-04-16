@@ -1,9 +1,4 @@
-import {
-  createSlice,
-  createAsyncThunk,
-  PayloadAction,
-  current,
-} from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { User } from "./userProfileSlice";
@@ -75,8 +70,6 @@ export const getDirectChatHistory = createAsyncThunk(
 export const getDirectContent = createAsyncThunk(
   "direct/getDirectContent",
   async (userId: number, _api) => {
-    console.log("get direct messages", userId);
-
     try {
       const response = await axios.get(
         `http://localhost:3001/api/messages/direct/${userId}`,
@@ -86,8 +79,6 @@ export const getDirectContent = createAsyncThunk(
           },
         }
       );
-      console.log("messages:", response.data);
-
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error.message);
@@ -116,7 +107,6 @@ const directChatSlice = createSlice({
       action: PayloadAction<DirectMessage>
     ) => {
       state.directMessages.push(action.payload);
-      // console.log("CHAT SLICE", current(state.channelContent));
     },
   },
   extraReducers: (builder) => {

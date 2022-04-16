@@ -10,7 +10,6 @@ import {
   setNewChannelId,
 } from "../../features/chatSlice";
 import { socket } from "../../pages/SocketProvider";
-import { useNavigate } from "react-router";
 
 const ChannelsListModal = () => {
   const divRef = useRef(null);
@@ -121,7 +120,6 @@ const UnjoinedChannel: React.FC<UCProps> = ({ id, name, type }) => {
         setIsPrivate(true);
       } else {
         socket.emit("join_channel", { channelId: id });
-
         dispatch(getChannelsList()).then(() => {
           dispatch(setNewChannelId({ id, render: true }));
           dispatch(setChannelsListModal(false));

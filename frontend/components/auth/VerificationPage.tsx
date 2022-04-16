@@ -1,15 +1,15 @@
-import { verify2FACode, logOutUser } from "../../features/userProfileSlice";
+import { verify2FACode } from "../../features/userProfileSlice";
 import { useAppDispatch } from "../../app/hooks";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 
 const VerificationPage = () => {
   const dispatch = useAppDispatch();
-  const [toHome, setToHome] = useState(false);
   const [isValid, setIsValid] = useState(0);
   const [code, setCode] = useState("");
   const navigate = useNavigate();
   const divRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleUserVerification = (e: any) => {
     e.preventDefault();
@@ -19,6 +19,7 @@ const VerificationPage = () => {
       } else {
         setIsValid(0);
         navigate("/", { replace: true });
+        window.location.reload();
       }
     });
     setCode("");
@@ -40,11 +41,14 @@ const VerificationPage = () => {
     });
   }, [code]);
 
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
   return (
     <div
       onClick={(e) => {
         if (e.target == divRef.current) {
-          dispatch(logOutUser());
           navigate("/", { replace: true });
         }
       }}
@@ -57,6 +61,7 @@ const VerificationPage = () => {
           </h1>
           <form className="flex flex-col w-5/6 md:w-4/6 text-gray-800">
             <input
+              ref={inputRef}
               type="text"
               placeholder="XXX XXX"
               value={code}

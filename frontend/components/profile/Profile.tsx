@@ -28,7 +28,6 @@ const UserProfile: React.FC = () => {
 
   useEffect(() => {
     if (editProfile === false && Number(id) === loggedUser.id) {
-      console.log("4. Profile updated");
       dispatch(fetchUserFriends());
     }
     if (Number(id) === loggedUser.id) {
@@ -44,7 +43,6 @@ const UserProfile: React.FC = () => {
     if (Number(id) !== loggedUser.id) {
       dispatch(setIsPageLoading(true));
       dispatch(fetchSingleUser(Number(id))).then((response: any) => {
-        console.log("-->", response);
         if (response.error) {
           setErrorMsg({
             status: Number(response.payload.match(/(\d+)/)[0]),
@@ -59,8 +57,6 @@ const UserProfile: React.FC = () => {
       setErrorMsg({ status: 200, message: "OK" });
     }
   }, [id]);
-
-  // console.log("Error:", errorMsg);
 
   if (isPageLoading) {
     return (

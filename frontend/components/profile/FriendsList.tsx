@@ -3,7 +3,6 @@ import { useNavigate } from "react-router";
 import { AiOutlineRight } from "react-icons/ai";
 import { FaUsersSlash } from "react-icons/fa";
 import { User, fetchSingleUser } from "../../features/userProfileSlice";
-import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { friendsPosition } from "../../consts";
 
@@ -22,10 +21,6 @@ const FriendsList: React.FC<Props> = ({ friends }) => {
       navigate(`/profile/${friend.id}`);
     });
   };
-
-  useEffect(() => {
-    console.log("%cRENDER USER FRIENDS", "color:green; font-weight: bold");
-  }, []);
 
   return (
     <div className="md:relative left-[26rem] xl:left-[30rem] md:w-[22rem] lg:w-[24rem] my-4 xl:w-[28rem]">
