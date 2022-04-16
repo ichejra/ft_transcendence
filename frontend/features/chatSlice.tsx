@@ -112,7 +112,6 @@ export const createChannel = createAsyncThunk(
           },
         }
       );
-      console.log("[CHAT SLICE] created channel => ", response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error.message);
@@ -137,8 +136,6 @@ export const updateChannel = createAsyncThunk(
     _api
   ) => {
     try {
-      console.log("==================> ", name, password, type, channelId);
-
       const response = await axios.patch(
         `http://localhost:3001/api/channels/${channelId}`,
         {
@@ -153,7 +150,6 @@ export const updateChannel = createAsyncThunk(
           },
         }
       );
-      console.log("[CHAT SLICE] updated channel => ", response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error.message);
@@ -211,8 +207,6 @@ export const getSingleChannel = createAsyncThunk(
           },
         }
       );
-      console.log("[CHAT SLICE] single channel => ", response.data);
-
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error.message);
@@ -450,7 +444,6 @@ export const getChannelContent = createAsyncThunk(
           },
         }
       );
-      console.log("[CHAT SLICE] channel content =>", response.data);
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error.message);

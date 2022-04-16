@@ -78,7 +78,6 @@ const NewChatUser: React.FC<NewChatUserProps> = ({
 
   const sendFirstMessage = (id: number) => {
     if (!message) return;
-    console.log("--------------------- send message to", id);
     socket.emit("send_message", {
       receiverId: id,
       content: message,

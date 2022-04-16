@@ -5,7 +5,7 @@ import {
   enableTwoFactorAuth,
   disableTwoFactorAuth,
   generate2FAQrCode,
-  verify2FACode,
+  firstVerify2FACode,
 } from "../../features/userProfileSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { BiEditAlt } from "react-icons/bi";
@@ -25,7 +25,6 @@ export const UpdateProfileForm: React.FC = () => {
     const img = document.getElementById("profile-picture") as HTMLImageElement;
     img.src = URL.createObjectURL(e.target.files[0]);
     setAvatar(e.target.files[0]);
-    console.log("new img->", URL.createObjectURL(e.target.files[0]));
   };
 
   const handleProfileUpdate = (e: React.FormEvent<EventTarget>) => {
@@ -42,9 +41,7 @@ export const UpdateProfileForm: React.FC = () => {
     ).then((data: any) => {
       if (data.error) {
         setIsValid(0);
-        console.log("rejected _______+++++++++++>>>", data);
       } else {
-        console.log("fulfilled _______+++++++++++>>>", data);
         setIsValid(2);
         dispatch(editUserProfile(false));
       }
@@ -66,11 +63,8 @@ export const UpdateProfileForm: React.FC = () => {
           inputPlaceholder: "XXX XXX",
           showLoaderOnConfirm: true,
           preConfirm: (code: string) => {
-            console.log("code: ", code);
-            return dispatch(verify2FACode(code)).then((data: any) => {
-              console.log("data: ", data);
+            return dispatch(firstVerify2FACode(code)).then((data: any) => {
               if (data.error) {
-                console.log("invalid code_____", data.error);
                 Swal.showValidationMessage(`invalid code`);
               } else {
                 Swal.fire({
@@ -79,9 +73,7 @@ export const UpdateProfileForm: React.FC = () => {
                   showConfirmButton: false,
                   timer: 1500,
                 });
-                dispatch(enableTwoFactorAuth()).then(() => {
-                  console.log("2FA enabled: ", checked, loggedUser);
-                });
+                dispatch(enableTwoFactorAuth());
               }
             });
           },
@@ -91,9 +83,7 @@ export const UpdateProfileForm: React.FC = () => {
         }
       });
     } else {
-      dispatch(disableTwoFactorAuth()).then(() => {
-        console.log("2FA disabled: ", checked, loggedUser);
-      });
+      dispatch(disableTwoFactorAuth());
     }
   };
 

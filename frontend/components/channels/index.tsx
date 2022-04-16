@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate, useLocation, Navigate } from "react-router";
+import { Link } from "react-router-dom";
+import { SiAdblock } from "react-icons/si";
+import { useParams, useNavigate } from "react-router";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { socket } from "../../pages/SocketProvider";
 import ChannelsList from "./ChannelsList";
@@ -28,6 +30,7 @@ const ChatRooms = () => {
   const [channelName, setChannelName] = useState("");
   const [channelID, setChannelID] = useState(-1);
   const [channelOwner, setChannelOwner] = useState({} as User);
+  const [errorMsg, setErrorMsg] = useState({ status: 200, message: "ok" });
   const navigate = useNavigate();
   const params = useParams();
   const dispatch = useAppDispatch();
@@ -47,10 +50,13 @@ const ChatRooms = () => {
         const errorCode = Number(data.payload.match(/(\d+)/)[0]);
         if (errorCode === 404) {
           navigate(`/404`, { replace: true });
+        } else if (errorCode === 403) {
+          setErrorMsg({ status: 403, message: "forbidden" });
         }
       } else {
         const channel: Channel = data.payload.channel;
         const owner: User = data.payload.user;
+        setErrorMsg({ status: 200, message: "ok" });
         dispatch(getChannelContent(id)).then(() => {
           socket.emit("update_join", { rooms: channels, room: channel });
           dispatch(setNewChannelId({ id: newChannel.id, render: false }));
@@ -116,6 +122,24 @@ const ChatRooms = () => {
       socket.off("receive_message_channel");
     };
   }, []);
+
+  if (errorMsg.status === 403) {
+    return (
+      <div className="page-100 mt-20 flex justify-center bg-black">
+        <div className="flex flex-col w-full text-gray-300 2xl:w-[80rem] items-center justify-center shadow-xl rounded-none lg:rounded-xl">
+          <SiAdblock size="18rem" className="p-6 m-2" />
+          <p className="about-title-family">
+            This page isn't accessible right now
+          </p>
+          <Link to="/">
+            <button className="hover:text-gray-300 hover:bg-transparent transition duration-300 bg-gray-300 text-gray-900 px-4 py-2 m-4 w-48 border rounded-lg about-family">
+              Back Home
+            </button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative page-100 h-full w-full pt-20 pb-16 about-family channels-bar-bg">

@@ -38,7 +38,6 @@ interface UserState {
   isFriend: boolean;
   isBlocked: boolean;
   qrCode: string;
-  isVerified: boolean;
 }
 
 const user: User = {
@@ -71,7 +70,6 @@ const initialState: UserState = {
   isFriend: false,
   isBlocked: false,
   qrCode: "",
-  isVerified: false,
 };
 
 export const fetchNoRelationUsers = createAsyncThunk(
@@ -86,8 +84,6 @@ export const fetchNoRelationUsers = createAsyncThunk(
           },
         }
       );
-      console.log("[US] NRU ==>", response.data);
-
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error.message);
@@ -107,8 +103,6 @@ export const fetchAllUsers = createAsyncThunk(
           },
         }
       );
-      console.log("[US] ARU ==>", response.data);
-
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error.message);
@@ -186,13 +180,33 @@ export const generate2FAQrCode = createAsyncThunk(
   }
 );
 
+export const firstVerify2FACode = createAsyncThunk(
+  "users/firstVerify2FACode",
+  async (verificationCode: string, _api) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3001/api/2fa/first-verify",
+        { code: verificationCode },
+        {
+          headers: {
+            authorization: `Bearer ${Cookies.get("accessToken")}`,
+          },
+        }
+      );
+      return _api.fulfillWithValue(response.data);
+    } catch (error: any) {
+      return _api.rejectWithValue(error.message);
+    }
+  }
+);
+
 export const verify2FACode = createAsyncThunk(
   "users/verify2FACode",
   async (verificationCode: string, _api) => {
     try {
       const response = await axios.post(
         "http://localhost:3001/api/2fa/verify",
-        { code: verificationCode },
+        { code: verificationCode, key: Cookies.get("key") },
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -256,8 +270,6 @@ export const fetchUserFriends = createAsyncThunk(
           },
         }
       );
-      console.log("[US] Friends => ", response.data);
-
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
       return _api.rejectWithValue(error.message);
@@ -269,7 +281,6 @@ export const completeProfileInfo = createAsyncThunk(
   "user/completeProfileInfo",
   async ({ data }: { data: FormData }, _api) => {
     try {
-      console.log("");
       const response = await axios.patch(
         `http://localhost:3001/api/users/update-profile`,
         data,
@@ -282,7 +293,6 @@ export const completeProfileInfo = createAsyncThunk(
       );
       return _api.fulfillWithValue(response.data);
     } catch (error: any) {
-      console.log();
       return _api.rejectWithValue(error.message);
     }
   }
@@ -371,11 +381,9 @@ export const userProfileSlice = createSlice({
     builder.addCase(generate2FAQrCode.rejected, (state, action: any) => {});
 
     //* check 2fa verification
-    builder.addCase(verify2FACode.fulfilled, (state) => {
-      state.isVerified = true;
-    });
-    builder.addCase(verify2FACode.rejected, (state) => {
-      state.isVerified = false;
+    builder.addCase(verify2FACode.fulfilled, (state, action: any) => {
+      const token = action.payload.token;
+      Cookies.set("accessToken", token);
     });
 
     //* disable 2fa

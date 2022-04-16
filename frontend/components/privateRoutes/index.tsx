@@ -1,20 +1,10 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Navigate, useLocation } from "react-router";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { logOutUser } from "../../features/userProfileSlice";
+import { useAppSelector } from "../../app/hooks";
 
 export const AuthRoute: React.FC = ({ children }) => {
   const location = useLocation();
-  const { isLoggedIn, isVerified, loggedUser } = useAppSelector(
-    (state) => state.user
-  );
-  const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    if (loggedUser.is_2fa_enabled && !isVerified) {
-      dispatch(logOutUser());
-    }
-  }, []);
+  const { isLoggedIn } = useAppSelector((state) => state.user);
 
   if (!isLoggedIn && location.pathname !== "/auth") {
     return <Navigate to="/auth" state={{ from: location }} replace={true} />;

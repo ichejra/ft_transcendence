@@ -39,7 +39,6 @@ const NewChannelModal: React.FC = () => {
       })
     ).then((data: any) => {
       if (data.error) {
-        console.log("________> Rejected");
         setIsValid(3);
       } else {
         const newChannel: Channel = data.payload.channel;

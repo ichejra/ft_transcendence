@@ -34,13 +34,7 @@ const Notifications = () => {
       });
     }
     dispatch(showNotificationsList(false));
-    console.log(
-      "Friend " +
-        users.find((user) => user.id === id)?.display_name +
-        " accepted"
-    );
   };
-
 
   const rejectFriend = (id: number) => {
     if (Cookies.get("accessToken")) {
@@ -51,12 +45,10 @@ const Notifications = () => {
       });
     }
     dispatch(showNotificationsList(false));
-    console.log("Friend rejected");
   };
 
   //? re-render the component each time a friend get accepted or rejected to update the pending users
   useEffect(() => {
-    console.log(2);
     if (Cookies.get("accessToken")) {
       dispatch(fetchPendingStatus());
     }

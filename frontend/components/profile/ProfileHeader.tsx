@@ -34,7 +34,7 @@ interface Props {
   friends: User[];
 }
 
-const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
+const ProfileHeader: React.FC<Props> = ({ user_me, friends }) => {
   //!useNavigate
   const navigate = useNavigate();
 
@@ -124,14 +124,12 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
   //! #######################
 
   const handleInviteToGame = (user: User) => {
-    console.log(loggedUser.id, " sent invit to: ", user.id);
     swal("Choose the game type", {
       buttons: {
         Default: true,
         Obstacle: true,
       },
     }).then((value) => {
-      console.log(value);
       if (value === "Default") {
         socket.emit("invite_to_game", {
           inviter: loggedUser,
@@ -153,7 +151,6 @@ const ProfileHeader: React.FC<Props> = ({ user_me, users, friends }) => {
   };
 
   useEffect(() => {
-    console.log("0001");
     dispatch(setIsLoading(true));
     dispatch(fetchUserFriends()).then((data: any) => {
       const userFriends: User[] = data.payload;

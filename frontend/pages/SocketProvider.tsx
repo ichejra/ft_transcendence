@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { io } from "socket.io-client";
 import {
   fetchAllUsers,
   fetchUserFriends,
   fetchNoRelationUsers,
   setIsPending,
-  setIsFriend,
 } from "../features/userProfileSlice";
 import {
   fetchPendingStatus,
@@ -14,7 +13,6 @@ import {
 import { updateGlobalState } from "../features/globalSlice";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import Cookies from "js-cookie";
-import { User } from "../features/userProfileSlice";
 import swal from "sweetalert";
 import { useNavigate } from "react-router";
 
@@ -38,7 +36,6 @@ const SocketProvider: React.FC = ({ children }) => {
   useEffect(() => {
     socket.on("receive_notification", () => {
       dispatch(updateGlobalState());
-      console.log("trigger the refresh");
     });
 
     socket.on("logout", () => {
@@ -51,11 +48,7 @@ const SocketProvider: React.FC = ({ children }) => {
   }, [socket]);
 
   useEffect(() => {
-
-    console.log("emmm : ", pathname);
     if (Cookies.get("accessToken")) {
-      console.log("General Render");
-
       dispatch(fetchAllUsers());
       dispatch(fetchNoRelationUsers()).then(() => {
         dispatch(fetchPendingStatus());
@@ -70,7 +63,6 @@ const SocketProvider: React.FC = ({ children }) => {
       if (pathname.includes("profile")) {
         dispatch(setIsPending(false));
       }
-      console.log("--------------------> refershhhhhh");
     }
   }, [refresh]);
 
@@ -95,11 +87,9 @@ const SocketProvider: React.FC = ({ children }) => {
         },
       }).then((value) => {
         if (value) {
-          console.log(`The returned value is: ${value}`);
           socket.emit("accept_challenge", { challengeId });
           navigate("/game");
         } else {
-          console.log(`The returned value is: ${value}`);
           socket.emit("reject_challenge", { challengeId, loggedUser });
         }
       });
