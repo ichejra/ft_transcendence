@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
-import { User } from '../../features/userProfileSlice';
-import { socket } from '../../pages/SocketProvider';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
+import { fetchCurrentUser, User } from "../../features/userProfileSlice";
+import { socket } from "../../pages/SocketProvider";
 import { FiVideoOff } from "react-icons/fi";
-import { MdSentimentVeryDissatisfied } from "react-icons/md";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 
 interface IFrame {
   players: {
@@ -17,31 +17,41 @@ interface IFrame {
 }
 
 const LiveGames = () => {
-  // console.log('I am from live games');
   const [frame, setFrame] = useState<IFrame[]>([]);
   const [refresh, setRefresh] = useState(false);
   const navigate = useNavigate();
-
+  const { loggedUser } = useAppSelector((state) => state.user);
+  const dispatch = useAppDispatch();
   const watchGame = (id: number) => {
-    socket.emit('spectator', id);
-    navigate('/watch');
+    socket.emit("spectator", id);
+    navigate("/watch");
   };
-  const delay = (ms: number) => {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
+
+  // const delay = (ms: number) => {
+  //   return new Promise((resolve) => setTimeout(resolve, ms));
+  // };
+
   useEffect(() => {
-    socket.emit('liveGames');
-    delay(1000).then(() => {
+    socket.emit("liveGames");
+    // delay(1000).then(() => {
+    //   setRefresh(!refresh);
+    // });
+    const delay = setTimeout(() => {
       setRefresh(!refresh);
-    });
+      clearTimeout(delay);
+    }, 1000);
+    return () => {
+      clearTimeout(delay);
+    };
   }, [refresh]);
 
   useEffect(() => {
-    socket.on('liveGame_state', (newState) => {
+    dispatch(fetchCurrentUser());
+    socket.on("liveGame_state", (newState) => {
       setFrame(newState);
     });
     return () => {
-      socket.off('liveGame_state');
+      socket.off("liveGame_state");
     };
   }, []);
 
@@ -86,14 +96,16 @@ const LiveGames = () => {
               <div className="flex p-2 text-center relative h-[7rem] w-48">
                 <div className="livegame-net"></div>
                 <div className="hover:scale-125 h-4">
-                  <button
-                    className="bg-none game-family rounded sm:text-[11px] text-[9.3px]"
-                    onClick={() => {
-                      watchGame(player1.id);
-                    }}
-                  >
-                    Watch Game
-                  </button>
+                  {loggedUser.state !== "in_game" && (
+                    <button
+                      className="bg-none game-family rounded sm:text-[11px] text-[9.3px]"
+                      onClick={() => {
+                        watchGame(player1.id);
+                      }}
+                    >
+                      Watch Game
+                    </button>
+                  )}
                 </div>
               </div>
               <div className=" bg-black h-[7rem] w-1/2 flex items-center justify-between relative">
@@ -114,62 +126,9 @@ const LiveGames = () => {
             </div>
           );
         })}
-
-        {/* {Array.from({ length: 10 }).map((item, index) => {
-         
-          return (
-            <div
-              key={index}
-              className='sm:w-[40rem] w-[22rem] h-[7rem] bg-black sm:m-6 mb-6 flex justify-between items-center'
-            >
-              <div className=' bg-black h-[7rem] w-1/2 flex items-center justify-between relative'>
-                <div className='livegame-left-paddle'></div>
-                <div className='flex items-center'>
-                  <img
-                    src='/images/profile.jpeg'
-                    className='sm:w-20 sm:h-20 w-14 h-14 rounded-full m-4 ml-5'
-                  />
-                  <h1 className='about-family sm:text-[16px] text-[12px]'>
-                    lalala
-                  </h1>
-                </div>
-                <div className='sm:mr-4 -mr-14 game-family sm:text-[20px] text-[12px] font-bold'>
-                  10
-                </div>
-              </div>
-              <div className='flex p-2 text-center relative h-[7rem] w-48'>
-                <div className='livegame-net'></div>
-                <div className='hover:scale-125 h-4'>
-                  <button
-                    className='bg-none game-family rounded sm:text-[11px] text-[9.3px]'
-                    
-                  >
-                    Watch Game
-                  </button>
-                </div>
-              </div>
-              <div className=' bg-black h-[7rem] w-1/2 flex items-center justify-between relative'>
-                <div className='sm:ml-4 -ml-14 game-family sm:text-[20px] text-[12px] font-bold'>
-                  10
-                </div>
-                <div className='flex items-center'>
-                  <h1 className='about-family sm:text-[16px] text-[12px]'>
-                    lalala
-                  </h1>
-                  <img
-                    src='/images/profile.jpeg'
-                    className='sm:w-20 sm:h-20 w-14 h-14 rounded-full m-4 mr-5'
-                  />
-                </div>
-                <div className='livegame-right-paddle'></div>
-              </div>
-            </div>
-          );
-        })} */}
       </div>
     </div>
   );
 };
 
 export default LiveGames;
-

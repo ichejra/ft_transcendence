@@ -15,7 +15,6 @@ import { useAppDispatch, useAppSelector } from "../app/hooks";
 import Cookies from "js-cookie";
 import swal from "sweetalert";
 import { useNavigate } from "react-router";
-
 import { useLocation } from "react-router";
 
 export const socket = io("http://localhost:3001", {
@@ -28,9 +27,7 @@ const SocketProvider: React.FC = ({ children }) => {
   const dispatch = useAppDispatch();
   const { refresh } = useAppSelector((state) => state.globalState);
   const { loggedUser } = useAppSelector((state) => state.user);
-
   const navigate = useNavigate();
-
   const { pathname } = useLocation();
 
   useEffect(() => {
@@ -100,7 +97,6 @@ const SocketProvider: React.FC = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    //TODO: socket.on('start_challenge', (args: any) => { })
     socket.on("challenge_accepted", (data) => {
       navigate("/game");
     });
@@ -113,13 +109,12 @@ const SocketProvider: React.FC = ({ children }) => {
     socket.on("invitee_in_game", ({ user }) => {
       swal(`${user.display_name} is in game right now!`);
     });
+    socket.on("inviter_is_in_game", ({ user }) => {
+      swal(`${user.display_name} is in game right now!`);
+    });
   }, []);
 
   return <>{children}</>;
 };
 
 export default SocketProvider;
-
-//*DONE show game request Modal
-//*DONE erase disconnected sockets in game_gateway
-//*DONE add Game type options to game request

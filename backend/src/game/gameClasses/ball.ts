@@ -20,13 +20,6 @@ class Ball {
   public moveBall(): void {
     this._x += this._velocityX;
     this._y += this._velocityY;
-    //TODO
-    //! in case
-    // if (
-    //   ball.y - ball.radius >= ctx.canvas.height ||
-    //   ball.y + ball.radius <= 0
-    // )
-    //   ball.y -= ball.velocityY;
   }
 
   //* Random serves

@@ -14,7 +14,7 @@ class GameObj {
   private _player2AsUser: User;
   private _ball: Ball;
   private _remove: Function;
-  private _spectators: Socket[] = []; // TODO: Set instead of array
+  private _spectators: Socket[] = [];
   private _interval: NodeJS.Timer;
   private _isDefault: boolean;
 
@@ -43,47 +43,37 @@ class GameObj {
   public getIsDefault(): boolean {
     return this._isDefault;
   }
-
   public getId(): string {
     return this._id;
   }
-
   public getPlayer1(): Player {
     return this._player1;
   }
-
   public getPlayer2(): Player {
     return this._player2;
   }
-
   public getPlayer1AsUser(): User {
     return this._player1AsUser;
   }
-
   public getPlayer2AsUser(): User {
     return this._player2AsUser;
   }
-
   public getGamePlayer(playerSocket: Socket): Player {
     return this._player1.getSocket() === playerSocket
       ? this._player1
       : this._player2;
   }
-
   public getInterval() {
     return this._interval;
   }
-
   public getWinnerSocket(): Socket {
     if (this._player1.isWinner()) return this._player1.getSocket();
     else return this._player2.getSocket();
   }
-
   public getLoserSocket(): Socket {
     if (!this._player1.isWinner()) return this._player1.getSocket();
     else return this._player2.getSocket();
   }
-
   public getPlayersSockets = (): Socket[] => {
     return [this._player1.getSocket(), this._player2.getSocket()];
   };
@@ -135,6 +125,12 @@ class GameObj {
     return false;
   }
 
+  public hasSocket(client: Socket): boolean {
+    if (client === this._player1.getSocket() || this._player2.getSocket() === client)
+      return true;
+    return false;
+  }
+
   //* get game state
   public gameState = (): GameStates => {
     if (
@@ -165,11 +161,10 @@ class GameObj {
     );
     this._ball.setVelocityY(this._ball.getSpeed() * Math.sin(angleRad));
     this._ball.setSpeed(this._ball.getSpeed() + 0.3);
-    //! incremented the ball speed too 0.2=>0.3
-    //! changed the paddle min height and the increment ammount 40=>30 and 2=>3
     if (!this._isDefault) {
-      if (player.getPaddle().getHeight() > 30)
-        player.getPaddle().setHeight(player.getPaddle().getHeight() - 3);
+      player
+      .getPaddle()
+      .setHeight(Math.floor(Math.random() * (100 - 40 + 1) + 40));
     }
   }
 
@@ -221,14 +216,12 @@ class GameObj {
   public clearSpectators(): void {
     if (this._spectators.length > 0)
       this._spectators.splice(0, this._spectators.length);
-    console.log('Spectators removed');
   }
 
   //* remove a spectator
   public removeSpectator(spectator: Socket): void {
     if (this._spectators.includes(spectator))
       this._spectators.splice(this._spectators.indexOf(spectator), 1);
-    console.log('I am removed');
   }
 
   //* check if the game has spectator
@@ -252,6 +245,3 @@ class GameObj {
 }
 
 export default GameObj;
-
-//TODO: arrow func
-//TODO: check unused func

@@ -21,6 +21,6 @@ import { GameService } from "./game.service";
     GameService,
     GameGateway,
     ConnectionsService
-  ], //? Gateways are not instantiated until they are referenced in the providers array of an existing module.
+  ],
 })
 export class GameModule { }

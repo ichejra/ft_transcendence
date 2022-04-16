@@ -6,16 +6,11 @@ import { socket } from "../../pages/SocketProvider";
 import {
   CANVAS_HEIGHT,
   CANVAS_WIDTH,
-  MAX_SCORE,
-  MAX_WATCHERS,
-  BALL_RADIUS,
+  B_RADIUS,
   BALL_INIT_X,
   BALL_INIT_Y,
-  BALL_SPEED,
-  BALL_MAX_SPEED,
   PAD_WIDTH,
   PAD_HEIGHT,
-  PADDLE_DIFF,
   L_PADX,
   R_PADX,
   PADY_INIT,
@@ -29,15 +24,12 @@ import {
   IFrame,
 } from "./GameConsts";
 import GameRules from "./GameRules";
+import { GiTrophyCup } from "react-icons/gi";
+import LeaderBoard from "./LeaderBoard";
 
 class Paddle extends Rect {}
 class Ball extends Circle {}
 class Score extends Text {}
-
-import { Link } from "react-router-dom";
-import { GiTrophyCup, GiDiamondTrophy } from "react-icons/gi";
-import { GrTrophy } from "react-icons/gr";
-import LeaderBoard from "./LeaderBoard";
 
 const stateInit: IFrame = {
   ball: {
@@ -69,11 +61,8 @@ function delay(ms: number) {
 let isRefresh = false;
 
 const Pong: React.FC<UserType> = ({ userType }) => {
-  // console.log("Pong game built ==> |" + userType + "|");
-
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const playBtnsRef: React.RefObject<HTMLDivElement> = React.createRef();
-  const usersRef: React.RefObject<HTMLDivElement> = React.createRef();
   const [frame, setFrame] = useState(stateInit);
   const [users, setUsers] = useState<User[]>([]);
   const [leftPlayer, setLeftPlayer] = useState<User>(users[0]);
@@ -84,12 +73,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   const location = useLocation();
   const { loggedUser } = useAppSelector((state) => state.user);
 
-  // console.log('user type: ', userType);
-  // console.log('location: ', location.pathname);
   useEffect(() => {
-    // console.log('location: ', location);
-    // console.log('user type: ', userType);
-    // console.log('player: ', leftPlayer);
     if (userType === "spectator" && location.pathname !== "/watch")
       socket.emit("spectator_left");
   }, []);
@@ -104,37 +88,22 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   };
 
   useEffect(() => {
-    // socket.emit("check_joined_queue");
-    // socket.on("joined_queue", () => {
-    //   setJoined(true);
-    // });
-    // return () => {
-    //   socket.off("joined");
-    // };
     socket.on("unjoin_queue", () => {
       setJoined(false);
     });
   }, []);
 
-  // const stopMatch = () => {
-  //   socket.emit('stop_game', 'default');
-  // };
   const handlePlayAgain = () => {
-    // console.log('reset game');
     socket.emit("spectator_left");
     setUsers([]);
     setFrame(stateInit);
     setJoined(false);
-    // document.getElementById('canvas')?.remove();
-    // playBtnsRef.current?.style.display = 'block';
   };
   const handlePlayForSpec = () => {
-    console.log("handle play for spec");
     socket.emit("spectator_left");
     setUsers([]);
     setFrame(stateInit);
     setJoined(false);
-    // userType = 'player';
     navigate("/game");
   };
 
@@ -145,28 +114,26 @@ const Pong: React.FC<UserType> = ({ userType }) => {
     users[1].id !== loggedUser.id
   ) {
     handlePlayAgain();
-    // return;
   }
-
+  
   if (userType === "player" && !leftPlayer) {
     socket.emit("spectator_left");
   }
-  //* chek if the users still in game to protect the render of the game when a player navigate to another page
+
+  //* keep rendering the game if a player changed the location
   useEffect(() => {
     if (users.length !== 0) return;
     socket.emit("isAlreadyInGame");
     socket.on("set_users", (players) => {
-      console.log("players", players);
       isRefresh = true;
       setUsers(players);
-      console.log("users length: ", users.length);
     });
     return () => {
       socket.off("set_users");
     };
   }, []);
 
-  //* check if the player is joined to a queue to hide the buttons
+  //* joined the queue and waiting for the other component
   useEffect(() => {
     if (users.length !== 0) return;
     socket.emit("isJoined");
@@ -195,20 +162,16 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   };
 
   useEffect(() => {
-    console.log("userType: ==================>|" + userType + "|");
     if (location.pathname === "/game") {
       document.addEventListener("keydown", movePaddle);
       document.addEventListener("keyup", stopPaddle);
     }
-    console.log("I am frame from front", userType);
     socket.on("game_state", (newState) => {
       setFrame(newState);
     });
     return () => {
-      // if (userType !== "spectator") {
       document.removeEventListener("keydown", movePaddle);
       document.removeEventListener("keyup", stopPaddle);
-      // }
       socket.off("game_state");
     };
   }, [location]);
@@ -219,11 +182,6 @@ const Pong: React.FC<UserType> = ({ userType }) => {
     const canvas = canvasRef.current;
     const ctx = canvas != null ? canvas.getContext("2d") : null;
     if (ctx != null && frame.state != "void") {
-      // if (playBtnsRef != null) {
-      //   if (playBtnsRef.current != null) {
-      //     playBtnsRef.current.style.display = 'none';
-      //   }
-      // }
       const table = new Rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, "black", ctx);
       table.drawRect();
       for (let i = 0; i <= ctx.canvas.height; i += 16) {
@@ -248,13 +206,7 @@ const Pong: React.FC<UserType> = ({ userType }) => {
         ctx
       );
       paddle2.drawRect();
-      const ball = new Ball(
-        frame.ball.x,
-        frame.ball.y,
-        BALL_RADIUS,
-        "white",
-        ctx
-      );
+      const ball = new Ball(frame.ball.x, frame.ball.y, B_RADIUS, "white", ctx);
       ball.drawCircle();
       const player1Score = new Score(
         CANVAS_WIDTH / 4,
@@ -276,13 +228,11 @@ const Pong: React.FC<UserType> = ({ userType }) => {
         const ball = new Ball(
           frame.ball.x,
           frame.ball.y,
-          BALL_RADIUS,
+          B_RADIUS,
           "black",
           ctx
         );
         ball.drawCircle();
-        // const clearTable = new Rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, 'black', ctx);
-        // clearTable.drawRect();
         const gameOver = new Text(
           (2.85 * CANVAS_WIDTH) / 8,
           CANVAS_HEIGHT / 2,
@@ -301,7 +251,6 @@ const Pong: React.FC<UserType> = ({ userType }) => {
             if (frame.score.score1 > frame.score.score2)
               position = (1 * CANVAS_WIDTH) / 6;
             else position = (3.9 * CANVAS_WIDTH) / 6;
-            //! ///////////////////////
             const playerMsg = new Text(
               position,
               CANVAS_HEIGHT / 3,
@@ -310,7 +259,6 @@ const Pong: React.FC<UserType> = ({ userType }) => {
               ctx
             );
             playerMsg.drawText();
-            //! ///////////////////////
           } else {
             let position;
             if (frame.score.score1 > frame.score.score2)
@@ -382,7 +330,6 @@ const Pong: React.FC<UserType> = ({ userType }) => {
         }
       });
     }
-    // return ()=>
   }, []);
 
   return (
@@ -480,13 +427,3 @@ const Pong: React.FC<UserType> = ({ userType }) => {
 };
 
 export default Pong;
-
-//* Done: show the score on the screen
-//* Done: stop the game when a score reaches the max score
-//* DONE: show the uttons only if the userType is a player
-//* DONE: set winner and looser
-//* DONE: add game over in the end of the game and the winner for the winner and loser for the looser
-//* DONE: add Live Games page and update it every little bit by listening on a socket every 1s or so
-//* DONE: when game is over and userType is spectator: navigate to game or live game
-//* DONE (wa9): handle the prb of the live game interventing with game
-

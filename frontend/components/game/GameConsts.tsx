@@ -1,15 +1,18 @@
 
 import { User } from '../../features/userProfileSlice';
 
+//* canvas resolutions
 const CANVAS_HEIGHT = 600;
 const CANVAS_WIDTH = 1000;
-const MAX_SCORE = 10;
-const MAX_WATCHERS = 10;
-const BALL_RADIUS = 12;
+
+//* ball resolutions and coordinates
+const B_RADIUS = 12;
 const BALL_INIT_X = CANVAS_WIDTH / 2;
 const BALL_INIT_Y = CANVAS_HEIGHT / 2;
 const BALL_SPEED = 6;
 const BALL_MAX_SPEED = 15;
+
+//* paddles resolutions and coordinates
 const PAD_WIDTH = 15;
 const PAD_HEIGHT = 100;
 const PADDLE_DIFF = 10;
@@ -17,10 +20,14 @@ const L_PADX = 0 + 20;
 const R_PADX = CANVAS_WIDTH - PAD_WIDTH - 20;
 const PADY_INIT = CANVAS_HEIGHT / 2 - PAD_HEIGHT / 2;
 
+//* net resolutions and coordinates
 const NET_W = 5;
 const NET_H = 10;
 const NETX = CANVAS_WIDTH / 2 - NET_W / 2;
 const NETY = 0;
+
+const MAX_SCORE = 10;
+const MAX_WATCHERS = 10;
 
 export class Rect {
   _ctx: any;
@@ -50,8 +57,6 @@ export class Rect {
   }
 }
 
-
-
 export class Circle {
   _ctx: any;
   _x: number;
@@ -74,7 +79,6 @@ export class Circle {
   }
 }
 
-
 export class Text {
   _x: number;
   _y: number;
@@ -91,12 +95,10 @@ export class Text {
   }
   drawText() {
     this._ctx.fillStyle = this._color;
-    // this._ctx.font = '45px fantasy';
     this._ctx.font = "32px 'Press Start 2P'";
     this._ctx.fillText(this._text, this._x, this._y);
   }
 }
-
 
 export interface IFrame {
   players?: {
@@ -126,7 +128,7 @@ export {
   CANVAS_WIDTH,
   MAX_SCORE,
   MAX_WATCHERS,
-  BALL_RADIUS,
+  B_RADIUS,
   BALL_INIT_X,
   BALL_INIT_Y,
   BALL_SPEED,
