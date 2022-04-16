@@ -66,17 +66,26 @@ export class ChannelsService {
     }
 
     /* get a channel by id */
-    async getChannelById(channelId: number): Promise<UserChannel> {
+    async getChannelById(user: User, channelId: number): Promise<UserChannel> {
         try {
-            const uc = await this.connection.getRepository(UserChannel).findOne({
+            const userCh = await this.connection.getRepository(UserChannel).findOne({
+                where:{
+                    channel: channelId,
+                    user: user,
+                }
+            });
+            if (!userCh || userCh.userStatus === MemberStatus.BANNED) {
+                throw new ForbiddenException('Denied to get channel');
+            }
+            const ownerCh = await this.connection.getRepository(UserChannel).findOne({
                 relations: ['user', 'channel'],
                 where: {
                     channel: channelId,
                     userRole: UserRole.OWNER
                 }
             });
-            if (uc) {
-                return uc;
+            if (ownerCh) {
+                return ownerCh;
             }
             throw new NotFoundException('Channel not found.');
         } catch (err) {
@@ -313,9 +322,8 @@ export class ChannelsService {
     }
 
     // saving messages
-    saveMessage = async (socket: Socket, channel: Channel, content: string): Promise<MessageChannel> => {
+    saveMessage = async (author: User, channel: Channel, content: string): Promise<MessageChannel> => {
         try {
-            const author = await this.connectionsService.getUserFromSocket(socket);
             return await this.messagesService.createMessage(author, channel, content);
         } catch (err) {
             throw err;
