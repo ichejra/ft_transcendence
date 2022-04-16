@@ -119,6 +119,9 @@ const SocketProvider: React.FC = ({ children }) => {
     socket.on("invitee_in_game", ({ user }) => {
       swal(`${user.display_name} is in game right now!`);
     });
+    socket.on("inviter_is_in_game", ({ user }) => {
+      swal(`${user.display_name} is in game right now!`);
+    });
   }, []);
 
   return <>{children}</>;

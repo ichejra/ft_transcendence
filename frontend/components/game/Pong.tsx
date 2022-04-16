@@ -115,10 +115,11 @@ const Pong: React.FC<UserType> = ({ userType }) => {
   ) {
     handlePlayAgain();
   }
-
+  
   if (userType === "player" && !leftPlayer) {
     socket.emit("spectator_left");
   }
+
   //* keep rendering the game if a player changed the location
   useEffect(() => {
     if (users.length !== 0) return;
@@ -426,12 +427,3 @@ const Pong: React.FC<UserType> = ({ userType }) => {
 };
 
 export default Pong;
-
-//* Done: show the score on the screen
-//* Done: stop the game when a score reaches the max score
-//* DONE: show the uttons only if the userType is a player
-//* DONE: set winner and looser
-//* DONE: add game over in the end of the game and the winner for the winner and loser for the looser
-//* DONE: add Live Games page and update it every little bit by listening on a socket every 1s or so
-//* DONE: when game is over and userType is spectator: navigate to game or live game
-//* DONE (wa9): handle the prb of the live game interventing with game

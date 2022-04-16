@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
-import { User } from '../../features/userProfileSlice';
-import { socket } from '../../pages/SocketProvider';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
+import { fetchCurrentUser, User } from "../../features/userProfileSlice";
+import { socket } from "../../pages/SocketProvider";
 import { FiVideoOff } from "react-icons/fi";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 
 interface IFrame {
   players: {
@@ -19,29 +20,38 @@ const LiveGames = () => {
   const [frame, setFrame] = useState<IFrame[]>([]);
   const [refresh, setRefresh] = useState(false);
   const navigate = useNavigate();
-
+  const { loggedUser } = useAppSelector((state) => state.user);
+  const dispatch = useAppDispatch();
   const watchGame = (id: number) => {
-    socket.emit('spectator', id);
-    navigate('/watch');
+    socket.emit("spectator", id);
+    navigate("/watch");
   };
 
-  const delay = (ms: number) => {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
+  // const delay = (ms: number) => {
+  //   return new Promise((resolve) => setTimeout(resolve, ms));
+  // };
 
   useEffect(() => {
-    socket.emit('liveGames');
-    delay(1000).then(() => {
+    socket.emit("liveGames");
+    // delay(1000).then(() => {
+    //   setRefresh(!refresh);
+    // });
+    const delay = setTimeout(() => {
       setRefresh(!refresh);
-    });
+      clearTimeout(delay);
+    }, 1000);
+    return () => {
+      clearTimeout(delay);
+    };
   }, [refresh]);
 
   useEffect(() => {
-    socket.on('liveGame_state', (newState) => {
+    dispatch(fetchCurrentUser());
+    socket.on("liveGame_state", (newState) => {
       setFrame(newState);
     });
     return () => {
-      socket.off('liveGame_state');
+      socket.off("liveGame_state");
     };
   }, []);
 
@@ -86,14 +96,16 @@ const LiveGames = () => {
               <div className="flex p-2 text-center relative h-[7rem] w-48">
                 <div className="livegame-net"></div>
                 <div className="hover:scale-125 h-4">
-                  <button
-                    className="bg-none game-family rounded sm:text-[11px] text-[9.3px]"
-                    onClick={() => {
-                      watchGame(player1.id);
-                    }}
-                  >
-                    Watch Game
-                  </button>
+                  {loggedUser.state !== "in_game" && (
+                    <button
+                      className="bg-none game-family rounded sm:text-[11px] text-[9.3px]"
+                      onClick={() => {
+                        watchGame(player1.id);
+                      }}
+                    >
+                      Watch Game
+                    </button>
+                  )}
                 </div>
               </div>
               <div className=" bg-black h-[7rem] w-1/2 flex items-center justify-between relative">
