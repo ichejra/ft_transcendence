@@ -85,7 +85,7 @@ export const fetchNoRelationUsers = createAsyncThunk(
   async (_, _api) => {
     try {
       const response = await axios.get(
-        "http://localhost:3001/api/users/no_relation",
+        "http://192.168.99.117:3001/api/users/no_relation",
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -104,7 +104,7 @@ export const fetchAllUsers = createAsyncThunk(
   async (_, _api) => {
     try {
       const response = await axios.get(
-        "http://localhost:3001/api/users/all_users",
+        "http://192.168.99.117:3001/api/users/all_users",
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -122,7 +122,7 @@ export const fetchCurrentUser = createAsyncThunk(
   "users/fetchUserStatus",
   async (_, _api) => {
     try {
-      const response = await axios.get("http://localhost:3001/api/users/me", {
+      const response = await axios.get("http://192.168.99.117:3001/api/users/me", {
         headers: {
           authorization: `Bearer ${Cookies.get("accessToken")}`,
         },
@@ -139,7 +139,7 @@ export const fetchUserGameHistory = createAsyncThunk(
   async (userId: number, _api) => {
     try {
       const response = await axios.get(
-        `http://localhost:3001/api/games/user/${userId}`,
+        `http://192.168.99.117:3001/api/games/user/${userId}`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -158,7 +158,7 @@ export const fetchUsersRank = createAsyncThunk(
   async (_, _api) => {
     try {
       const response = await axios.get(
-        `http://localhost:3001/api/games/ranking`,
+        `http://192.168.99.117:3001/api/games/ranking`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -176,7 +176,7 @@ export const enableTwoFactorAuth = createAsyncThunk(
   "users/enableTwoFactorAuth",
   async (_, _api) => {
     try {
-      const response = await axios.get("http://localhost:3001/api/2fa/enable", {
+      const response = await axios.get("http://192.168.99.117:3001/api/2fa/enable", {
         headers: {
           authorization: `Bearer ${Cookies.get("accessToken")}`,
         },
@@ -193,7 +193,7 @@ export const generate2FAQrCode = createAsyncThunk(
   async (_, _api) => {
     try {
       const response = await axios.get(
-        "http://localhost:3001/api/2fa/generate",
+        "http://192.168.99.117:3001/api/2fa/generate",
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -212,7 +212,7 @@ export const firstVerify2FACode = createAsyncThunk(
   async (verificationCode: string, _api) => {
     try {
       const response = await axios.post(
-        "http://localhost:3001/api/2fa/first-verify",
+        "http://192.168.99.117:3001/api/2fa/first-verify",
         { code: verificationCode },
         {
           headers: {
@@ -232,7 +232,7 @@ export const verify2FACode = createAsyncThunk(
   async (verificationCode: string, _api) => {
     try {
       const response = await axios.post(
-        "http://localhost:3001/api/2fa/verify",
+        "http://192.168.99.117:3001/api/2fa/verify",
         { code: verificationCode, key: Cookies.get("key") },
         {
           headers: {
@@ -252,7 +252,7 @@ export const disableTwoFactorAuth = createAsyncThunk(
   async (_, _api) => {
     try {
       const response = await axios.get(
-        "http://localhost:3001/api/2fa/disable",
+        "http://192.168.99.117:3001/api/2fa/disable",
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -271,7 +271,7 @@ export const fetchSingleUser = createAsyncThunk(
   async (userId: number, _api) => {
     try {
       const response = await axios.get(
-        `http://localhost:3001/api/users/${userId}`,
+        `http://192.168.99.117:3001/api/users/${userId}`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -290,7 +290,7 @@ export const fetchUserFriends = createAsyncThunk(
   async (_, _api) => {
     try {
       const response = await axios.get(
-        "http://localhost:3001/api/users/friends",
+        "http://192.168.99.117:3001/api/users/friends",
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -309,7 +309,7 @@ export const completeProfileInfo = createAsyncThunk(
   async ({ data }: { data: FormData }, _api) => {
     try {
       const response = await axios.patch(
-        `http://localhost:3001/api/users/update-profile`,
+        `http://192.168.99.117:3001/api/users/update-profile`,
         data,
         {
           headers: {
