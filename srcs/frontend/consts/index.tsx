@@ -1,6 +1,6 @@
 export const frameData = [
   {
-    img: "./images/profile.jpeg",
+    name: "EL",
     color: "portrait1",
     coords: {
       leftTop: "leftPaddle",
@@ -8,7 +8,7 @@ export const frameData = [
     },
   },
   {
-    img: "./images/profile.jpeg",
+    name: "IC",
     color: "portrait2",
     coords: {
       leftTop: "leftPaddle",
@@ -16,7 +16,7 @@ export const frameData = [
     },
   },
   {
-    img: "./images/profile.jpeg",
+    name: "AS",
     color: "portrait3",
     coords: {
       leftTop: "leftPaddle",

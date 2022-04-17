@@ -20,7 +20,7 @@ import { gameChallenge } from './gameClasses/gameChallenge';
 
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: process.env.FRONTEND_URL,
   },
 })
 export class GameGateway
