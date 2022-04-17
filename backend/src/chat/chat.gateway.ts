@@ -36,7 +36,7 @@ dotenv.config();
         origin: process.env.FRONTEND_URL, // FRONTEND_URL
     },
 })
-export class ChatGatway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer()
     private server: Server;
 
