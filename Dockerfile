@@ -5,18 +5,17 @@ WORKDIR /usr/src/app/
 # * Client side
 WORKDIR /usr/src/app/frontend
 COPY srcs/frontend/ .
-RUN npm install && npx tsc && npm run build
+RUN npm install
+RUN npm run build
 
 # * Server side
 WORKDIR /usr/src/app/backend/
 COPY srcs/backend/ .
-RUN npm install && npx tsc && npm run build
-
-WORKDIR /
-COPY srcs/run.bash .
-RUN chmod +x /run.bash
+RUN npm install
+RUN npm run build
+RUN npm i concurrently
 
 EXPOSE 3000
 EXPOSE 3001
 
-CMD ["/bin/bash", "run.bash"]
+CMD ["npm", "run", "deploy" ]

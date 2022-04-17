@@ -29,7 +29,7 @@ export const fetchRequestStatus = createAsyncThunk(
   async (id: string, _api) => {
     try {
       const response = await axios.patch(
-        `http://192.168.99.116:3001/api/users/friend-request`,
+        `http://localhost:3001/api/users/friend-request`,
         {
           recipientId: id,
         },
@@ -51,7 +51,7 @@ export const fetchPendingStatus = createAsyncThunk(
   async (_, _api) => {
     try {
       const response = await axios.get(
-        `http://192.168.99.116:3001/api/users/pending-friends`,
+        `http://localhost:3001/api/users/pending-friends`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -70,7 +70,7 @@ export const acceptFriendRequest = createAsyncThunk(
   async (id: number, _api) => {
     try {
       const response = await axios.patch(
-        "http://192.168.99.116:3001/api/users/friend-accept",
+        "http://localhost:3001/api/users/friend-accept",
         { applicantId: id },
         {
           headers: {
@@ -90,7 +90,7 @@ export const blockUserRequest = createAsyncThunk(
   async (id: number, _api) => {
     try {
       const response = await axios.patch(
-        `http://192.168.99.116:3001/api/users/friend-block`,
+        `http://localhost:3001/api/users/friend-block`,
         { blockId: id },
         {
           headers: {
@@ -110,7 +110,7 @@ export const unblockUserRequest = createAsyncThunk(
   async (id: number, _api) => {
     try {
       const response = await axios.patch(
-        `http://192.168.99.116:3001/api/users/friend-unblock`,
+        `http://localhost:3001/api/users/friend-unblock`,
         { unblockId: id },
         {
           headers: {
@@ -130,7 +130,7 @@ export const fetchBlockedUsers = createAsyncThunk(
   async (_, _api) => {
     try {
       const response = await axios.get(
-        `http://192.168.99.116:3001/api/users/blocked-friends`,
+        `http://localhost:3001/api/users/blocked-friends`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -149,7 +149,7 @@ export const removeFriendRelation = createAsyncThunk(
   async (id: number, _api) => {
     try {
       const response = await axios.patch(
-        `http://192.168.99.116:3001/api/users/remove-relation`,
+        `http://localhost:3001/api/users/remove-relation`,
         { rejectedId: id },
         {
           headers: {

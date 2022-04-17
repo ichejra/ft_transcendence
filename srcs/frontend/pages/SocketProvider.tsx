@@ -17,7 +17,7 @@ import swal from "sweetalert";
 import { useNavigate } from "react-router";
 import { useLocation } from "react-router";
 
-export const socket = io("http://192.168.99.116:3001", {
+export const socket = io("http://localhost:3001", {
   auth: {
     token: Cookies.get("accessToken"),
   },
