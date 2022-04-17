@@ -1,19 +1,22 @@
 FROM node:16
 
-WORKDIR /usr/app/ft_transcendence
+WORKDIR /usr/src/app/
 
 # * Client side
+WORKDIR /usr/src/app/frontend
+COPY srcs/frontend/ .
+RUN npm install && npx tsc && npm run build
 
-WORKDIR /usr/app/ft_transcendence/frontend
-COPY frontend/* .
-# RUN npm install
-# RUN npx tsc
-# * Client side will be run in the background
-# * Serer side
+# * Server side
+WORKDIR /usr/src/app/backend/
+COPY srcs/backend/ .
+RUN npm install && npx tsc && npm run build
 
-WORKDIR /usr/app/ft_transcendence/backend/
-COPY backend/* .
-# RUN npm install
-# RUN npx tsc
+WORKDIR /
+COPY srcs/run.bash .
+RUN chmod +x /run.bash
 
-CMD ["sh"]
+EXPOSE 3000
+EXPOSE 3001
+
+CMD ["/bin/bash", "run.bash"]

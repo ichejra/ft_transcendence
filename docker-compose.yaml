@@ -13,7 +13,7 @@ services:
   networks:
    - my_net
   ports:
-   - ${POSTGRES_PORT}:5432
+   - 5432:${POSTGRES_PORT}
 
   #Database manager
  adminer:
@@ -27,20 +27,19 @@ services:
   depends_on:
    - db
 
-#  app:
-#   build: ./app
-#   container_name: app
-#   restart: always
-#   env_file:
-#    - .env
-#   networks:
-#    - my_net
-#   ports:
-#    - 80:80
-#    - 3000:3000
-#    - 3001:3001
-#   depends_on:
-#    - db
+ app:
+  build: ./
+  container_name: app
+  restart: always
+  env_file:
+   - .env
+  networks:
+   - my_net
+  ports:
+   - 3001:3001
+   - 3000:3000
+  depends_on:
+   - db
 
 networks:
  my_net:
