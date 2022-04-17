@@ -23,7 +23,7 @@ const CompleteUserProfileInfo: React.FC = () => {
 export const CompleteProfileInfo: React.FC = () => {
   const { loggedUser } = useAppSelector((state) => state.user);
   const [avatar, setAvatar] = useState("");
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(loggedUser.user_name);
   const [isValid, setIsValid] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -58,9 +58,6 @@ export const CompleteProfileInfo: React.FC = () => {
   };
 
   useEffect(() => {
-    if (loggedUser.user_name) {
-      navigate("/", { replace: true });
-    }
     inputRef.current?.focus();
     dispatch(completeUserInfo(true));
   }, []);
