@@ -440,7 +440,7 @@ export const userProfileSlice = createSlice({
       state.isLoading = true;
     });
     builder.addCase(completeProfileInfo.rejected, (state, action: any) => {
-      state.error = { status: 403, message: "This username is not available" };
+      state.error = { status: 403, message: "invalid username or avatar" };
       state.isLoading = false;
     });
 
