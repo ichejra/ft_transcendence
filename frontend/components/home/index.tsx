@@ -2,42 +2,12 @@ import { Link } from "react-router-dom";
 import Member from "../utils/TeamMember";
 import { frameData } from "../../consts";
 import { socket } from "../../pages/SocketProvider";
-import { useAppSelector } from "../../app/hooks";
-import { User } from "../../features/userProfileSlice";
-import swal from "sweetalert";
 
 socket.emit("connection", () => {
   console.log("connected");
 });
 
 const HomePage: React.FC = () => {
-  const { users, loggedUser } = useAppSelector((state) => state.user);
-
-  const handleInvite = (user: User) => {
-    console.log(loggedUser.id, " sent invit to: ", user.id);
-    swal("Regular Pong or Our Pong?", "", {
-      buttons: {
-        Default: true,
-        Obstacle: true,
-      },
-    }).then((value) => {
-      console.log(value);
-      if (value === "Default") {
-        socket.emit("invite_to_game", {
-          inviter: loggedUser,
-          invitee: user,
-          gameType: "default",
-        });
-      } else if (value === "Obstacle") {
-        socket.emit("invite_to_game", {
-          inviter: loggedUser,
-          invitee: user,
-          gameType: "obstacle",
-        });
-      }
-    });
-  };
-
   return (
     <div className="w-full h-full  flex justify-center">
       <div className="page-50 mt-20 flex bg-black w-full 2xl:w-[80rem] flex-col items-center">
@@ -64,9 +34,9 @@ const HomePage: React.FC = () => {
             </h1>
             <p className="text-family text-white text-opacity-80">
               Pong is one of the first computer games that ever created, this
-              simple tennis like game features two paddles and a ball. The
-              game was originally developed by Allan Alcorn and released in 1972
-              by Atari corporations. Soon, Pong became a huge success that is
+              simple tennis like game features two paddles and a ball. The game
+              was originally developed by Allan Alcorn and released in 1972 by
+              Atari corporations. Soon, Pong became a huge success that is
               considered to be the game which started the video games industry.
               <br />
               <span className="font-mono text-xs">source: ponggame.org</span>
@@ -103,21 +73,6 @@ const HomePage: React.FC = () => {
           <h3 className="about-family text-white text-opacity-80 text-center">
             Ready To Bring Out The Child In You?
           </h3>
-
-          {users
-            .filter((user) => user.id != loggedUser.id)
-            .map((user) => {
-              const { id, user_name } = user;
-              return (
-                <button
-                  key={id}
-                  className="hover:scale-110 transition duration-300 play-button-bottom"
-                  onClick={() => handleInvite(user)}
-                >
-                  Invite {user_name}
-                </button>
-              );
-            })}
           <Link to="/game">
             <button className="hover:scale-110 transition duration-300 play-button-bottom">
               PLAY NOW
@@ -130,6 +85,3 @@ const HomePage: React.FC = () => {
 };
 
 export default HomePage;
-
-//TODO remove the invite button later
-//TODO Photos
