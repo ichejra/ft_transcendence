@@ -1,0 +1,34 @@
+.livegame-left-paddle {
+  position: absolute;
+  width: 16px;
+  height: 7rem;
+  background-color: white;
+  left: 0;
+  top: 0;
+}
+
+.livegame-right-paddle {
+  position: absolute;
+  width: 16px;
+  height: 7rem;
+  right: 0;
+  top: 0;
+  background-color: white;
+}
+
+.game-family {
+  font-family: "Press Start 2P";
+  letter-spacing: 0.1em;
+}
+
+.livegame-net {
+  position: absolute;
+  border:none;
+  border-left: 3px dashed white;
+  color:#fff;
+  background-color: black;
+  height:7rem;
+  right:50%;
+  top: 0;
+  width:3px;
+}

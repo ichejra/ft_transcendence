@@ -1,0 +1,46 @@
+version: "3.3"
+
+services:
+  #Database
+ db:
+  image: postgres:${POSTGRES_VERSION}
+  container_name: postgres
+  restart: always
+  environment:
+   - POSTGRES_USER=${POSTGRES_USERNAME}
+   - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+   - POSTGRES_DB=${POSTGRES_DATABASE}
+  networks:
+   - app_net
+  ports:
+   - 5432:${POSTGRES_PORT}
+
+  #Database manager
+ adminer:
+  image: adminer
+  container_name: adminer
+  restart: always
+  networks:
+   - app_net
+  ports:
+   - 8080:8080
+  depends_on:
+   - db
+
+ app:
+  build: ./
+  container_name: app
+  restart: always
+  env_file:
+   - .env
+  networks:
+   - app_net
+  ports:
+   - 3001:3001
+   - 3000:3000
+  depends_on:
+   - db
+
+networks:
+ app_net:
+  driver: bridge
