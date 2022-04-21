@@ -99,7 +99,7 @@ export const createChannel = createAsyncThunk(
   ) => {
     try {
       const response = await axios.post(
-        `http://192.168.99.117:3001/api/channels/create`,
+        `http://localhost:3001/api/channels/create`,
         {
           name,
           type,
@@ -137,7 +137,7 @@ export const updateChannel = createAsyncThunk(
   ) => {
     try {
       const response = await axios.patch(
-        `http://192.168.99.117:3001/api/channels/${channelId}`,
+        `http://localhost:3001/api/channels/${channelId}`,
         {
           name,
           type,
@@ -162,7 +162,7 @@ export const getChannelsList = createAsyncThunk(
   async (_, _api) => {
     try {
       const response = await axios.get(
-        `http://192.168.99.117:3001/api/channels/joined`,
+        `http://localhost:3001/api/channels/joined`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -181,7 +181,7 @@ export const fetchUnjoinedChannels = createAsyncThunk(
   async (_, _api) => {
     try {
       const response = await axios.get(
-        `http://192.168.99.117:3001/api/channels/unjoined`,
+        `http://localhost:3001/api/channels/unjoined`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -200,7 +200,7 @@ export const getSingleChannel = createAsyncThunk(
   async (channelId: number, _api) => {
     try {
       const response = await axios.get(
-        `http://192.168.99.117:3001/api/channels/${channelId}`,
+        `http://localhost:3001/api/channels/${channelId}`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -219,7 +219,7 @@ export const getLoggedUserRole = createAsyncThunk(
   async (channelId: number, _api) => {
     try {
       const response = await axios.get(
-        `http://192.168.99.117:3001/api/channels/${channelId}/role`,
+        `http://localhost:3001/api/channels/${channelId}/role`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -238,7 +238,7 @@ export const getChannelMembersList = createAsyncThunk(
   async (channelId: number, _api) => {
     try {
       const response = await axios.get(
-        `http://192.168.99.117:3001/api/channels/${channelId}/members`,
+        `http://localhost:3001/api/channels/${channelId}/members`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -257,7 +257,7 @@ export const getChannelAdminsList = createAsyncThunk(
   async (channelId: number, _api) => {
     try {
       const response = await axios.get(
-        `http://192.168.99.117:3001/api/channels/${channelId}/admins`,
+        `http://localhost:3001/api/channels/${channelId}/admins`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -279,7 +279,7 @@ export const setMemberAsAdmin = createAsyncThunk(
   ) => {
     try {
       const response = await axios.patch(
-        `http://192.168.99.117:3001/api/channels/${channelId}/add-new-admin`,
+        `http://localhost:3001/api/channels/${channelId}/add-new-admin`,
         { memberId },
         {
           headers: {
@@ -302,7 +302,7 @@ export const setAdminAsMember = createAsyncThunk(
   ) => {
     try {
       const response = await axios.patch(
-        `http://192.168.99.117:3001/api/channels/${channelId}/remove-admin`,
+        `http://localhost:3001/api/channels/${channelId}/remove-admin`,
         { memberId },
         {
           headers: {
@@ -325,7 +325,7 @@ export const muteChannelMember = createAsyncThunk(
   ) => {
     try {
       const response = await axios.patch(
-        `http://192.168.99.117:3001/api/channels/${channelId}/mute-user`,
+        `http://localhost:3001/api/channels/${channelId}/mute-user`,
         { memberId },
         {
           headers: {
@@ -348,7 +348,7 @@ export const unmuteChannelMember = createAsyncThunk(
   ) => {
     try {
       const response = await axios.patch(
-        `http://192.168.99.117:3001/api/channels/${channelId}/unmute-user`,
+        `http://localhost:3001/api/channels/${channelId}/unmute-user`,
         { memberId },
         {
           headers: {
@@ -371,7 +371,7 @@ export const banChannelMember = createAsyncThunk(
   ) => {
     try {
       const response = await axios.patch(
-        `http://192.168.99.117:3001/api/channels/${channelId}/ban-user`,
+        `http://localhost:3001/api/channels/${channelId}/ban-user`,
         { memberId },
         {
           headers: {
@@ -394,7 +394,7 @@ export const unbanChannelMember = createAsyncThunk(
   ) => {
     try {
       const response = await axios.patch(
-        `http://192.168.99.117:3001/api/channels/${channelId}/unban-user`,
+        `http://localhost:3001/api/channels/${channelId}/unban-user`,
         { memberId },
         {
           headers: {
@@ -417,7 +417,7 @@ export const kickChannelMember = createAsyncThunk(
   ) => {
     try {
       const response = await axios.patch(
-        `http://192.168.99.117:3001/api/channels/${channelId}/kick-user`,
+        `http://localhost:3001/api/channels/${channelId}/kick-user`,
         { memberId },
         {
           headers: {
@@ -437,7 +437,7 @@ export const getChannelContent = createAsyncThunk(
   async (channelId: number, _api) => {
     try {
       const response = await axios.get(
-        `http://192.168.99.117:3001/api/messages/channels/${channelId}`,
+        `http://localhost:3001/api/messages/channels/${channelId}`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,

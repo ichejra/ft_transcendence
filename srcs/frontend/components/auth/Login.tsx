@@ -36,7 +36,7 @@ const Login = () => {
           </h1>
           <div className="flex flex-col w-5/6 md:w-4/6 text-gray-800">
             <a
-              href="http://192.168.99.117:3001/auth"
+              href="http://localhost:3001/auth"
               className="flex items-center justify-center about-family transition duration-300 border-2 text-gray-900  bg-gray-300 hover:bg-white rounded-md  m-2 p-2 tracking-wider"
             >
               <img

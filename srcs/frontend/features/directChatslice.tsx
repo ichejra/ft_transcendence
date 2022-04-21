@@ -34,7 +34,7 @@ export const fetchChatFriend = createAsyncThunk(
   async (userId: number, _api) => {
     try {
       const response = await axios.get(
-        `http://192.168.99.117:3001/api/users/${userId}`,
+        `http://localhost:3001/api/users/${userId}`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -53,7 +53,7 @@ export const getDirectChatHistory = createAsyncThunk(
   async (_, _api) => {
     try {
       const response = await axios.get(
-        `http://192.168.99.117:3001/api/messages/direct-chat`,
+        `http://localhost:3001/api/messages/direct-chat`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -72,7 +72,7 @@ export const getDirectContent = createAsyncThunk(
   async (userId: number, _api) => {
     try {
       const response = await axios.get(
-        `http://192.168.99.117:3001/api/messages/direct/${userId}`,
+        `http://localhost:3001/api/messages/direct/${userId}`,
         {
           headers: {
             authorization: `Bearer ${Cookies.get("accessToken")}`,
