@@ -1,6 +1,6 @@
 # ft_transcendence
 
-ft_trancsendence is a website that provides a nice user interface, a real-time chat, and real-time multiplayer online Ping Pong game.
+ft_trancsendence is a website (Single-Page Application) that provides a nice user interface, a real-time chat, and real-time multiplayer online Ping Pong game.
 
 ## Features
 
@@ -12,25 +12,25 @@ ft_trancsendence is a website that provides a nice user interface, a real-time c
 
 ## Screenshots
   ### Home page
-  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/home.png" width="600" />
-  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/home-page-with-logged-user.png" width="600" />
+  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/home.png" width="100%" />
+  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/home-page-with-logged-user.png" width="100%" />
 
   ### Porfile Page
-  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/profile.png" width="600" />
-  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/profile-notif.png" width="600" />
+  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/profile.png" width="100%" />
+  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/profile-notif.png" width="100%" />
 
   ### Users Page
-  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/users-section.png" width="600" />
+  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/users-section.png" width="100%" />
 
   ### Channels Page
-  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/channels.png" width="600" />
+  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/channels.png" width="100%" />
 
   ### Direct chat page
-  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/direct.png" width="600" />
+  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/direct.png" width="100%" />
 
   ### Pong Game Page
-  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/game.png" width="600" />
-  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/end-game.png" width="600" />
+  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/game.png" width="100%" />
+  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/end-game.png" width="100%" />
 
   ### Live Games Page
   <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/live.png" width="600" />
