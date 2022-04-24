@@ -33,7 +33,7 @@ ft_trancsendence is a website (Single-Page Application) that provides a nice use
   <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/end-game.png" width="100%" />
 
   ### Live Games Page
-  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/live.png" width="600" />
+  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/live.png" width="100%" />
 
 
 
