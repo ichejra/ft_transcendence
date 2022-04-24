@@ -4,7 +4,7 @@ ft_trancsendence is a website (Single-Page Application) that provides a nice use
 
 ## Subject
 
-[Inception subject](https://github.com/ichejra/ft_transcendence/blob/main/ft_transcendane.subject.pdf)
+[ft_transcendence subject](https://github.com/ichejra/ft_transcendence/blob/main/ft_transcendane.subject.pdf)
 ## Features
 
 - Mulitplayer Pong game with match making system.
