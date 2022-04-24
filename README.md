@@ -7,8 +7,35 @@ ft_trancsendence is a website that provides a nice user interface, a real-time c
 - Mulitplayer Pong game with match making system.
 - Real-time direct chat.
 - Create and Chat in private/public channels with other users.
-- Invite other users to a Pong duel.
-- and much more futures...
+- Profile
+- ad much more futures...
+
+## Screenshots
+  ### Home page
+  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/home.png" width="600" />
+  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/home-page-with-logged-user.png" width="600" />
+
+  ### Porfile Page
+  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/profile.png" width="600" />
+  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/profile-notif.png" width="600" />
+
+  ### Users Page
+  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/users-section.png" width="600" />
+
+  ### Channels Page
+  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/channels.png" width="600" />
+
+  ### Direct chat page
+  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/direct.png" width="600" />
+
+  ### Pong Game Page
+  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/game.png" width="600" />
+  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/end-game.png" width="600" />
+
+  ### Live Games Page
+  <img src="https://github.com/ichejra/ft_transcendence/blob/main/shots/live.png" width="600" />
+
+
 
 ## Tech
 
@@ -26,11 +53,12 @@ ft_transcendence uses the following technologies:
 ## Installation
 
 Install the dependencies and devDependencies and start the server.
-sh
+```sh
 cd ft_transcnendence
 docker-compose up --build
+```
 Verify the deployment by navigating to your server address in
 your preferred browser.
-sh
+```sh
 http://localhost:3000/
-## License
+```

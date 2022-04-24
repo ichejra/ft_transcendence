@@ -39,4 +39,4 @@ lerna-debug.log*
 /client
 
 # env
-# .env
+.env

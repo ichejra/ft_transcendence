@@ -44,3 +44,4 @@ services:
 networks:
  app_net:
   driver: bridge
+  
