@@ -9,9 +9,9 @@ ft_trancsendence is a website (Single-Page Application) that provides a nice use
 
 - Mulitplayer Pong game with match making system.
 - Real-time direct chat.
-- Create and Chat in private/public channels with other users.
-- Profile
-- ad much more futures...
+- Create private/public channels and Chat with other users.
+- User Profile
+- And many other features...
 
 ## Screenshots
   ### Home page
